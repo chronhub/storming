@@ -16,12 +16,12 @@ function remote()
     git remote add $1 $2 || true
 }
 
-git pull origin $CURRENT_BRANCH
+#git pull origin $CURRENT_BRANCH
 
 remote contract git@github.com:chronhub/contract.git
 remote stream git@github.com:chronhub/stream.git
-remote stream git@github.com:chronhub/message.git
-remote stream git@github.com:chronhub/tracker.git
+remote message git@github.com:chronhub/message.git
+remote tracker git@github.com:chronhub/tracker.git
 
 split 'src/Storm/Contract' contract
 split 'src/Storm/Stream' stream

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Storm\Contract\Tracker;
 
 use Generator;
@@ -65,5 +67,4 @@ interface MessageStory
      * Return promise if exists
      */
     public function promise(): ?PromiseInterface;
-
 }

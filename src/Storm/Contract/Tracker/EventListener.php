@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Storm\Contract\Tracker;
 
 interface EventListener
@@ -16,7 +18,7 @@ interface EventListener
     /**
      * Return scope class name
      *
-     * @return class-string
+     * @return class-string|null
      */
-    public function origin(): string;
+    public function origin(): ?string;
 }

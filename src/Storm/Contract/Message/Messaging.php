@@ -1,8 +1,10 @@
 <?php
 
-namespace Storm\Contract\Report;
+declare(strict_types=1);
 
-interface Reporting
+namespace Storm\Contract\Message;
+
+interface Messaging
 {
     /**
      * @param array<string, int|float|string|bool|array|object|null> $content

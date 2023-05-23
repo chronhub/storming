@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Storm\Message;
 
 use InvalidArgumentException;
 use RuntimeException;
-use Storm\Contract\Report\Reporting;
+use Storm\Contract\Message\Messaging;
 
 final class Message
 {
@@ -18,7 +20,7 @@ final class Message
             throw new InvalidArgumentException('Message event cannot be an instance of itself');
         }
 
-        if (! $event instanceof Reporting) {
+        if (! $event instanceof Messaging) {
             $this->event = $event;
             $this->headers = $headers;
 
@@ -37,7 +39,7 @@ final class Message
 
     public function event(): object
     {
-        if ($this->event instanceof Reporting) {
+        if ($this->event instanceof Messaging) {
             return clone $this->event->withHeaders($this->headers);
         }
 
@@ -64,6 +66,6 @@ final class Message
 
     public function isMessaging(): bool
     {
-        return $this->event instanceof Reporting;
+        return $this->event instanceof Messaging;
     }
 }

@@ -1,6 +1,8 @@
 <?php
 
-namespace Storm\Contract\Report;
+declare(strict_types=1);
+
+namespace Storm\Contract\Message;
 
 interface DomainType
 {

@@ -16,11 +16,14 @@
     "symfony/uid": "6.3.x",
     "symfony/clock": "^6.3",
     "symfony/serializer": "^6.3",
+    "illuminate/collections": "10.1",
     "ext-pcntl": "*"
   },
   "replace": {
     "chronhub/contract": "self.version",
-    "chronhub/stream": "self.version"
+    "chronhub/stream": "self.version",
+    "chronhub/tracker": "self.version",
+    "chronhub/message": "self.version"
   },
   "require-dev": {
     "ext-posix": "*",
@@ -35,7 +38,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Storming\\": "src/Storm/"
+      "Storm\\": "src/Storm/"
     }
   },
   "autoload-dev": {
