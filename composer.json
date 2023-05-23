@@ -16,7 +16,7 @@
     "symfony/uid": "6.3.x",
     "symfony/clock": "^6.3",
     "symfony/serializer": "^6.3",
-    "illuminate/collections": "10.1",
+    "illuminate/collections": "10.x-dev",
     "ext-pcntl": "*"
   },
   "replace": {
@@ -43,7 +43,7 @@
   },
   "autoload-dev": {
     "psr-4": {
-      "Storming\\Tests\\": "tests"
+      "Storm\\Tests\\": "tests"
     }
   },
   "scripts": {

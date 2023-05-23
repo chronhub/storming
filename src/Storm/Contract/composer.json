@@ -10,8 +10,7 @@
     }
   ],
   "require": {
-    "php": "^8.2",
-    "react/promise": "^2.9"
+    "php": "^8.2"
   },
   "autoload": {
     "psr-4": {
