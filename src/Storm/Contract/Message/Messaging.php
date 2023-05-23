@@ -34,5 +34,5 @@ interface Messaging
      */
     public function headers(): array;
 
-    public function type(): DomainType;
+    public function supportType(): string;
 }

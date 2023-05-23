@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Message;
 
-trait HasHeaders
+trait ReadHeaders
 {
     /**
      * @var array<string, null|int|float|string|bool|array|object>

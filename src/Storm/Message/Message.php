@@ -10,7 +10,7 @@ use Storm\Contract\Message\Messaging;
 
 final class Message
 {
-    use HasHeaders;
+    use ReadHeaders;
 
     private object $event;
 
