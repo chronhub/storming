@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Storm\Contract\Report;
+namespace Storm\Contract\Reporter;
 
-interface EventReporter extends Reporter
+interface CommandReporter extends Reporter
 {
     public function relay(object|array $message): void;
 }

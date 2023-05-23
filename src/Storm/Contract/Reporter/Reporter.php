@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Contract\Report;
+namespace Storm\Contract\Reporter;
 
 use React\Promise\PromiseInterface;
 use Storm\Contract\Message\DomainType;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tracker;
 
-use Storm\Contract\Report\Reporter;
+use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\EventListener;
 use Storm\Contract\Tracker\MessageStory;
 use Storm\Contract\Tracker\MessageTracker;
