@@ -1,0 +1,28 @@
+{
+  "name": "chronhub/tracker",
+  "description": "storm tracker",
+  "keywords": ["foundation"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "steph bug",
+      "email": "chronhubgit@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^8.2",
+    "chronhub/contract": "dev-main"
+  },
+  "autoload": {
+    "psr-4": {
+      "Storm\\Tracker\\": ""
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "minimum-stability": "dev"
+}
