@@ -13,9 +13,9 @@ interface Tracker
     public function disclose(Story $story): void;
 
     /**
-     * @template T in true|void
+     * @template TReturn in bool|void
      *
-     * @param callable(Story): (T) $callback
+     * @param callable(MessageStory|StreamStory|Story): (TReturn) $callback
      */
     public function discloseUntil(Story $story, callable $callback): void;
 

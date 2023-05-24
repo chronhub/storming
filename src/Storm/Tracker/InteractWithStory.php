@@ -18,7 +18,7 @@ trait InteractWithStory
      */
     protected bool $isStopped = false;
 
-    public function __construct(protected ?string $currentEvent)
+    public function __construct(protected string $currentEvent)
     {
     }
 

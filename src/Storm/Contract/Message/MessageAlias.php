@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Message;
 
+use Storm\Message\InvalidMessageAlias;
+
 interface MessageAlias
 {
     /**
-     * @param class-string $className
+     * @param class-string|object $class
+     *
+     * @throws InvalidMessageAlias when class string does not exist.
      */
-    public function classToAlias(string $className): string;
-
-    public function instanceToAlias(object $instance): string;
+    public function toAlias(string|object $class): string;
 }

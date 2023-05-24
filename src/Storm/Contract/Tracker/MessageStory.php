@@ -8,7 +8,7 @@ use Generator;
 use React\Promise\PromiseInterface;
 use Storm\Message\Message;
 
-interface MessageStory
+interface MessageStory extends Story
 {
     /**
      * Set transient message

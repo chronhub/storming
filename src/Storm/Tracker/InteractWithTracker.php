@@ -17,7 +17,7 @@ trait InteractWithTracker
         $this->listeners = new Collection();
     }
 
-    public function watch(string $eventName, callable $story, int $priority = 0): EventListener
+    public function watch(string $eventName, callable $story, int $priority = 1): EventListener
     {
         $listener = new GenericEventListener($eventName, $story, $priority);
 
