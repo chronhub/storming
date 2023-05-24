@@ -28,4 +28,4 @@ split 'src/Storm/Contract' contract
 split 'src/Storm/Stream' stream
 split 'src/Storm/Message' message
 split 'src/Storm/Tracker' tracker
-split 'src/Storm/Tracker' clock
+split 'src/Storm/Clock' clock
