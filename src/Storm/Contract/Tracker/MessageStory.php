@@ -41,12 +41,12 @@ interface MessageStory extends Story
     /**
      * Add message handlers
      */
-    public function withConsumers(iterable $consumers): void;
+    public function withHandlers(iterable $handlers): void;
 
     /**
      * Yield consumers
      */
-    public function consumers(): Generator;
+    public function handlers(): Generator;
 
     /**
      * Mark message handled

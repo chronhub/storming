@@ -30,7 +30,7 @@ class Draft implements MessageStory
      *
      * @var iterable<object>
      */
-    private iterable $consumers = [];
+    private iterable $handlers = [];
 
     /**
      * Is message handled
@@ -52,14 +52,14 @@ class Draft implements MessageStory
         $this->message = $message;
     }
 
-    public function withConsumers(iterable $consumers): void
+    public function withHandlers(iterable $handlers): void
     {
-        $this->consumers = $consumers;
+        $this->handlers = $handlers;
     }
 
-    public function consumers(): Generator
+    public function handlers(): Generator
     {
-        yield from $this->consumers;
+        yield from $this->handlers;
     }
 
     public function withPromise(PromiseInterface $promise): void

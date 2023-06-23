@@ -19,7 +19,7 @@ it('create new instance with current event', function () {
         ->and($tracker->isStopped())->toBeFalse()
         ->and($tracker->hasException())->toBeFalse()
         ->and($tracker->exception())->toBeNull()
-        ->and($tracker->consumers())->toBeInstanceOf(Generator::class)
+        ->and($tracker->handlers())->toBeInstanceOf(Generator::class)
         ->and($tracker->promise())->toBeNull()
         ->and($tracker->isHandled())->toBeFalse();
 });
@@ -55,13 +55,13 @@ it('expect setup message', function () {
 it('set consumers', function () {
     $draft = new Draft('event');
 
-    expect($draft->consumers())->toBeInstanceOf(Generator::class);
+    expect($draft->handlers())->toBeInstanceOf(Generator::class);
 
     $messageHandlers = [fn () => 'consumer'];
 
-    $draft->withConsumers($messageHandlers);
+    $draft->withHandlers($messageHandlers);
 
-    $consumers = $draft->consumers();
+    $consumers = $draft->handlers();
 
     expect($consumers)
         ->toBeInstanceOf(Generator::class)
