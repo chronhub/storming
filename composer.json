@@ -27,14 +27,14 @@
   },
   "require-dev": {
     "ext-posix": "*",
-    "laravel/pint": "^v1.9",
-    "nunomaduro/larastan": "^2.5",
+    "laravel/pint": "^v1.1",
+    "nunomaduro/larastan": "^2.6",
     "nunomaduro/phpinsights": "dev-master",
     "orchestra/testbench": "^8.x-dev",
     "pestphp/pest": "2.x-dev",
     "pestphp/pest-plugin-type-coverage": "2.x-dev",
     "phpstan/phpstan": "^1.10.x-dev",
-    "phpunit/phpunit": "^10.1",
+    "phpunit/phpunit": "^10.3",
     "rector/rector": "dev-main",
     "roave/security-advisories": "dev-latest"
   },
