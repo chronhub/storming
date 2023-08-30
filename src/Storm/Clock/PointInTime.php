@@ -10,6 +10,7 @@ use DomainException;
 use Exception;
 use Storm\Contract\Clock\SystemClock;
 use Symfony\Component\Clock\MonotonicClock;
+
 use function is_string;
 
 final readonly class PointInTime implements SystemClock

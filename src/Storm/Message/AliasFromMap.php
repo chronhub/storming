@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Message;
 
 use Storm\Contract\Message\MessageAlias;
+
 use function class_exists;
 use function is_string;
 
