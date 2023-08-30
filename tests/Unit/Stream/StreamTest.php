@@ -14,6 +14,38 @@ use Storm\Tests\Stubs\Double\Message\SomeEvent;
 
 use function iterator_to_array;
 
+it('create new stream instance with empty events', function (StreamName $streamName) {
+    $stream = new Stream($streamName);
+
+    expect($stream->streamName)->toBe($streamName)
+        ->and($stream->name())->toBe($streamName);
+
+    expect(iterator_to_array($stream->events()))->toBeEmpty();
+})->with('streamNames');
+
+it('create new stream instance with iterable stream events', function (iterable $events) {
+    $stream = new Stream(new StreamName('stream_name'), $events);
+
+    expect($stream->events())->toBeInstanceOf('Generator');
+
+    $events = iterator_to_array($stream->events());
+
+    expect($events)->toHaveCount(3)
+        ->and($events[0])->toBeInstanceOf(SomeEvent::class);
+
+})->with('iterable');
+
+it('return number of event from generator', function (iterable $events) {
+    $stream = new Stream(new StreamName('stream_name'), $events);
+
+    $streamEvents = $stream->events();
+    foreach ($streamEvents as $streamEvent) {
+        expect($streamEvent)->toBeInstanceOf(SomeEvent::class);
+    }
+
+    expect($streamEvents->getReturn())->toBe(3);
+})->with('iterable');
+
 dataset('streamNames', [
     new StreamName('stream_name'),
     new StreamName('stream_name2'),
@@ -47,35 +79,3 @@ dataset('iterable',
         ]),
     ]
 );
-
-it('create new stream instance with empty events', function (StreamName $streamName) {
-    $stream = new Stream($streamName);
-
-    expect($stream->streamName)->toBe($streamName)
-        ->and($stream->name())->toBe($streamName);
-
-    expect(iterator_to_array($stream->events()))->toBeEmpty();
-})->with('streamNames');
-
-it('create new stream instance with iterable stream events', function (iterable $events) {
-    $stream = new Stream(new StreamName('stream_name'), $events);
-
-    expect($stream->events())->toBeInstanceOf('Generator');
-
-    $events = iterator_to_array($stream->events());
-
-    expect($events)->toHaveCount(3)
-        ->and($events[0])->toBeInstanceOf(SomeEvent::class);
-
-})->with('iterable');
-
-it('return number of event from generator', function (iterable $events) {
-    $stream = new Stream(new StreamName('stream_name'), $events);
-
-    $streamEvents = $stream->events();
-    foreach ($streamEvents as $streamEvent) {
-        expect($streamEvent)->toBeInstanceOf(SomeEvent::class);
-    }
-
-    expect($streamEvents->getReturn())->toBe(3);
-})->with('iterable');

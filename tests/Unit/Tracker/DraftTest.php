@@ -10,9 +10,10 @@ use RuntimeException;
 use Storm\Message\Message;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tracker\Draft;
+
 use function iterator_to_array;
 
-it('create new instance with current event', function () {
+it('create new instance with given event', function () {
     $tracker = new Draft('event');
 
     expect($tracker->currentEvent())->toBe('event')
@@ -34,19 +35,18 @@ it('override current event', function () {
     expect($tracker->currentEvent())->toBe('dispatch');
 });
 
-it('expect setup message', function () {
+it('test transient message', function () {
     $draft = new Draft('event');
 
     expect($draft->transientMessage())->toBeNull();
 
     $transient = new Message(new SomeCommand(['name' => 'steph']));
     $draft->withTransientMessage($transient);
-
     $extracted = $draft->pullTransientMessage();
+
     expect($extracted)->toBe($transient);
 
     $draft->withMessage($transient);
-
     $message = $draft->message();
 
     expect($message)->toBe($transient)->toBe($message);
@@ -58,9 +58,7 @@ it('set consumers', function () {
     expect($draft->handlers())->toBeInstanceOf(Generator::class);
 
     $messageHandlers = [fn () => 'consumer'];
-
     $draft->withHandlers($messageHandlers);
-
     $consumers = $draft->handlers();
 
     expect($consumers)
@@ -97,6 +95,25 @@ it('set exception', function () {
 
     $exception = new RuntimeException('some error');
 
+    $draft->withRaisedException($exception);
+
+    expect($draft->hasException())->toBeTrue()
+        ->and($draft->exception())->toBe($exception);
+});
+
+it('override exception', function () {
+    $draft = new Draft('event');
+
+    expect($draft->hasException())->toBeFalse();
+
+    $exception = new RuntimeException('some error');
+
+    $draft->withRaisedException($exception);
+
+    expect($draft->hasException())->toBeTrue()
+        ->and($draft->exception())->toBe($exception);
+
+    $exception = new RuntimeException('another error');
     $draft->withRaisedException($exception);
 
     expect($draft->hasException())->toBeTrue()

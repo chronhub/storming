@@ -13,6 +13,8 @@ interface Tracker
     public function disclose(Story $story): void;
 
     /**
+     * fixMe invalid return type
+     *
      * @template TReturn in bool|void
      *
      * @param callable(MessageStory|StreamStory|Story): (TReturn) $callback
