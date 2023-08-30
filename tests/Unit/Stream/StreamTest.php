@@ -11,6 +11,7 @@ use Iterator;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
+
 use function iterator_to_array;
 
 dataset('streamNames', [
@@ -53,9 +54,7 @@ it('create new stream instance with empty events', function (StreamName $streamN
     expect($stream->streamName)->toBe($streamName)
         ->and($stream->name())->toBe($streamName);
 
-    $events = iterator_to_array($stream->events());
-
-    expect($events)->toBeEmpty();
+    expect(iterator_to_array($stream->events()))->toBeEmpty();
 })->with('streamNames');
 
 it('create new stream instance with iterable stream events', function (iterable $events) {
