@@ -1,0 +1,27 @@
+{
+  "name": "chronhub/chronicler",
+  "description": "event store",
+  "keywords": ["event store"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "steph bug",
+      "email": "chronhubgit@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^8.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Storm\\Chronicler\\": ""
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "minimum-stability": "dev"
+}
