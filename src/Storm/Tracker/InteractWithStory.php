@@ -14,7 +14,7 @@ trait InteractWithStory
     protected ?Throwable $exception = null;
 
     /**
-     * Stop event propagation
+     * Event propagation state
      */
     protected bool $isStopped = false;
 

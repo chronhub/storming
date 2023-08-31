@@ -17,7 +17,7 @@ use function iterator_to_array;
 it('create new stream instance with empty events', function (StreamName $streamName) {
     $stream = new Stream($streamName);
 
-    expect($stream->streamName)->toBe($streamName)
+    expect($stream->name)->toBe($streamName)
         ->and($stream->name())->toBe($streamName);
 
     expect(iterator_to_array($stream->events()))->toBeEmpty();

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Tests\Message;
+namespace Storm\Tests\Unit\Message;
 
 use InvalidArgumentException;
 use RuntimeException;
