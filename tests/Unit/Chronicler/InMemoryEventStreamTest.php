@@ -97,6 +97,6 @@ describe('filter event stream', function (): void {
         expect($provider->createStream('foo', null))->toBe(true)
             ->and($provider->createStream('bar', null, 'some_category'))->toBe(true)
             ->and($provider->createStream('$_internal', null))->toBe(true)
-            ->and($provider->filterByAscendantStreams([new StreamName('foo'), '$_internal', 'some_category', ' bar', 'no_stream']))->toBe(['$_internal', 'foo']);
+            ->and($provider->filterByAscendantStreams([new StreamName('foo'), '$_internal', 'some_category', 'bar', 'no_stream']))->toBe(['$_internal', 'foo']);
     });
 });
