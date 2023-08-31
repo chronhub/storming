@@ -15,17 +15,18 @@
     "react/react": "^1.3",
     "symfony/uid": "6.3.x",
     "symfony/clock": "^6.3",
-    "symfony/serializer": "^6.3",
-    "illuminate/collections": "10.x-dev",
-    "ext-pcntl": "*"
+    "symfony/serializer": "^6.4",
+    "illuminate/collections": "10.x-dev"
   },
   "replace": {
     "chronhub/contract": "self.version",
     "chronhub/stream": "self.version",
     "chronhub/tracker": "self.version",
-    "chronhub/message": "self.version"
+    "chronhub/message": "self.version",
+    "chronhub/chronicler": "self.version"
   },
   "require-dev": {
+    "ext-pcntl": "*",
     "ext-posix": "*",
     "laravel/pint": "^v1.1",
     "nunomaduro/larastan": "^2.6",
