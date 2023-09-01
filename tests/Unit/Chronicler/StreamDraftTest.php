@@ -20,15 +20,15 @@ describe('interact with story', function (): void {
 
 });
 
-describe('test promise and deferred', function (): void {
-    it('resolve promise', function (mixed $callback): void {
+describe('resolve', function (): void {
+    test('promise', function (mixed $callback): void {
         $draft = new StreamDraft('some_event');
         $draft->deferred(fn (): mixed => $callback);
 
         expect($draft->promise())->toBe($callback);
     })->with('someTypes');
 
-    it('override promise', function (): void {
+    test('override promise', function (): void {
         $draft = new StreamDraft('some_event');
         $draft->deferred(fn (): int => 42);
 
@@ -40,27 +40,22 @@ describe('test promise and deferred', function (): void {
     });
 });
 
-describe('test exception', function (): void {
-    it('raise exception when callback is not set', function (): void {
-        $draft = new StreamDraft('some_event');
-        $draft->promise();
-    })->throws(UnexpectedCallback::class, 'No event callback has been set');
-
-    it('test story exception', function (): void {
+describe('exception', function (): void {
+    test('accessor', function (): void {
         $draft = new StreamDraft('some_event');
 
-        expect($draft->exception())->toBeNull();
-    });
-
-    it('test stream exception', function (): void {
-        $draft = new StreamDraft('some_event');
-
-        expect($draft->hasStreamAlreadyExits())->toBeFalse()
+        expect($draft->exception())->toBeNull()
+            ->and($draft->hasStreamAlreadyExits())->toBeFalse()
             ->and($draft->hasStreamNotFound())->toBeFalse()
             ->and($draft->hasConcurrency())->toBeFalse();
     });
 
-    it('test stream already exists exception', function (): void {
+    test('raised when callback is not set', function (): void {
+        $draft = new StreamDraft('some_event');
+        $draft->promise();
+    })->throws(UnexpectedCallback::class, 'No event callback has been set');
+
+    test('stream already exists', function (): void {
         $draft = new StreamDraft('some_event');
 
         expect($draft->hasStreamAlreadyExits())->toBeFalse();
@@ -73,7 +68,7 @@ describe('test exception', function (): void {
             ->and($draft->exception())->toBe($exception);
     });
 
-    it('test stream not found exception', function (): void {
+    test('stream not found', function (): void {
         $draft = new StreamDraft('some_event');
 
         expect($draft->hasStreamNotFound())->toBeFalse();
@@ -86,7 +81,7 @@ describe('test exception', function (): void {
             ->and($draft->exception())->toBe($exception);
     });
 
-    it('test concurrency exception', function (): void {
+    test('concurrency error', function (): void {
         $draft = new StreamDraft('some_event');
 
         expect($draft->hasConcurrency())->toBeFalse();
@@ -101,7 +96,7 @@ describe('test exception', function (): void {
 });
 
 describe('decorate stream event', function (): void {
-    it('test decorate stream event', function (MessageDecorator $eventDecorator): void {
+    test('with given decorator', function (MessageDecorator $eventDecorator): void {
 
         $stream = new Stream(new StreamName('customer'), [SomeEvent::fromContent(['name' => 'steph bug'])]);
 
@@ -122,7 +117,7 @@ describe('decorate stream event', function (): void {
 
     })->with('eventDecorator');
 
-    it('test exception raise when stream events not set to be decorated', function (mixed $value, MessageDecorator $eventDecorator): void {
+    test('raise exception with invalid deferred type', function (mixed $value, MessageDecorator $eventDecorator): void {
         $draft = new StreamDraft('some event');
         $draft->deferred(fn (): mixed => $value);
         $draft->decorate($eventDecorator);

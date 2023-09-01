@@ -8,8 +8,8 @@ use Storm\Chronicler\Exceptions\TransactionAlreadyStarted;
 use Storm\Chronicler\Exceptions\TransactionNotStarted;
 use Storm\Chronicler\TransactionalStreamDraft;
 
-describe('test exception', function (): void {
-    it('test draft exception', function (): void {
+describe('exception', function (): void {
+    test('accessor', function (): void {
         $draft = new TransactionalStreamDraft('some event');
 
         expect($draft->exception())->toBeNull()
@@ -17,7 +17,7 @@ describe('test exception', function (): void {
             ->and($draft->hasTransactionNotStarted())->toBeFalse();
     });
 
-    it('test transaction not started', function (): void {
+    test('with transaction not started', function (): void {
         $draft = new TransactionalStreamDraft('some event');
         $exception = new TransactionNotStarted('no started');
 
@@ -28,7 +28,7 @@ describe('test exception', function (): void {
         expect($draft->hasTransactionNotStarted())->toBeTrue();
     });
 
-    it('test transaction already started', function (): void {
+    test('with transaction already started', function (): void {
         $draft = new TransactionalStreamDraft('some event');
         $exception = new TransactionAlreadyStarted('already started');
 

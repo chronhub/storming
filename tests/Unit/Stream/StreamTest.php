@@ -18,9 +18,9 @@ it('create new stream instance with empty events', function (StreamName $streamN
     $stream = new Stream($streamName);
 
     expect($stream->name)->toBe($streamName)
-        ->and($stream->name())->toBe($streamName);
+        ->and($stream->name())->toBe($streamName)
+        ->and(iterator_to_array($stream->events()))->toBeEmpty();
 
-    expect(iterator_to_array($stream->events()))->toBeEmpty();
 })->with('streamNames');
 
 it('create new stream instance with iterable stream events', function (iterable $events) {
@@ -35,7 +35,7 @@ it('create new stream instance with iterable stream events', function (iterable 
 
 })->with('iterable');
 
-it('return number of event from generator', function (iterable $events) {
+it('return number of events from generator', function (iterable $events) {
     $stream = new Stream(new StreamName('stream_name'), $events);
 
     $streamEvents = $stream->events();

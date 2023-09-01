@@ -12,7 +12,7 @@ use Storm\Message\Message;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 
 describe('create message', function (): void {
-    it('object event', function () {
+    test('with object event', function () {
         $event = new stdClass();
         $message = new Message($event, []);
 
@@ -26,7 +26,7 @@ describe('create message', function (): void {
             ->and($message->hasNot('foo'))->toBeTrue();
     });
 
-    it('with given headers', function () {
+    test('with given headers', function () {
         $event = new stdClass();
         $headers = ['foo' => 'bar'];
         $message = new Message($event, $headers);
@@ -43,7 +43,7 @@ describe('create message', function (): void {
             ->and($message->event())->not->toHaveProperty('headers');
     });
 
-    it('with domain instance', function (Messaging $event) {
+    test('with domain instance', function (Messaging $event) {
         $headers = ['foo' => 'bar'];
         $message = new Message($event, $headers);
 
@@ -53,7 +53,6 @@ describe('create message', function (): void {
             ->and($message->event())->toBeInstanceOf($event::class)
             ->and($message->isMessaging())->toBeTrue()
             ->and($message->headers())->toBe($headers)
-            ->and($message->headers())->toEqual($headers)
             ->and($message->has('foo'))->toBeTrue()
             ->and($message->hasNot('baz'))->toBeTrue()
             ->and($message->event())->toHaveProperty('headers')
@@ -62,8 +61,8 @@ describe('create message', function (): void {
     })->with('provideMessaging');
 });
 
-describe('alter message headers', function (): void {
-    it('by overriding header', function (Messaging $event) {
+describe('message headers', function (): void {
+    test('override header', function (Messaging $event) {
         $headers = ['foo' => 'bar'];
         $message = new Message($event, $headers);
 
@@ -81,7 +80,7 @@ describe('alter message headers', function (): void {
             ->and($newMessage->event()->headers())->toBe(['foo' => 'baz']);
     })->with('provideMessaging');
 
-    it('by overriding headers', function (Messaging $event) {
+    test('override headers', function (Messaging $event) {
         $headers = ['foo' => 'bar'];
         $message = new Message($event, $headers);
 
@@ -101,11 +100,11 @@ describe('alter message headers', function (): void {
 });
 
 describe('raise exception', function (): void {
-    it('when message event is instance of message', function () {
+    test('when message event is instance of message', function () {
         new Message(new Message(new stdClass()), []);
     })->throws(InvalidArgumentException::class, 'Message event cannot be an instance of itself');
 
-    it('when non empty headers from event or message are not equals on instantiation', function () {
+    test('when non empty headers from event or message are not equals on instantiation', function () {
         $event = SomeCommand::fromContent(['name' => 'steph bug'])->withHeader('foo', 'nope');
 
         new Message($event, ['foo' => 'bar']);

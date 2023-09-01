@@ -17,5 +17,5 @@ it('return same message instance', function (Message $message): void {
 })->with([
     'content set' => fn (): Message => new Message(SomeCommand::fromContent(['foo' => 'bar'])),
     'headers set' => fn (): Message => new Message(new stdClass(), ['some' => 'header']),
-    'all set' => fn (): Message => new Message(SomeCommand::fromContent(['foo' => 'bar']), ['another header']),
+    'content and headers set' => fn (): Message => new Message(SomeCommand::fromContent(['foo' => 'bar']), ['another header']),
 ]);

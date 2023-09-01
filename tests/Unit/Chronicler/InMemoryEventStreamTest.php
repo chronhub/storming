@@ -20,15 +20,15 @@ it('create new instance', function (string $streamName): void {
         ->and($provider->hasRealStreamName($streamName))->toBe(false);
 })->with('streamNames');
 
-describe('create event stream', function (): void {
-    it('create new event stream', function (string $streamName): void {
+describe('create', function (): void {
+    test('new event stream', function (string $streamName): void {
         $provider = new InMemoryEventStream();
 
         expect($provider->createStream($streamName, null))->toBe(true)
             ->and($provider->hasRealStreamName($streamName))->toBe(true);
     })->with('streamNames');
 
-    it('does not create event stream if already exists', function (string $streamName): void {
+    test('does not duplicate when already exists', function (string $streamName): void {
         $provider = new InMemoryEventStream();
 
         expect($provider->createStream($streamName, null))->toBe(true)
@@ -36,7 +36,7 @@ describe('create event stream', function (): void {
             ->and($provider->createStream($streamName, null))->toBe(false);
     })->with('streamNames');
 
-    it('create event stream with category', function (): void {
+    test('new event stream with category', function (): void {
         $provider = new InMemoryEventStream();
 
         expect($provider->createStream('credit_card', null, 'payment'))->toBe(true)
@@ -44,7 +44,7 @@ describe('create event stream', function (): void {
             ->and($provider->filterByAscendantCategories(['payment']))->toBe(['bitcoin', 'credit_card']);
     });
 
-    it('does not create event stream with category if stream name already exists', function (): void {
+    test('does not duplicate category when already exists', function (): void {
         $provider = new InMemoryEventStream();
 
         expect($provider->createStream('bitcoin', null, 'payment'))->toBe(true)
@@ -53,8 +53,8 @@ describe('create event stream', function (): void {
     });
 });
 
-describe('delete event stream', function (): void {
-    it('delete event stream', function (string $streamName): void {
+describe('delete', function (): void {
+    test('event stream', function (string $streamName): void {
         $provider = new InMemoryEventStream();
 
         expect($provider->createStream($streamName, null))->toBe(true)
@@ -63,7 +63,7 @@ describe('delete event stream', function (): void {
             ->and($provider->hasRealStreamName($streamName))->toBe(false);
     })->with('streamNames');
 
-    it('delete event stream per category', function (): void {
+    test('event stream per category', function (): void {
         $provider = new InMemoryEventStream();
 
         expect($provider->createStream('bitcoin', null, 'payment'))->toBe(true)
@@ -72,17 +72,17 @@ describe('delete event stream', function (): void {
             ->and($provider->deleteStream('credit_card'))->toBe(true)
             ->and($provider->filterByAscendantCategories(['payment']))->toBe(['bitcoin']);
     });
-});
 
-describe('filter event stream', function (): void {
-    it('return false on delete event stream which does not exists', function (string $streamName): void {
+    test('return false when event stream does not exists', function (string $streamName): void {
         $provider = new InMemoryEventStream();
 
         expect($provider->hasRealStreamName($streamName))->toBe(false)
             ->and($provider->deleteStream($streamName))->toBe(false);
     })->with('streamNames');
+});
 
-    it('filter stream names without internal streams prefixed with a dollar sign', function (): void {
+describe('filter event stream', function (): void {
+    test('by stream names without internal streams prefixed with a dollar sign', function (): void {
         $provider = new InMemoryEventStream();
 
         expect($provider->createStream('foo', null))->toBe(true)
@@ -91,7 +91,7 @@ describe('filter event stream', function (): void {
             ->and($provider->allWithoutInternal())->toBe(['foo']);
     });
 
-    it('filter stream names string or instance given by ascendant names', function (): void {
+    test('by stream names string or instance given by ascendant names', function (): void {
         $provider = new InMemoryEventStream();
 
         expect($provider->createStream('foo', null))->toBe(true)

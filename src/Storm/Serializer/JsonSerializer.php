@@ -11,6 +11,8 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
 
+use function is_int;
+
 final class JsonSerializer
 {
     private array $context = [];
@@ -47,9 +49,12 @@ final class JsonSerializer
 
     public function getJsonEncoder(): JsonEncoder
     {
+        $encodeOptions = is_int($this->encodeOptions) ? [JsonEncode::OPTIONS => $this->encodeOptions] : [];
+        $decodeOptions = is_int($this->decodeOptions) ? [JsonDecode::OPTIONS => $this->decodeOptions] : [];
+
         return new JsonEncoder(
-            new JsonEncode([JsonEncode::OPTIONS => $this->encodeOptions]),
-            new JsonDecode([JsonDecode::OPTIONS => $this->decodeOptions]),
+            new JsonEncode($encodeOptions),
+            new JsonDecode($decodeOptions),
             $this->context
         );
     }
