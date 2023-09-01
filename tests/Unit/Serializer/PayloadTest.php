@@ -24,7 +24,7 @@ it('creates payload with given values', function (array|string $content, array|s
     'null seqNum' => fn (): null => null,
 ]);
 
-it('json serialize payload', function (): void {
+it('serialize payload to json', function (): void {
     $payload = new Payload(['some' => 'content'], ['key' => 'value'], 123);
 
     expect($payload->jsonSerialize())

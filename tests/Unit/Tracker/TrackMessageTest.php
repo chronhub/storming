@@ -13,22 +13,26 @@ use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tracker\Draft;
 use Storm\Tracker\TrackMessage;
 
-describe('new instance', function (): void {
-    it('create new tracker', function () {
-        $tracker = new TrackMessage();
+beforeEach(function (): void {
+    $this->tracker = new TrackMessage();
+});
 
-        $listeners = $tracker->listeners();
+afterEach(function (): void {
+    $this->tracker = null;
+});
 
-        expect($tracker)->toBeInstanceOf(MessageTracker::class)
+describe('create', function (): void {
+    test('new tracker instance', function () {
+        $listeners = $this->tracker->listeners();
+
+        expect($this->tracker)->toBeInstanceOf(MessageTracker::class)
             ->and($listeners)->toBeEmpty()
-            ->and($listeners)->not()->toBe($tracker->listeners())
-            ->and($listeners)->toEqual($tracker->listeners());
+            ->and($listeners)->not()->toBe($this->tracker->listeners())
+            ->and($listeners)->toEqual($this->tracker->listeners());
     });
 
-    it('create a new story', function () {
-        $tracker = new TrackMessage();
-
-        $story = $tracker->newStory('event');
+    test('new story instance', function () {
+        $story = $this->tracker->newStory('event');
 
         expect($story)->toBeInstanceOf(MessageStory::class)
             ->toBeInstanceOf(Draft::class)
@@ -37,110 +41,97 @@ describe('new instance', function (): void {
 });
 
 describe('watch', function (): void {
-    it('some event', function () {
-        $tracker = new TrackMessage();
+    test('some event', function () {
+        $listener = $this->tracker->watch('event', fn () => 'story');
 
-        $listener = $tracker->watch('event', fn () => 'story');
-
-        expect($tracker->listeners())->toHaveCount(1)
+        expect($this->tracker->listeners())->toHaveCount(1)
             ->and($listener->name())->toBe('event')
             ->and($listener->story()())->toBe('story');
     });
 
-    it('dispatch event', function () {
-        $tracker = new TrackMessage();
+    test('and dispatch event', function () {
+        expect($this->tracker->listeners())->toHaveCount(0);
 
-        expect($tracker->listeners())->toHaveCount(0);
+        $listener = $this->tracker->onDispatch(fn () => 'story');
 
-        $listener = $tracker->onDispatch(fn () => 'story');
-
-        expect($tracker->listeners())->toHaveCount(1)
+        expect($this->tracker->listeners())->toHaveCount(1)
             ->and($listener->name())->toBe(Reporter::DISPATCH_EVENT)
             ->and($listener->story()())->toBe('story');
     });
 
-    it('finalize event', function () {
-        $tracker = new TrackMessage();
+    test('and finalize event', function () {
+        expect($this->tracker->listeners())->toHaveCount(0);
 
-        expect($tracker->listeners())->toHaveCount(0);
+        $listener = $this->tracker->onFinalize(fn () => 'story');
 
-        $listener = $tracker->onFinalize(fn () => 'story');
-
-        expect($tracker->listeners())->toHaveCount(1)
+        expect($this->tracker->listeners())->toHaveCount(1)
             ->and($listener->name())->toBe(Reporter::FINALIZE_EVENT)
             ->and($listener->story()())->toBe('story');
     });
 
-    it('events with priority', function () {
-        $tracker = new TrackMessage();
+    test('events with priority', function () {
+        $this->tracker->watch('event', fn () => 'story', 2);
+        $this->tracker->watch('event', fn () => 'story');
+        $this->tracker->watch('event', fn () => 'story', 0);
 
-        $tracker->watch('event', fn () => 'story', 2);
-        $tracker->watch('event', fn () => 'story');
-        $tracker->watch('event', fn () => 'story', 0);
-
-        expect($tracker->listeners())->toHaveCount(3)
-            ->and($tracker->listeners()[0]->priority())->toBe(2)
-            ->and($tracker->listeners()[1]->priority())->toBe(1)
-            ->and($tracker->listeners()[2]->priority())->toBe(0);
+        expect($this->tracker->listeners())->toHaveCount(3)
+            ->and($this->tracker->listeners()[0]->priority())->toBe(2)
+            ->and($this->tracker->listeners()[1]->priority())->toBe(1)
+            ->and($this->tracker->listeners()[2]->priority())->toBe(0);
     });
 });
 
 describe('dispatch', function (): void {
-    it('some event', function () {
-        $tracker = new TrackMessage();
-
-        $tracker->watch('event', function (MessageStory $story): void {
+    test('some event', function () {
+        $this->tracker->watch('event', function (MessageStory $story): void {
             $story->withMessage(new Message(new stdClass()));
         });
-        $story = $tracker->newStory('event');
 
-        $tracker->disclose($story);
+        $story = $this->tracker->newStory('event');
+
+        $this->tracker->disclose($story);
 
         expect($story->message())->toBeInstanceOf(Message::class)
             ->and($story->message()->event())->toBeInstanceOf(stdClass::class);
     });
 
-    it('some event till propagation event is not stopped', function () {
-        $tracker = new TrackMessage();
-
-        $tracker->watch('event', function (MessageStory $story): void {
+    test('some event till propagation event is not stopped', function () {
+        $this->tracker->watch('event', function (MessageStory $story): void {
             $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'bar'])));
 
         }, 10);
 
-        $tracker->watch('event', function (MessageStory $story): void {
+        $this->tracker->watch('event', function (MessageStory $story): void {
             $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'baz'])));
             $story->stop(true);
         }, 100);
 
-        $story = $tracker->newStory('event');
+        $story = $this->tracker->newStory('event');
 
-        $tracker->disclose($story);
+        $this->tracker->disclose($story);
 
         expect($story->message())->toBeInstanceOf(Message::class)
             ->and($story->message()->event()->toContent()['foo'])->toBe('baz');
     });
 
-    it('some event with ordered priorities', function () {
-        $tracker = new TrackMessage();
-
-        $tracker->watch('event', function (MessageStory $story): void {
+    test('some event with ordered priorities', function () {
+        $this->tracker->watch('event', function (MessageStory $story): void {
             $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'bar'])));
 
             expect($story->message()->event()->toContent()['foo'])->toBe('bar')
                 ->and($story->isStopped())->toBeFalse();
         }, 100);
 
-        $tracker->watch('event', function (MessageStory $story): void {
+        $this->tracker->watch('event', function (MessageStory $story): void {
             $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'baz'])));
 
             expect($story->message()->event()->toContent()['foo'])->toBe('baz')
                 ->and($story->isStopped())->toBeFalse();
         }, 90);
 
-        $story = $tracker->newStory('event');
+        $story = $this->tracker->newStory('event');
 
-        $tracker->disclose($story);
+        $this->tracker->disclose($story);
 
         expect($story->message())->toBeInstanceOf(Message::class)
             ->and($story->message()->event())->toBeInstanceOf(SomeCommand::class)
@@ -148,10 +139,8 @@ describe('dispatch', function (): void {
             ->and($story->isStopped())->toBeFalse();
     });
 
-    it('some event until a truthy callback', function () {
-        $tracker = new TrackMessage();
-
-        $tracker->watch('event', function (MessageStory $story): void {
+    test('some event until a truthy callback', function () {
+        $this->tracker->watch('event', function (MessageStory $story): void {
             $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'bar'])));
 
             expect($story->message()->event()->toContent()['foo'])->toBe('bar')
@@ -159,13 +148,13 @@ describe('dispatch', function (): void {
 
         }, 100);
 
-        $tracker->watch('event', function (MessageStory $story): void {
+        $this->tracker->watch('event', function (MessageStory $story): void {
             $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'nope'])));
         }, 90);
 
-        $story = $tracker->newStory('event');
+        $story = $this->tracker->newStory('event');
 
-        $tracker->discloseUntil($story, function (MessageStory $story): bool {
+        $this->tracker->discloseUntil($story, function (MessageStory $story): bool {
             if ($story->message()->event()->toContent()['foo'] === 'bar') {
                 $story->stop(true);
 
@@ -183,24 +172,26 @@ describe('dispatch', function (): void {
 });
 
 it('forget event', function () {
-    $tracker = new TrackMessage();
-
-    $tracker->watch('event', function (MessageStory $story): void {
+    $this->tracker->watch('event', function (MessageStory $story): void {
         $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'bar'])));
 
         expect($story->message()->event()->toContent()['foo'])->toBe('bar')
             ->and($story->isStopped())->toBeFalse();
     }, 100);
 
-    $listenerToForget = $tracker->watch('event', function (MessageStory $story): void {
+    $listenerToForget = $this->tracker->watch('event', function (MessageStory $story): void {
         $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'baz'])));
     }, 90);
 
-    $story = $tracker->newStory('event');
+    $story = $this->tracker->newStory('event');
 
-    $tracker->forget($listenerToForget);
+    expect($this->tracker->listeners())->toHaveCount(2);
 
-    $tracker->disclose($story);
+    $this->tracker->forget($listenerToForget);
+
+    expect($this->tracker->listeners())->toHaveCount(1);
+
+    $this->tracker->disclose($story);
 
     expect($story->message())->toBeInstanceOf(Message::class)
         ->and($story->message()->event())->toBeInstanceOf(SomeCommand::class)

@@ -18,22 +18,29 @@ use Symfony\Component\Serializer\Serializer;
 
 use function method_exists;
 
-it('serializes a message', function (): void {
-    $contentSerializer = mock(ContentSerializer::class);
-    $serializer = mock(Serializer::class);
+beforeEach(function () {
+    $this->serializer = mock(Serializer::class);
+    $this->contentSerializer = mock(ContentSerializer::class);
+    $this->messagingSerializer = new MessagingSerializer($this->serializer, $this->contentSerializer);
+});
 
+afterEach(function () {
+    $this->serializer = null;
+    $this->contentSerializer = null;
+    $this->messagingSerializer = null;
+});
+
+it('serializes a message', function (): void {
     $content = ['foo' => 'bar'];
     $headers = ['key' => 'value'];
     $command = SomeCommand::fromContent($content)->withHeaders($headers);
 
     $message = new Message($command);
 
-    $serializer->shouldReceive('normalize')->with($headers, 'json')->andReturn($headers);
-    $contentSerializer->shouldReceive('serialize')->andReturn($content);
+    $this->serializer->shouldReceive('normalize')->with($headers, 'json')->andReturn($headers);
+    $this->contentSerializer->shouldReceive('serialize')->andReturn($content);
 
-    $messagingSerializer = new MessagingSerializer($serializer, $contentSerializer);
-
-    $payload = $messagingSerializer->serializeMessage($message);
+    $payload = $this->messagingSerializer->serializeMessage($message);
 
     expect($payload)->toBeInstanceOf(Payload::class)
         ->and($payload->content)->toBe($content)
@@ -44,16 +51,14 @@ it('serializes a message', function (): void {
 it('deserializes payload to messaging instance', function (string $source) {
     $payload = new Payload(['some' => 'content'], [Header::EVENT_TYPE => $source]);
 
-    $contentSerializer = mock(ContentSerializer::class);
-    $serializer = mock(Serializer::class);
-    $serializer = new MessagingSerializer($serializer, $contentSerializer);
-
     if (! method_exists($source, 'fromContent')) {
         throw new RuntimeException('invalid data provided');
     }
-    $contentSerializer->shouldReceive('deserialize')->andReturn($source::fromContent(['some' => 'content']));
 
-    $messaging = $serializer->deserializePayload($payload);
+    $this->contentSerializer->shouldReceive('deserialize')->andReturn($source::fromContent(['some' => 'content']));
+    $this->serializer->shouldNotHaveBeenCalled();
+
+    $messaging = $this->messagingSerializer->deserializePayload($payload);
 
     expect($messaging)->toBeInstanceOf($source)
         ->and($messaging->toContent())->toBe(['some' => 'content'])
@@ -64,17 +69,17 @@ it('deserializes payload to messaging instance', function (string $source) {
     'event' => SomeEvent::class,
 ]);
 
-it('raises exception when event type header is missing', function (): void {
-    $serializer = new MessagingSerializer(mock(Serializer::class), mock(ContentSerializer::class));
-    $serializer->deserializePayload(new Payload(['some' => 'content'], []));
-})->throws(InvalidArgumentException::class, 'Missing event type header string to deserialize payload');
+describe('raises exception with invalid event type header', function (): void {
+    it('when missing', function (): void {
+        $this->messagingSerializer->deserializePayload(new Payload(['some' => 'content'], []));
+    })->throws(InvalidArgumentException::class, 'Missing event type header string to deserialize payload');
 
-it('raises exception when event type header is not a string', function (mixed $value): void {
-    $serializer = new MessagingSerializer(mock(Serializer::class), mock(ContentSerializer::class));
-    $serializer->deserializePayload(new Payload(['some' => 'content'], [Header::EVENT_TYPE => $value]));
-})->with([
-    'null' => fn () => null,
-    'object' => fn () => new stdClass(),
-    'array' => fn () => [],
-    'int' => fn () => 42,
-])->throws(InvalidArgumentException::class, 'Missing event type header string to deserialize payload');
+    it('when not a string', function (mixed $value): void {
+        $this->messagingSerializer->deserializePayload(new Payload(['some' => 'content'], [Header::EVENT_TYPE => $value]));
+    })->with([
+        'null' => fn () => null,
+        'object' => fn () => new stdClass(),
+        'array' => fn () => [],
+        'int' => fn () => 42,
+    ])->throws(InvalidArgumentException::class, 'Missing event type header string to deserialize payload');
+});

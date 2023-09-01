@@ -8,34 +8,38 @@ use Storm\Chronicler\Exceptions\TransactionAlreadyStarted;
 use Storm\Chronicler\Exceptions\TransactionNotStarted;
 use Storm\Chronicler\TransactionalStreamDraft;
 
+beforeEach(function () {
+    $this->draft = new TransactionalStreamDraft('some_event');
+});
+
+afterEach(function () {
+    $this->draft = null;
+});
+
 describe('exception', function (): void {
     test('accessor', function (): void {
-        $draft = new TransactionalStreamDraft('some event');
-
-        expect($draft->exception())->toBeNull()
-            ->and($draft->hasTransactionAlreadyStarted())->toBeFalse()
-            ->and($draft->hasTransactionNotStarted())->toBeFalse();
+        expect($this->draft->exception())->toBeNull()
+            ->and($this->draft->hasTransactionAlreadyStarted())->toBeFalse()
+            ->and($this->draft->hasTransactionNotStarted())->toBeFalse();
     });
 
     test('with transaction not started', function (): void {
-        $draft = new TransactionalStreamDraft('some event');
         $exception = new TransactionNotStarted('no started');
 
-        expect($draft->hasTransactionNotStarted())->toBeFalse();
+        expect($this->draft->hasTransactionNotStarted())->toBeFalse();
 
-        $draft->withRaisedException($exception);
+        $this->draft->withRaisedException($exception);
 
-        expect($draft->hasTransactionNotStarted())->toBeTrue();
+        expect($this->draft->hasTransactionNotStarted())->toBeTrue();
     });
 
     test('with transaction already started', function (): void {
-        $draft = new TransactionalStreamDraft('some event');
         $exception = new TransactionAlreadyStarted('already started');
 
-        expect($draft->hasTransactionAlreadyStarted())->toBeFalse();
+        expect($this->draft->hasTransactionAlreadyStarted())->toBeFalse();
 
-        $draft->withRaisedException($exception);
+        $this->draft->withRaisedException($exception);
 
-        expect($draft->hasTransactionAlreadyStarted())->toBeTrue();
+        expect($this->draft->hasTransactionAlreadyStarted())->toBeTrue();
     });
 });

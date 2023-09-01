@@ -11,10 +11,16 @@ use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
-it('create new instance', function () {
-    $jsonSerializer = new JsonSerializer();
+beforeEach(function () {
+    $this->jsonSerializer = new JsonSerializer();
+});
 
-    expect($jsonSerializer)
+afterEach(function () {
+    $this->jsonSerializer = null;
+});
+
+it('create new instance', function () {
+    expect($this->jsonSerializer)
         ->toHaveProperties(['context', 'encodeOptions', 'decodeOptions'])
         ->toHaveScalarProperty('context', [])
         ->toHaveScalarProperty('encodeOptions', null)
@@ -23,41 +29,33 @@ it('create new instance', function () {
 
 describe('setter', function () {
     test('context', function (): void {
-        $jsonSerializer = new JsonSerializer();
+        expect($this->jsonSerializer)->toHaveScalarProperty('context', []);
 
-        expect($jsonSerializer)->toHaveScalarProperty('context', []);
+        $this->jsonSerializer->withContext(['foo' => 'bar']);
 
-        $jsonSerializer->withContext(['foo' => 'bar']);
-
-        expect($jsonSerializer)->toHaveScalarProperty('context', ['foo' => 'bar']);
+        expect($this->jsonSerializer)->toHaveScalarProperty('context', ['foo' => 'bar']);
     });
 
     test('encode options', function () {
-        $jsonSerializer = new JsonSerializer();
+        expect($this->jsonSerializer)->toHaveScalarProperty('encodeOptions', null);
 
-        expect($jsonSerializer)->toHaveScalarProperty('encodeOptions', null);
+        $this->jsonSerializer->withEncodeOptions(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
 
-        $jsonSerializer->withEncodeOptions(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
-
-        expect($jsonSerializer)->toHaveScalarProperty('encodeOptions', 1344);
+        expect($this->jsonSerializer)->toHaveScalarProperty('encodeOptions', 1344);
     });
 
     test('decode options', function () {
-        $jsonSerializer = new JsonSerializer();
+        expect($this->jsonSerializer)->toHaveScalarProperty('decodeOptions', null);
 
-        expect($jsonSerializer)->toHaveScalarProperty('decodeOptions', null);
+        $this->jsonSerializer->withDecodeOptions(JSON_BIGINT_AS_STRING);
 
-        $jsonSerializer->withDecodeOptions(JSON_BIGINT_AS_STRING);
-
-        expect($jsonSerializer)->toHaveScalarProperty('decodeOptions', 2);
+        expect($this->jsonSerializer)->toHaveScalarProperty('decodeOptions', 2);
     });
 });
 
 describe('json encoder instance', function (): void {
     it('create default instance', function () {
-        $jsonSerializer = new JsonSerializer();
-
-        $jsonEncoder = $jsonSerializer->getJsonEncoder();
+        $jsonEncoder = $this->jsonSerializer->getJsonEncoder();
 
         expect($jsonEncoder)
             ->toBeInstanceOf(JsonEncoder::class)
@@ -65,19 +63,16 @@ describe('json encoder instance', function (): void {
     });
 
     it('create new instance', function () {
-        $jsonSerializer = new JsonSerializer();
-
-        $jsonEncoder = $jsonSerializer->getJsonEncoder();
-        $aJsonEncoder = $jsonSerializer->getJsonEncoder();
+        $jsonEncoder = $this->jsonSerializer->getJsonEncoder();
+        $aJsonEncoder = $this->jsonSerializer->getJsonEncoder();
 
         expect($jsonEncoder)->not()->toBe($aJsonEncoder)->toEqual($aJsonEncoder);
     });
 
     it('create instance with given context', function () {
-        $jsonSerializer = new JsonSerializer();
-        $jsonSerializer->withContext(['foo' => 'bar']);
+        $this->jsonSerializer->withContext(['foo' => 'bar']);
 
-        $jsonEncoder = $jsonSerializer->getJsonEncoder();
+        $jsonEncoder = $this->jsonSerializer->getJsonEncoder();
 
         expect($jsonEncoder)
             ->toBeInstanceOf(JsonEncoder::class)
@@ -91,16 +86,12 @@ describe('json encoder instance', function (): void {
 
 describe('symfony serializer instance', function (): void {
     it('return new instance', function () {
-        $jsonSerializer = new JsonSerializer();
+        $symfonySerializer = $this->jsonSerializer->create();
 
-        $symfonySerializer = $jsonSerializer->create();
-
-        expect($symfonySerializer)->not()->toBe($jsonSerializer->create())->toEqual($jsonSerializer->create());
+        expect($symfonySerializer)->not()->toBe($this->jsonSerializer->create())->toEqual($this->jsonSerializer->create());
     });
 
     it('serialize with normalizers', function (): void {
-        $jsonSerializer = new JsonSerializer();
-
         $data = ['foo' => 'bar', 'int' => 42, 'datetime' => new DateTimeImmutable('2023-12-25', new DateTimeZone('UTC'))];
 
         $normalizer =
@@ -109,7 +100,7 @@ describe('symfony serializer instance', function (): void {
                 DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
             ]);
 
-        $symfonySerializer = $jsonSerializer->create($normalizer);
+        $symfonySerializer = $this->jsonSerializer->create($normalizer);
 
         expect($symfonySerializer->serialize($data, 'json'))
             ->toBe('{"foo":"bar","int":42,"datetime":"2023-12-25T00:00:00.000000"}');

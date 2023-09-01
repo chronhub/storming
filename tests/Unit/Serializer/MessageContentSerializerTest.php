@@ -12,7 +12,6 @@ use Storm\Tests\Stubs\Double\Message\SomeEvent;
 use Storm\Tests\Stubs\Double\Message\SomeQuery;
 
 it('serialize message content', function (): void {
-
     $command = SomeCommand::fromContent(['steph' => 'bug']);
     $serializer = new MessageContentSerializer();
 

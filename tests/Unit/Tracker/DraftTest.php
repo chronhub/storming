@@ -13,53 +13,55 @@ use Storm\Tracker\Draft;
 
 use function iterator_to_array;
 
-it('create new instance with given event', function () {
-    $tracker = new Draft('event');
+beforeEach(function (): void {
+    $this->draft = new Draft('some_event');
+});
 
-    expect($tracker->currentEvent())->toBe('event')
-        ->and($tracker->isStopped())->toBeFalse()
-        ->and($tracker->hasException())->toBeFalse()
-        ->and($tracker->exception())->toBeNull()
-        ->and($tracker->handlers())->toBeInstanceOf(Generator::class)
-        ->and($tracker->promise())->toBeNull()
-        ->and($tracker->isHandled())->toBeFalse();
+afterEach(function (): void {
+    $this->draft = null;
+});
+
+it('create new instance with given event', function () {
+    expect($this->draft->currentEvent())->toBe('some_event')
+        ->and($this->draft->isStopped())->toBeFalse()
+        ->and($this->draft->hasException())->toBeFalse()
+        ->and($this->draft->exception())->toBeNull()
+        ->and($this->draft->handlers())->toBeInstanceOf(Generator::class)
+        ->and($this->draft->promise())->toBeNull()
+        ->and($this->draft->isHandled())->toBeFalse();
 });
 
 it('override current event', function () {
-    $tracker = new Draft('event');
+    expect($this->draft->currentEvent())->toBe('some_event');
 
-    expect($tracker->currentEvent())->toBe('event');
+    $this->draft->withEvent('dispatch');
 
-    $tracker->withEvent('dispatch');
-
-    expect($tracker->currentEvent())->toBe('dispatch');
+    expect($this->draft->currentEvent())->toBe('dispatch');
 });
 
 it('test transient message', function () {
-    $draft = new Draft('event');
 
-    expect($draft->transientMessage())->toBeNull();
+    expect($this->draft->transientMessage())->toBeNull();
 
     $transient = new Message(new SomeCommand(['name' => 'steph']));
-    $draft->withTransientMessage($transient);
-    $extracted = $draft->pullTransientMessage();
+    $this->draft->withTransientMessage($transient);
+    $extracted = $this->draft->pullTransientMessage();
 
     expect($extracted)->toBe($transient);
 
-    $draft->withMessage($transient);
-    $message = $draft->message();
+    $this->draft->withMessage($transient);
+    $message = $this->draft->message();
 
     expect($message)->toBe($transient)->toBe($message);
 });
 
 it('set consumers', function () {
-    $draft = new Draft('event');
-
-    expect($draft->handlers())->toBeInstanceOf(Generator::class);
+    expect($this->draft->handlers())->toBeInstanceOf(Generator::class);
 
     $messageHandlers = [fn () => 'consumer'];
-    $draft->withHandlers($messageHandlers);
-    $consumers = $draft->handlers();
+    $this->draft->withHandlers($messageHandlers);
+
+    $consumers = $this->draft->handlers();
 
     expect($consumers)
         ->toBeInstanceOf(Generator::class)
@@ -67,73 +69,65 @@ it('set consumers', function () {
 });
 
 it('mark message handled', function () {
-    $draft = new Draft('event');
+    expect($this->draft->isHandled())->toBeFalse();
 
-    expect($draft->isHandled())->toBeFalse();
+    $this->draft->markHandled(true);
 
-    $draft->markHandled(true);
-
-    expect($draft->isHandled())->toBeTrue();
+    expect($this->draft->isHandled())->toBeTrue();
 });
 
 it('set promise', function () {
-    $draft = new Draft('event');
+    expect($this->draft->promise())->toBeNull();
 
-    expect($draft->promise())->toBeNull();
+    $promise = mock(PromiseInterface::class);
 
-    $promise = $this->createMock(PromiseInterface::class);
+    $this->draft->withPromise($promise);
 
-    $draft->withPromise($promise);
-
-    expect($draft->promise())->toBe($promise);
+    expect($this->draft->promise())->toBe($promise);
 });
 
-it('set exception', function () {
-    $draft = new Draft('event');
+describe('exception', function (): void {
+    it('set', function () {
+        expect($this->draft->hasException())->toBeFalse();
 
-    expect($draft->hasException())->toBeFalse();
+        $exception = new RuntimeException('some error');
 
-    $exception = new RuntimeException('some error');
+        $this->draft->withRaisedException($exception);
 
-    $draft->withRaisedException($exception);
+        expect($this->draft->hasException())->toBeTrue()
+            ->and($this->draft->exception())->toBe($exception);
+    });
 
-    expect($draft->hasException())->toBeTrue()
-        ->and($draft->exception())->toBe($exception);
-});
+    it('override', function () {
+        expect($this->draft->hasException())->toBeFalse();
 
-it('override exception', function () {
-    $draft = new Draft('event');
+        $exception = new RuntimeException('some error');
 
-    expect($draft->hasException())->toBeFalse();
+        $this->draft->withRaisedException($exception);
 
-    $exception = new RuntimeException('some error');
+        expect($this->draft->hasException())->toBeTrue()
+            ->and($this->draft->exception())->toBe($exception);
 
-    $draft->withRaisedException($exception);
+        $exception = new RuntimeException('another error');
+        $this->draft->withRaisedException($exception);
 
-    expect($draft->hasException())->toBeTrue()
-        ->and($draft->exception())->toBe($exception);
+        expect($this->draft->hasException())->toBeTrue()
+            ->and($this->draft->exception())->toBe($exception);
+    });
 
-    $exception = new RuntimeException('another error');
-    $draft->withRaisedException($exception);
+    it('reset', function () {
+        expect($this->draft->hasException())->toBeFalse();
 
-    expect($draft->hasException())->toBeTrue()
-        ->and($draft->exception())->toBe($exception);
-});
+        $exception = new RuntimeException('some error');
 
-it('reset exception', function () {
-    $draft = new Draft('event');
+        $this->draft->withRaisedException($exception);
 
-    expect($draft->hasException())->toBeFalse();
+        expect($this->draft->hasException())->toBeTrue()
+            ->and($this->draft->exception())->toBe($exception);
 
-    $exception = new RuntimeException('some error');
+        $this->draft->resetException();
 
-    $draft->withRaisedException($exception);
-
-    expect($draft->hasException())->toBeTrue()
-        ->and($draft->exception())->toBe($exception);
-
-    $draft->resetException();
-
-    expect($draft->hasException())->toBeFalse()
-        ->and($draft->exception())->toBeNull();
+        expect($this->draft->hasException())->toBeFalse()
+            ->and($this->draft->exception())->toBeNull();
+    });
 });
