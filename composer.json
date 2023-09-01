@@ -14,7 +14,7 @@
     "psr/container": "dev-master",
     "react/react": "^1.3",
     "symfony/uid": "6.3.x",
-    "symfony/clock": "^6.3",
+    "symfony/clock": "^6.4",
     "symfony/serializer": "^6.4",
     "illuminate/collections": "10.x-dev"
   },
