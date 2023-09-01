@@ -1,0 +1,27 @@
+{
+  "name": "chronhub/reporter",
+  "description": "service bus",
+  "keywords": ["reporter, service bus, command bus, query bus, event bus"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "steph bug",
+      "email": "chronhubgit@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^8.2"
+  },
+  "autoload": {
+    "psr-4": {
+      "Storm\\Reporter\\": ""
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "minimum-stability": "dev"
+}

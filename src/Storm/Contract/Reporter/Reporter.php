@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Storm\Contract\Reporter;
 
 use React\Promise\PromiseInterface;
-use Storm\Contract\Message\DomainType;
 use Storm\Contract\Tracker\MessageSubscriber;
 use Storm\Contract\Tracker\MessageTracker;
 
@@ -29,9 +28,4 @@ interface Reporter
     public function subscribe(MessageSubscriber ...$messageSubscribers): void;
 
     public function tracker(): MessageTracker;
-
-    /**
-     * @return string{DomainType::*}
-     */
-    public function support(): string;
 }

@@ -8,6 +8,7 @@ use JsonSerializable;
 
 final readonly class Payload implements JsonSerializable
 {
+    //todo content and header a string (json) should be used for EventPayload only
     public function __construct(
         public string|array $content,
         public string|array $headers,

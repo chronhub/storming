@@ -32,14 +32,33 @@ final readonly class MessagingSerializer implements MessageSerializer
 
     public function deserializePayload(Payload $payload): Messaging
     {
-        $source = $payload->headers[Header::EVENT_TYPE] ?? null;
+        $decodedPayload = $this->decodePayload($payload);
+
+        $source = $decodedPayload->headers[Header::EVENT_TYPE] ?? null;
 
         if (is_string($source)) {
-            $event = $this->contentSerializer->deserialize($source, $payload);
+            $event = $this->contentSerializer->deserialize($source, $decodedPayload);
 
-            return $event->withHeaders($payload->headers);
+            return $event->withHeaders($decodedPayload->headers);
         }
 
         throw new InvalidArgumentException('Missing event type header string to deserialize payload');
+    }
+
+    private function decodePayload(Payload $payload): Payload
+    {
+        $content = $payload->content;
+
+        if (is_string($content)) {
+            $content = $this->serializer->decode($content, 'json');
+        }
+
+        $headers = $payload->headers;
+
+        if (is_string($headers)) {
+            $headers = $this->serializer->decode($headers, 'json');
+        }
+
+        return new Payload($content, $headers);
     }
 }

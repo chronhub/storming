@@ -21,10 +21,10 @@ it('creates payload with given values', function (array|string $content, array|s
     'allow empty headers' => fn (): array => [],
 ])->with([
     'seqNo' => fn (): int => 123,
-    'null seqNum' => fn (): null => null,
+    'null seqNo' => fn (): null => null,
 ]);
 
-it('serialize payload to json', function (): void {
+it('serializes payload to json', function (): void {
     $payload = new Payload(['some' => 'content'], ['key' => 'value'], 123);
 
     expect($payload->jsonSerialize())
