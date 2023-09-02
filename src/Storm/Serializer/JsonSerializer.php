@@ -13,6 +13,7 @@ use Symfony\Component\Serializer\Serializer;
 
 use function is_int;
 
+// todo change name to SerializerFactory
 final class JsonSerializer
 {
     private array $context = [];

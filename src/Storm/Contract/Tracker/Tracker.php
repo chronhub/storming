@@ -8,12 +8,15 @@ use Illuminate\Support\Collection;
 
 interface Tracker
 {
-    public function watch(string $eventName, callable $story, int $priority = 1): EventListener;
+    /**
+     * @return array<EventListener>
+     */
+    public function watch(object $subscriber): array;
 
     public function disclose(Story $story): void;
 
     /**
-     * fixMe invalid return type
+     * fixMe invalid callback return type
      *
      * @template TReturn in bool|void
      *

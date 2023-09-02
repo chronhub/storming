@@ -50,13 +50,13 @@ final readonly class MessagingSerializer implements MessageSerializer
         $content = $payload->content;
 
         if (is_string($content)) {
-            $content = $this->serializer->decode($content, 'json');
+            $content = $this->serializer->deserialize($content, 'array', 'json');
         }
 
         $headers = $payload->headers;
 
         if (is_string($headers)) {
-            $headers = $this->serializer->decode($headers, 'json');
+            $headers = $this->serializer->deserialize($content, 'array', 'json');
         }
 
         return new Payload($content, $headers);

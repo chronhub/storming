@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Message;
 
 use Mockery;
+use stdClass;
 use Storm\Contract\Message\Messaging;
 use Storm\Contract\Serializer\MessageSerializer;
 use Storm\Message\GenericMessageFactory;
@@ -12,6 +13,7 @@ use Storm\Message\Message;
 use Storm\Serializer\Payload;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
+use Storm\Tests\Stubs\Double\Message\SomeQuery;
 
 use function PHPUnit\Framework\assertEquals;
 use function PHPUnit\Framework\assertInstanceOf;
@@ -60,8 +62,26 @@ it('create message from array', function (string $messaging): void {
 
 it('create message from object', function () {
 
-})->todo();
+    $event = new stdClass();
 
-it('create message from message instance', function () {
+    $message = new Message($event, ['key' => 'value']);
+    $newMessage = $this->messageFactory->createMessageFrom($message);
 
-})->todo();
+    expect($newMessage)->toEqual($message)->not()->toBe($message)
+        ->and($newMessage->event())->toEqual($event)->not()->toBe($event);
+});
+
+it('create message from message instance', function (string $messaging) {
+    /** @var Messaging $messaging */
+    $event = $messaging::fromContent(['foo' => 'bar'])->withHeaders(['key' => 'value']);
+
+    $message = new Message($event);
+
+    $newMessage = $this->messageFactory->createMessageFrom($message);
+
+    expect($newMessage)->toEqual($message)->not()->toBe($message);
+})->with([
+    'command' => SomeCommand::class,
+    'event' => SomeEvent::class,
+    'query' => SomeQuery::class,
+]);

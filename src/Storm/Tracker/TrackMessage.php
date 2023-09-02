@@ -15,12 +15,12 @@ final class TrackMessage implements MessageTracker
 
     public function onDispatch(callable $story, int $priority = 1): EventListener
     {
-        return $this->watch(Reporter::DISPATCH_EVENT, $story, $priority);
+        return $this->watch(new GenericEventListener(Reporter::DISPATCH_EVENT, $story, $priority))[0];
     }
 
     public function onFinalize(callable $story, int $priority = 1): EventListener
     {
-        return $this->watch(Reporter::FINALIZE_EVENT, $story, $priority);
+        return $this->watch(new GenericEventListener(Reporter::FINALIZE_EVENT, $story, $priority))[0];
     }
 
     public function newStory(string $eventName): MessageStory

@@ -7,6 +7,7 @@ namespace Storm\Tracker;
 use Illuminate\Support\Collection;
 use Storm\Contract\Tracker\EventListener;
 use Storm\Contract\Tracker\Story;
+use Storm\Reporter\Loader\LoadSubscriberClass;
 
 trait InteractWithTracker
 {
@@ -17,13 +18,15 @@ trait InteractWithTracker
         $this->listeners = new Collection();
     }
 
-    public function watch(string $eventName, callable $story, int $priority = 1): EventListener
+    public function watch(object $subscriber): array
     {
-        $listener = new GenericEventListener($eventName, $story, $priority);
+        if (! $subscriber instanceof EventListener) {
+            $subscriber = LoadSubscriberClass::from($subscriber);
+        }
 
-        $this->listeners->push($listener);
-
-        return $listener;
+        return Collection::wrap($subscriber)->each(function (EventListener $listener): void {
+            $this->listeners->push($listener);
+        })->toArray();
     }
 
     public function disclose(Story $story): void

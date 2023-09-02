@@ -11,6 +11,7 @@ use Storm\Contract\Tracker\MessageTracker;
 use Storm\Message\Message;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tracker\Draft;
+use Storm\Tracker\GenericEventListener;
 use Storm\Tracker\TrackMessage;
 
 beforeEach(function (): void {
@@ -32,21 +33,25 @@ describe('create', function (): void {
     });
 
     test('new story instance', function () {
-        $story = $this->tracker->newStory('event');
+        $story = $this->tracker->newStory('reporter_event');
 
         expect($story)->toBeInstanceOf(MessageStory::class)
             ->toBeInstanceOf(Draft::class)
-            ->and($story->currentEvent())->toBe('event');
+            ->and($story->currentEvent())->toBe('reporter_event');
     });
 });
 
 describe('watch', function (): void {
-    test('some event', function () {
-        $listener = $this->tracker->watch('event', fn () => 'story');
+    test('some event with event listener instance', function () {
+        $eventListener = new GenericEventListener('some_event', fn (): string => 'story', 10);
+        $listeners = $this->tracker->watch($eventListener);
+        $listener = $listeners[0];
 
-        expect($this->tracker->listeners())->toHaveCount(1)
-            ->and($listener->name())->toBe('event')
-            ->and($listener->story()())->toBe('story');
+        expect($listener)->toBe($eventListener)
+            ->and($this->tracker->listeners())->toHaveCount(1)
+            ->and($listener->name())->toBe('some_event')
+            ->and($listener->story()())->toBe('story')
+            ->and($listener->priority())->toBe(10);
     });
 
     test('and dispatch event', function () {
@@ -70,9 +75,9 @@ describe('watch', function (): void {
     });
 
     test('events with priority', function () {
-        $this->tracker->watch('event', fn () => 'story', 2);
-        $this->tracker->watch('event', fn () => 'story');
-        $this->tracker->watch('event', fn () => 'story', 0);
+        $this->tracker->onDispatch(fn () => 'story', 2);
+        $this->tracker->onDispatch(fn () => 'story');
+        $this->tracker->onDispatch(fn () => 'story', 0);
 
         expect($this->tracker->listeners())->toHaveCount(3)
             ->and($this->tracker->listeners()[0]->priority())->toBe(2)
@@ -83,11 +88,11 @@ describe('watch', function (): void {
 
 describe('dispatch', function (): void {
     test('some event', function () {
-        $this->tracker->watch('event', function (MessageStory $story): void {
+        $this->tracker->onDispatch(function (MessageStory $story): void {
             $story->withMessage(new Message(new stdClass()));
         });
 
-        $story = $this->tracker->newStory('event');
+        $story = $this->tracker->newStory(Reporter::DISPATCH_EVENT);
 
         $this->tracker->disclose($story);
 
@@ -96,17 +101,17 @@ describe('dispatch', function (): void {
     });
 
     test('some event till propagation event is not stopped', function () {
-        $this->tracker->watch('event', function (MessageStory $story): void {
+        $this->tracker->onDispatch(function (MessageStory $story): void {
             $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'bar'])));
 
         }, 10);
 
-        $this->tracker->watch('event', function (MessageStory $story): void {
+        $this->tracker->onDispatch(function (MessageStory $story): void {
             $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'baz'])));
             $story->stop(true);
         }, 100);
 
-        $story = $this->tracker->newStory('event');
+        $story = $this->tracker->newStory(Reporter::DISPATCH_EVENT);
 
         $this->tracker->disclose($story);
 
@@ -115,21 +120,21 @@ describe('dispatch', function (): void {
     });
 
     test('some event with ordered priorities', function () {
-        $this->tracker->watch('event', function (MessageStory $story): void {
+        $this->tracker->onDispatch(function (MessageStory $story): void {
             $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'bar'])));
 
             expect($story->message()->event()->toContent()['foo'])->toBe('bar')
                 ->and($story->isStopped())->toBeFalse();
         }, 100);
 
-        $this->tracker->watch('event', function (MessageStory $story): void {
+        $this->tracker->onDispatch(function (MessageStory $story): void {
             $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'baz'])));
 
             expect($story->message()->event()->toContent()['foo'])->toBe('baz')
                 ->and($story->isStopped())->toBeFalse();
         }, 90);
 
-        $story = $this->tracker->newStory('event');
+        $story = $this->tracker->newStory(Reporter::DISPATCH_EVENT);
 
         $this->tracker->disclose($story);
 
@@ -140,7 +145,7 @@ describe('dispatch', function (): void {
     });
 
     test('some event until a truthy callback', function () {
-        $this->tracker->watch('event', function (MessageStory $story): void {
+        $this->tracker->onDispatch(function (MessageStory $story): void {
             $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'bar'])));
 
             expect($story->message()->event()->toContent()['foo'])->toBe('bar')
@@ -148,11 +153,11 @@ describe('dispatch', function (): void {
 
         }, 100);
 
-        $this->tracker->watch('event', function (MessageStory $story): void {
+        $this->tracker->onDispatch(function (MessageStory $story): void {
             $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'nope'])));
         }, 90);
 
-        $story = $this->tracker->newStory('event');
+        $story = $this->tracker->newStory(Reporter::DISPATCH_EVENT);
 
         $this->tracker->discloseUntil($story, function (MessageStory $story): bool {
             if ($story->message()->event()->toContent()['foo'] === 'bar') {
@@ -172,18 +177,18 @@ describe('dispatch', function (): void {
 });
 
 it('forget event', function () {
-    $this->tracker->watch('event', function (MessageStory $story): void {
+    $this->tracker->onDispatch(function (MessageStory $story): void {
         $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'bar'])));
 
         expect($story->message()->event()->toContent()['foo'])->toBe('bar')
             ->and($story->isStopped())->toBeFalse();
     }, 100);
 
-    $listenerToForget = $this->tracker->watch('event', function (MessageStory $story): void {
+    $listenerToForget = $this->tracker->onDispatch(function (MessageStory $story): void {
         $story->withMessage(new Message(SomeCommand::fromContent(['foo' => 'baz'])));
     }, 90);
 
-    $story = $this->tracker->newStory('event');
+    $story = $this->tracker->newStory(Reporter::DISPATCH_EVENT);
 
     expect($this->tracker->listeners())->toHaveCount(2);
 
