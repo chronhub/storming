@@ -35,12 +35,11 @@ it('assert has subscriber attribute', function () {
 
 it('handle command and mark message handled when command handler as been set on story', function () {
     $called = false;
-    $command = SomeCommand::fromContent(['foo' => 'bar']);
     $commandHandler = function () use (&$called) {
         $called = true;
     };
 
-    $message = new Message($command);
+    $message = new Message(SomeCommand::fromContent(['foo' => 'bar']));
 
     $this->story->withMessage($message);
     $this->story->withHandlers([$commandHandler]);
@@ -51,8 +50,7 @@ it('handle command and mark message handled when command handler as been set on 
 });
 
 it('mark message handled when message event has been dispatched', function () {
-    $command = SomeCommand::fromContent(['foo' => 'bar']);
-    $message = new Message($command);
+    $message = new Message(SomeCommand::fromContent(['foo' => 'bar']));
 
     $this->story->withMessage($message);
 
@@ -68,8 +66,7 @@ it('mark message handled when message event has been dispatched', function () {
 });
 
 it('does not mark message handled when message event has not been dispatched and no command handler set', function () {
-    $command = SomeCommand::fromContent(['foo' => 'bar']);
-    $message = new Message($command);
+    $message = new Message(SomeCommand::fromContent(['foo' => 'bar']));
 
     $this->story->withMessage($message);
     $this->tracker->disclose($this->story);

@@ -51,7 +51,9 @@ class LoadSubscriberClass
     }
 
     /**
-     * @param array<ReflectionParameter> $parameters>
+     * Get the callable story for the subscriber's method.
+     *
+     * @param array<ReflectionParameter> $parameters
      */
     private static function getStory(string|object $subscriber, string $method, array $parameters): callable
     {
