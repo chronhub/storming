@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tracker;
 
 use Illuminate\Support\Collection;
-use Storm\Contract\Tracker\EventListener;
+use Storm\Contract\Tracker\Listener;
 use Storm\Contract\Tracker\Story;
 use Storm\Reporter\Loader\LoadSubscriberClass;
 
@@ -18,13 +18,13 @@ trait InteractWithTracker
         $this->listeners = new Collection();
     }
 
-    public function watch(object $subscriber): array
+    public function watch(object|string $subscriber): array
     {
-        if (! $subscriber instanceof EventListener) {
+        if (! $subscriber instanceof Listener) {
             $subscriber = LoadSubscriberClass::from($subscriber);
         }
 
-        return Collection::wrap($subscriber)->each(function (EventListener $listener): void {
+        return Collection::wrap($subscriber)->each(function (Listener $listener): void {
             $this->listeners->push($listener);
         })->toArray();
     }
@@ -39,10 +39,10 @@ trait InteractWithTracker
         $this->fireEvent($story, $callback);
     }
 
-    public function forget(EventListener $listener): void
+    public function forget(Listener $listener): void
     {
         $this->listeners = $this->listeners->reject(
-            static fn (EventListener $subscriber): bool => $listener === $subscriber
+            static fn (Listener $subscriber): bool => $listener === $subscriber
         );
     }
 
@@ -57,9 +57,9 @@ trait InteractWithTracker
     private function fireEvent(Story $story, ?callable $callback): void
     {
         $this->listeners
-            ->filter(static fn (EventListener $listener): bool => $story->currentEvent() === $listener->name())
-            ->sortByDesc(static fn (EventListener $listener): int => $listener->priority(), SORT_NUMERIC)
-            ->each(static function (EventListener $listener) use ($story, $callback): bool {
+            ->filter(static fn (Listener $listener): bool => $story->currentEvent() === $listener->name())
+            ->sortByDesc(static fn (Listener $listener): int => $listener->priority(), SORT_NUMERIC)
+            ->each(static function (Listener $listener) use ($story, $callback): bool {
                 $listener->story()($story);
 
                 if ($story->isStopped()) {

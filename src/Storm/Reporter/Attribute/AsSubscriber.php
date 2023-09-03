@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Reporter\Attribute;
 
 use Attribute;
+use Storm\Contract\Tracker\Tracker;
 
 /**
  * when subscriber could be attached to message&stream tracker
@@ -15,7 +16,7 @@ final readonly class AsSubscriber
 {
     public function __construct(
         string $eventName,
-        int $priority = 1,
+        int $priority = Tracker::DEFAULT_PRIORITY,
         string $method = null)
     {
     }

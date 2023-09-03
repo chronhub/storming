@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Storm\Tracker;
 
 use ReflectionFunction;
-use Storm\Contract\Tracker\EventListener;
+use Storm\Contract\Tracker\Listener;
 
-final class GenericEventListener implements EventListener
+final class GenericListener implements Listener
 {
     /**
      * @var callable

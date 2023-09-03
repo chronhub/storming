@@ -9,7 +9,7 @@ use stdClass;
 use Storm\Reporter\Loader\LoadSubscriberClass;
 use Storm\Tests\Stubs\Double\Annotation\SomeMessageSubscriber;
 use Storm\Tests\Stubs\Double\Annotation\SomeMessageSubscriberWithRepeatableAttribute;
-use Storm\Tracker\GenericEventListener;
+use Storm\Tracker\GenericListener;
 
 use function is_string;
 
@@ -22,7 +22,7 @@ it('load AsSubscriber attribute', function (string|object $subscriber): void {
 
     $instance = is_string($subscriber) ? new $subscriber : $subscriber;
 
-    expect($eventListener)->toBeInstanceOf(GenericEventListener::class)
+    expect($eventListener)->toBeInstanceOf(GenericListener::class)
         ->and($eventListener->name())->toBe('some_event')
         ->and($eventListener->priority())->toBe(10)
         ->and($eventListener->story())->toEqual($instance())->not()->toBe($instance)
@@ -39,14 +39,14 @@ it('load AsSubscriber repeatable attribute', function (string|object $subscriber
 
     $firstListener = $eventListeners[0];
 
-    expect($firstListener)->toBeInstanceOf(GenericEventListener::class)
+    expect($firstListener)->toBeInstanceOf(GenericListener::class)
         ->and($firstListener->name())->toBe('some_event')
         ->and($firstListener->priority())->toBe(20)
         ->and($firstListener->story()())->toBe('firstMethod');
 
     $anotherListener = $eventListeners[1];
 
-    expect($anotherListener)->toBeInstanceOf(GenericEventListener::class)
+    expect($anotherListener)->toBeInstanceOf(GenericListener::class)
         ->and($anotherListener->name())->toBe('some_event')
         ->and($anotherListener->priority())->toBe(5)
         ->and($anotherListener->story()())->toBe('anotherMethod');

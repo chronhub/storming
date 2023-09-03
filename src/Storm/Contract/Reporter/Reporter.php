@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Storm\Contract\Reporter;
 
 use React\Promise\PromiseInterface;
-use Storm\Contract\Tracker\MessageSubscriber;
 use Storm\Contract\Tracker\MessageTracker;
 
 interface Reporter
@@ -25,7 +24,7 @@ interface Reporter
      */
     public function relay(object|array $message);
 
-    public function subscribe(MessageSubscriber ...$messageSubscribers): void;
+    public function subscribe(object|string ...$messageSubscribers): void;
 
     public function tracker(): MessageTracker;
 }

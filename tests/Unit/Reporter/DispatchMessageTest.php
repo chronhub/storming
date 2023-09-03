@@ -13,7 +13,6 @@ use Storm\Contract\Message\Messaging;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Message\Message;
 use Storm\Message\SyncMessageProducer;
-use Storm\Reporter\Loader\LoadSubscriberClass;
 use Storm\Reporter\Subscriber\DispatchMessage;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
@@ -26,17 +25,11 @@ dataset('messaging', [
     'query' => fn (): DomainQuery => SomeQuery::fromContent(['foo' => 'bar']),
 ]);
 
-it('assert subscriber has attribute', function (): void {
-    $subscriber = new DispatchMessage(new SyncMessageProducer());
-
-    expect($subscriber)->toBeCallable();
-
-    $listeners = LoadSubscriberClass::from($subscriber);
-
-    expect($listeners)->toHaveCount(1)
-        ->and($listeners[0]->name())->toBe(Reporter::DISPATCH_EVENT)
-        ->and($listeners[0]->priority())->toBe(1000)
-        ->and($listeners[0]->story())->toBeCallable();
+it('assert has subscriber attribute', function () {
+    expect(DispatchMessage::class)->toHaveSubscriberAttribute([[
+        'eventName' => Reporter::DISPATCH_EVENT,
+        'priority' => 1000,
+    ]]);
 });
 
 describe('dispatch message', function (): void {

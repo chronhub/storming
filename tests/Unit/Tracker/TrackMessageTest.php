@@ -11,7 +11,7 @@ use Storm\Contract\Tracker\MessageTracker;
 use Storm\Message\Message;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tracker\Draft;
-use Storm\Tracker\GenericEventListener;
+use Storm\Tracker\GenericListener;
 use Storm\Tracker\TrackMessage;
 
 beforeEach(function (): void {
@@ -43,7 +43,7 @@ describe('create', function (): void {
 
 describe('watch', function (): void {
     test('some event with event listener instance', function () {
-        $eventListener = new GenericEventListener('some_event', fn (): string => 'story', 10);
+        $eventListener = new GenericListener('some_event', fn (): string => 'story', 10);
         $listeners = $this->tracker->watch($eventListener);
         $listener = $listeners[0];
 

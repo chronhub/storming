@@ -7,7 +7,6 @@ namespace Storm\Reporter;
 use Storm\Contract\Message\Header;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\MessageStory;
-use Storm\Contract\Tracker\MessageSubscriber;
 use Storm\Contract\Tracker\MessageTracker;
 use Throwable;
 
@@ -38,10 +37,10 @@ trait HasConstructableReporter
         }
     }
 
-    public function subscribe(MessageSubscriber ...$messageSubscribers): void
+    public function subscribe(object|string ...$messageSubscribers): void
     {
         foreach ($messageSubscribers as $messageSubscriber) {
-            $messageSubscriber->attachTo($this->tracker);
+            $this->tracker->watch($messageSubscriber);
         }
     }
 

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Tracker;
 
-interface EventListener
+interface Listener
 {
     public function name(): string;
 

@@ -8,16 +8,16 @@ use ReflectionClass;
 use ReflectionException;
 use ReflectionParameter;
 use RuntimeException;
-use Storm\Contract\Tracker\EventListener;
+use Storm\Contract\Tracker\Listener;
 use Storm\Reporter\Attribute\AsSubscriber;
-use Storm\Tracker\GenericEventListener;
+use Storm\Tracker\GenericListener;
 
 use function is_string;
 
 class LoadSubscriberClass
 {
     /**
-     * @return array<EventListener>
+     * @return array<Listener>
      *
      * @throws RuntimeException    when attribute is missing
      * @throws ReflectionException
@@ -40,7 +40,7 @@ class LoadSubscriberClass
             $method = $attribute->getArguments()['method'] ?? '__invoke';
             $parameters = $reflectionClass->getMethod($method)->getParameters();
 
-            $listeners[] = new GenericEventListener(
+            $listeners[] = new GenericListener(
                 $attribute->getArguments()['eventName'],
                 self::getStory($class, $method, $parameters),
                 $attribute->getArguments()['priority'],

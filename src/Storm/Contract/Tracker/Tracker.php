@@ -8,10 +8,12 @@ use Illuminate\Support\Collection;
 
 interface Tracker
 {
+    public const DEFAULT_PRIORITY = 1;
+
     /**
-     * @return array<EventListener>
+     * @return array<Listener>
      */
-    public function watch(object $subscriber): array;
+    public function watch(object|string $subscriber): array;
 
     public function disclose(Story $story): void;
 
@@ -24,10 +26,10 @@ interface Tracker
      */
     public function discloseUntil(Story $story, callable $callback): void;
 
-    public function forget(EventListener $eventListener): void;
+    public function forget(Listener $eventListener): void;
 
     /**
-     * @return Collection<EventListener> a clone instance of listeners
+     * @return Collection<Listener> a clone instance of listeners
      */
     public function listeners(): Collection;
 }

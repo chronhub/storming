@@ -17,7 +17,7 @@ use function str_starts_with;
 final readonly class InMemoryEventStream implements EventStreamProvider
 {
     /**
-     * @var Collection{string, string|null}
+     * @var Collection{non-empty-string, non-empty-string|null}
      */
     private Collection $eventStreams;
 
