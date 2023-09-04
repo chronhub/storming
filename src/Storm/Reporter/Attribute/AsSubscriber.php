@@ -12,12 +12,12 @@ use Storm\Contract\Tracker\Tracker;
  * suggest your own method
  */
 #[Attribute(Attribute::TARGET_CLASS | Attribute::IS_REPEATABLE)]
-final readonly class AsSubscriber
+readonly class AsSubscriber
 {
     public function __construct(
-        string $eventName,
-        int $priority = Tracker::DEFAULT_PRIORITY,
-        string $method = null)
+        public string $eventName,
+        public int $priority = Tracker::DEFAULT_PRIORITY,
+        public ?string $method = null)
     {
     }
 }

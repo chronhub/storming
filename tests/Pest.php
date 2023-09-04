@@ -15,15 +15,6 @@ namespace Chronhub\Storm\Tests;
 |
 */
 
-use ReflectionClass;
 use Storm\Tests\TestCase;
 
 uses(TestCase::class)->in('Unit');
-
-function getPrivateProperty(object $object, string $property)
-{
-    $reflectedClass = new ReflectionClass($object);
-    $reflection = $reflectedClass->getProperty($property);
-
-    return $reflection->getValue($object);
-}

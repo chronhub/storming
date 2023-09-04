@@ -19,7 +19,7 @@ final readonly class MakeMessage
     public function __invoke(): callable
     {
         return function (MessageStory $story): void {
-            $message = ($this->messageFactory)($story->pullTransientMessage());
+            $message = $this->messageFactory->createMessageFrom($story->pullTransientMessage());
 
             $story->withMessage($message);
         };

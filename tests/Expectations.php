@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Chronhub\Storm\Tests;
 
+use React\Promise\PromiseInterface;
 use ReflectionClass;
 use Storm\Reporter\Attribute\AsSubscriber;
 
@@ -26,6 +27,11 @@ expect()->extend('toHaveEqualObjectProperty', function (string $property, object
     $value = getPrivateProperty($this->value, $property);
 
     return expect($value)->toEqual($expected);
+});
+
+expect()->extend('toBePromiseResult', function (mixed $expected) {
+    return expect($this->value)->toBeInstanceOf(PromiseInterface::class)
+        ->and(getPromiseResult($this->value))->toBe($expected);
 });
 
 expect()->extend('toHaveSubscriberAttribute', function (array $parameters, int $repeated = 1) {

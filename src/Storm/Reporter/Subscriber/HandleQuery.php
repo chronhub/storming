@@ -16,9 +16,9 @@ final class HandleQuery
     public function __invoke(): callable
     {
         return function (MessageStory $story): void {
-            $messageHandlers = $story->handlers()->current();
+            $queryHandler = $story->handlers()->current();
 
-            if ($messageHandlers === null) {
+            if ($queryHandler === null) {
                 $story->markHandled(false);
 
                 return;
@@ -27,7 +27,7 @@ final class HandleQuery
             $deferred = new Deferred();
 
             try {
-                $messageHandlers($story->message()->event(), $deferred);
+                $queryHandler($story->message()->event(), $deferred);
             } catch (Throwable $exception) {
                 $deferred->reject($exception);
             } finally {

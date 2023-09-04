@@ -35,18 +35,18 @@ it('assert has subscriber attribute', function () {
 
 it('handle event and mark message handled when handlers have been set on story', function () {
     $called = 0;
-    $command = SomeEvent::fromContent(['foo' => 'bar']);
-    $commandHandler1 = function () use (&$called) {
+    $eventHandler1 = function () use (&$called) {
         $called++;
     };
-    $commandHandler2 = function () use (&$called) {
+    $eventHandler2 = function () use (&$called) {
         $called++;
     };
 
+    $command = SomeEvent::fromContent(['foo' => 'bar']);
     $message = new Message($command);
 
     $this->story->withMessage($message);
-    $this->story->withHandlers([$commandHandler1, $commandHandler2]);
+    $this->story->withHandlers([$eventHandler1, $eventHandler2]);
     $this->tracker->disclose($this->story);
 
     expect($called)->toBe(2)
@@ -54,8 +54,7 @@ it('handle event and mark message handled when handlers have been set on story',
 });
 
 it('mark message handled with no handler set in story', function () {
-    $command = SomeEvent::fromContent(['foo' => 'bar']);
-    $message = new Message($command);
+    $message = new Message(SomeEvent::fromContent(['foo' => 'bar']));
 
     $this->story->withMessage($message);
     $this->story->withHandlers([]);
@@ -68,20 +67,19 @@ it('does not hold exception raised', function () {
 
     $called = 0;
     $exception = new RuntimeException('some exception');
-    $command = SomeEvent::fromContent(['foo' => 'bar']);
-    $commandHandler1 = function () use (&$called, $exception) {
+    $eventHandler1 = function () use (&$called, $exception) {
         $called++;
 
         throw $exception;
     };
-    $commandHandler2 = function () use (&$called) {
+    $eventHandler2 = function () use (&$called) {
         $called++;
     };
 
-    $message = new Message($command);
+    $message = new Message(SomeEvent::fromContent(['foo' => 'bar']));
 
     $this->story->withMessage($message);
-    $this->story->withHandlers([$commandHandler1, $commandHandler2]);
+    $this->story->withHandlers([$eventHandler1, $eventHandler2]);
 
     try {
         $this->tracker->disclose($this->story);
