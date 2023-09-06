@@ -13,15 +13,7 @@ final class ReportQuery implements QueryReporter
 
     public function relay(object|array $message): PromiseInterface
     {
-        $story = $this->tracker->newStory(self::DISPATCH_EVENT);
-
-        $story->withTransientMessage($message);
-
-        $this->relayMessage($story);
-
-        if ($story->hasException()) {
-            throw $story->exception();
-        }
+        $story = $this->processStory($message);
 
         return $story->promise();
     }

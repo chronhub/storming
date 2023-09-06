@@ -29,15 +29,7 @@ final class ReportCommand implements CommandReporter
 
             try {
                 while ($command = array_shift($this->commandQueue)) {
-                    $story = $this->tracker->newStory(self::DISPATCH_EVENT);
-
-                    $story->withTransientMessage($command);
-
-                    $this->relayMessage($story);
-
-                    if ($story->hasException()) {
-                        throw $story->exception();
-                    }
+                    $this->processStory($command);
                 }
             } finally {
                 $this->isDispatching = false;

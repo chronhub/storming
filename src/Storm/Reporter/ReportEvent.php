@@ -12,14 +12,6 @@ final class ReportEvent implements EventReporter
 
     public function relay(object|array $message): void
     {
-        $story = $this->tracker->newStory(self::DISPATCH_EVENT);
-
-        $story->withTransientMessage($message);
-
-        $this->relayMessage($story);
-
-        if ($story->hasException()) {
-            throw $story->exception();
-        }
+        $this->processStory($message);
     }
 }

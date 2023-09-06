@@ -7,6 +7,9 @@ namespace Storm\Contract\Reporter;
 use React\Promise\PromiseInterface;
 use Storm\Contract\Tracker\MessageTracker;
 
+/**
+ * @property-read MessageTracker $tracker
+ */
 interface Reporter
 {
     /**

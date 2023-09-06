@@ -7,6 +7,7 @@ namespace Storm\Tests\Unit\Reporter;
 use RuntimeException;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Message\Message;
+use Storm\Reporter\Attribute\AsSubscriber;
 use Storm\Reporter\Exception\CollectedEventHandlerError;
 use Storm\Reporter\Subscriber\TryHandleEvent;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
@@ -27,7 +28,7 @@ afterEach(function () {
 });
 
 it('assert has subscriber attribute', function () {
-    expect(TryHandleEvent::class)->toHaveSubscriberAttribute([[
+    expect(TryHandleEvent::class)->toHaveAttribute(AsSubscriber::class, [[
         'eventName' => Reporter::DISPATCH_EVENT,
         'priority' => 0,
     ]]);

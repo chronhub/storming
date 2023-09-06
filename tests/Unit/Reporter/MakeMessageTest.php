@@ -7,6 +7,7 @@ namespace Storm\Tests\Unit\Reporter;
 use Storm\Contract\Message\MessageFactory;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Message\Message;
+use Storm\Reporter\Attribute\AsSubscriber;
 use Storm\Reporter\Subscriber\MakeMessage;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tracker\TrackMessage;
@@ -22,7 +23,7 @@ afterEach(function () {
 });
 
 it('assert has subscriber attribute', function () {
-    expect(MakeMessage::class)->toHaveSubscriberAttribute([[
+    expect(MakeMessage::class)->toHaveAttribute(AsSubscriber::class, [[
         'eventName' => Reporter::DISPATCH_EVENT,
         'priority' => 100000,
     ]]);

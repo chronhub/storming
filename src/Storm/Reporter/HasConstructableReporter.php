@@ -37,6 +37,21 @@ trait HasConstructableReporter
         }
     }
 
+    protected function processStory(object|array $message): MessageStory
+    {
+        $story = $this->tracker->newStory(self::DISPATCH_EVENT);
+
+        $story->withTransientMessage($message);
+
+        $this->relayMessage($story);
+
+        if ($story->hasException()) {
+            throw $story->exception();
+        }
+
+        return $story;
+    }
+
     public function subscribe(object|string ...$messageSubscribers): void
     {
         foreach ($messageSubscribers as $messageSubscriber) {

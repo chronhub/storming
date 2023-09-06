@@ -8,6 +8,7 @@ use Storm\Contract\Message\Header;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\MessageStory;
 use Storm\Message\Message;
+use Storm\Reporter\Attribute\AsSubscriber;
 use Storm\Reporter\Subscriber\HandleCommand;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tracker\TrackMessage;
@@ -27,7 +28,7 @@ afterEach(function () {
 });
 
 it('assert has subscriber attribute', function () {
-    expect(HandleCommand::class)->toHaveSubscriberAttribute([[
+    expect(HandleCommand::class)->toHaveAttribute(AsSubscriber::class, [[
         'eventName' => Reporter::DISPATCH_EVENT,
         'priority' => 0,
     ]]);

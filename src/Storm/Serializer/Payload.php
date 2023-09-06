@@ -9,6 +9,11 @@ use JsonSerializable;
 final readonly class Payload implements JsonSerializable
 {
     //todo content and header a string (json) should be used for EventPayload only
+    /**
+     * @param non-empty-string|array<string|array>                $content
+     * @param non-empty-string|array<string|array<string, mixed>> $headers
+     * @param null|int<1,max>                                     $seqNo
+     */
     public function __construct(
         public string|array $content,
         public string|array $headers,
@@ -16,9 +21,6 @@ final readonly class Payload implements JsonSerializable
     {
     }
 
-    /**
-     * @return array{headers:string|array, content:string|array, seqNo:positive-int|null}
-     */
     public function jsonSerialize(): array
     {
         return [

@@ -6,7 +6,6 @@ namespace Chronhub\Storm\Tests;
 
 use React\Promise\PromiseInterface;
 use ReflectionClass;
-use Storm\Reporter\Attribute\AsSubscriber;
 
 use function class_exists;
 use function count;
@@ -34,14 +33,15 @@ expect()->extend('toBePromiseResult', function (mixed $expected) {
         ->and(getPromiseResult($this->value))->toBe($expected);
 });
 
-expect()->extend('toHaveSubscriberAttribute', function (array $parameters, int $repeated = 1) {
+expect()->extend('toHaveAttribute', function (string $attribute, array $parameters, int $repeated = 1) {
     $class = $this->value;
 
     expect(class_exists($class))->toBe(true, "Class $class not found")
+        ->and(class_exists($attribute))->toBe(true, "Attribute class $attribute not found")
         ->and($repeated)->toBe(count($parameters));
 
     $reflectionClass = new ReflectionClass($class);
-    $arguments = collect($reflectionClass->getAttributes(AsSubscriber::class))
+    $arguments = collect($reflectionClass->getAttributes($attribute))
         ->map(fn ($r) => $r->getArguments())->toArray();
 
     expect($arguments)->toHaveCount($repeated)

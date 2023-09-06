@@ -8,6 +8,7 @@ use React\Promise\Deferred;
 use RuntimeException;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Message\Message;
+use Storm\Reporter\Attribute\AsSubscriber;
 use Storm\Reporter\Subscriber\HandleQuery;
 use Storm\Tests\Stubs\Double\Message\SomeQuery;
 use Storm\Tracker\TrackMessage;
@@ -27,7 +28,7 @@ afterEach(function () {
 });
 
 it('assert has subscriber attribute', function () {
-    expect(HandleQuery::class)->toHaveSubscriberAttribute([[
+    expect(HandleQuery::class)->toHaveAttribute(AsSubscriber::class, [[
         'eventName' => Reporter::DISPATCH_EVENT,
         'priority' => 0,
     ]]);

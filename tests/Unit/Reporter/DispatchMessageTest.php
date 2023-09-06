@@ -13,6 +13,7 @@ use Storm\Contract\Message\Messaging;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Message\Message;
 use Storm\Message\SyncMessageProducer;
+use Storm\Reporter\Attribute\AsSubscriber;
 use Storm\Reporter\Subscriber\DispatchMessage;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
@@ -26,7 +27,7 @@ dataset('messaging', [
 ]);
 
 it('assert has subscriber attribute', function () {
-    expect(DispatchMessage::class)->toHaveSubscriberAttribute([[
+    expect(DispatchMessage::class)->toHaveAttribute(AsSubscriber::class, [[
         'eventName' => Reporter::DISPATCH_EVENT,
         'priority' => 1000,
     ]]);
