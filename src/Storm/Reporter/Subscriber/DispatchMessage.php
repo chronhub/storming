@@ -8,11 +8,12 @@ use Storm\Contract\Message\MessageProducer;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\MessageStory;
 use Storm\Reporter\Attribute\AsSubscriber;
+use Storm\Support\Attribute\Reference;
 
 #[AsSubscriber(eventName: Reporter::DISPATCH_EVENT, priority: 1000)]
 final readonly class DispatchMessage
 {
-    public function __construct(private MessageProducer $messageProducer)
+    public function __construct(#[Reference] private MessageProducer $messageProducer)
     {
     }
 

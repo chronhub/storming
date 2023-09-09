@@ -4,14 +4,18 @@ declare(strict_types=1);
 
 namespace Storm\Tracker;
 
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Collection;
 use Storm\Contract\Tracker\Listener;
 use Storm\Contract\Tracker\Story;
-use Storm\Reporter\Loader\LoadSubscriberClass;
+use Storm\Support\Attribute\AttributeResolver;
+use Storm\Support\Attribute\ResolveSubscriber;
 
 trait InteractWithTracker
 {
     private Collection $listeners;
+
+    private ?Container $container = null;
 
     public function __construct()
     {
@@ -21,7 +25,8 @@ trait InteractWithTracker
     public function watch(object|string $subscriber): array
     {
         if (! $subscriber instanceof Listener) {
-            $subscriber = LoadSubscriberClass::from($subscriber);
+            $subscriber = (new ResolveSubscriber(new AttributeResolver()))
+                ->resolve($subscriber);
         }
 
         return Collection::wrap($subscriber)->each(function (Listener $listener): void {
@@ -57,9 +62,9 @@ trait InteractWithTracker
     private function fireEvent(Story $story, ?callable $callback): void
     {
         $this->listeners
-            ->filter(static fn (Listener $listener): bool => $story->currentEvent() === $listener->name())
-            ->sortByDesc(static fn (Listener $listener): int => $listener->priority(), SORT_NUMERIC)
-            ->each(static function (Listener $listener) use ($story, $callback): bool {
+            ->filter(fn (Listener $listener): bool => $story->currentEvent() === $listener->name())
+            ->sortByDesc(fn (Listener $listener): int => $listener->priority(), SORT_NUMERIC)
+            ->each(function (Listener $listener) use ($story, $callback): bool {
                 $listener->story()($story);
 
                 if ($story->isStopped()) {

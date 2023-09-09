@@ -10,18 +10,17 @@ use React\Promise\PromiseInterface;
 use RuntimeException;
 use stdClass;
 use Storm\Contract\Message\Header;
-use Storm\Contract\Reporter\QueryReporter;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\MessageStory;
 use Storm\Contract\Tracker\MessageTracker;
 use Storm\Message\Message;
 use Storm\Reporter\MessageNotHandled;
-use Storm\Reporter\ReportCommand;
-use Storm\Reporter\ReportEvent;
-use Storm\Reporter\ReportQuery;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 use Storm\Tests\Stubs\Double\Message\SomeQuery;
+use Storm\Tests\Unit\Reporter\Stub\ReportCommandStub;
+use Storm\Tests\Unit\Reporter\Stub\ReportEventStub;
+use Storm\Tests\Unit\Reporter\Stub\ReportQueryStub;
 use Storm\Tracker\GenericListener;
 use Storm\Tracker\TrackMessage;
 use Throwable;
@@ -35,9 +34,9 @@ afterEach(function () {
 });
 
 dataset('reporter', [
-    'command' => ReportCommand::class,
-    'event' => ReportEvent::class,
-    'query' => ReportQuery::class,
+    'command' => ReportCommandStub::class,
+    'event' => ReportEventStub::class,
+    'query' => ReportQueryStub::class,
 ]);
 
 dataset('message', [
@@ -50,16 +49,14 @@ dataset('message', [
 it('test instance', function (string $reporterClass) {
     $reporter = new $reporterClass($this->tracker);
 
-    expect($reporter->tracker())->toBe($this->tracker)
-        ->and($reporter->tracker)->toBe($this->tracker);
+    expect($reporter->tracker)->toBe($this->tracker);
 })->with('reporter');
 
 it('add subscriber', function (string $reporterClass) {
     $tracker = new TrackMessage();
     $reporter = new $reporterClass($tracker);
 
-    expect($reporter->tracker())->toBe($tracker)
-        ->and($reporter->tracker)->toBe($tracker)
+    expect($reporter->tracker)->toBe($tracker)
         ->and($tracker->listeners())->toHaveCount(0);
 
     $listener = new GenericListener('foo', fn () => 42, 12);
@@ -96,14 +93,14 @@ it('report', function (string $reporterClass, object $object) {
     $story->shouldReceive('hasException')->once()->andReturn(false);
 
     $promise = null;
-    if ($reporter instanceof QueryReporter) {
+    if ($reporter instanceof ReportQueryStub) {
         $promise = mock(PromiseInterface::class);
         $story->shouldReceive('promise')->andReturn($promise);
     }
 
     $result = $reporter->relay($object);
 
-    if ($result instanceof QueryReporter) {
+    if ($result instanceof PromiseInterface) {
         expect($result)->toBe($promise);
     }
 
@@ -143,7 +140,7 @@ it('raise exception when message is not marked as handled', function (string $re
 
 it('raise exception when story hold exception', function (string $reporterClass, object $object, Throwable $exception) {
     $reporter = new $reporterClass($this->tracker);
-    $message = new Message($object, [Header::EVENT_TYPE => SomeCommand::class]);
+    $message = new Message($object);
 
     // story
     $story = mock(MessageStory::class);
@@ -163,9 +160,7 @@ it('raise exception when story hold exception', function (string $reporterClass,
 
     //
     $story->shouldReceive('hasException')->once()->andReturn(true);
-    $story->shouldReceive('exception')->once()->andReturn(
-        $exception
-    );
+    $story->shouldReceive('exception')->once()->andReturn($exception);
 
     try {
         $reporter->relay($object);

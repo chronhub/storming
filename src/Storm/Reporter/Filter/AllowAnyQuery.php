@@ -10,16 +10,16 @@ use Storm\Contract\Message\DomainQuery;
 use Storm\Contract\Reporter\MessageFilter;
 use Storm\Message\Message;
 
-final class AllowsAnyCommand implements MessageFilter
+final class AllowAnyQuery implements MessageFilter
 {
     public function allows(Message $message): bool
     {
         $messageEvent = $message->event();
 
-        if ($messageEvent instanceof DomainCommand) {
+        if ($messageEvent instanceof DomainQuery) {
             return true;
         }
 
-        return ! $messageEvent instanceof DomainEvent && ! $messageEvent instanceof DomainQuery;
+        return ! $messageEvent instanceof DomainEvent && ! $messageEvent instanceof DomainCommand;
     }
 }

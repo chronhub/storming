@@ -6,17 +6,15 @@ namespace Storm\Tests\Unit\Reporter\Stub;
 
 use Storm\Contract\Reporter\Reporter;
 use Storm\Reporter\Attribute\AsReporter;
-use Storm\Reporter\DelegateToQueue;
 use Storm\Reporter\HasConstructableReporter;
 
 #[AsReporter]
-final class ReportCommandStub implements Reporter
+final class ReportEventStub implements Reporter
 {
-    use DelegateToQueue;
     use HasConstructableReporter;
 
     public function relay(object|array $message): void
     {
-        $this->queueAndProcess($message);
+        $this->dispatch($message);
     }
 }

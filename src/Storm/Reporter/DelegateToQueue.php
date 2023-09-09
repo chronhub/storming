@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Reporter;
 
+use Throwable;
+
 use function array_shift;
 
 trait DelegateToQueue
@@ -15,7 +17,13 @@ trait DelegateToQueue
 
     private bool $isDispatching = false;
 
-    public function queueAndProcess(object $message): void
+    /**
+     * Queue and process one message at a time.
+     * Only relevant for sync process.
+     *
+     * @throws Throwable
+     */
+    protected function queueAndProcess(object|array $message): void
     {
         $this->queue[] = $message;
 

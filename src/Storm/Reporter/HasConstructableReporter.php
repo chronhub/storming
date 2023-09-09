@@ -8,21 +8,34 @@ use Storm\Contract\Message\Header;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\MessageStory;
 use Storm\Contract\Tracker\MessageTracker;
+use Storm\Tracker\TrackMessage;
 use Throwable;
+use TypeError;
 
 trait HasConstructableReporter
 {
-    public function __construct(public readonly MessageTracker $tracker)
+    public function __construct(readonly ?MessageTracker $tracker = new TrackMessage())
     {
     }
 
-    protected function relayMessage(MessageStory $story): void
+    public function subscribe(object|string ...$messageSubscribers): void
     {
+        foreach ($messageSubscribers as $messageSubscriber) {
+            $this->tracker->watch($messageSubscriber);
+        }
+    }
+
+    protected function dispatch(object|array $message): MessageStory
+    {
+        $story = $this->tracker->newStory(self::DISPATCH_EVENT);
+
+        $story->withTransientMessage($message);
+
         try {
             $this->tracker->disclose($story);
 
             if (! $story->isHandled()) {
-                $messageName = $story->message()->header(Header::EVENT_TYPE) ?? $story->message()->event()::class;
+                $messageName = $this->determineMessageName($story);
 
                 throw MessageNotHandled::withMessageName($messageName);
             }
@@ -35,15 +48,6 @@ trait HasConstructableReporter
 
             $this->tracker->disclose($story);
         }
-    }
-
-    protected function processStory(object|array $message): MessageStory
-    {
-        $story = $this->tracker->newStory(self::DISPATCH_EVENT);
-
-        $story->withTransientMessage($message);
-
-        $this->relayMessage($story);
 
         if ($story->hasException()) {
             throw $story->exception();
@@ -52,15 +56,12 @@ trait HasConstructableReporter
         return $story;
     }
 
-    public function subscribe(object|string ...$messageSubscribers): void
+    private function determineMessageName(MessageStory $story): string
     {
-        foreach ($messageSubscribers as $messageSubscriber) {
-            $this->tracker->watch($messageSubscriber);
+        try {
+            return $story->message()->header(Header::EVENT_TYPE) ?? $story->message()->event()::class;
+        } catch (TypeError) {
+            return 'undefined';
         }
-    }
-
-    public function tracker(): MessageTracker
-    {
-        return $this->tracker;
     }
 }

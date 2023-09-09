@@ -8,11 +8,12 @@ use Storm\Contract\Message\MessageFactory;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\MessageStory;
 use Storm\Reporter\Attribute\AsSubscriber;
+use Storm\Support\Attribute\Reference;
 
 #[AsSubscriber(eventName: Reporter::DISPATCH_EVENT, priority: 100000)]
 final readonly class MakeMessage
 {
-    public function __construct(private MessageFactory $messageFactory)
+    public function __construct(#[Reference] private MessageFactory $messageFactory)
     {
     }
 

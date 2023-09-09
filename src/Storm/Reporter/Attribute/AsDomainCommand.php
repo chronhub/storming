@@ -11,9 +11,7 @@ readonly class AsDomainCommand
 {
     public function __construct(
         public string|object $messageHandler,
-        //public ?string $methodName = null,
-        public bool $isAsync = false,
-        public bool $forceAsync = false
+        public bool $isAsync = false
     ) {
     }
 }

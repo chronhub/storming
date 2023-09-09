@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Chronhub\Storm\Tests;
+namespace Storm\Tests;
 
 use React\Promise\PromiseInterface;
 use ReflectionClass;

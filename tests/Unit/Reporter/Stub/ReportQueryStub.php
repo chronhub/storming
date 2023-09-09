@@ -4,19 +4,20 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Reporter\Stub;
 
+use React\Promise\PromiseInterface;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Reporter\Attribute\AsReporter;
-use Storm\Reporter\DelegateToQueue;
 use Storm\Reporter\HasConstructableReporter;
 
 #[AsReporter]
-final class ReportCommandStub implements Reporter
+final class ReportQueryStub implements Reporter
 {
-    use DelegateToQueue;
     use HasConstructableReporter;
 
-    public function relay(object|array $message): void
+    public function relay(object|array $message): PromiseInterface
     {
-        $this->queueAndProcess($message);
+        $story = $this->dispatch($message);
+
+        return $story->promise();
     }
 }

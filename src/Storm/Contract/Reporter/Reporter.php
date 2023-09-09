@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace Storm\Contract\Reporter;
 
 use React\Promise\PromiseInterface;
+use Storm\Contract\Tracker\Listener;
 use Storm\Contract\Tracker\MessageTracker;
+use Storm\Reporter\Attribute\AsSubscriber;
 
 /**
  * @property-read MessageTracker $tracker
@@ -27,7 +29,14 @@ interface Reporter
      */
     public function relay(object|array $message);
 
+    /**
+     * @template T of object|non-empty-string
+     *
+     * @param T ...$messageSubscribers
+     *
+     * fixme: add support for string service id
+     * Object can be class name which implements @see AsSubscriber attribute
+     * or an instance of @see Listener
+     */
     public function subscribe(object|string ...$messageSubscribers): void;
-
-    public function tracker(): MessageTracker;
 }

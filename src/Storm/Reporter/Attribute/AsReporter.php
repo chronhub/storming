@@ -8,6 +8,7 @@ use Attribute;
 use Storm\Contract\Reporter\MessageFilter;
 use Storm\Contract\Tracker\MessageTracker;
 use Storm\Reporter\Filter\AllowsAll;
+use Storm\Tracker\TrackMessage;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 readonly class AsReporter
@@ -18,7 +19,7 @@ readonly class AsReporter
          */
         public ?string $name = null,
         public string|MessageFilter $filter = new AllowsAll(),
-        public null|string|MessageTracker $tracker = null,
+        public string|MessageTracker $tracker = new TrackMessage() // todo remove and use reference
     ) {
     }
 }
