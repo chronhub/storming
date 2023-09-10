@@ -38,7 +38,7 @@ it('assert has subscriber attribute', function () {
 });
 
 it('add reporter name to message header', function (Message $message) {
-    $this->tracker->watch(new NameReporter('foo'));
+    $this->tracker->listen(new NameReporter('foo'));
     expect($this->tracker->listeners())->toHaveCount(1);
 
     $this->story->withMessage($message);
@@ -52,7 +52,7 @@ it('add reporter name to message header', function (Message $message) {
 
 it('not add reporter name to message header', function (Message $message) {
     $subscriber = new NameReporter('foo');
-    $this->tracker->watch($subscriber);
+    $this->tracker->listen($subscriber);
 
     $message = $message->withHeader(Header::REPORTER_ID, 'bar');
 

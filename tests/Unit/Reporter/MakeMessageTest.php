@@ -35,7 +35,7 @@ it('create message from transient', function () {
 
     $mock = mock(MessageFactory::class);
     $mock->shouldReceive('createMessageFrom')->with($event)->andReturn($message);
-    $this->tracker->watch(new MakeMessage($mock));
+    $this->tracker->listen(new MakeMessage($mock));
 
     $this->story->withTransientMessage($event);
     $this->tracker->disclose($this->story);

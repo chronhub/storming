@@ -44,7 +44,7 @@ describe('create', function (): void {
 describe('watch', function (): void {
     test('some event with event listener instance', function () {
         $eventListener = new GenericListener('some_event', fn (): string => 'story', 10);
-        $listeners = $this->tracker->watch($eventListener);
+        $listeners = $this->tracker->listen($eventListener);
         $listener = $listeners[0];
 
         expect($listener)->toBe($eventListener)

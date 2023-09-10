@@ -21,6 +21,16 @@ it('register', function () {
         ->and($this->app[MessageProducer::class])->toBeInstanceOf(SyncMessageProducer::class);
 });
 
+it('test reporter manager instance', function () {
+    /** @var ManageReporter $manager */
+    $manager = $this->app[ManageReporter::class];
+
+    $reporter = $manager->create('command-default');
+
+    expect($reporter)->toBeInstanceOf(Reporter::class)
+        ->and($manager->create('command-default'))->toBe($reporter);
+});
+
 it('test reporter manager', function () {
     $message = new Message(SomeCommand::fromContent(['id' => 1]));
 

@@ -4,34 +4,36 @@ declare(strict_types=1);
 
 namespace Storm\Tracker;
 
-use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Collection;
 use Storm\Contract\Tracker\Listener;
 use Storm\Contract\Tracker\Story;
-use Storm\Support\Attribute\AttributeResolver;
-use Storm\Support\Attribute\ResolveSubscriber;
 
 trait InteractWithTracker
 {
     private Collection $listeners;
 
-    private ?Container $container = null;
+    /**
+     * @var ?callable
+     */
+    private $subscriberResolver = null;
 
     public function __construct()
     {
         $this->listeners = new Collection();
     }
 
-    public function watch(object|string $subscriber): array
+    public function listen(Listener $listener): Listener
     {
-        if (! $subscriber instanceof Listener) {
-            $subscriber = (new ResolveSubscriber(new AttributeResolver()))
-                ->resolve($subscriber);
-        }
+        $this->listeners->push($listener);
 
-        return Collection::wrap($subscriber)->each(function (Listener $listener): void {
-            $this->listeners->push($listener);
-        })->toArray();
+        return $listener;
+    }
+
+    public function watch(string $eventName, callable $story, int $priority = self::DEFAULT_PRIORITY): Listener
+    {
+        return $this->listen(
+            $this->newListener($eventName, $story, $priority)
+        );
     }
 
     public function disclose(Story $story): void
@@ -51,14 +53,16 @@ trait InteractWithTracker
         );
     }
 
+    public function newListener(string $eventName, callable $story, int $priority = self::DEFAULT_PRIORITY): Listener
+    {
+        return new GenericListener($eventName, $story, $priority);
+    }
+
     public function listeners(): Collection
     {
         return clone $this->listeners;
     }
 
-    /**
-     * Dispatch event and handle message
-     */
     private function fireEvent(Story $story, ?callable $callback): void
     {
         $this->listeners

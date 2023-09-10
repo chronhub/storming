@@ -6,19 +6,20 @@ namespace Storm\Reporter;
 
 use Illuminate\Contracts\Container\Container;
 use InvalidArgumentException;
-use ReflectionClass;
-use ReflectionException;
+use Storm\Attribute\AttributeFactory;
+use Storm\Contract\Reporter\MessageFilter;
 use Storm\Contract\Reporter\Reporter;
+use Storm\Contract\Reporter\ReporterManager;
 use Storm\Reporter\Attribute\AsReporter;
+use Storm\Reporter\Attribute\AsSubscriber;
 use Storm\Reporter\Subscriber\FilterMessage;
 use Storm\Reporter\Subscriber\NameReporter;
-use Storm\Support\Attribute\AttributeResolver;
+use Storm\Support\Attribute\ReporterResolver;
 use Storm\Support\ContainerAsClosure;
 
 use function class_exists;
-use function is_string;
 
-class ManageReporter
+final class ManageReporter implements ReporterManager
 {
     protected Container $container;
 
@@ -36,77 +37,71 @@ class ManageReporter
 
     public function __construct(
         ContainerAsClosure $container,
-        protected AttributeResolver $attributeResolver
+        protected AttributeFactory $attributeFactory
     ) {
         $this->container = $container->container;
     }
 
     public function create(string $name): Reporter
     {
+        // only use alias till we fetch attributes from autoload classes
+        // could be done on resolving by adding aliases with autoload classes
         $className = $this->aliases[$name] ?? $name;
 
         if (! class_exists($className)) {
             // todo fetch attribute to determine reporter alias if exists
-            throw new InvalidArgumentException("Reporter $className does not exist.");
+            throw new InvalidArgumentException("Reporter $className does not exist");
         }
 
-        if (isset($this->reporters[$className])) {
-            return $this->reporters[$className];
-        }
-
-        [$alias, $reporter] = $this->resolveReporter($className);
-
-        $this->aliases[$alias] = $reporter::class;
-
-        return $this->reporters[$className] = $reporter;
+        return $this->reporters[$className] ??= $this->resolve($className);
     }
 
     public function addAlias(string $name, string $className): void
     {
         if (isset($this->aliases[$name])) {
-            throw new InvalidArgumentException("Reporter alias $name already exists.");
+            throw new InvalidArgumentException("Reporter alias $name already exists");
         }
 
         if (! class_exists($className)) {
-            throw new InvalidArgumentException("Reporter $className does not exist.");
+            throw new InvalidArgumentException("Reporter $className does not exist");
         }
 
         $this->aliases[$name] = $className;
     }
 
-    /**
-     * @return array{class-string, Reporter}
-     *
-     * @throws ReflectionException
-     */
-    protected function resolveReporter(string $className): array
+    protected function resolve(string $className): Reporter
     {
-        $reflectionClass = new ReflectionClass($className);
+        $resolver = $this->attributeFactory->make(AsReporter::class);
 
-        return $this->attributeResolver->forClass($reflectionClass)
-            ->filter(function ($attribute) {
-                return $attribute instanceof AsReporter;
-            })->whenEmpty(function () use ($className) {
-                throw new InvalidArgumentException("Missing #AsReporter attribute for class $className");
-            })
-            ->map(function (AsReporter $attribute) use ($reflectionClass) {
-                $instance = $this->attributeResolver->newInstance($reflectionClass);
+        if (! $resolver instanceof ReporterResolver) {
+            throw new InvalidArgumentException("Resolver for $className is not a ReporterResolver");
+        }
 
-                $filter = $attribute->filter;
+        [$instance, $alias, $filter] = $resolver->resolve($className);
 
-                if (is_string($filter)) {
-                    $filter = $this->attributeResolver->container[$filter];
-                }
+        $this->setSubscriberResolver($instance);
+        $this->addReporterAliasSubscriber($instance, $alias);
+        $this->addMessageFilterSubscriber($instance, $filter);
 
-                $alias = $attribute->name ?? $reflectionClass->getName();
+        return $instance;
+    }
 
-                $instance->subscribe(
-                    new NameReporter($alias),
-                    new FilterMessage($filter)
-                );
+    protected function setSubscriberResolver(Reporter $reporter): void
+    {
+        $reporter->withSubscriberResolver(
+            function (string|object $subscriber) {
+                return $this->attributeFactory->make(AsSubscriber::class)->resolve($subscriber);
+            }
+        );
+    }
 
-                return [$alias, $instance];
+    protected function addMessageFilterSubscriber(Reporter $reporter, MessageFilter $messageFilter): void
+    {
+        $reporter->subscribe(new FilterMessage($messageFilter));
+    }
 
-            })->first();
+    protected function addReporterAliasSubscriber(Reporter $reporter, string $alias): void
+    {
+        $reporter->subscribe(new NameReporter($alias));
     }
 }

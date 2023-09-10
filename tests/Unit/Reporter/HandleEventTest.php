@@ -15,7 +15,7 @@ use Throwable;
 
 beforeEach(function () {
     $this->tracker = new TrackMessage();
-    $this->tracker->watch(new HandleEvent());
+    $this->tracker->listen(new HandleEvent());
     $this->story = $this->tracker->newStory(Reporter::DISPATCH_EVENT);
 
     expect($this->story->handlers()->current())->toBeNull()

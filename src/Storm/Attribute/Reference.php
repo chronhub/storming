@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Support\Attribute;
+namespace Storm\Attribute;
 
 use Attribute;
 

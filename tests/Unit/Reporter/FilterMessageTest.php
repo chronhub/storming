@@ -19,7 +19,7 @@ use Storm\Tracker\TrackMessage;
 beforeEach(function () {
     $this->tracker = new TrackMessage();
     $this->mock = mock(MessageFilter::class);
-    $this->tracker->watch(new FilterMessage($this->mock));
+    $this->tracker->listen(new FilterMessage($this->mock));
     $this->story = $this->tracker->newStory(Reporter::DISPATCH_EVENT);
 
     expect($this->tracker->listeners())->toHaveCount(1);

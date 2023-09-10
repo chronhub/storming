@@ -43,7 +43,7 @@ describe('dispatch message', function (): void {
             ->andReturn(new Message($message->event(), ['dispatched' => true]));
 
         $tracker = new TrackMessage();
-        $tracker->watch(new DispatchMessage($messageProducer));
+        $tracker->listen(new DispatchMessage($messageProducer));
 
         $story = $tracker->newStory(Reporter::DISPATCH_EVENT);
         $story->withMessage($message);
@@ -60,7 +60,7 @@ describe('dispatch message', function (): void {
         $messageProducer = new SyncMessageProducer();
 
         $tracker = new TrackMessage();
-        $tracker->watch(new DispatchMessage($messageProducer));
+        $tracker->listen(new DispatchMessage($messageProducer));
 
         $story = $tracker->newStory(Reporter::DISPATCH_EVENT);
         $story->withMessage($message);

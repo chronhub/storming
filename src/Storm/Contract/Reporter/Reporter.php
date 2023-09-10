@@ -34,9 +34,10 @@ interface Reporter
      *
      * @param T ...$messageSubscribers
      *
-     * fixme: add support for string service id
-     * Object can be class name which implements @see AsSubscriber attribute
+     * Object can be class name which implements attribute @see AsSubscriber attribute
      * or an instance of @see Listener
      */
     public function subscribe(object|string ...$messageSubscribers): void;
+
+    public function withSubscriberResolver(callable $subscriberResolver): void;
 }

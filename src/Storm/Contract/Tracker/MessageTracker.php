@@ -9,14 +9,14 @@ interface MessageTracker extends Tracker
     public function newStory(string $eventName): MessageStory;
 
     /**
-     * Shortcut to watch on Dispatch Event
+     * Shortcut to listen on Dispatch Event
      *
      * @see Report
      */
     public function onDispatch(callable $story, int $priority = 1): Listener;
 
     /**
-     * Shortcut to watch on Finalize Event
+     * Shortcut to listen on Finalize Event
      *
      * @see Report
      */

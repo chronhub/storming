@@ -15,7 +15,7 @@ use Storm\Tracker\TrackMessage;
 
 beforeEach(function () {
     $this->tracker = new TrackMessage();
-    $this->tracker->watch(new HandleQuery());
+    $this->tracker->listen(new HandleQuery());
     $this->story = $this->tracker->newStory(Reporter::DISPATCH_EVENT);
 
     expect($this->story->handlers()->current())->toBeNull()

@@ -13,14 +13,18 @@ final class TrackMessage implements MessageTracker
 {
     use InteractWithTracker;
 
-    public function onDispatch(callable $story, int $priority = 1): Listener
+    public function onDispatch(callable $story, int $priority = self::DEFAULT_PRIORITY): Listener
     {
-        return $this->watch(new GenericListener(Reporter::DISPATCH_EVENT, $story, $priority))[0];
+        return $this->listen(
+            $this->newListener(Reporter::DISPATCH_EVENT, $story, $priority)
+        );
     }
 
-    public function onFinalize(callable $story, int $priority = 1): Listener
+    public function onFinalize(callable $story, int $priority = self::DEFAULT_PRIORITY): Listener
     {
-        return $this->watch(new GenericListener(Reporter::FINALIZE_EVENT, $story, $priority))[0];
+        return $this->listen(
+            $this->newListener(Reporter::FINALIZE_EVENT, $story, $priority)
+        );
     }
 
     public function newStory(string $eventName): MessageStory

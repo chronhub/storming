@@ -23,8 +23,7 @@ interface MessageStory extends Story
     /**
      * Pull transient message
      *
-     * Should be done once to be replaced by
-     * a valid message instance
+     * Should be done once to be replaced by a valid message instance
      */
     public function pullTransientMessage(): object|array;
 
