@@ -22,7 +22,7 @@ final class MessageHandlerResolver extends TypeResolver
 {
     public const ATTRIBUTE_NAME = AsMessageHandler::class;
 
-    public const NO_PARAMETER_EXCEPTION = 'No parameters found for method %s for class %s';
+    public const NO_PARAMETER_EXCEPTION = 'No parameter found for method %s for class %s';
 
     public const UNSUPPORTED_PARAMETER_EXCEPTION = 'Parameter %s for class %s is not supported';
 
@@ -45,13 +45,12 @@ final class MessageHandlerResolver extends TypeResolver
     }
 
     /**
-     * Find AsMessageHandler attribute in class
+     * Find attribute in class
      *
      * Only one attribute is allowed per class
      * An invokable method is required
      * First method parameter must be the message instance
      *
-     * @throws ReflectionException
      */
     private function findAttributeInClass(ReflectionClass $reflectionClass): ?MessageHandlerInstance
     {
@@ -91,10 +90,7 @@ final class MessageHandlerResolver extends TypeResolver
      *
      * No invokable method is allowed as we turn message handler into callable,
      * it could lead to unexpected behavior
-     *
      * First parameter for each method must be the message instance
-     *
-     * @throws ReflectionException
      */
     private function findAttributeInMethods(ReflectionClass $reflectionClass): ?MessageHandlerInstance
     {
@@ -131,6 +127,9 @@ final class MessageHandlerResolver extends TypeResolver
         return null;
     }
 
+    /**
+     * @return class-string
+     */
     private function getNameParameter(ReflectionParameter $reflectionParameter): string
     {
         if ($reflectionParameter->getType() instanceof ReflectionNamedType) {
