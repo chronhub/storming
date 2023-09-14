@@ -60,8 +60,11 @@ it('test reporter manager', function () {
     // test route message
     // $routeSubscriber = new RouteAwareMessage([$handler]);
 
-    $routeSubscriber = $this->app[RouteMessage::class];
+    // test route message as object from container
+    // $routeSubscriber = $this->app[RouteMessage::class];
 
+    // test as class
+    $routeSubscriber = RouteMessage::class;
     $reporter->subscribe($routeSubscriber);
 
     /** @var ?Message $expected */

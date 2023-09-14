@@ -23,7 +23,7 @@ class Loader
      * Find reporter class name by alias or class name.
      *
      * @param  class-string|non-empty-string                           $name
-     * @return array{class-string, non-empty-string|class-string}|null reporter class name and alias
+     * @return array{class-string, non-empty-string|class-string}|null
      */
     public function getReporter(string $name): ?array
     {

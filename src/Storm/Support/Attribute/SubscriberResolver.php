@@ -32,20 +32,20 @@ final class SubscriberResolver extends TypeResolver
                 $this->raiseMissingAttributeException($reflectionClass);
             })
             ->map(function (AsSubscriber $attribute) use ($reflectionClass, $original) {
-                $method = $attribute->method;
+                $methodName = $attribute->method;
 
-                $reflectionMethod = ReflectionUtil::requirePublicMethod($reflectionClass, $method);
+                $reflectionMethod = ReflectionUtil::requirePublicMethod($reflectionClass, $methodName);
 
                 $parameters = $reflectionMethod->getParameters();
 
                 if ($parameters !== []) {
-                    throw new RuntimeException("Method $method for class {$reflectionClass->getName()} must not have parameters");
+                    throw new RuntimeException("Method $methodName for class {$reflectionClass->getName()} must not have parameters");
                 }
 
                 // in some cases, we can already have an instance
                 $instance = is_object($original) ? $original : $this->createInstance($reflectionClass);
 
-                return new GenericListener($attribute->eventName, $instance->$method()(...), $attribute->priority);
+                return new GenericListener($attribute->eventName, $instance->$methodName()(...), $attribute->priority);
             });
     }
 

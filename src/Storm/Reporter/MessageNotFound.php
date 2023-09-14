@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+namespace Storm\Reporter;
+
+use RuntimeException;
+
 class MessageNotFound extends RuntimeException
 {
     public static function withMessageName(string $messageName): self

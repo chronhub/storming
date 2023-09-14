@@ -6,8 +6,6 @@ namespace Storm\Reporter;
 
 use Storm\Attribute\Loader;
 use Storm\Attribute\ResolverFactory;
-use Storm\Reporter\Attribute\AsMessageHandler;
-use Storm\Support\Attribute\MessageHandlerInstance;
 
 class Routing
 {
@@ -27,8 +25,7 @@ class Routing
         $handlers = [];
 
         foreach ($messageHandlers as $messageHandler) {
-            /** @var MessageHandlerInstance $handler */
-            $handler = $this->factory->make(AsMessageHandler::class)->resolve($messageHandler);
+            $handler = $this->factory->toMessageHandler($messageHandler);
 
             $handlers[] = $handler->call();
         }

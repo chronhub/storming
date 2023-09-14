@@ -40,19 +40,26 @@ abstract class TypeResolver
             return $reflectionClass;
         }
 
+        if ($parameters !== []) {
+            return $reflectionClass->newInstance(...$parameters);
+        }
+
         $constructorParameters = ReflectionUtil::getConstructorParameters($reflectionClass);
 
         if ($constructorParameters === []) {
             return $reflectionClass->newInstance();
         }
 
-        if ($parameters !== []) {
-            return $reflectionClass->newInstance(...$parameters);
-        }
-
         $bindings = ReflectionUtil::getReferenceBindings($constructorParameters, $this->container);
 
-        return $reflectionClass->newInstance(...$bindings);
+        if ($bindings !== []) {
+            return $reflectionClass->newInstance(...$bindings);
+        }
+
+        // checkMe last resort
+        // useful when passing string class name (subscriber|message handler)
+        // which does not depend on constructor reference
+        return $this->container[$reflectionClass->getName()];
     }
 
     /**

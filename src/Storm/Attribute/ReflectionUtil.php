@@ -76,10 +76,6 @@ class ReflectionUtil
     public static function getInvokableMethod(array $reflectionMethods): ?ReflectionMethod
     {
         foreach ($reflectionMethods as $reflectionMethod) {
-            if (! $reflectionMethod->isPublic()) {
-                continue;
-            }
-
             if ($reflectionMethod->getName() === '__invoke') {
                 return $reflectionMethod;
             }

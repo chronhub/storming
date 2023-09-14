@@ -7,8 +7,6 @@ namespace Storm\Tracker;
 use Storm\Contract\Tracker\Listener;
 
 /**
- * @internal
- *
  * @property-read object $subscriber
  */
 final readonly class ResolvedListener implements Listener

@@ -6,7 +6,6 @@ namespace Storm\Support\Attribute;
 
 use Illuminate\Support\Collection;
 use ReflectionClass;
-use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
@@ -28,6 +27,7 @@ final class MessageHandlerResolver extends TypeResolver
 
     public function process(Collection $attributes, ReflectionClass $reflectionClass, string|object $original): MessageHandlerInstance
     {
+        //fixMe handle original, we should not create instance if original is already an object
         if ($attributes->isNotEmpty() && $instance = $this->findAttributeInClass($reflectionClass)) {
             return $instance;
         }
@@ -50,7 +50,6 @@ final class MessageHandlerResolver extends TypeResolver
      * Only one attribute is allowed per class
      * An invokable method is required
      * First method parameter must be the message instance
-     *
      */
     private function findAttributeInClass(ReflectionClass $reflectionClass): ?MessageHandlerInstance
     {
