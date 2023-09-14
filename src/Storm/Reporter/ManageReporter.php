@@ -5,19 +5,28 @@ declare(strict_types=1);
 namespace Storm\Reporter;
 
 use Illuminate\Contracts\Container\Container;
+use Illuminate\Support\Collection;
 use InvalidArgumentException;
-use Storm\Attribute\AttributeFactory;
+use ReflectionException;
+use Storm\Attribute\Loader;
+use Storm\Attribute\ResolverFactory;
 use Storm\Contract\Reporter\MessageFilter;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Reporter\ReporterManager;
+use Storm\Contract\Tracker\Listener;
 use Storm\Reporter\Attribute\AsReporter;
 use Storm\Reporter\Attribute\AsSubscriber;
 use Storm\Reporter\Subscriber\FilterMessage;
 use Storm\Reporter\Subscriber\NameReporter;
+use Storm\Support\Attribute\ReporterInstance;
 use Storm\Support\Attribute\ReporterResolver;
+use Storm\Support\Attribute\SubscriberResolver;
 use Storm\Support\ContainerAsClosure;
+use Storm\Tracker\GenericListener;
+use Storm\Tracker\ResolvedListener;
 
-use function class_exists;
+use function is_object;
+use function is_string;
 
 final class ManageReporter implements ReporterManager
 {
@@ -28,62 +37,44 @@ final class ManageReporter implements ReporterManager
      */
     protected array $reporters = [];
 
-    /**
-     * @var array <string, class-string>
-     */
-    protected array $aliases = [
-        'command-default' => ReportCommand::class,
-    ];
-
     public function __construct(
         ContainerAsClosure $container,
-        protected AttributeFactory $attributeFactory
+        protected ResolverFactory $attributeFactory,
+        protected Loader $loader,
     ) {
         $this->container = $container->container;
     }
 
     public function create(string $name): Reporter
     {
-        // only use alias till we fetch attributes from autoload classes
-        // could be done on resolving by adding aliases with autoload classes
-        $className = $this->aliases[$name] ?? $name;
+        $aliases = $this->loader->getReporter($name);
 
-        if (! class_exists($className)) {
-            // todo fetch attribute to determine reporter alias if exists
-            throw new InvalidArgumentException("Reporter $className does not exist");
+        if ($aliases === null) {
+            throw new InvalidArgumentException("Reporter $name does not exist");
         }
 
-        return $this->reporters[$className] ??= $this->resolve($className);
-    }
+        [$className, $alias] = $aliases;
 
-    public function addAlias(string $name, string $className): void
-    {
-        if (isset($this->aliases[$name])) {
-            throw new InvalidArgumentException("Reporter alias $name already exists");
-        }
-
-        if (! class_exists($className)) {
-            throw new InvalidArgumentException("Reporter $className does not exist");
-        }
-
-        $this->aliases[$name] = $className;
+        return $this->reporters[$alias] ??= $this->resolve($className);
     }
 
     protected function resolve(string $className): Reporter
     {
+        /** @var ReporterResolver $resolver */
         $resolver = $this->attributeFactory->make(AsReporter::class);
 
-        if (! $resolver instanceof ReporterResolver) {
-            throw new InvalidArgumentException("Resolver for $className is not a ReporterResolver");
-        }
+        /** @var ReporterInstance $instance */
+        $instance = $resolver->resolve($className);
 
-        [$instance, $alias, $filter] = $resolver->resolve($className);
+        $this->setSubscriberResolver($instance->reporter);
 
-        $this->setSubscriberResolver($instance);
-        $this->addReporterAliasSubscriber($instance, $alias);
-        $this->addMessageFilterSubscriber($instance, $filter);
+        $this->addSubscriber(
+            $instance->reporter,
+            $this->createReporterNameSubscriber($instance->name),
+            $this->createMessageFilterSubscriber($instance->messageFilter),
+        );
 
-        return $instance;
+        return $instance->reporter;
     }
 
     protected function setSubscriberResolver(Reporter $reporter): void
@@ -95,13 +86,47 @@ final class ManageReporter implements ReporterManager
         );
     }
 
-    protected function addMessageFilterSubscriber(Reporter $reporter, MessageFilter $messageFilter): void
+    protected function addSubscriber(Reporter $reporter, object ...$subscribers): void
     {
-        $reporter->subscribe(new FilterMessage($messageFilter));
+        foreach ($subscribers as $subscriber) {
+            $listeners = $this->resolveSubscriber($subscriber);
+
+            $reporter->subscribe(...$listeners->all());
+        }
     }
 
-    protected function addReporterAliasSubscriber(Reporter $reporter, string $alias): void
+    /**
+     * @return Collection<Listener|GenericListener|ResolvedListener>
+     *
+     * @throws ReflectionException
+     */
+    protected function resolveSubscriber(string|object $subscriber): Collection
     {
-        $reporter->subscribe(new NameReporter($alias));
+        /** @var SubscriberResolver $resolver */
+        $resolver = $this->attributeFactory->make(AsSubscriber::class);
+
+        $listeners = $resolver->resolve($subscriber);
+
+        return $listeners->each(function (object $listener) use ($subscriber) {
+            if (is_object($subscriber)) {
+                return new ResolvedListener($subscriber, $listener->name(), $listener->priority());
+            }
+
+            return $listener;
+        });
+    }
+
+    protected function createReporterNameSubscriber(string $name): NameReporter
+    {
+        return new NameReporter($name);
+    }
+
+    protected function createMessageFilterSubscriber(string|MessageFilter $messageFilter): ?FilterMessage
+    {
+        if (is_string($messageFilter)) {
+            $messageFilter = $this->container[$messageFilter];
+        }
+
+        return new FilterMessage($messageFilter);
     }
 }

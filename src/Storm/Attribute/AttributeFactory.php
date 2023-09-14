@@ -4,47 +4,110 @@ declare(strict_types=1);
 
 namespace Storm\Attribute;
 
-use Illuminate\Contracts\Container\Container;
-use InvalidArgumentException;
+use Illuminate\Support\Collection;
+use ReflectionAttribute;
+use ReflectionClass;
+use ReflectionMethod;
+use RuntimeException;
+use Storm\Reporter\Attribute\AsMessageHandler;
 use Storm\Reporter\Attribute\AsReporter;
 use Storm\Reporter\Attribute\AsSubscriber;
-use Storm\Support\Attribute\ReporterResolver;
-use Storm\Support\Attribute\SubscriberResolver;
-use Storm\Support\ContainerAsClosure;
-
-use function is_object;
 
 class AttributeFactory
 {
-    protected Container $container;
-
-    protected array $resolvers = [
-        AsReporter::class => ReporterResolver::class,
-        AsSubscriber::class => SubscriberResolver::class,
-    ];
-
-    public function __construct(ContainerAsClosure $container)
+    public function make(Collection $classes): Collection
     {
-        $this->container = $container->container;
+        return collect([
+            AsReporter::class => $this->findReporterAttributes($classes),
+            AsSubscriber::class => $this->findSubscriberAttributes($classes),
+            AsMessageHandler::class => $this->findHandlerAttributes($classes),
+        ]);
+    }
+
+    protected function findReporterAttributes(Collection $classes): Collection
+    {
+        return $classes->map(function (ReflectionClass $reflectionClass) {
+            $attributes = $this->findAttributesInClass($reflectionClass, AsReporter::class);
+
+            if ($attributes === null) {
+                return null;
+            }
+
+            /** @var AsReporter $asReporter */
+            $asReporter = $attributes[0]->newInstance();
+
+            return $asReporter->name ?? $reflectionClass->getName();
+        })->filter();
     }
 
     /**
-     * @param class-string $attribute
+     * CheckMe by now its not worth it to cache it
+     *
+     * @return Collection<class-string>
      */
-    public function make(string $attribute): SubscriberResolver|ReporterResolver
+    protected function findSubscriberAttributes(Collection $classes): Collection
     {
-        $resolver = $this->resolvers[$attribute] ?? null;
+        return $classes->map(function (ReflectionClass $reflectionClass) {
+            return $this->findAttributesInClass($reflectionClass, AsSubscriber::class);
+        })->filter()->keys();
+    }
 
-        if (is_object($resolver)) {
-            return $resolver;
+    /**
+     * @return Collection<array<class-string, non-empty-string>>
+     */
+    protected function findHandlerAttributes(Collection $classes): Collection
+    {
+        return $classes->map(function (ReflectionClass $reflectionClass) {
+            $attributes = $this->findAttributesInClass($reflectionClass, AsMessageHandler::class);
+
+            if ($attributes !== null) {
+                return $this->normalizeMessageHandler($reflectionClass);
+            }
+
+            $reflectionMethods = ReflectionUtil::getPublicMethodsByAttribute($reflectionClass, AsMessageHandler::class);
+
+            if ($reflectionMethods === []) {
+                return null;
+            }
+
+            $messageHandlers = [];
+
+            foreach ($reflectionMethods as $reflectionMethod) {
+                $messageHandlers[] = $this->normalizeMessageHandler($reflectionMethod);
+            }
+
+            return $messageHandlers;
+        })->filter();
+    }
+
+    /**
+     * @return array<class-string, non-empty-string> [type name parameter aka message => method name]
+     *
+     * @throws RuntimeException when no invokable method is found in class
+     */
+    protected function normalizeMessageHandler(ReflectionClass|ReflectionMethod $reflector): array
+    {
+        $attributes = $reflector->getAttributes(AsMessageHandler::class, ReflectionAttribute::IS_INSTANCEOF);
+
+        if ($attributes !== []) {
+            $attributes[0]->newInstance();
         }
 
-        if ($resolver === null) {
-            throw new InvalidArgumentException("Attribute $attribute is not defined");
+        if ($reflector instanceof ReflectionClass) {
+            $reflector = ReflectionUtil::requirePublicInvokableMethod($reflector->getMethods(ReflectionMethod::IS_PUBLIC));
         }
 
-        // fixMe by now we do not support attribute inheritance
+        return [ReflectionUtil::requireFirstParameterTypeName($reflector) => $reflector->getName()];
+    }
 
-        return $this->resolvers[$attribute] = new $resolver($this->container);
+    /**
+     * @param  class-string                    $attribute
+     * @return array<ReflectionAttribute>|null
+     */
+    protected function findAttributesInClass(ReflectionClass $reflectionClass, string $attribute): ?array
+    {
+        $attributes = $reflectionClass->getAttributes($attribute, ReflectionAttribute::IS_INSTANCEOF);
+
+        return $attributes === [] ? null : $attributes;
     }
 }

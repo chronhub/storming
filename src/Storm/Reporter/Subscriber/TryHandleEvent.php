@@ -29,9 +29,9 @@ final class TryHandleEvent
             $story->markHandled(true);
 
             if ($exceptions !== []) {
-                $story->withRaisedException(
-                    CollectedEventHandlerError::fromExceptions(...$exceptions)
-                );
+                $collectedExceptions = CollectedEventHandlerError::fromExceptions(...$exceptions);
+
+                $story->withRaisedException($collectedExceptions);
             }
         };
     }

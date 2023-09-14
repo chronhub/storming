@@ -10,6 +10,7 @@ use InvalidArgumentException;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionException;
+use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
 use RuntimeException;
@@ -20,20 +21,42 @@ use function sprintf;
 
 class ReflectionUtil
 {
-    public const MissingParameterType = 'Missing parameter type %s in class %s';
-
-    public const InvalidParameterType = 'Unable to resolve union or intersection type for parameter %s in class %s, use reference attribute to resolve it';
-
-    public const UnsupportedBuiltInType = 'Unsupported built-in type for parameter %s in class %s';
+    public const InvalidParameterType = 'Unsupported parameter %s in class %s';
 
     /**
-     * @param  array<ReflectionAttribute> $attributes
-     * @return Collection<object>
+     * @param class-string|object $class
+     *
+     * @throws ReflectionException
+     * @throws InvalidArgumentException when the class string does not exist
      */
-    public static function createAttributeCollection(array $attributes): Collection
+    public static function createReflectionClass(string|object $class): ReflectionClass
     {
-        return Collection::make($attributes)
-            ->map(fn (ReflectionAttribute $attribute) => $attribute->newInstance())
+        if (is_string($class) && ! class_exists($class)) {
+            throw new InvalidArgumentException("Class $class does not exist");
+        }
+
+        return $class instanceof ReflectionClass ? $class : new ReflectionClass($class);
+    }
+
+    /**
+     * @param  class-string|object             $className
+     * @param  class-string                    $attributeClass
+     * @return Collection<ReflectionAttribute>
+     *
+     * @throws ReflectionException
+     */
+    public static function getAttributesInstancesForClass(string|object $className, string $attributeClass): Collection
+    {
+        $reflectionClass = self::createReflectionClass($className);
+
+        return Collection::wrap($reflectionClass->getAttributes($attributeClass, ReflectionAttribute::IS_INSTANCEOF))
+            ->map(function (ReflectionAttribute $attribute) {
+                if (! class_exists($attribute->getName())) {
+                    return null;
+                }
+
+                return $attribute->newInstance();
+            })
             ->filter();
     }
 
@@ -45,6 +68,82 @@ class ReflectionUtil
         $constructor = $reflectionClass->getConstructor();
 
         return $constructor ? $constructor->getParameters() : [];
+    }
+
+    /**
+     * @param array<ReflectionMethod> $reflectionMethods>
+     */
+    public static function getInvokableMethod(array $reflectionMethods): ?ReflectionMethod
+    {
+        foreach ($reflectionMethods as $reflectionMethod) {
+            if (! $reflectionMethod->isPublic()) {
+                continue;
+            }
+
+            if ($reflectionMethod->getName() === '__invoke') {
+                return $reflectionMethod;
+            }
+        }
+
+        return null;
+    }
+
+    public static function requirePublicInvokableMethod(array $reflectionMethods): ReflectionMethod
+    {
+        $invokableMethod = self::getInvokableMethod($reflectionMethods);
+
+        if ($invokableMethod === null) {
+            throw new RuntimeException("invokable method is mandatory in class {$reflectionMethods[0]->getDeclaringClass()->getName()}");
+        }
+
+        return $invokableMethod;
+    }
+
+    /**
+     * @param non-empty-string $method
+     *
+     * @throw RuntimeException when method does not exist or is not public
+     */
+    public static function requirePublicMethod(ReflectionClass $reflectionClass, string $method): ReflectionMethod
+    {
+        if (! $reflectionClass->hasMethod($method)) {
+            throw new RuntimeException("Method $method for class {$reflectionClass->getName()} does not exist");
+        }
+
+        $reflectionMethod = $reflectionClass->getMethod($method);
+
+        if (! $reflectionMethod->isPublic()) {
+            throw new RuntimeException("Method $method for class {$reflectionClass->getName()} must be public");
+        }
+
+        return $reflectionMethod;
+    }
+
+    /**
+     * Find methods which implements the attribute.
+     *
+     * @param  class-string            $attribute
+     * @return array<ReflectionMethod> return ReflectionMethods that contains the attribute
+     */
+    public static function getPublicMethodsByAttribute(ReflectionClass $reflectionClass, string $attribute): array
+    {
+        $reflectionMethods = $reflectionClass->getMethods(ReflectionMethod::IS_PUBLIC);
+
+        $found = [];
+
+        foreach ($reflectionMethods as $reflectionMethod) {
+            if ($reflectionMethod->isConstructor()) {
+                continue;
+            }
+
+            $attributes = $reflectionMethod->getAttributes($attribute, ReflectionAttribute::IS_INSTANCEOF);
+
+            if ($attributes !== []) {
+                $found[] = $reflectionMethod;
+            }
+        }
+
+        return $found;
     }
 
     /**
@@ -66,56 +165,37 @@ class ReflectionUtil
         return $bindings;
     }
 
+    public static function requireFirstParameterTypeName(ReflectionMethod $reflectionMethod): string
+    {
+        $parameter = $reflectionMethod->getParameters()[0] ?? null;
+
+        if ($parameter === null) {
+            throw new RuntimeException("Missing parameter for message handler {$reflectionMethod->getName()} in class {$reflectionMethod->getDeclaringClass()->getName()}");
+        }
+
+        return self::getParameterTypeName($parameter);
+    }
+
     /**
      * Get the type name for a parameter's type hint.
      *
      * @throws RuntimeException when the parameter type is invalid or not supported
      */
-    protected static function getParameterTypeName(ReflectionParameter $parameter): string
+    public static function getParameterTypeName(ReflectionParameter $parameter): string
     {
         $type = $parameter->getType();
 
         if ($type instanceof ReflectionNamedType) {
-            if (! $type->isBuiltin()) {
-                return $type->getName();
-            }
-
-            throw self::createParameterException(self::UnsupportedBuiltInType, $parameter);
+            return $type->getName();
         }
 
-        if ($type === null) {
-            throw self::createParameterException(self::MissingParameterType, $parameter);
-        }
-
-        throw self::createParameterException(self::InvalidParameterType, $parameter);
-    }
-
-    /**
-     * Create a parameter-related exception.
-     */
-    protected static function createParameterException(string $message, ReflectionParameter $reflection): RuntimeException
-    {
-        return new RuntimeException(
+        throw new RuntimeException(
             sprintf(
-                $message,
-                $reflection->getName(),
-                $reflection->getDeclaringClass()->getName()
+                self::InvalidParameterType,
+                $parameter->getName(),
+                $parameter->getDeclaringClass()->getName()
             )
         );
-    }
 
-    /**
-     * @param class-string|object $class
-     *
-     * @throws ReflectionException
-     * @throws InvalidArgumentException when the string class does not exist
-     */
-    public static function createReflectionClass(string|object $class): ReflectionClass
-    {
-        if (is_string($class) && ! class_exists($class)) {
-            throw new InvalidArgumentException("Class $class does not exist");
-        }
-
-        return $class instanceof ReflectionClass ? $class : new ReflectionClass($class);
     }
 }

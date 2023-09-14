@@ -9,9 +9,6 @@ use Storm\Contract\Tracker\Listener;
 use Storm\Contract\Tracker\MessageTracker;
 use Storm\Reporter\Attribute\AsSubscriber;
 
-/**
- * @property-read MessageTracker $tracker
- */
 interface Reporter
 {
     /**
@@ -40,4 +37,6 @@ interface Reporter
     public function subscribe(object|string ...$messageSubscribers): void;
 
     public function withSubscriberResolver(callable $subscriberResolver): void;
+
+    public function tracker(): MessageTracker;
 }

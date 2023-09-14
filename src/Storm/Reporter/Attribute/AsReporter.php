@@ -14,12 +14,9 @@ use Storm\Tracker\TrackMessage;
 readonly class AsReporter
 {
     public function __construct(
-        /**
-         * @var string|null class name or service id (should be used to bind reporter and add header for async)
-         */
         public ?string $name = null,
         public string|MessageFilter $filter = new AllowsAll(),
-        public string|MessageTracker $tracker = new TrackMessage() // todo remove and use reference
+        public string|MessageTracker $tracker = new TrackMessage()
     ) {
     }
 }

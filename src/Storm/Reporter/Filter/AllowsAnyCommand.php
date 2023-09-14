@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Reporter\Filter;
 
-use Storm\Contract\Message\DomainCommand;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\DomainQuery;
 use Storm\Contract\Reporter\MessageFilter;
@@ -16,10 +15,9 @@ final class AllowsAnyCommand implements MessageFilter
     {
         $messageEvent = $message->event();
 
-        if ($messageEvent instanceof DomainCommand) {
-            return true;
-        }
-
-        return ! $messageEvent instanceof DomainEvent && ! $messageEvent instanceof DomainQuery;
+        return match (true) {
+            $messageEvent instanceof DomainEvent, $messageEvent instanceof DomainQuery => false,
+            default => true,
+        };
     }
 }

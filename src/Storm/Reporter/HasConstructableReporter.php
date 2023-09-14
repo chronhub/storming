@@ -25,7 +25,7 @@ trait HasConstructableReporter
      */
     protected $subscriberResolver = null;
 
-    public function __construct(readonly ?MessageTracker $tracker = new TrackMessage())
+    public function __construct(protected readonly ?MessageTracker $tracker = new TrackMessage())
     {
     }
 
@@ -43,6 +43,11 @@ trait HasConstructableReporter
         }
 
         $this->subscriberResolver = $subscriberResolver;
+    }
+
+    public function tracker(): MessageTracker
+    {
+        return $this->tracker;
     }
 
     protected function dispatch(object|array $message): MessageStory

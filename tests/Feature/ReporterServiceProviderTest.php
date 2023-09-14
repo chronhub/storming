@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Feature;
+namespace Storm\Tests\Feature;
 
 use Storm\Contract\Message\Header;
 use Storm\Contract\Message\MessageProducer;
@@ -11,8 +11,11 @@ use Storm\Contract\Tracker\MessageStory;
 use Storm\Message\Message;
 use Storm\Message\SyncMessageProducer;
 use Storm\Reporter\ManageReporter;
+use Storm\Reporter\ReportCommand;
 use Storm\Reporter\Subscriber\HandleCommand;
 use Storm\Reporter\Subscriber\MakeMessage;
+use Storm\Reporter\Subscriber\RequireOneMessageHandlerOnly;
+use Storm\Reporter\Subscriber\RouteMessage;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tracker\GenericListener;
 
@@ -25,41 +28,55 @@ it('test reporter manager instance', function () {
     /** @var ManageReporter $manager */
     $manager = $this->app[ManageReporter::class];
 
-    $reporter = $manager->create('command-default');
+    $reporter = $manager->create('reporter-command-default');
 
     expect($reporter)->toBeInstanceOf(Reporter::class)
-        ->and($manager->create('command-default'))->toBe($reporter);
+        ->and($manager->create('reporter-command-default'))->toBe($reporter)
+        ->and($manager->create(ReportCommand::class))->toBe($reporter);
+
 });
 
 it('test reporter manager', function () {
     $message = new Message(SomeCommand::fromContent(['id' => 1]));
 
-    $result = null;
-    $handler = function (SomeCommand $command) use (&$result) {
-        $result = $command->toContent();
-    };
+    //    $result = null;
+    //    $handler = function (SomeCommand $command) use (&$result) {
+    //        $result = $command->toContent();
+    //    };
 
     /** @var ManageReporter $manager */
     $manager = $this->app[ManageReporter::class];
 
-    $reporter = $manager->create('command-default');
-    $reporter->subscribe(MakeMessage::class, HandleCommand::class);
+    $reporter = $manager->create('reporter-command-default');
+    $reporter->subscribe(MakeMessage::class, HandleCommand::class, RequireOneMessageHandlerOnly::class);
 
-    $reporter->subscribe(new GenericListener(Reporter::DISPATCH_EVENT, function (MessageStory $story) use ($handler) {
-        $story->withHandlers([$handler]);
-    }, 1000));
+    // RouteMessage subscriber
+
+    // generic subscriber
+    //    $routeSubscriber = new GenericListener(Reporter::DISPATCH_EVENT, function (MessageStory $story) use ($handler) {
+    //        $story->withHandlers([$handler]);
+    //    }, 1000);
+
+    // test route message
+    // $routeSubscriber = new RouteAwareMessage([$handler]);
+
+    $routeSubscriber = $this->app[RouteMessage::class];
+
+    $reporter->subscribe($routeSubscriber);
 
     /** @var ?Message $expected */
+    $_story = null;
     $expected = null;
-    $reporter->subscribe(new GenericListener(Reporter::DISPATCH_EVENT, function (MessageStory $story) use (&$expected) {
+    $reporter->subscribe(new GenericListener(Reporter::DISPATCH_EVENT, function (MessageStory $story) use (&$expected, &$_story) {
         $expected = $story->message();
+        $_story = $story;
     }, -1));
 
     $reporter->relay($message);
 
-    expect($expected)->toBeInstanceOf(Message::class)
+    expect($_story->isHandled())->toBeTrue()
+        ->and($expected)->toBeInstanceOf(Message::class)
         ->and($expected->event()->toContent())->toBe(['id' => 1])
-        ->and($result)->toBe(['id' => 1])
         ->and($expected->header(Header::REPORTER_ID))->toBe('reporter-command-default');
 });
 
@@ -77,7 +94,7 @@ it('dispatch array command', function () {
     /** @var ManageReporter $manager */
     $manager = $this->app[ManageReporter::class];
 
-    $reporter = $manager->create('command-default');
+    $reporter = $manager->create('reporter-command-default');
     $reporter->subscribe(MakeMessage::class, HandleCommand::class);
 
     $reporter->subscribe(new GenericListener(Reporter::DISPATCH_EVENT, function (MessageStory $story) use ($handler) {

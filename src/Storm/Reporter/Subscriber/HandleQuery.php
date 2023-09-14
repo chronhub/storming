@@ -18,22 +18,18 @@ final class HandleQuery
         return function (MessageStory $story): void {
             $queryHandler = $story->handlers()->current();
 
-            if ($queryHandler === null) {
-                $story->markHandled(false);
+            if ($queryHandler !== null) {
+                $deferred = new Deferred();
 
-                return;
-            }
+                try {
+                    $queryHandler($story->message()->event(), $deferred);
+                } catch (Throwable $exception) {
+                    $deferred->reject($exception);
+                } finally {
+                    $story->withPromise($deferred->promise());
 
-            $deferred = new Deferred();
-
-            try {
-                $queryHandler($story->message()->event(), $deferred);
-            } catch (Throwable $exception) {
-                $deferred->reject($exception);
-            } finally {
-                $story->withPromise($deferred->promise());
-
-                $story->markHandled(true);
+                    $story->markHandled(true);
+                }
             }
         };
     }

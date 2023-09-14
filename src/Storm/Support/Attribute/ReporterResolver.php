@@ -4,44 +4,45 @@ declare(strict_types=1);
 
 namespace Storm\Support\Attribute;
 
-use ReflectionException;
-use RuntimeException;
-use Storm\Attribute\Reader;
-use Storm\Attribute\ReflectionUtil;
-use Storm\Contract\Reporter\MessageFilter;
-use Storm\Contract\Reporter\Reporter;
+use Illuminate\Support\Collection;
+use ReflectionClass;
+use Storm\Attribute\TypeResolver;
+use Storm\Contract\Tracker\MessageTracker;
 use Storm\Reporter\Attribute\AsReporter;
 
 use function is_string;
 
-class ReporterResolver extends Reader
+final class ReporterResolver extends TypeResolver
 {
-    /**
-     * @param  class-string                                     $className
-     * @return array{Reporter, non-empty-string, MessageFilter}
-     *
-     * @throws ReflectionException
-     */
-    public function resolve(string $className): array
-    {
-        $reflectionClass = ReflectionUtil::createReflectionClass($className);
+    public const ATTRIBUTE_NAME = AsReporter::class;
 
-        return $this->readAttribute($reflectionClass, AsReporter::class)
-            ->whenEmpty(function () use ($className) {
-                throw new RuntimeException("Missing #AsReporter attribute for class $className");
+    public function process(Collection $attributes, ReflectionClass $reflectionClass, string|object $original): ReporterInstance
+    {
+        return $attributes
+            ->whenEmpty(function () use ($reflectionClass) {
+                $this->raiseMissingAttributeException($reflectionClass);
             })
             ->map(function (AsReporter $attribute) use ($reflectionClass) {
-                $instance = $this->createInstance($reflectionClass);
+                $instance = $this->createInstance(
+                    $reflectionClass,
+                    [$this->resolveTracker($attribute->tracker)]
+                );
 
-                $filter = $attribute->filter;
-
-                if (is_string($filter)) {
-                    $filter = $this->container[$filter];
-                }
-
-                $instanceId = $attribute->name ?? $reflectionClass->getName();
-
-                return [$instance, $instanceId, $filter];
+                return new ReporterInstance($instance, $attribute->name ?? $instance::class, $attribute->filter);
             })->first();
+    }
+
+    public function getSupportedAttribute(): string
+    {
+        return self::ATTRIBUTE_NAME;
+    }
+
+    private function resolveTracker(string|MessageTracker $tracker): object
+    {
+        if (is_string($tracker)) {
+            return $this->container[$tracker];
+        }
+
+        return $tracker;
     }
 }
