@@ -7,52 +7,46 @@ namespace Storm\Attribute;
 use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Collection;
-use RuntimeException;
+
+use function var_export;
 
 final readonly class AttributeFile
 {
-    public const CACHE_FILE = __DIR__.'/attributes-map.php';
-
-    public function __construct(private Filesystem $filesystem)
-    {
+    public function __construct(
+        private Filesystem $filesystem,
+        private string $manifest = __DIR__.'/attributes-map.php',
+    ) {
     }
 
     public function compile(Collection $content): void
     {
-        if ($this->filesystem->exists(self::CACHE_FILE)) {
-            throw new RuntimeException('File already exists, use refresh');
-        }
-
-        $this->filesystem->put(self::CACHE_FILE, $content->toJson());
-    }
-
-    public function refresh(Collection $content): void
-    {
-        if ($this->filesystem->exists(self::CACHE_FILE)) {
-            $this->filesystem->delete(self::CACHE_FILE);
-        }
-
-        $this->compile($content);
-    }
-
-    public function get(): Collection
-    {
-        if ($this->filesystem->missing(self::CACHE_FILE)) {
-            throw new FileNotFoundException('File not found: '.self::CACHE_FILE);
-        }
-
-        return collect($this->filesystem->json(self::CACHE_FILE));
+        $this->filesystem->replace(
+            $this->manifest, '<?php return '.var_export($content->jsonSerialize(), true).';'
+        );
     }
 
     public function delete(): void
     {
-        if ($this->filesystem->exists(self::CACHE_FILE)) {
-            $this->filesystem->delete(self::CACHE_FILE);
+        if ($this->filesystem->exists($this->manifest)) {
+            $this->filesystem->delete($this->manifest);
         }
+    }
+
+    /**
+     * @throws FileNotFoundException
+     */
+    public function get(): Collection
+    {
+        return collect($this->filesystem->getRequire($this->manifest));
     }
 
     public function exists(): bool
     {
-        return $this->filesystem->exists(self::CACHE_FILE);
+        return $this->filesystem->exists($this->manifest);
+    }
+
+    public function path(): string
+    {
+        return $this->manifest;
     }
 }

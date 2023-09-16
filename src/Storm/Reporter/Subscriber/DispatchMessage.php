@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Reporter\Subscriber;
 
+use Closure;
 use Storm\Attribute\Reference;
 use Storm\Contract\Message\MessageProducer;
 use Storm\Contract\Reporter\Reporter;
@@ -17,7 +18,7 @@ final readonly class DispatchMessage
     {
     }
 
-    public function __invoke(): callable
+    public function __invoke(): Closure
     {
         // todo assume sync
         return function (MessageStory $story): void {

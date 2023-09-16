@@ -13,6 +13,9 @@ use Storm\Reporter\Attribute\AsMessageHandler;
 use Storm\Reporter\Attribute\AsReporter;
 use Storm\Reporter\Attribute\AsSubscriber;
 
+use function array_key_exists;
+use function count;
+
 class AttributeFactory
 {
     public function make(Collection $classes): Collection
@@ -41,8 +44,6 @@ class AttributeFactory
     }
 
     /**
-     * CheckMe by now its not worth it to cache it
-     *
      * @return Collection<class-string>
      */
     protected function findSubscriberAttributes(Collection $classes): Collection
@@ -52,36 +53,74 @@ class AttributeFactory
         })->filter()->keys();
     }
 
-    /**
-     * @return Collection<array<class-string, non-empty-string>>
-     */
     protected function findHandlerAttributes(Collection $classes): Collection
     {
-        return $classes->map(function (ReflectionClass $reflectionClass) {
+        // todo priority methodName
+        $messages = [];
+
+        foreach ($classes as $reflectionClass) {
             $attributes = $this->findAttributesInClass($reflectionClass, AsMessageHandler::class);
 
             if ($attributes !== null) {
-                return $this->normalizeMessageHandler($reflectionClass);
+                if (count($attributes) > 1) {
+                    throw new RuntimeException("Only one #AsMessageHandler attribute is allowed per class for {$reflectionClass->getName()}");
+                }
+
+                [$messageName, $handleMethodName] = $this->normalizeMessageHandler($reflectionClass);
+
+                if (! array_key_exists($messageName, $messages)) {
+                    $messages[$messageName] = [$reflectionClass->getName() => $handleMethodName];
+                } else {
+                    $messages[$messageName][$reflectionClass->getName()] = $handleMethodName;
+                }
             }
 
             $reflectionMethods = ReflectionUtil::getPublicMethodsByAttribute($reflectionClass, AsMessageHandler::class);
 
             if ($reflectionMethods === []) {
-                return null;
+                continue;
             }
-
-            $messageHandlers = [];
 
             foreach ($reflectionMethods as $reflectionMethod) {
-                $messageHandlers[] = $this->normalizeMessageHandler($reflectionMethod);
-            }
+                [$messageName, $handleMethodName] = $this->normalizeMessageHandler($reflectionMethod);
 
-            return $messageHandlers;
-        })->filter();
+                if (! array_key_exists($messageName, $messages)) {
+                    $messages[$messageName] = [$reflectionClass->getName() => $handleMethodName];
+                } else {
+                    $messages[$messageName][$reflectionClass->getName()] = $handleMethodName;
+                }
+            }
+        }
+
+        //dd($messages);
+
+        return collect($messages);
+
+        //        return $classes->map(function (ReflectionClass $reflectionClass) {
+        //            $attributes = $this->findAttributesInClass($reflectionClass, AsMessageHandler::class);
+        //
+        //            if ($attributes !== null) {
+        //                return $this->normalizeMessageHandler($reflectionClass);
+        //            }
+        //
+        //            $reflectionMethods = ReflectionUtil::getPublicMethodsByAttribute($reflectionClass, AsMessageHandler::class);
+        //
+        //            if ($reflectionMethods === []) {
+        //                return null;
+        //            }
+        //
+        //            $messageHandlers = [];
+        //
+        //            foreach ($reflectionMethods as $reflectionMethod) {
+        //                $messageHandlers[] = $this->normalizeMessageHandler($reflectionMethod);
+        //            }
+        //
+        //            return $messageHandlers;
+        //        })->filter();
     }
 
     /**
-     * @return array<class-string, non-empty-string> [type name parameter aka message => method name]
+     * @return array{class-string, non-empty-string} [type name parameter aka message => method name]
      *
      * @throws RuntimeException when no invokable method is found in class
      */
@@ -97,7 +136,7 @@ class AttributeFactory
             $reflector = ReflectionUtil::requirePublicInvokableMethod($reflector->getMethods(ReflectionMethod::IS_PUBLIC));
         }
 
-        return [ReflectionUtil::requireFirstParameterTypeName($reflector) => $reflector->getName()];
+        return [ReflectionUtil::requireFirstParameterTypeName($reflector), $reflector->getName()];
     }
 
     /**

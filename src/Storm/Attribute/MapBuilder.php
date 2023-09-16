@@ -4,36 +4,42 @@ declare(strict_types=1);
 
 namespace Storm\Attribute;
 
+use Composer\Autoload\ClassLoader;
 use Illuminate\Support\Collection;
 use ReflectionClass;
 
 use function class_exists;
 use function str_starts_with;
 
-final class MapBuilder
+final readonly class MapBuilder
 {
-    protected Collection $map;
+    private ClassLoader $classLoader;
 
     public function __construct(
-        private readonly AttributeFile $files,
-        private readonly AttributeFactory $factory,
+        private AttributeFile $files,
+        private AttributeFactory $factory,
+        string $autoload = __DIR__.'/../../../vendor/autoload.php'
     ) {
+        $this->classLoader = require $autoload;
     }
 
-    public function inMemory(): void
+    // todo env
+    public function inMemory(): Collection
     {
-        $this->map = $this->buildMap();
+        return $this->buildMap();
     }
 
-    public function compile(): void
+    public function build(): Collection
     {
         if (! $this->files->exists()) {
-            $this->map = $this->buildMap();
+            $map = $this->buildMap();
 
-            $this->files->compile($this->map);
-        } else {
-            $this->map = $this->files->get();
+            $this->files->compile($map);
+
+            return $map;
         }
+
+        return $this->files->get();
     }
 
     public function update(): void
@@ -42,19 +48,14 @@ final class MapBuilder
             $this->files->delete();
         }
 
-        $this->compile();
-    }
-
-    public function getMap(): Collection
-    {
-        return $this->map;
+        $this->build();
     }
 
     private function buildMap(): Collection
     {
         $map = $this->getAutoloadClasses();
 
-        $classes = $this->filterStormClasses($map);
+        $classes = $this->filterClasses($map);
 
         return $this->factory->make($classes);
     }
@@ -64,15 +65,13 @@ final class MapBuilder
      */
     private function getAutoloadClasses(): Collection
     {
-        $classLoader = require __DIR__.'/../../../vendor/autoload.php';
-
-        return collect($classLoader->getClassMap());
+        return collect($this->classLoader->getClassMap());
     }
 
     /**
      * @return Collection{class-string, ReflectionClass}
      */
-    private function filterStormClasses(Collection $classes): Collection
+    private function filterClasses(Collection $classes): Collection
     {
         return $classes
             ->filter(function (string $path, string $class): bool {

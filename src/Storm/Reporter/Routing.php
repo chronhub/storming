@@ -17,14 +17,20 @@ class Routing
 
     /**
      * @return array<empty|callable>
+     *
+     * @throws MessageNotFound
      */
     public function route(string $messageName): array
     {
+        if (! $this->hasMessageName($messageName)) {
+            throw MessageNotFound::withMessageName($messageName);
+        }
+
         $messageHandlers = $this->loader->getMessageHandlers($messageName);
 
         $handlers = [];
 
-        foreach ($messageHandlers as $messageHandler) {
+        foreach ($messageHandlers as $messageHandler => $handlerMethodName) {
             $handler = $this->factory->toMessageHandler($messageHandler);
 
             $handlers[] = $handler->call();

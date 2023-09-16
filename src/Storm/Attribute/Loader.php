@@ -8,15 +8,15 @@ use Illuminate\Support\Collection;
 use Storm\Reporter\Attribute\AsMessageHandler;
 use Storm\Reporter\Attribute\AsReporter;
 
-use function array_key_exists;
 use function class_exists;
 
 class Loader
 {
+    private Collection $map;
+
     public function __construct(protected MapBuilder $mapBuilder)
     {
-        // $this->mapBuilder->compile();
-        $this->mapBuilder->inMemory();
+        $this->map = $this->mapBuilder->inMemory();
     }
 
     /**
@@ -27,7 +27,7 @@ class Loader
      */
     public function getReporter(string $name): ?array
     {
-        $reporterMap = $this->mapBuilder->getMap()[AsReporter::class];
+        $reporterMap = $this->map[AsReporter::class];
 
         if (class_exists($name)) {
             $alias = $reporterMap[$name] ?? null;
@@ -52,19 +52,7 @@ class Loader
      */
     public function getMessageHandlers(string $messageName): array
     {
-        $messageHandlers = $this->mapBuilder->getMap()[AsMessageHandler::class];
-
-        $found = [];
-
-        foreach ($messageHandlers as $messageHandlerClass => $handlers) {
-            foreach ($handlers as $messageClass => $method) {
-                if ($messageClass === $messageName) {
-                    $found[] = $messageHandlerClass;
-                }
-            }
-        }
-
-        return $found;
+        return $this->map[AsMessageHandler::class]->get($messageName, []);
     }
 
     /**
@@ -74,20 +62,11 @@ class Loader
      */
     public function hasMessageName(string $messageName): bool
     {
-        $messageHandlers = $this->mapBuilder->getMap()[AsMessageHandler::class];
-
-        $found = false;
-        foreach ($messageHandlers as $handlers) {
-            if (array_key_exists($messageName, $handlers)) {
-                $found = true;
-            }
-        }
-
-        return $found;
+        return $this->map[AsMessageHandler::class]->has($messageName);
     }
 
     public function getMap(): Collection
     {
-        return $this->mapBuilder->getMap();
+        return $this->map;
     }
 }
