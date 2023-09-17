@@ -11,7 +11,6 @@ use Storm\Reporter\Subscriber\DispatchMessage;
 use Storm\Tests\Unit\Reporter\Stub\ReportCommandStub;
 
 it('test', function () {
-
     /** @var Loader $loader */
     $loader = $this->app[Loader::class];
 

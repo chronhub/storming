@@ -4,149 +4,72 @@ declare(strict_types=1);
 
 namespace Storm\Attribute;
 
+use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Collection;
-use ReflectionAttribute;
 use ReflectionClass;
-use ReflectionMethod;
-use RuntimeException;
+use Storm\Attribute\Definition\MessageBuilder;
+use Storm\Attribute\Definition\MessageHandlerResolver;
+use Storm\Attribute\Definition\ReporterResolver;
+use Storm\Attribute\Definition\SubscriberResolver;
 use Storm\Reporter\Attribute\AsMessageHandler;
 use Storm\Reporter\Attribute\AsReporter;
 use Storm\Reporter\Attribute\AsSubscriber;
 
-use function array_key_exists;
-use function count;
-
 class AttributeFactory
 {
+    /**
+     * Mapping of attribute types to resolver classes.
+     *
+     * @var array<class-string, class-string>
+     */
+    protected array $resolverMapping = [
+        AsReporter::class => ReporterResolver::class,
+        AsSubscriber::class => SubscriberResolver::class,
+        AsMessageHandler::class => MessageHandlerResolver::class,
+    ];
+
+    /**
+     * Ensure any reference bindings exists in the container when set
+     */
+    public function __construct(protected ?Container $container = null)
+    {
+    }
+
+    /**
+     * Find attribute definitions from the given classes.
+     *
+     * @param Collection<ReflectionClass> $classes
+     * @return Collection{class-string, Collection<array<Definition|array<Definition>>>}
+     */
     public function make(Collection $classes): Collection
     {
-        return collect([
-            AsReporter::class => $this->findReporterAttributes($classes),
-            AsSubscriber::class => $this->findSubscriberAttributes($classes),
-            AsMessageHandler::class => $this->findHandlerAttributes($classes),
-        ]);
-    }
+        $result = [];
 
-    protected function findReporterAttributes(Collection $classes): Collection
-    {
-        return $classes->map(function (ReflectionClass $reflectionClass) {
-            $attributes = $this->findAttributesInClass($reflectionClass, AsReporter::class);
+        foreach ($this->resolverMapping as $attributeType => $resolverClass) {
+            $definitions = $this->makeDefinition($classes, $resolverClass);
 
-            if ($attributes === null) {
-                return null;
-            }
-
-            /** @var AsReporter $asReporter */
-            $asReporter = $attributes[0]->newInstance();
-
-            return $asReporter->name ?? $reflectionClass->getName();
-        })->filter();
-    }
-
-    /**
-     * @return Collection<class-string>
-     */
-    protected function findSubscriberAttributes(Collection $classes): Collection
-    {
-        return $classes->map(function (ReflectionClass $reflectionClass) {
-            return $this->findAttributesInClass($reflectionClass, AsSubscriber::class);
-        })->filter()->keys();
-    }
-
-    protected function findHandlerAttributes(Collection $classes): Collection
-    {
-        // todo priority methodName
-        $messages = [];
-
-        foreach ($classes as $reflectionClass) {
-            $attributes = $this->findAttributesInClass($reflectionClass, AsMessageHandler::class);
-
-            if ($attributes !== null) {
-                if (count($attributes) > 1) {
-                    throw new RuntimeException("Only one #AsMessageHandler attribute is allowed per class for {$reflectionClass->getName()}");
-                }
-
-                [$messageName, $handleMethodName] = $this->normalizeMessageHandler($reflectionClass);
-
-                if (! array_key_exists($messageName, $messages)) {
-                    $messages[$messageName] = [$reflectionClass->getName() => $handleMethodName];
-                } else {
-                    $messages[$messageName][$reflectionClass->getName()] = $handleMethodName;
-                }
-            }
-
-            $reflectionMethods = ReflectionUtil::getPublicMethodsByAttribute($reflectionClass, AsMessageHandler::class);
-
-            if ($reflectionMethods === []) {
-                continue;
-            }
-
-            foreach ($reflectionMethods as $reflectionMethod) {
-                [$messageName, $handleMethodName] = $this->normalizeMessageHandler($reflectionMethod);
-
-                if (! array_key_exists($messageName, $messages)) {
-                    $messages[$messageName] = [$reflectionClass->getName() => $handleMethodName];
-                } else {
-                    $messages[$messageName][$reflectionClass->getName()] = $handleMethodName;
-                }
-            }
+            $result[$attributeType] = $definitions;
         }
 
-        //dd($messages);
+        //dd(collect($result));
+        // build map
+        $messageMap = new MessageBuilder();
+        dd($messageMap->build($result[AsMessageHandler::class]));
 
-        return collect($messages);
+        return collect($result[AsMessageHandler::class]);
 
-        //        return $classes->map(function (ReflectionClass $reflectionClass) {
-        //            $attributes = $this->findAttributesInClass($reflectionClass, AsMessageHandler::class);
-        //
-        //            if ($attributes !== null) {
-        //                return $this->normalizeMessageHandler($reflectionClass);
-        //            }
-        //
-        //            $reflectionMethods = ReflectionUtil::getPublicMethodsByAttribute($reflectionClass, AsMessageHandler::class);
-        //
-        //            if ($reflectionMethods === []) {
-        //                return null;
-        //            }
-        //
-        //            $messageHandlers = [];
-        //
-        //            foreach ($reflectionMethods as $reflectionMethod) {
-        //                $messageHandlers[] = $this->normalizeMessageHandler($reflectionMethod);
-        //            }
-        //
-        //            return $messageHandlers;
-        //        })->filter();
+        // dd($handlers);
     }
 
     /**
-     * @return array{class-string, non-empty-string} [type name parameter aka message => method name]
+     * Make definition collections of a specific type from the given classes.
      *
-     * @throws RuntimeException when no invokable method is found in class
+     * @param Collection<ReflectionClass> $classes
      */
-    protected function normalizeMessageHandler(ReflectionClass|ReflectionMethod $reflector): array
+    protected function makeDefinition(Collection $classes, string $resolverClass): Collection
     {
-        $attributes = $reflector->getAttributes(AsMessageHandler::class, ReflectionAttribute::IS_INSTANCEOF);
+        $resolver = new $resolverClass($this->container);
 
-        if ($attributes !== []) {
-            $attributes[0]->newInstance();
-        }
-
-        if ($reflector instanceof ReflectionClass) {
-            $reflector = ReflectionUtil::requirePublicInvokableMethod($reflector->getMethods(ReflectionMethod::IS_PUBLIC));
-        }
-
-        return [ReflectionUtil::requireFirstParameterTypeName($reflector), $reflector->getName()];
-    }
-
-    /**
-     * @param  class-string                    $attribute
-     * @return array<ReflectionAttribute>|null
-     */
-    protected function findAttributesInClass(ReflectionClass $reflectionClass, string $attribute): ?array
-    {
-        $attributes = $reflectionClass->getAttributes($attribute, ReflectionAttribute::IS_INSTANCEOF);
-
-        return $attributes === [] ? null : $attributes;
+        return $resolver->find($classes);
     }
 }
