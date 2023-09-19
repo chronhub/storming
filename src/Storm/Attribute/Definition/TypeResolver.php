@@ -28,7 +28,7 @@ abstract class TypeResolver
 
     public const PARAMETER_NOT_SUPPORTED = 'Parameter %s for class %s is not supported';
 
-    public const ENTRY_NOT_FOUND = 'Reference entry with %s not found in container in class %s';
+    public const ENTRY_NOT_FOUND = 'Reference name %s not found in container in class %s';
 
     public function __construct(protected ?Container $container = null)
     {
@@ -89,7 +89,7 @@ abstract class TypeResolver
             return null;
         }
 
-        $references = $this->getStringReference($constructor->getParameters(), $reflectionClass);
+        $references = $this->getReferenceNames($constructor->getParameters(), $reflectionClass);
 
         return $references !== [] ? $references : null;
     }
@@ -100,7 +100,7 @@ abstract class TypeResolver
      *
      * @throws EntryNotFoundException
      */
-    protected function getStringReference(array $parameters, ReflectionClass $reflectionClass): array
+    protected function getReferenceNames(array $parameters, ReflectionClass $reflectionClass): array
     {
         $arguments = [];
 
@@ -108,8 +108,9 @@ abstract class TypeResolver
             $reference = $parameter->getAttributes(Reference::class)[0] ?? null;
 
             if ($reference !== null) {
-                // todo instantiate reference attribute
-                $argument = $reference->getArguments()[0] ?? $this->requireNameParameter($parameter);
+                $argument = $reference->newInstance()->name;
+
+                // checkMe validate first parameter is name typed ?
 
                 if ($this->container !== null && ! $this->container->has($argument)) {
                     throw new EntryNotFoundException(sprintf(self::ENTRY_NOT_FOUND, $argument, $reflectionClass->getName()));

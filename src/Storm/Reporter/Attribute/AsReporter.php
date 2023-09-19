@@ -17,8 +17,8 @@ readonly class AsReporter
 {
     public function __construct(
         public ?string $name = null,
-        public string|MessageFilter $filter = new AllowsAll(),
-        public string|MessageTracker $tracker = new TrackMessage() //fixMe no need for instance, use class-string
+        public string|MessageFilter $filter = AllowsAll::class,
+        public string|MessageTracker $tracker = TrackMessage::class
     ) {
     }
 

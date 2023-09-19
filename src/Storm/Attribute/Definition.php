@@ -6,13 +6,10 @@ namespace Storm\Attribute;
 
 use JsonSerializable;
 
-/**
- * @template Ref of array<empty>|array<non-empty-string, array<empty|class-string>>
- */
 abstract class Definition implements JsonSerializable
 {
     /**
-     * @var array<Ref>
+     * @var array<empty>|array<non-empty-string, array<empty|non-empty-string>>
      */
     protected array $references = [];
 

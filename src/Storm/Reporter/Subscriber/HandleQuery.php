@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Reporter\Subscriber;
 
+use Closure;
 use React\Promise\Deferred;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\MessageStory;
@@ -13,7 +14,7 @@ use Throwable;
 #[AsSubscriber(eventName: Reporter::DISPATCH_EVENT, priority: 0)]
 final class HandleQuery
 {
-    public function __invoke(): callable
+    public function __invoke(): Closure
     {
         return function (MessageStory $story): void {
             $queryHandler = $story->handlers()->current();

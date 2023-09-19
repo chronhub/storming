@@ -48,7 +48,7 @@ it('test subscriber', function () {
         ->and($sub[0]->origin())->toBe(DispatchMessage::class);
 });
 
-it('test many event in on subscriber', function () {
+it('test many event in on many subscriber', function () {
     $sub = $this->app[SomeMessageSubscriberWithRepeatableAttribute::class];
 
     expect($sub)->toBeArray()

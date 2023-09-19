@@ -20,9 +20,10 @@ final readonly class RouteMessage
     public function __invoke(): Closure
     {
         return function (MessageStory $story): void {
-            $messageHandlers = $this->routing->route(
-                $story->message()->name()
-            );
+
+            $eventName = $story->message()->name();
+
+            $messageHandlers = $this->routing->route($eventName);
 
             $story->withHandlers($messageHandlers);
         };

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Reporter\Subscriber;
 
+use Closure;
 use RuntimeException;
 use Storm\Contract\Reporter\MessageFilter;
 use Storm\Contract\Reporter\Reporter;
@@ -17,7 +18,7 @@ final readonly class FilterMessage
     {
     }
 
-    public function __invoke(): callable
+    public function __invoke(): Closure
     {
         return function (MessageStory $story): void {
             if (! $this->messageFilter->allows($story->message())) {

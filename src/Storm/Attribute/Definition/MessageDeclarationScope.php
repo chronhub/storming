@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Attribute\Definition;
 
+//fixMe to string
 enum MessageDeclarationScope: int
 {
     /**

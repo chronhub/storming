@@ -12,10 +12,6 @@ use ReflectionMethod;
 use Storm\Attribute\Exception\DefinitionException;
 use Storm\Reporter\Attribute\AsMessageHandler;
 
-use function array_column;
-use function array_count_values;
-use function array_filter;
-use function array_key_exists;
 use function count;
 use function usort;
 
@@ -25,24 +21,15 @@ final class MessageHandlerResolver extends TypeResolver
 
     public const METHOD_NOT_ALLOWED = 'Invokable method is disallowed when using attribute targeted method for class %s';
 
-    public const MESSAGE_HAS_MULTIPLE_HANDLERS_WITH_SAME_PRIORITY = 'Message %s has multiple handlers with the same priority';
-
-    public const SCOPE_NOT_FOUND = 'Invalid scope %s for message handler %s::%s';
-
-    public const SCOPE_NOT_UNIQUE = 'Message %s has multiple handlers with the "Unique" scope';
-
-    public const SCOPE_NOT_IN_CLASS = 'Message $messageName has handlers with different classes for "BelongsToClass" scope';
-
-    public const MESSAGE_HAS_MULTIPLE_HANDLERS_WITH_DIFFERENT_CLASSES = 'Message %s has multiple handlers with the "BelongsToClass" scope, but they have different classes';
-
     public function find(Collection $classes): array
     {
         $definitions = $this->makeDefinitions($classes);
 
         $map = $this->gatherDefinitionsByMessageName($definitions->toArray());
 
-        $this->validateMessageDeclarationScope($map);
-        $this->validateUniquePriorityWhenManyHandlers($map);
+        foreach ($this->getValidators() as $validator) {
+            $validator->validate($map);
+        }
 
         return $this->sortMessageHandlersByPriority($map);
     }
@@ -156,73 +143,6 @@ final class MessageHandlerResolver extends TypeResolver
         );
     }
 
-    /**
-     * Validate scope for message declaration per message name
-     *
-     * @throws DefinitionException when scope is not found
-     * @throws DefinitionException when multiple handlers with different classes are found for BelongsToClass scope
-     * @throws DefinitionException when multiple handlers with unique scope are found
-     */
-    private function validateMessageDeclarationScope(array $map): void
-    {
-        foreach ($map as $messageName => $handlers) {
-            $counts = [
-                MessageDeclarationScope::Unique->value => 0,
-                MessageDeclarationScope::BelongsToClass->value => 0,
-                MessageDeclarationScope::BelongsToMany->value => 0,
-            ];
-
-            $classForBelongsToClass = null;
-
-            foreach ($handlers as $info) {
-                $scope = $info['scope'];
-
-                if (! array_key_exists($scope, $counts)) {
-                    throw $this->createException(self::SCOPE_NOT_FOUND, $scope, $info['class'], $info['method']);
-                }
-
-                $counts[$scope]++;
-
-                if ($scope === MessageDeclarationScope::BelongsToClass->value) {
-                    if ($classForBelongsToClass === null) {
-                        $classForBelongsToClass = $info['class'];
-                    } elseif ($info['class'] !== $classForBelongsToClass) {
-                        throw $this->createException(self::SCOPE_NOT_IN_CLASS, $messageName);
-                    }
-                }
-            }
-
-            if ($counts[MessageDeclarationScope::Unique->value] > 1) {
-                throw $this->createException(self::SCOPE_NOT_UNIQUE, $messageName);
-            }
-
-            if ($counts[MessageDeclarationScope::BelongsToClass->value] > 1 && $classForBelongsToClass === null) {
-                throw $this->createException(self::MESSAGE_HAS_MULTIPLE_HANDLERS_WITH_DIFFERENT_CLASSES, $messageName);
-            }
-        }
-    }
-
-    /**
-     * @throws DefinitionException When a message has multiple handlers with the same priority
-     */
-    private function validateUniquePriorityWhenManyHandlers(array $map): void
-    {
-        foreach ($map as $messageName => $handlers) {
-            if (count($handlers) < 2) {
-                continue;
-            }
-
-            $duplicates = array_filter(
-                array_count_values(array_column($handlers, 'priority')),
-                fn (int $count) => $count > 1
-            );
-
-            if ($duplicates !== []) {
-                throw $this->createException(self::MESSAGE_HAS_MULTIPLE_HANDLERS_WITH_SAME_PRIORITY, $messageName);
-            }
-        }
-    }
-
     private function sortMessageHandlersByPriority(array $map): array
     {
         foreach ($map as &$handlers) {
@@ -249,5 +169,16 @@ final class MessageHandlerResolver extends TypeResolver
         }
 
         return $map;
+    }
+
+    /**
+     * @return array<AbstractMessageHandlerValidation>
+     */
+    private function getValidators(): array
+    {
+        return [
+            new DeclarationScopeValidation(),
+            new UniquePriorityValidation(),
+        ];
     }
 }

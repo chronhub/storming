@@ -65,6 +65,7 @@ final class SubscriberResolver extends TypeResolver
     private function assertMethodHasNoParameter(ReflectionClass $reflectionClass, string $methodName): void
     {
         $reflectionMethod = $this->requirePublicMethod($reflectionClass, $methodName);
+
         $parameters = $reflectionMethod->getParameters();
 
         if ($parameters !== []) {

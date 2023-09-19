@@ -11,7 +11,7 @@ use function array_shift;
 trait DelegateToQueue
 {
     /**
-     * @var array <empty|object>
+     * @var array <empty|object|array>
      */
     private array $queue = [];
 

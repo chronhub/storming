@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tracker;
 
+use Closure;
 use ReflectionFunction;
 use Storm\Contract\Tracker\Listener;
 
@@ -37,10 +38,14 @@ final class GenericListener implements Listener
         return $this->story;
     }
 
-    public function origin(): ?string
+    public function origin(): string
     {
-        $origin = new ReflectionFunction($this->story);
+        if ($this->story instanceof Closure) {
+            $origin = new ReflectionFunction($this->story);
 
-        return $origin->getClosureScopeClass()?->name;
+            return $origin->getClosureScopeClass()->name;
+        }
+
+        return $this->story::class;
     }
 }

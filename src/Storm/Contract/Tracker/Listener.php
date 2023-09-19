@@ -11,14 +11,14 @@ interface Listener
     public function priority(): int;
 
     /**
-     * @return callable(Story)
+     * @return callable{Story}
      */
     public function story(): callable;
 
     /**
      * Return scope class name
      *
-     * @return class-string|null
+     * @return class-string
      */
-    public function origin(): ?string;
+    public function origin(): string;
 }
