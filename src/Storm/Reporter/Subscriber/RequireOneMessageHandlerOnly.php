@@ -20,7 +20,7 @@ final readonly class RequireOneMessageHandlerOnly
             $count = iterator_count($story->handlers());
 
             if ($count !== 1) {
-                throw new RuntimeException('Message must have one handler only');
+                throw new RuntimeException("Message {$story->message()->name()} must have one handler only");
             }
         };
     }

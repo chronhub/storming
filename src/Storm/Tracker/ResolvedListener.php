@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tracker;
 
+use ReflectionFunction;
 use Storm\Contract\Tracker\Listener;
 
 /**
@@ -12,7 +13,7 @@ use Storm\Contract\Tracker\Listener;
 final readonly class ResolvedListener implements Listener
 {
     public function __construct(
-        public object $subscriber,
+        public object $instance,
         private string $name,
         private int $priority
     ) {
@@ -30,11 +31,19 @@ final readonly class ResolvedListener implements Listener
 
     public function story(): callable
     {
-        return ($this->subscriber)();
+        return ($this->instance)();
     }
 
     public function origin(): ?string
     {
-        return $this->subscriber::class;
+        $ref = new ReflectionFunction($this->instance);
+
+        if ($ref->isClosure()) {
+            $scopeClass = $ref->getClosureScopeClass();
+
+            return $scopeClass->getName() ?? null;
+        }
+
+        return $this->instance::class;
     }
 }

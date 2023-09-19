@@ -6,6 +6,7 @@ namespace Storm\Message;
 
 use InvalidArgumentException;
 use RuntimeException;
+use Storm\Contract\Message\Header;
 use Storm\Contract\Message\Messaging;
 
 final class Message
@@ -35,6 +36,15 @@ final class Message
 
         $this->event = $event->withHeaders([]);
         $this->headers = $expectedHeaders;
+    }
+
+    public function name(): string
+    {
+        if (! $this->isMessaging()) {
+            return $this->event::class;
+        }
+
+        return $this->headers[Header::EVENT_TYPE] ?? $this->event::class;
     }
 
     public function event(): object

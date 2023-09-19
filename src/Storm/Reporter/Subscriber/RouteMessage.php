@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Storm\Reporter\Subscriber;
 
 use Closure;
-use Storm\Contract\Message\Header;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\MessageStory;
 use Storm\Reporter\Attribute\AsSubscriber;
@@ -21,11 +20,9 @@ final readonly class RouteMessage
     public function __invoke(): Closure
     {
         return function (MessageStory $story): void {
-            $message = $story->message();
-
-            $messageName = $message->header(Header::EVENT_TYPE) ?? $message->event()::class;
-
-            $messageHandlers = $this->routing->route($messageName);
+            $messageHandlers = $this->routing->route(
+                $story->message()->name()
+            );
 
             $story->withHandlers($messageHandlers);
         };

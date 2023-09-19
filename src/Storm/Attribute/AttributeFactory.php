@@ -7,7 +7,6 @@ namespace Storm\Attribute;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Support\Collection;
 use ReflectionClass;
-use Storm\Attribute\Definition\MessageBuilder;
 use Storm\Attribute\Definition\MessageHandlerResolver;
 use Storm\Attribute\Definition\ReporterResolver;
 use Storm\Attribute\Definition\SubscriberResolver;
@@ -39,7 +38,7 @@ class AttributeFactory
      * Find attribute definitions from the given classes.
      *
      * @param Collection<ReflectionClass> $classes
-     * @return Collection{class-string, Collection<array<Definition|array<Definition>>>}
+     * @return Collection{class-string, array}
      */
     public function make(Collection $classes): Collection
     {
@@ -51,14 +50,7 @@ class AttributeFactory
             $result[$attributeType] = $definitions;
         }
 
-        //dd(collect($result));
-        // build map
-        $messageMap = new MessageBuilder();
-        dd($messageMap->build($result[AsMessageHandler::class]));
-
-        return collect($result[AsMessageHandler::class]);
-
-        // dd($handlers);
+        return new Collection($result);
     }
 
     /**
@@ -66,7 +58,7 @@ class AttributeFactory
      *
      * @param Collection<ReflectionClass> $classes
      */
-    protected function makeDefinition(Collection $classes, string $resolverClass): Collection
+    protected function makeDefinition(Collection $classes, string $resolverClass): array
     {
         $resolver = new $resolverClass($this->container);
 

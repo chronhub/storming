@@ -9,7 +9,7 @@ use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\MessageStory;
 use Storm\Reporter\Attribute\AsSubscriber;
 
-#[AsSubscriber(eventName: Reporter::DISPATCH_EVENT, priority: 1000)]
+//#[AsSubscriber(eventName: Reporter::DISPATCH_EVENT, priority: 1000)]
 final readonly class RouteMessageHandlerAware
 {
     /**

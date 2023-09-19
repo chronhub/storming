@@ -7,7 +7,6 @@ namespace Storm\Reporter;
 use Generator;
 use LogicException;
 use RuntimeException;
-use Storm\Contract\Message\Header;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\Listener;
 use Storm\Contract\Tracker\MessageStory;
@@ -105,11 +104,9 @@ trait HasConstructableReporter
     protected function determineMessageName(MessageStory $story): string
     {
         try {
-            $message = $story->message();
+            return $story->message()->name();
         } catch (TypeError) {
             return 'undefined';
         }
-
-        return $message->header(Header::EVENT_TYPE) ?? $message->event()::class;
     }
 }

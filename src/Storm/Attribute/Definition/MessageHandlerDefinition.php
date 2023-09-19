@@ -37,15 +37,16 @@ final class MessageHandlerDefinition extends Definition
     }
 
     /**
-     * @return array{class: string, method: string, priority: int, scope: value-of<MessageDeclarationScope::*>}
+     * @return array{class: string, method: string, priority: int, scope: value-of<MessageDeclarationScope::*>, references: array}
      */
-    public function info(): array
+    public function jsonSerialize(): array
     {
         return [
             'class' => $this->className,
             'method' => $this->methodName,
             'priority' => $this->priority,
             'scope' => $this->scope->value,
+            'references' => $this->references,
         ];
     }
 }

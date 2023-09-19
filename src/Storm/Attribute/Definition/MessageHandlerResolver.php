@@ -9,19 +9,46 @@ use Illuminate\Support\Collection;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
-use RuntimeException;
+use Storm\Attribute\Exception\DefinitionException;
 use Storm\Reporter\Attribute\AsMessageHandler;
 
+use function array_column;
+use function array_count_values;
+use function array_filter;
+use function array_key_exists;
 use function count;
+use function usort;
 
-final class MessageHandlerResolver extends AttributeResolver
+final class MessageHandlerResolver extends TypeResolver
 {
-    public function find(Collection $classes): Collection
-    {
-        // need a better strategy to organize message handlers
-        // as is, we allow message name to be handled by class and methods
-        // declared in another class
+    public const ATTRIBUTE_NOT_REPEATABLE = '#AsMessageHandler attribute is only repeatable for target method in %s';
 
+    public const METHOD_NOT_ALLOWED = 'Invokable method is disallowed when using attribute targeted method for class %s';
+
+    public const MESSAGE_HAS_MULTIPLE_HANDLERS_WITH_SAME_PRIORITY = 'Message %s has multiple handlers with the same priority';
+
+    public const SCOPE_NOT_FOUND = 'Invalid scope %s for message handler %s::%s';
+
+    public const SCOPE_NOT_UNIQUE = 'Message %s has multiple handlers with the "Unique" scope';
+
+    public const SCOPE_NOT_IN_CLASS = 'Message $messageName has handlers with different classes for "BelongsToClass" scope';
+
+    public const MESSAGE_HAS_MULTIPLE_HANDLERS_WITH_DIFFERENT_CLASSES = 'Message %s has multiple handlers with the "BelongsToClass" scope, but they have different classes';
+
+    public function find(Collection $classes): array
+    {
+        $definitions = $this->makeDefinitions($classes);
+
+        $map = $this->gatherDefinitionsByMessageName($definitions->toArray());
+
+        $this->validateMessageDeclarationScope($map);
+        $this->validateUniquePriorityWhenManyHandlers($map);
+
+        return $this->sortMessageHandlersByPriority($map);
+    }
+
+    private function makeDefinitions(Collection $classes): Collection
+    {
         return $classes->map(function (ReflectionClass $reflectionClass) {
             $attributes = $this->findAttributesInClass($reflectionClass, AsMessageHandler::class);
 
@@ -40,21 +67,22 @@ final class MessageHandlerResolver extends AttributeResolver
     /**
      * Find attribute in class
      *
-     * Only one attribute is allowed per class
+     * Only one attribute is allowed when class is targeted
      * First method parameter must be the message instance
      *
      * @param array<ReflectionAttribute> $attributes
      *
-     * @throws RuntimeException       when attribute is repeated in target class
+     * @throws DefinitionException    when attribute is repeated in target class
+     * @throws DefinitionException    when first parameter aka message is not found in method
      * @throws EntryNotFoundException when reference is not found in container
      */
     private function findInClass(ReflectionClass $reflectionClass, array $attributes): MessageHandlerDefinition
     {
         if (count($attributes) > 1) {
-            throw new RuntimeException("#AsMessageHandler attribute is only repeatable for target method in {$reflectionClass->getName()}");
+            throw $this->createException(self::ATTRIBUTE_NOT_REPEATABLE, $reflectionClass->getName());
         }
 
-        $definition = $this->getDefinition($reflectionClass, $attributes[0], null);
+        $definition = $this->getDefinition($reflectionClass, $attributes[0]->newInstance(), null);
 
         $this->addReferenceToDefinition($definition, $reflectionClass, '__construct');
 
@@ -62,15 +90,10 @@ final class MessageHandlerResolver extends AttributeResolver
     }
 
     /**
-     * Find AsMessageHandler attribute in methods class
+     * Find @see AsMessageHandler attribute in methods class
      *
-     * No invokable method is allowed as we turn message handler into callable,
-     * it could lead to unexpected behavior
-     * First parameter for each method must be the message instance
-     *
-     * @return array<MessageHandlerDefinition>|null
-     *
-     * @throws RuntimeException       when invokable method is found in class
+     * @throws DefinitionException    when invokable method is found for many handlers
+     * @throws DefinitionException    when first parameter aka message is not found in method
      * @throws EntryNotFoundException when reference is not found in container
      */
     private function findInMethods(ReflectionClass $reflectionClass): ?array
@@ -95,10 +118,10 @@ final class MessageHandlerResolver extends AttributeResolver
             }
 
             if ($this->getInvokableMethod($reflectionMethods)) {
-                throw new RuntimeException("Invokable method is disallowed when using attribute targeted method for class {$reflectionClass->getName()}");
+                throw $this->createException(self::METHOD_NOT_ALLOWED, $reflectionClass->getName());
             }
 
-            $definition = $this->getDefinition($reflectionClass, $attributes[0], $reflectionMethod);
+            $definition = $this->getDefinition($reflectionClass, $attributes[0]->newInstance(), $reflectionMethod);
 
             $this->addReferenceToDefinition($definition, $reflectionClass, '__construct');
 
@@ -108,13 +131,15 @@ final class MessageHandlerResolver extends AttributeResolver
         return $definitions === [] ? null : $definitions;
     }
 
+    /**
+     * @throws DefinitionException when method not found
+     * @throws DefinitionException when first parameter aka message is not found in method
+     */
     private function getDefinition(
         ReflectionClass $reflectionClass,
-        ReflectionAttribute $reflectionAttribute,
+        AsMessageHandler $attribute,
         ?ReflectionMethod $reflectionMethod
     ): MessageHandlerDefinition {
-        /** @var AsMessageHandler $attribute */
-        $attribute = $reflectionAttribute->newInstance();
 
         if ($reflectionMethod === null) {
             $reflectionMethod = $this->requirePublicMethod($reflectionClass, $attribute->method);
@@ -129,5 +154,100 @@ final class MessageHandlerResolver extends AttributeResolver
             $attribute->priority,
             $attribute->scope
         );
+    }
+
+    /**
+     * Validate scope for message declaration per message name
+     *
+     * @throws DefinitionException when scope is not found
+     * @throws DefinitionException when multiple handlers with different classes are found for BelongsToClass scope
+     * @throws DefinitionException when multiple handlers with unique scope are found
+     */
+    private function validateMessageDeclarationScope(array $map): void
+    {
+        foreach ($map as $messageName => $handlers) {
+            $counts = [
+                MessageDeclarationScope::Unique->value => 0,
+                MessageDeclarationScope::BelongsToClass->value => 0,
+                MessageDeclarationScope::BelongsToMany->value => 0,
+            ];
+
+            $classForBelongsToClass = null;
+
+            foreach ($handlers as $info) {
+                $scope = $info['scope'];
+
+                if (! array_key_exists($scope, $counts)) {
+                    throw $this->createException(self::SCOPE_NOT_FOUND, $scope, $info['class'], $info['method']);
+                }
+
+                $counts[$scope]++;
+
+                if ($scope === MessageDeclarationScope::BelongsToClass->value) {
+                    if ($classForBelongsToClass === null) {
+                        $classForBelongsToClass = $info['class'];
+                    } elseif ($info['class'] !== $classForBelongsToClass) {
+                        throw $this->createException(self::SCOPE_NOT_IN_CLASS, $messageName);
+                    }
+                }
+            }
+
+            if ($counts[MessageDeclarationScope::Unique->value] > 1) {
+                throw $this->createException(self::SCOPE_NOT_UNIQUE, $messageName);
+            }
+
+            if ($counts[MessageDeclarationScope::BelongsToClass->value] > 1 && $classForBelongsToClass === null) {
+                throw $this->createException(self::MESSAGE_HAS_MULTIPLE_HANDLERS_WITH_DIFFERENT_CLASSES, $messageName);
+            }
+        }
+    }
+
+    /**
+     * @throws DefinitionException When a message has multiple handlers with the same priority
+     */
+    private function validateUniquePriorityWhenManyHandlers(array $map): void
+    {
+        foreach ($map as $messageName => $handlers) {
+            if (count($handlers) < 2) {
+                continue;
+            }
+
+            $duplicates = array_filter(
+                array_count_values(array_column($handlers, 'priority')),
+                fn (int $count) => $count > 1
+            );
+
+            if ($duplicates !== []) {
+                throw $this->createException(self::MESSAGE_HAS_MULTIPLE_HANDLERS_WITH_SAME_PRIORITY, $messageName);
+            }
+        }
+    }
+
+    private function sortMessageHandlersByPriority(array $map): array
+    {
+        foreach ($map as &$handlers) {
+            usort($handlers, function ($a, $b) {
+                return $a['priority'] <=> $b['priority'];
+            });
+        }
+
+        return $map;
+    }
+
+    private function gatherDefinitionsByMessageName(array $definitions): array
+    {
+        $map = [];
+
+        foreach ($definitions as $definition) {
+            if ($definition instanceof MessageHandlerDefinition) {
+                $map[$definition->messageName][] = $definition->jsonSerialize();
+            } else {
+                foreach ($definition as $def) {
+                    $map[$def->messageName][] = $def->jsonSerialize();
+                }
+            }
+        }
+
+        return $map;
     }
 }

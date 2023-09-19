@@ -6,32 +6,38 @@ namespace Storm\Attribute\Definition;
 
 use Illuminate\Container\EntryNotFoundException;
 use Illuminate\Contracts\Container\Container;
+use Illuminate\Support\Collection;
 use ReflectionAttribute;
 use ReflectionClass;
 use ReflectionMethod;
 use ReflectionNamedType;
 use ReflectionParameter;
-use RuntimeException;
 use Storm\Attribute\Definition;
+use Storm\Attribute\Exception\DefinitionException;
 use Storm\Attribute\Reference;
 
 use function sprintf;
 
-abstract class AttributeResolver
+abstract class TypeResolver
 {
-    public const NO_METHOD_FOUND = 'Method %s for class %s does not exist';
+    public const METHOD_NOT_FOUND = 'Method %s for class %s does not exist';
 
-    public const REQUIRE_PUBLIC_METHOD = 'Method %s for class %s must be public';
+    public const PUBLIC_METHOD_REQUIRED = 'Method %s for class %s must be public';
 
-    public const NO_PARAMETER = 'No parameter found for method %s in class %s';
+    public const PARAMETER_NOT_FOUND = 'No parameter found for method %s in class %s';
 
-    public const UNSUPPORTED_PARAMETER = 'Parameter %s for class %s is not supported';
+    public const PARAMETER_NOT_SUPPORTED = 'Parameter %s for class %s is not supported';
 
     public const ENTRY_NOT_FOUND = 'Reference entry with %s not found in container in class %s';
 
     public function __construct(protected ?Container $container = null)
     {
     }
+
+    /**
+     * @param Collection<ReflectionClass> $classes
+     */
+    abstract public function find(Collection $classes): array;
 
     /**
      * @param  class-string                    $attribute
@@ -117,15 +123,17 @@ abstract class AttributeResolver
     }
 
     /**
-     * @throws RuntimeException when parameter is not supported
+     * @throws DefinitionException when first parameter is not found
      */
     protected function requireFirstParameterTypeName(ReflectionMethod $reflectionMethod): string
     {
         $parameter = $reflectionMethod->getParameters()[0] ?? null;
 
         if ($parameter === null) {
-            throw new RuntimeException(
-                sprintf(self::NO_PARAMETER, $reflectionMethod->getName(), $reflectionMethod->getDeclaringClass()->getName())
+            $this->createException(
+                self::PARAMETER_NOT_FOUND,
+                $reflectionMethod->getName(),
+                $reflectionMethod->getDeclaringClass()->getName()
             );
         }
 
@@ -137,7 +145,7 @@ abstract class AttributeResolver
      *
      * @return class-string
      *
-     * @throws RuntimeException when parameter is not supported
+     * @throws DefinitionException when parameter is not supported
      */
     protected function requireNameParameter(ReflectionParameter $reflectionParameter): string
     {
@@ -145,26 +153,35 @@ abstract class AttributeResolver
             return $reflectionParameter->getType()->getName();
         }
 
-        throw new RuntimeException(sprintf(self::UNSUPPORTED_PARAMETER, $reflectionParameter->getName(), $reflectionParameter->getDeclaringClass()->getName()));
+        throw $this->createException(
+            self::PARAMETER_NOT_SUPPORTED,
+            $reflectionParameter->getName(),
+            $reflectionParameter->getDeclaringClass()->getName()
+        );
     }
 
     /**
      * @param non-empty-string $method
      *
-     * @throw RuntimeException when method does not exist or is not public
+     * @throws DefinitionException when method does not exist or is not public
      */
     protected function requirePublicMethod(ReflectionClass $reflectionClass, string $method): ReflectionMethod
     {
         if (! $reflectionClass->hasMethod($method)) {
-            throw new RuntimeException(sprintf(self::NO_METHOD_FOUND, $method, $reflectionClass->getName()));
+            throw $this->createException(self::METHOD_NOT_FOUND, $method, $reflectionClass->getName());
         }
 
         $reflectionMethod = $reflectionClass->getMethod($method);
 
         if (! $reflectionMethod->isPublic()) {
-            throw new RuntimeException(sprintf(self::REQUIRE_PUBLIC_METHOD, $method, $reflectionClass->getName()));
+            throw $this->createException(self::PUBLIC_METHOD_REQUIRED, $method, $reflectionClass->getName());
         }
 
         return $reflectionMethod;
+    }
+
+    protected function createException(string $message, mixed ...$arguments): DefinitionException
+    {
+        return throw new DefinitionException(sprintf($message, ...$arguments));
     }
 }

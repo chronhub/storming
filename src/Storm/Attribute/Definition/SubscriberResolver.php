@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Storm\Attribute\Definition;
 
+use Illuminate\Container\EntryNotFoundException;
 use Illuminate\Support\Collection;
 use ReflectionAttribute;
 use ReflectionClass;
 use RuntimeException;
-use Storm\Attribute\ReflectionUtil;
 use Storm\Reporter\Attribute\AsSubscriber;
 
-final class SubscriberResolver extends AttributeResolver
+final class SubscriberResolver extends TypeResolver
 {
-    public function find(Collection $classes): Collection
+    public function find(Collection $classes): array
     {
         return $classes->map(function (ReflectionClass $reflectionClass) {
             $attributes = $this->findAttributesInClass($reflectionClass, AsSubscriber::class);
@@ -23,43 +23,52 @@ final class SubscriberResolver extends AttributeResolver
             }
 
             return $this->findInClass($reflectionClass, $attributes);
-        })->filter();
+        })->filter()->jsonSerialize();
     }
 
     /**
      * @param array<ReflectionAttribute> $attributes>
+     *
+     * @throws EntryNotFoundException
+     * @throws RuntimeException       when method has parameters
      */
-    private function findInClass(ReflectionClass $reflectionClass, array $attributes): array
+    private function findInClass(ReflectionClass $reflectionClass, array $attributes): SubscriberDefinition
     {
-        $definitions = [];
+        $definition = new SubscriberDefinition($reflectionClass->getName());
 
         foreach ($attributes as $attribute) {
             /** @var AsSubscriber $asSubscriber */
             $asSubscriber = $attribute->newInstance();
-
-            $definitions[] = $definition = new SubscriberDefinition(
-                $reflectionClass->getName(),
-                $asSubscriber->eventName,
-                $asSubscriber->priority,
-            );
-
             $methodName = $asSubscriber->method;
-            $reflectionMethod = ReflectionUtil::requirePublicMethod($reflectionClass, $methodName);
-            $parameters = $reflectionMethod->getParameters();
 
-            if ($parameters !== []) {
-                throw new RuntimeException("Method $methodName for class {$reflectionClass->getName()} must not have parameters");
-            }
+            $this->assertMethodHasNoParameter($reflectionClass, $methodName);
+
+            $definition->addEvent($asSubscriber->eventName, $asSubscriber->priority, $methodName);
 
             $definition->addMethod($methodName);
 
             $arguments = $this->getReferenceFromConstructor($reflectionClass);
 
+            // checkMe by now we seem to accept references parameters only in constructor
             if ($arguments !== null) {
                 $definition->addMethod('__construct', $arguments);
             }
         }
 
-        return $definitions;
+        return $definition;
+    }
+
+    /**
+     * checkMe allow later to use constructor parameters and public method parameters
+     * could be useful when a subscriber provide many events but require different dependencies
+     */
+    private function assertMethodHasNoParameter(ReflectionClass $reflectionClass, string $methodName): void
+    {
+        $reflectionMethod = $this->requirePublicMethod($reflectionClass, $methodName);
+        $parameters = $reflectionMethod->getParameters();
+
+        if ($parameters !== []) {
+            throw new RuntimeException("Method $methodName for class {$reflectionClass->getName()} must not have parameters");
+        }
     }
 }

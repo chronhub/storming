@@ -4,15 +4,17 @@ declare(strict_types=1);
 
 namespace Storm\Reporter;
 
-use Storm\Attribute\Loader;
-use Storm\Attribute\ResolverFactory;
+use Illuminate\Contracts\Container\Container;
+use Storm\Support\ContainerAsClosure;
+use Storm\Support\MessageAliasBinding;
 
 class Routing
 {
-    public function __construct(
-        protected Loader $loader,
-        protected ResolverFactory $factory
-    ) {
+    private Container $container;
+
+    public function __construct(ContainerAsClosure $container)
+    {
+        $this->container = $container->container;
     }
 
     /**
@@ -22,25 +24,12 @@ class Routing
      */
     public function route(string $messageName): array
     {
-        if (! $this->hasMessageName($messageName)) {
+        $alias = MessageAliasBinding::fromMessageName($messageName);
+
+        if (! $this->container->has($alias)) {
             throw MessageNotFound::withMessageName($messageName);
         }
 
-        $messageHandlers = $this->loader->getMessageHandlers($messageName);
-
-        $handlers = [];
-
-        foreach ($messageHandlers as $messageHandler => $handlerMethodName) {
-            $handler = $this->factory->toMessageHandler($messageHandler);
-
-            $handlers[] = $handler->call();
-        }
-
-        return $handlers;
-    }
-
-    public function hasMessageName(string $messageName): bool
-    {
-        return $this->loader->hasMessageName($messageName);
+        return $this->container[$alias];
     }
 }

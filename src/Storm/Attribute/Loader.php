@@ -7,8 +7,7 @@ namespace Storm\Attribute;
 use Illuminate\Support\Collection;
 use Storm\Reporter\Attribute\AsMessageHandler;
 use Storm\Reporter\Attribute\AsReporter;
-
-use function class_exists;
+use Storm\Reporter\Attribute\AsSubscriber;
 
 class Loader
 {
@@ -20,49 +19,21 @@ class Loader
     }
 
     /**
-     * Find reporter class name by alias or class name.
-     *
-     * @param  class-string|non-empty-string                           $name
-     * @return array{class-string, non-empty-string|class-string}|null
+     * @return array<class-string, array{class: class-string, alias: non-empty-string, filter: non-empty-string, tracker: non-empty-string}>
      */
-    public function getReporter(string $name): ?array
+    public function getReporters(): array
     {
-        $reporterMap = $this->map[AsReporter::class];
-
-        if (class_exists($name)) {
-            $alias = $reporterMap[$name] ?? null;
-
-            return $alias !== null ? [$name, $alias] : null;
-        }
-
-        foreach ($reporterMap as $reporterClass => $reporterAlias) {
-            if ($reporterAlias === $name) {
-                return [$reporterClass, $name];
-            }
-        }
-
-        return null;
+        return $this->map[AsReporter::class]; //fixme remove key from array return
     }
 
-    /**
-     * Find message handler(s) class name by message name.
-     *
-     * @param  class-string              $messageName
-     * @return array<class-string|empty> message handler class name
-     */
-    public function getMessageHandlers(string $messageName): array
+    public function getSubscribers(): array
     {
-        return $this->map[AsMessageHandler::class]->get($messageName, []);
+        return $this->map[AsSubscriber::class];
     }
 
-    /**
-     * Check if message name exists.
-     *
-     * @param class-string $messageName
-     */
-    public function hasMessageName(string $messageName): bool
+    public function getHandlers(): array
     {
-        return $this->map[AsMessageHandler::class]->has($messageName);
+        return $this->map[AsMessageHandler::class];
     }
 
     public function getMap(): Collection

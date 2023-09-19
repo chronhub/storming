@@ -6,9 +6,11 @@ namespace Storm\Tests\Feature;
 
 use ReflectionClass;
 use Storm\Attribute\Loader;
-use Storm\Reporter\ReportCommand;
 use Storm\Reporter\Subscriber\DispatchMessage;
-use Storm\Tests\Unit\Reporter\Stub\ReportCommandStub;
+use Storm\Support\MessageAliasBinding;
+use Storm\Tests\Stubs\Double\Annotation\SomeMessageSubscriberWithRepeatableAttribute;
+use Storm\Tests\Stubs\Double\Message\AnotherCommand;
+use Storm\Tracker\ResolvedListener;
 
 it('test', function () {
     /** @var Loader $loader */
@@ -17,16 +19,52 @@ it('test', function () {
     dump($loader->getMap()->jsonSerialize());
 });
 
+it('test message bindings', function () {
+    $messageName = MessageAliasBinding::fromMessageName(AnotherCommand::class);
+    $handlers = $this->app[$messageName];
+
+    $command = AnotherCommand::fromContent(['foo' => 'bar']);
+
+    $result = [];
+    foreach ($handlers as $handler) {
+        $result[] = $handler($command);
+    }
+
+    expect($result)
+        ->toHaveCount(2)
+        ->toBe([$command, $command]);
+});
+
+it('register reporters', function () {
+    dd($this->app['reporter-command-default']);
+});
+
+it('test subscriber', function () {
+    $sub = $this->app[DispatchMessage::class];
+
+    expect($sub)->toBeArray()
+        ->and($sub)->toHaveCount(1)
+        ->and($sub[0])->toBeInstanceOf(ResolvedListener::class)
+        ->and($sub[0]->origin())->toBe(DispatchMessage::class);
+});
+
+it('test many event in on subscriber', function () {
+    $sub = $this->app[SomeMessageSubscriberWithRepeatableAttribute::class];
+
+    expect($sub)->toBeArray()
+        ->and($sub)->toHaveCount(2)
+        ->and($sub[0])->toBeInstanceOf(ResolvedListener::class)
+        ->and($sub[1])->toBeInstanceOf(ResolvedListener::class)
+        ->and($sub[0]->origin())->toBe(SomeMessageSubscriberWithRepeatableAttribute::class);
+});
+
 it('find reporter name', function () {
 
     /** @var Loader $loader */
     $loader = $this->app[Loader::class];
 
-    dump($loader->getReporter('foo'));
-    dump($loader->getReporter(ReportCommandStub::class));
-    dump($loader->getReporter(ReportCommand::class));
-    dump($loader->getReporter(ReportCommand::class));
-    dump($loader->getReporter('reporter-command-default'));
+    dump($loader);
+
 });
 
 it('du', function () {

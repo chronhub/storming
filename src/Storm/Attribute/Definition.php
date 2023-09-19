@@ -4,15 +4,24 @@ declare(strict_types=1);
 
 namespace Storm\Attribute;
 
-abstract class Definition
+use JsonSerializable;
+
+/**
+ * @template Ref of array<empty>|array<non-empty-string, array<empty|class-string>>
+ */
+abstract class Definition implements JsonSerializable
 {
     /**
-     * @var array<empty>|array<non-empty-string, array<empty|class-string>>
+     * @var array<Ref>
      */
-    protected array $calls = [];
+    protected array $references = [];
 
     public function addMethod(string $methodName, array $parameters = []): void
     {
-        $this->calls[] = [$methodName, $parameters];
+        if ($methodName === '__invoke' && $parameters === []) {
+            return;
+        }
+
+        $this->references[] = [$methodName => $parameters];
     }
 }

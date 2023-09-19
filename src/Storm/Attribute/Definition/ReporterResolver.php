@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Storm\Attribute\Definition;
 
 use Illuminate\Support\Collection;
+use ReflectionAttribute;
 use ReflectionClass;
 use Storm\Reporter\Attribute\AsReporter;
 
-use function is_string;
-
-final class ReporterResolver extends AttributeResolver
+final class ReporterResolver extends TypeResolver
 {
-    public function find(Collection $classes): Collection
+    public function find(Collection $classes): array
     {
         return $classes->map(function (ReflectionClass $reflectionClass) {
             $attributes = $this->findAttributesInClass($reflectionClass, AsReporter::class);
@@ -21,15 +20,22 @@ final class ReporterResolver extends AttributeResolver
                 return null;
             }
 
-            /** @var AsReporter $asReporter */
-            $asReporter = $attributes[0]->newInstance();
+            $asReporter = $this->getFirstAttributeInstance($attributes);
 
             return new ReporterDefinition(
                 $reflectionClass->getName(),
                 $asReporter->name ?? $reflectionClass->getName(),
-                is_string($asReporter->filter) ? $asReporter->filter : $asReporter->filter::class,
-                is_string($asReporter->tracker) ? $asReporter->tracker : $asReporter->tracker::class,
+                $asReporter->getStringFilter(),
+                $asReporter->getStringTracker(),
             );
-        })->filter();
+        })->filter()->jsonSerialize();
+    }
+
+    /**
+     * @param array<ReflectionAttribute> $attributes
+     */
+    private function getFirstAttributeInstance(array $attributes): AsReporter
+    {
+        return $attributes[0]->newInstance();
     }
 }
