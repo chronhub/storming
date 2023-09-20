@@ -6,7 +6,6 @@ namespace Storm\Reporter;
 
 use Generator;
 use LogicException;
-use RuntimeException;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\Listener;
 use Storm\Contract\Tracker\MessageStory;
@@ -14,8 +13,6 @@ use Storm\Contract\Tracker\MessageTracker;
 use Storm\Tracker\TrackMessage;
 use Throwable;
 use TypeError;
-
-use function is_callable;
 
 trait HasConstructableReporter
 {
@@ -86,15 +83,7 @@ trait HasConstructableReporter
     protected function resolveSubscriber(string|object ...$subscribers): Generator
     {
         foreach ($subscribers as $subscriber) {
-            if (! $subscriber instanceof Listener) {
-                if (! is_callable($this->subscriberResolver)) {
-                    throw new RuntimeException('Only Listener instance is handled when subscriber resolver is not set');
-                }
-
-                yield from ($this->subscriberResolver)($subscriber);
-            } else {
-                yield $subscriber;
-            }
+            yield from ($this->subscriberResolver)($subscriber);
         }
     }
 

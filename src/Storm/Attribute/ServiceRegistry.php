@@ -7,8 +7,9 @@ namespace Storm\Attribute;
 use Closure;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
+use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\Listener;
-use Storm\Support\ContainerAsClosure;
+use Storm\Reporter\SubscriberResolverAware;
 use Storm\Support\MessageAliasBinding;
 use Storm\Tracker\ResolvedListener;
 
@@ -19,9 +20,11 @@ class ServiceRegistry
 {
     protected Container $container;
 
-    public function __construct(ContainerAsClosure $container, protected Loader $loader)
-    {
-        $this->container = $container->container;
+    public function __construct(
+        Container $container,
+        protected Loader $loader
+    ) {
+        $this->container = $container;
     }
 
     public function register(): void
@@ -33,14 +36,22 @@ class ServiceRegistry
 
     protected function registerReporters(array $reporters): void
     {
-        foreach ($reporters as $reporter) {
-            $this->container->singleton($reporter['alias'], function (Application $app) use ($reporter) {
-                return $app->make($reporter['class'], [$app[$reporter['tracker']]]);
-            });
+        $subscriberResolver = new SubscriberResolverAware($this->container);
 
-            if ($reporter['alias'] !== $reporter['class']) {
-                $this->container->alias($reporter['class'], $reporter['alias']);
+        foreach ($reporters as $reporter) {
+            $class = $reporter['class'];
+            $alias = $reporter['alias'];
+            $tracker = $reporter['tracker'];
+
+            $this->container->singleton($alias, fn (Application $app): Reporter => $app->make($class, [$app[$tracker]]));
+
+            if ($alias !== $class) {
+                $this->container->alias($class, $alias);
             }
+
+            $this->container->resolving($alias, function (Reporter $reporter) use ($subscriberResolver): void {
+                $reporter->withSubscriberResolver($subscriberResolver);
+            });
         }
     }
 

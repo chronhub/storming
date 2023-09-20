@@ -25,8 +25,8 @@ final class ReporterResolver extends TypeResolver
             return new ReporterDefinition(
                 $reflectionClass->getName(),
                 $asReporter->name ?? $reflectionClass->getName(),
-                $asReporter->getStringFilter(),
-                $asReporter->getStringTracker(),
+                $asReporter->filter,
+                $asReporter->tracker,
             );
         })->filter()->jsonSerialize();
     }

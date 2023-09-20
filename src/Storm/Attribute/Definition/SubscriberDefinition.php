@@ -12,7 +12,7 @@ use function class_exists;
 /**
  * @template T of array{class: string, events: array{event: string, priority: int, method: non-empty-string}}
  */
-class SubscriberDefinition extends Definition
+final class SubscriberDefinition extends Definition
 {
     /** @var array<T> */
     private array $events = [];

@@ -77,7 +77,7 @@ final class MessageHandlerResolver extends TypeResolver
     }
 
     /**
-     * Find @see AsMessageHandler attribute in methods class
+     * Find @see AsMessageHandler attribute in class methods
      *
      * @throws DefinitionException    when invokable method is found for many handlers
      * @throws DefinitionException    when first parameter aka message is not found in method

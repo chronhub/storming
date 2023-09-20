@@ -13,6 +13,8 @@ class AttributeServiceProvider extends ServiceProvider
 {
     public function boot(): void
     {
+        $this->app[ServiceRegistry::class]->register();
+
         // create cache file from a config file which include directories to scan, autoload classes and namespaces
         // and exclude directories or tests
     }
@@ -30,6 +32,5 @@ class AttributeServiceProvider extends ServiceProvider
 
         $this->app->when(NameReporter::class)->needs('$name')->give('foo');
 
-        $this->app[ServiceRegistry::class]->register();
     }
 }
