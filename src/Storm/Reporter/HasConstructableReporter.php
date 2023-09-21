@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace Storm\Reporter;
 
 use Generator;
-use LogicException;
+use Illuminate\Contracts\Container\Container;
+use InvalidArgumentException;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\Listener;
 use Storm\Contract\Tracker\MessageStory;
@@ -14,12 +15,11 @@ use Storm\Tracker\TrackMessage;
 use Throwable;
 use TypeError;
 
+use function is_string;
+
 trait HasConstructableReporter
 {
-    /**
-     * @var callable|null
-     */
-    protected $subscriberResolver = null;
+    protected ?Container $container = null;
 
     public function __construct(protected readonly ?MessageTracker $tracker = new TrackMessage())
     {
@@ -27,18 +27,9 @@ trait HasConstructableReporter
 
     public function subscribe(object|string ...$messageSubscribers): void
     {
-        foreach ($this->resolveSubscriber(...$messageSubscribers) as $subscriber) {
-            $this->tracker->listen($subscriber);
+        foreach ($this->resolveSubscriber($messageSubscribers) as $listener) {
+            $this->tracker->listen($listener);
         }
-    }
-
-    public function withSubscriberResolver(callable $subscriberResolver): void
-    {
-        if ($this->subscriberResolver !== null) {
-            throw new LogicException('Subscriber resolver is already set');
-        }
-
-        $this->subscriberResolver = $subscriberResolver;
     }
 
     public function tracker(): MessageTracker
@@ -46,28 +37,23 @@ trait HasConstructableReporter
         return $this->tracker;
     }
 
-    protected function dispatch(object|array $message): MessageStory
+    public function setContainer(Container $container): void
     {
-        $story = $this->tracker->newStory(self::DISPATCH_EVENT);
+        $this->container = $container;
+    }
+
+    protected function dispatch(array|object $message): MessageStory
+    {
+        $story = $this->tracker->newStory(Reporter::DISPATCH_EVENT);
 
         $story->withTransientMessage($message);
 
         try {
-            $this->tracker->disclose($story);
-
-            if (! $story->isHandled()) {
-                $messageName = $this->determineMessageName($story);
-
-                throw MessageNotHandled::withMessageName($messageName);
-            }
+            $this->dispatchStory($story);
         } catch (Throwable $exception) {
             $story->withRaisedException($exception);
         } finally {
-            $story->stop(false);
-
-            $story->withEvent(Reporter::FINALIZE_EVENT);
-
-            $this->tracker->disclose($story);
+            $this->finalizeStory($story);
         }
 
         if ($story->hasException()) {
@@ -77,14 +63,24 @@ trait HasConstructableReporter
         return $story;
     }
 
-    /**
-     * @return Generator<Listener>
-     */
-    protected function resolveSubscriber(string|object ...$subscribers): Generator
+    protected function dispatchStory(MessageStory $story): void
     {
-        foreach ($subscribers as $subscriber) {
-            yield from ($this->subscriberResolver)($subscriber);
+        $this->tracker->disclose($story);
+
+        if (! $story->isHandled()) {
+            $messageName = $this->determineMessageName($story);
+
+            throw MessageNotHandled::withMessageName($messageName);
         }
+    }
+
+    protected function finalizeStory(MessageStory $story): void
+    {
+        $story->stop(false);
+
+        $story->withEvent(Reporter::FINALIZE_EVENT);
+
+        $this->tracker->disclose($story);
     }
 
     /**
@@ -96,6 +92,19 @@ trait HasConstructableReporter
             return $story->message()->name();
         } catch (TypeError) {
             return 'undefined';
+        }
+    }
+
+    protected function resolveSubscriber(array $subscribers): Generator
+    {
+        foreach ($subscribers as $subscriber) {
+            if ($subscriber instanceof Listener) {
+                yield $subscriber;
+            } elseif (is_string($subscriber) && $this->container && $this->container->has($subscriber)) {
+                yield from $this->container[$subscriber];
+            } else {
+                throw new InvalidArgumentException('Unable to resolve subscriber');
+            }
         }
     }
 }

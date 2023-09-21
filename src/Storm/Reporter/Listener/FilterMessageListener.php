@@ -2,23 +2,31 @@
 
 declare(strict_types=1);
 
-namespace Storm\Reporter\Subscriber;
+namespace Storm\Reporter\Listener;
 
-use Closure;
 use RuntimeException;
 use Storm\Contract\Reporter\MessageFilter;
 use Storm\Contract\Reporter\Reporter;
+use Storm\Contract\Tracker\Listener;
 use Storm\Contract\Tracker\MessageStory;
-use Storm\Reporter\Attribute\AsSubscriber;
 
-//#[AsSubscriber(eventName: Reporter::DISPATCH_EVENT, priority: 99000)]
-final readonly class FilterMessage
+final readonly class FilterMessageListener implements Listener
 {
     public function __construct(private MessageFilter $messageFilter)
     {
     }
 
-    public function __invoke(): Closure
+    public function name(): string
+    {
+        return Reporter::DISPATCH_EVENT;
+    }
+
+    public function priority(): int
+    {
+        return 99000;
+    }
+
+    public function story(): callable
     {
         return function (MessageStory $story): void {
             if (! $this->messageFilter->allows($story->message())) {
@@ -26,5 +34,10 @@ final readonly class FilterMessage
                 throw new RuntimeException('Dispatching message event is not allowed');
             }
         };
+    }
+
+    public function origin(): string
+    {
+        return self::class;
     }
 }

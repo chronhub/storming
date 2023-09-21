@@ -23,7 +23,24 @@ class Loader
      */
     public function getReporters(): array
     {
-        return $this->map[AsReporter::class]; //fixme remove key from array return
+        return $this->map[AsReporter::class];
+    }
+
+    public function getReporter(string $name): ?array
+    {
+        $reporter = $this->map[AsReporter::class][$name] ?? null;
+
+        if ($reporter !== []) {
+            return $reporter;
+        }
+
+        foreach ($this->map[AsReporter::class] as $class => $reporter) {
+            if ($reporter['alias'] === $name) {
+                return $reporter;
+            }
+        }
+
+        return null;
     }
 
     public function getSubscribers(): array

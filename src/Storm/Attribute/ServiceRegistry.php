@@ -9,7 +9,6 @@ use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Foundation\Application;
 use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\Listener;
-use Storm\Reporter\SubscriberResolverAware;
 use Storm\Support\MessageAliasBinding;
 use Storm\Tracker\ResolvedListener;
 
@@ -20,6 +19,8 @@ class ServiceRegistry
 {
     protected Container $container;
 
+    protected array $provides = [];
+
     public function __construct(
         Container $container,
         protected Loader $loader
@@ -29,30 +30,34 @@ class ServiceRegistry
 
     public function register(): void
     {
-        $this->registerReporters($this->loader->getReporters());
+        // $this->registerReporters($this->loader->getReporters());
         $this->registerSubscribers($this->loader->getSubscribers());
         $this->registerHandlers($this->loader->getHandlers());
     }
 
     protected function registerReporters(array $reporters): void
     {
-        $subscriberResolver = new SubscriberResolverAware($this->container);
-
         foreach ($reporters as $reporter) {
-            $class = $reporter['class'];
-            $alias = $reporter['alias'];
-            $tracker = $reporter['tracker'];
-
-            $this->container->singleton($alias, fn (Application $app): Reporter => $app->make($class, [$app[$tracker]]));
-
-            if ($alias !== $class) {
-                $this->container->alias($class, $alias);
-            }
-
-            $this->container->resolving($alias, function (Reporter $reporter) use ($subscriberResolver): void {
-                $reporter->withSubscriberResolver($subscriberResolver);
-            });
+            $this->registerReporter($reporter['class'], $reporter['alias'], $reporter['tracker']);
         }
+    }
+
+    protected function registerReporter(string $class, string $alias, string $tracker): void
+    {
+        $this->container->singleton($class, function (Application $app) use ($class, $tracker): Reporter {
+            return new $class($app[$tracker]);
+        });
+
+        if ($alias !== $class) {
+            $this->container->alias($class, $alias);
+        }
+
+        $this->container->resolving($class, function (object $reporter, Application $app): void {
+            $reporter->setContainer($app);
+        });
+
+        $this->provides[] = $alias;
+        $this->provides[] = $class;
     }
 
     protected function registerHandlers(array $messageHandlers): void
@@ -60,7 +65,8 @@ class ServiceRegistry
         foreach ($messageHandlers as $messageName => $handlers) {
             $aliasMessage = MessageAliasBinding::fromMessageName($messageName);
 
-            $this->container->bind($aliasMessage, fn (Application $app): array => $this->handlerToCallable($handlers));
+            $this->container->bind($aliasMessage, fn (): array => $this->handlerToCallable($handlers));
+            $this->provides[] = $aliasMessage;
         }
     }
 
@@ -98,6 +104,7 @@ class ServiceRegistry
             $subscriber = fn (): array => $this->subscriberToCallable($instances[$class], $events);
 
             $this->container->bind($class, $subscriber);
+            $this->provides[] = $class;
         }
     }
 
@@ -142,5 +149,10 @@ class ServiceRegistry
         }
 
         return $instances;
+    }
+
+    public function provides(): array
+    {
+        return $this->provides;
     }
 }

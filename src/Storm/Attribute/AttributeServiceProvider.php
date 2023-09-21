@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Storm\Attribute;
 
+use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 use Storm\Contract\Reporter\MessageFilter;
 use Storm\Message\Message;
 use Storm\Reporter\Subscriber\NameReporter;
 
-class AttributeServiceProvider extends ServiceProvider
+class AttributeServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     public function boot(): void
     {
-        $this->app[ServiceRegistry::class]->register();
 
         // create cache file from a config file which include directories to scan, autoload classes and namespaces
         // and exclude directories or tests
@@ -21,16 +21,25 @@ class AttributeServiceProvider extends ServiceProvider
 
     public function register(): void
     {
+
         //tmp
-        $this->app->bind(MessageFilter::class, fn () => new class implements MessageFilter
-        {
-            public function allows(Message $message): bool
-            {
-                return true;
-            }
-        });
+        //        $this->app->bind(MessageFilter::class, fn () => new class implements MessageFilter
+        //        {
+        //            public function allows(Message $message): bool
+        //            {
+        //                return true;
+        //            }
+        //        });
 
-        $this->app->when(NameReporter::class)->needs('$name')->give('foo');
+        //$this->app->when(NameReporter::class)->needs('$name')->give('foo');
 
+        $this->app->singleton(ServiceRegistry::class);
+
+        $this->app[ServiceRegistry::class]->register();
+    }
+
+    public function provides()
+    {
+        return $this->app[ServiceRegistry::class]->provides();
     }
 }

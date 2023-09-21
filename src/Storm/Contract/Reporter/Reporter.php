@@ -36,7 +36,5 @@ interface Reporter
      */
     public function subscribe(object|string ...$messageSubscribers): void;
 
-    public function withSubscriberResolver(callable $subscriberResolver): void;
-
     public function tracker(): MessageTracker;
 }
