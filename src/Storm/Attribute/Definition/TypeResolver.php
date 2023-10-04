@@ -116,7 +116,7 @@ abstract class TypeResolver
                     throw new EntryNotFoundException(sprintf(self::ENTRY_NOT_FOUND, $argument, $reflectionClass->getName()));
                 }
 
-                $arguments[] = $argument;
+                $arguments += [$parameter->name => $argument];
             }
         }
 

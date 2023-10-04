@@ -6,6 +6,9 @@ namespace Storm\Reporter;
 
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
+use Storm\Contract\Reporter\ReporterManager;
+use Storm\Contract\Reporter\Router;
+use Storm\Contract\Reporter\SubscriberManager;
 
 use function array_merge;
 
@@ -14,21 +17,33 @@ class ReporterServiceProvider extends ServiceProvider implements DeferrableProvi
     public function boot(): void
     {
         // check from config if we should autoload reporters
-        $this->getManager()->wire();
+        $this->getReporterManager()->wire();
+        $this->getSubscriberManager()->wire();
     }
 
     public function register(): void
     {
-        $this->app->singleton(ReporterManager::class);
+        $this->app->singleton(ReporterManager::class, ReportingManager::class);
+        $this->app->singleton(Router::class, MessageManager::class);
+        $this->app->singleton(SubscriberManager::class, SubscribingManager::class);
     }
 
     public function provides(): array
     {
-        return array_merge([ReporterManager::class], $this->getManager()->getLoaded());
+        return array_merge(
+            [ReporterManager::class, MessageManager::class, SubscriberManager::class],
+            $this->getReporterManager()->provides(),
+            $this->getSubscriberManager()->provides()
+        );
     }
 
-    protected function getManager(): ReporterManager
+    protected function getReporterManager(): ReportingManager
     {
-        return $this->app[ReporterManager::class];
+        return $this->app[ReportingManager::class];
+    }
+
+    protected function getSubscriberManager(): SubscriberManager
+    {
+        return $this->app[SubscriberManager::class];
     }
 }

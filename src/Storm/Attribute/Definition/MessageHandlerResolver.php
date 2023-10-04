@@ -17,9 +17,9 @@ use function usort;
 
 final class MessageHandlerResolver extends TypeResolver
 {
-    public const ATTRIBUTE_NOT_REPEATABLE = '#AsMessageHandler attribute is only repeatable for target method in %s';
+    public const ATTRIBUTE_NOT_REPEATABLE = '#AsMessageHandler attribute is only repeatable for target class in %s';
 
-    public const METHOD_NOT_ALLOWED = 'Invokable method is disallowed when using attribute targeted method for class %s';
+    public const METHOD_NOT_ALLOWED = 'Invokable method is disallowed when targeted many methods for class %s';
 
     public function find(Collection $classes): array
     {
@@ -43,11 +43,7 @@ final class MessageHandlerResolver extends TypeResolver
                 return $this->findInClass($reflectionClass, $attributes);
             }
 
-            if ($definitions = $this->findInMethods($reflectionClass)) {
-                return $definitions;
-            }
-
-            return null;
+            return $this->findInMethods($reflectionClass);
         })->filter();
     }
 
@@ -93,6 +89,7 @@ final class MessageHandlerResolver extends TypeResolver
 
         $definitions = [];
 
+        $count = 0;
         foreach ($reflectionMethods as $reflectionMethod) {
             if ($reflectionMethod->isConstructor()) {
                 continue;
@@ -104,7 +101,7 @@ final class MessageHandlerResolver extends TypeResolver
                 continue;
             }
 
-            if ($this->getInvokableMethod($reflectionMethods)) {
+            if ($count > 1 && $this->getInvokableMethod($reflectionMethods)) {
                 throw $this->createException(self::METHOD_NOT_ALLOWED, $reflectionClass->getName());
             }
 
@@ -113,13 +110,15 @@ final class MessageHandlerResolver extends TypeResolver
             $this->addReferenceToDefinition($definition, $reflectionClass, '__construct');
 
             $definitions[] = $definition;
+
+            $count++;
         }
 
         return $definitions === [] ? null : $definitions;
     }
 
     /**
-     * @throws DefinitionException when method not found
+     * @throws DefinitionException when method not found or not public
      * @throws DefinitionException when first parameter aka message is not found in method
      */
     private function getDefinition(
@@ -143,17 +142,6 @@ final class MessageHandlerResolver extends TypeResolver
         );
     }
 
-    private function sortMessageHandlersByPriority(array $map): array
-    {
-        foreach ($map as &$handlers) {
-            usort($handlers, function ($a, $b) {
-                return $a['priority'] <=> $b['priority'];
-            });
-        }
-
-        return $map;
-    }
-
     private function gatherDefinitionsByMessageName(array $definitions): array
     {
         $map = [];
@@ -166,6 +154,17 @@ final class MessageHandlerResolver extends TypeResolver
                     $map[$def->messageName][] = $def->jsonSerialize();
                 }
             }
+        }
+
+        return $map;
+    }
+
+    private function sortMessageHandlersByPriority(array $map): array
+    {
+        foreach ($map as &$handlers) {
+            usort($handlers, function ($a, $b) {
+                return $a['priority'] <=> $b['priority'];
+            });
         }
 
         return $map;

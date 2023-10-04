@@ -16,6 +16,7 @@ class Loader
     public function __construct(protected MapBuilder $mapBuilder)
     {
         $this->map = $this->mapBuilder->inMemory();
+        //$this->map = $this->mapBuilder->build();
     }
 
     /**
@@ -24,23 +25,6 @@ class Loader
     public function getReporters(): array
     {
         return $this->map[AsReporter::class];
-    }
-
-    public function getReporter(string $name): ?array
-    {
-        $reporter = $this->map[AsReporter::class][$name] ?? null;
-
-        if ($reporter !== []) {
-            return $reporter;
-        }
-
-        foreach ($this->map[AsReporter::class] as $class => $reporter) {
-            if ($reporter['alias'] === $name) {
-                return $reporter;
-            }
-        }
-
-        return null;
     }
 
     public function getSubscribers(): array

@@ -14,7 +14,6 @@ class AttributeServiceProvider extends ServiceProvider implements DeferrableProv
 {
     public function boot(): void
     {
-
         // create cache file from a config file which include directories to scan, autoload classes and namespaces
         // and exclude directories or tests
     }
@@ -33,13 +32,11 @@ class AttributeServiceProvider extends ServiceProvider implements DeferrableProv
 
         //$this->app->when(NameReporter::class)->needs('$name')->give('foo');
 
-        $this->app->singleton(ServiceRegistry::class);
-
-        $this->app[ServiceRegistry::class]->register();
+        $this->app->singleton(Loader::class);
     }
 
-    public function provides()
+    public function provides(): array
     {
-        return $this->app[ServiceRegistry::class]->provides();
+        return [Loader::class];
     }
 }

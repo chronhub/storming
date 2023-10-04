@@ -6,21 +6,22 @@ namespace Storm\Serializer;
 
 use JsonSerializable;
 
+/**
+ * @template T as non-empty-string|array<string,mixed>
+ * @template S as int<1,max>|null
+ */
 final readonly class Payload implements JsonSerializable
 {
-    //todo content and header a string (json) should be used for EventPayload only
-    /**
-     * @param non-empty-string|array<string|array>                $content
-     * @param non-empty-string|array<string|array<string, mixed>> $headers
-     * @param null|int<1,max>                                     $seqNo
-     */
     public function __construct(
-        public string|array $content,
-        public string|array $headers,
-        public ?int $seqNo = null)
-    {
+        /** @var T */ public string|array $content,
+        /** @var T */ public string|array $headers,
+        /** @var S */ public ?int $seqNo = null
+    ) {
     }
 
+    /**
+     * @return array{headers:T,content:T,seqNo:S}
+     */
     public function jsonSerialize(): array
     {
         return [

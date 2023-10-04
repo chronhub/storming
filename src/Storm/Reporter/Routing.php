@@ -4,32 +4,25 @@ declare(strict_types=1);
 
 namespace Storm\Reporter;
 
-use Illuminate\Contracts\Container\Container;
-use Storm\Support\ContainerAsClosure;
-use Storm\Support\MessageAliasBinding;
+use Storm\Contract\Reporter\Router;
 
-class Routing
+final readonly class Routing
 {
-    private Container $container;
-
-    public function __construct(ContainerAsClosure $container)
+    public function __construct(private Router $router)
     {
-        $this->container = $container->container;
     }
 
     /**
-     * @return array<empty|callable>
-     *
      * @throws MessageNotFound
      */
     public function route(string $messageName): array
     {
-        $alias = MessageAliasBinding::fromMessageName($messageName);
+        $handlers = $this->router->get($messageName);
 
-        if (! $this->container->has($alias)) {
+        if ($handlers === null) {
             throw MessageNotFound::withMessageName($messageName);
         }
 
-        return $this->container[$alias];
+        return $handlers;
     }
 }

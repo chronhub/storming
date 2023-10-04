@@ -9,7 +9,7 @@ use Storm\Reporter\ReportCommand;
 use Storm\Reporter\Subscriber\DispatchMessage;
 use Storm\Reporter\Subscriber\HandleCommand;
 use Storm\Reporter\Subscriber\MakeMessage;
-use Storm\Reporter\Subscriber\RequireOneMessageHandlerOnly;
+use Storm\Reporter\Subscriber\OneMessageHandlerOnly;
 use Storm\Reporter\Subscriber\RouteMessage;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
@@ -27,7 +27,7 @@ it('test dispatch', function () {
         RouteMessage::class,
         DispatchMessage::class,
         HandleCommand::class,
-        RequireOneMessageHandlerOnly::class
+        OneMessageHandlerOnly::class
     );
 
     $message = SomeCommand::fromContent(['foo' => 'bar']);

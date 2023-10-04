@@ -4,23 +4,17 @@ declare(strict_types=1);
 
 namespace Storm\Attribute;
 
-use Composer\Autoload\ClassLoader;
 use Illuminate\Support\Collection;
-use ReflectionClass;
 
-use function class_exists;
-use function str_starts_with;
+use function iterator_to_array;
 
 final readonly class MapBuilder
 {
-    private ClassLoader $classLoader;
-
     public function __construct(
         private AttributeFile $files,
         private AttributeFactory $factory,
-        string $autoload = __DIR__.'/../../../vendor/autoload.php'
+        private MapFactory $mapFactory,
     ) {
-        $this->classLoader = require $autoload;
     }
 
     // todo env
@@ -53,31 +47,13 @@ final readonly class MapBuilder
 
     private function buildMap(): Collection
     {
-        $map = $this->getAutoloadClasses();
+        $map = $this->mapFactory->fromDirectories(
+            [
+                __DIR__.'/../../../src',
+                __DIR__.'/../../../tests/Stubs',
+            ]
+        );
 
-        $classes = $this->filterClasses($map);
-
-        return $this->factory->make($classes);
-    }
-
-    /**
-     * @return Collection{class-string, string}
-     */
-    private function getAutoloadClasses(): Collection
-    {
-        return collect($this->classLoader->getClassMap());
-    }
-
-    /**
-     * @return Collection{class-string, ReflectionClass}
-     */
-    private function filterClasses(Collection $classes): Collection
-    {
-        return $classes
-            ->filter(function (string $path, string $class): bool {
-                return str_starts_with($class, 'Storm\\') && class_exists($class);
-            })->map(function (string $path, string $class): ReflectionClass {
-                return new ReflectionClass($class);
-            });
+        return $this->factory->make(collect(iterator_to_array($map)));
     }
 }

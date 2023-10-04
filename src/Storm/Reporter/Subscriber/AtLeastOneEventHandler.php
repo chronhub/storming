@@ -13,7 +13,7 @@ use Storm\Reporter\Attribute\AsSubscriber;
 use function iterator_count;
 
 #[AsSubscriber(eventName: Reporter::DISPATCH_EVENT, priority: 4900)]
-final class RequireAtLeastOneEventHandler
+final class AtLeastOneEventHandler
 {
     public function __invoke(): Closure
     {

@@ -7,9 +7,7 @@ namespace Storm\Tests\Feature;
 use ReflectionClass;
 use Storm\Attribute\Loader;
 use Storm\Reporter\Subscriber\DispatchMessage;
-use Storm\Support\MessageAliasBinding;
 use Storm\Tests\Stubs\Double\Annotation\SomeMessageSubscriberWithRepeatableAttribute;
-use Storm\Tests\Stubs\Double\Message\AnotherCommand;
 use Storm\Tracker\ResolvedListener;
 
 it('test', function () {
@@ -17,22 +15,6 @@ it('test', function () {
     $loader = $this->app[Loader::class];
 
     dump($loader->getMap()->jsonSerialize());
-});
-
-it('test message bindings', function () {
-    $messageName = MessageAliasBinding::fromMessageName(AnotherCommand::class);
-    $handlers = $this->app[$messageName];
-
-    $command = AnotherCommand::fromContent(['foo' => 'bar']);
-
-    $result = [];
-    foreach ($handlers as $handler) {
-        $result[] = $handler($command);
-    }
-
-    expect($result)
-        ->toHaveCount(2)
-        ->toBe([$command, $command]);
 });
 
 it('register reporters', function () {

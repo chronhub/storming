@@ -13,12 +13,15 @@ abstract class Definition implements JsonSerializable
      */
     protected array $references = [];
 
+    /**
+     * @param array<non-empty-string, non-empty-string> $parameters
+     */
     public function addMethod(string $methodName, array $parameters = []): void
     {
         if ($methodName === '__invoke' && $parameters === []) {
             return;
         }
 
-        $this->references[] = [$methodName => $parameters];
+        $this->references += [$methodName => $parameters];
     }
 }

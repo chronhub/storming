@@ -12,13 +12,13 @@ use function class_exists;
 final class ReporterDefinition extends Definition
 {
     public function __construct(
-        public readonly string $className,
+        public readonly string $class,
         public readonly string $alias,
         public readonly string $filter,
         public readonly string $tracker,
     ) {
-        if (! class_exists($this->className)) {
-            throw new InvalidArgumentException("Class $this->className does not exist");
+        if (! class_exists($this->class)) {
+            throw new InvalidArgumentException("Class $this->class does not exist");
         }
     }
 
@@ -28,7 +28,7 @@ final class ReporterDefinition extends Definition
     public function jsonSerialize(): array
     {
         return [
-            'class' => $this->className,
+            'class' => $this->class,
             'alias' => $this->alias,
             'filter' => $this->filter,
             'tracker' => $this->tracker,

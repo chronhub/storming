@@ -40,10 +40,6 @@ final class Message
 
     public function name(): string
     {
-        if (! $this->isMessaging()) {
-            return $this->event::class;
-        }
-
         return $this->headers[Header::EVENT_TYPE] ?? $this->event::class;
     }
 

@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Storm\Reporter;
 
 use Illuminate\Contracts\Container\Container;
+use Illuminate\Support\Arr;
 use InvalidArgumentException;
+use Storm\Attribute\Loader;
 use Storm\Contract\Reporter\MessageFilter;
 use Storm\Contract\Reporter\Reporter;
+use Storm\Contract\Reporter\ReporterManager;
 use Storm\Reporter\Listener\FilterMessageListener;
 use Storm\Reporter\Listener\NameReporterListener;
 use Storm\Support\ContainerAsClosure;
@@ -17,7 +20,7 @@ use function array_merge;
 use function array_unique;
 use function array_values;
 
-class ReporterManager
+final class ReportingManager implements ReporterManager
 {
     protected Container $container;
 
@@ -26,7 +29,7 @@ class ReporterManager
     protected array $reporters = [];
 
     public function __construct(
-        protected ReporterMap $map,
+        protected Loader $map,
         ContainerAsClosure $container
     ) {
         $this->container = $container->container;
@@ -43,7 +46,7 @@ class ReporterManager
 
     public function wire(): void
     {
-        $loaders = $this->map->list();
+        $loaders = $this->list();
 
         foreach ($loaders as $class => $alias) {
             $this->container->singleton($class, function () use ($class) {
@@ -56,16 +59,16 @@ class ReporterManager
         }
     }
 
-    public function getLoaded(): array
+    public function provides(): array
     {
-        $list = $this->map->list();
+        $list = $this->list();
 
         return array_unique(array_merge(array_keys($list), array_values($list)));
     }
 
-    protected function resolve(string $name): Reporter
+    private function resolve(string $name): Reporter
     {
-        [$class, $alias, $tracker, $filter] = $this->load($name);
+        [$class, $alias, $tracker, $filter] = $this->find($name);
 
         $instance = new $class($this->container[$tracker]);
         $instance->setContainer($this->container);
@@ -80,18 +83,7 @@ class ReporterManager
         return $this->reporters[$class] = $instance;
     }
 
-    protected function load(string $name): array
-    {
-        $reporter = $this->map->find($name);
-
-        if ($reporter === null) {
-            throw new InvalidArgumentException("Reporter [$name] is not found.");
-        }
-
-        return $reporter;
-    }
-
-    protected function resolved(string $name): ?Reporter
+    private function resolved(string $name): ?Reporter
     {
         if (isset($this->reporters[$name])) {
             return $this->reporters[$name];
@@ -104,7 +96,28 @@ class ReporterManager
         return null;
     }
 
-    protected function addFilterSubscriber(Reporter $reporter, string $filter): void
+    /**
+     * @return array{class-string, non-empty-string, non-empty-string, non-empty-string}
+     *
+     * @throws InvalidArgumentException when reporter is not found
+     */
+    private function find(string $name): array
+    {
+        foreach ($this->map->getReporters() as $map) {
+            if ($map['class'] === $name || $map['alias'] === $name) {
+                return [$map['class'], $map['alias'], $map['tracker'], $map['filter']];
+            }
+        }
+
+        throw new InvalidArgumentException("Reporter [$name] is not found.");
+    }
+
+    private function list(): array
+    {
+        return Arr::mapWithKeys($this->map->getReporters(), fn (array $map): array => [$map['class'] => $map['alias']]);
+    }
+
+    private function addFilterSubscriber(Reporter $reporter, string $filter): void
     {
         $messageFilter = $this->container[$filter];
 
@@ -117,7 +130,7 @@ class ReporterManager
         $reporter->subscribe($subscriber);
     }
 
-    protected function addNameSubscriber(Reporter $reporter, string $name): void
+    private function addNameSubscriber(Reporter $reporter, string $name): void
     {
         $reporter->subscribe(new NameReporterListener($name));
     }

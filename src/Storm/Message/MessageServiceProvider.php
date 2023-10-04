@@ -25,7 +25,7 @@ class MessageServiceProvider extends ServiceProvider implements DeferrableProvid
         });
 
         $this->app->singleton(MessageFactory::class, GenericMessageFactory::class);
-        $this->app->singleton(MessageProducer::class, SyncMessageProducer::class);
+        $this->app->singleton('message.producer.sync', SyncMessageProducer::class);
     }
 
     public function provides(): array

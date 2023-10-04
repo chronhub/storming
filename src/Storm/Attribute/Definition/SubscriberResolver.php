@@ -8,7 +8,7 @@ use Illuminate\Container\EntryNotFoundException;
 use Illuminate\Support\Collection;
 use ReflectionAttribute;
 use ReflectionClass;
-use RuntimeException;
+use Storm\Attribute\Exception\DefinitionException;
 use Storm\Reporter\Attribute\AsSubscriber;
 
 final class SubscriberResolver extends TypeResolver
@@ -30,7 +30,6 @@ final class SubscriberResolver extends TypeResolver
      * @param array<ReflectionAttribute> $attributes>
      *
      * @throws EntryNotFoundException
-     * @throws RuntimeException       when method has parameters
      */
     private function findInClass(ReflectionClass $reflectionClass, array $attributes): SubscriberDefinition
     {
@@ -61,6 +60,8 @@ final class SubscriberResolver extends TypeResolver
     /**
      * checkMe allow later to use constructor parameters and public method parameters
      * could be useful when a subscriber provide many events but require different dependencies
+     *
+     * @throws DefinitionException when method has parameters
      */
     private function assertMethodHasNoParameter(ReflectionClass $reflectionClass, string $methodName): void
     {
@@ -69,7 +70,7 @@ final class SubscriberResolver extends TypeResolver
         $parameters = $reflectionMethod->getParameters();
 
         if ($parameters !== []) {
-            throw new RuntimeException("Method $methodName for class {$reflectionClass->getName()} must not have parameters");
+            throw new DefinitionException("Method $methodName for class {$reflectionClass->getName()} must not have parameters");
         }
     }
 }

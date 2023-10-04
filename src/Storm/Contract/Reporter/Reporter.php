@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Storm\Contract\Reporter;
 
 use React\Promise\PromiseInterface;
-use Storm\Contract\Tracker\Listener;
 use Storm\Contract\Tracker\MessageTracker;
-use Storm\Reporter\Attribute\AsSubscriber;
 
 interface Reporter
 {
@@ -30,9 +28,6 @@ interface Reporter
      * @template T of object|non-empty-string
      *
      * @param T ...$messageSubscribers
-     *
-     * Object can be class name which implements attribute @see AsSubscriber attribute
-     * or an instance of @see Listener
      */
     public function subscribe(object|string ...$messageSubscribers): void;
 

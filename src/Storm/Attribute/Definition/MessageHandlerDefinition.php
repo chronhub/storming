@@ -12,14 +12,14 @@ use function class_exists;
 final class MessageHandlerDefinition extends Definition
 {
     public function __construct(
-        public readonly string $className,
+        public readonly string $class,
         public readonly string $messageName,
-        public readonly string $methodName,
+        public readonly string $method,
         public readonly int $priority,
         public readonly MessageDeclarationScope $scope,
     ) {
-        if (! class_exists($this->className)) {
-            throw new InvalidArgumentException("Class $this->className does not exist");
+        if (! class_exists($this->class)) {
+            throw new InvalidArgumentException("Class $this->class does not exist");
         }
 
         if (! class_exists($this->messageName)) {
@@ -42,8 +42,8 @@ final class MessageHandlerDefinition extends Definition
     public function jsonSerialize(): array
     {
         return [
-            'class' => $this->className,
-            'method' => $this->methodName,
+            'class' => $this->class,
+            'method' => $this->method,
             'priority' => $this->priority,
             'scope' => $this->scope->value,
             'references' => $this->references,
