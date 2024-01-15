@@ -23,7 +23,11 @@
     "chronhub/stream": "self.version",
     "chronhub/tracker": "self.version",
     "chronhub/message": "self.version",
-    "chronhub/chronicler": "self.version"
+    "chronhub/clock": "self.version",
+    "chronhub/serializer": "self.version",
+    "chronhub/chronicler": "self.version",
+    "chronhub/reporter": "self.version",
+    "chronhub/support": "self.version"
   },
   "require-dev": {
     "ext-pcntl": "*",

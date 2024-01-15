@@ -16,7 +16,7 @@ function remote()
     git remote add $1 $2 || true
 }
 
-git pull origin $CURRENT_BRANCH
+#git pull origin $CURRENT_BRANCH
 
 remote contract git@github.com:chronhub/contract.git
 remote stream git@github.com:chronhub/stream.git
