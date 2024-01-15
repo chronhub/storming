@@ -11,7 +11,7 @@
   ],
   "require": {
     "php": "^8.2",
-    "chronhub/contract": "dev-main"
+    "chronhub/contract": "main"
   },
   "autoload": {
     "psr-4": {
