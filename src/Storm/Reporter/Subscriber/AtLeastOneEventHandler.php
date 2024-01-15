@@ -6,13 +6,10 @@ namespace Storm\Reporter\Subscriber;
 
 use Closure;
 use RuntimeException;
-use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\MessageStory;
-use Storm\Reporter\Attribute\AsSubscriber;
 
 use function iterator_count;
 
-#[AsSubscriber(eventName: Reporter::DISPATCH_EVENT, priority: 4900)]
 final class AtLeastOneEventHandler
 {
     public function __invoke(): Closure

@@ -21,8 +21,9 @@ trait HasConstructableReporter
 {
     protected ?Container $container = null;
 
-    public function __construct(protected readonly ?MessageTracker $tracker = new TrackMessage())
-    {
+    public function __construct(
+        protected readonly ?MessageTracker $tracker = new TrackMessage()
+    ) {
     }
 
     public function subscribe(object|string ...$messageSubscribers): void

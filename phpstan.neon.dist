@@ -1,9 +1,10 @@
 includes:
-    - ./vendor/nunomaduro/larastan/extension.neon
+    - ./vendor/larastan/larastan/extension.neon
 
 parameters:
     paths:
         - src
+        - tests
 
     level: 5
 

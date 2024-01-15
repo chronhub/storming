@@ -5,10 +5,7 @@ declare(strict_types=1);
 namespace Storm\Reporter;
 
 use Storm\Contract\Reporter\Reporter;
-use Storm\Reporter\Attribute\AsReporter;
-use Storm\Reporter\Filter\AllowsAnyCommand;
 
-#[AsReporter(name: 'reporter-command-default', filter: AllowsAnyCommand::class)]
 final class ReportCommand implements Reporter
 {
     use DelegateToQueue;

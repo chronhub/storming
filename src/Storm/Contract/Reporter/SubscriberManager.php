@@ -8,7 +8,5 @@ interface SubscriberManager
 {
     public function register(string $name): void;
 
-    public function wire(): void;
-
     public function provides(): array;
 }

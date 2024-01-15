@@ -8,7 +8,7 @@ use JsonSerializable;
 
 /**
  * @template T as non-empty-string|array<string,mixed>
- * @template S as int<1,max>|null
+ * @template S as positive-int|null
  */
 final readonly class Payload implements JsonSerializable
 {

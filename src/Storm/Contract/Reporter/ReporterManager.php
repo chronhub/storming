@@ -8,7 +8,5 @@ interface ReporterManager
 {
     public function create(string $name): Reporter;
 
-    public function wire(): void;
-
     public function provides(): array;
 }

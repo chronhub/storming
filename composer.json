@@ -11,7 +11,8 @@
   ],
   "require": {
     "php": "^8.2",
-    "react/react": "^1.3",
+    "laravel/framework": "10.x-dev",
+    "react/promise": "^3.x-dev",
     "symfony/uid": "6.3.x",
     "symfony/clock": "^6.4",
     "symfony/serializer": "^6.4",
@@ -27,15 +28,13 @@
   "require-dev": {
     "ext-pcntl": "*",
     "ext-posix": "*",
-    "laravel/pint": "^v1.1",
+    "doctrine/dbal": "^3.7",
+    "laravel/pint": "^v1.3",
     "pestphp/pest": "2.x-dev",
     "pestphp/pest-plugin-type-coverage": "2.x-dev",
-    "nunomaduro/larastan": "^2.6",
-    "nunomaduro/phpinsights": "dev-master",
+    "larastan/larastan": "^2.8",
     "orchestra/testbench": "^8.x-dev",
     "phpstan/phpstan": "^1.1",
-    "phpunit/phpunit": "^10.3",
-    "rector/rector": "dev-main",
     "roave/security-advisories": "dev-latest"
   },
   "autoload": {
@@ -52,11 +51,7 @@
     ]
   },
   "scripts": {
-    "test": "vendor/bin/phpunit",
-    "pint": "vendor/bin/pint",
-    "rector-init": "vendor/bin/rector init",
-    "rector-dry": "vendor/bin/rector process --dry-run",
-    "rector-process": "vendor/bin/rector process"
+    "pint": "vendor/bin/pint"
   },
   "config": {
     "optimize-autoloader": false,

@@ -30,7 +30,6 @@ final readonly class FilterMessageListener implements Listener
     {
         return function (MessageStory $story): void {
             if (! $this->messageFilter->allows($story->message())) {
-                // checkMe raise exception from filters and handle it here ?
                 throw new RuntimeException('Dispatching message event is not allowed');
             }
         };

@@ -6,11 +6,8 @@ namespace Storm\Reporter\Subscriber;
 
 use Closure;
 use Storm\Contract\Message\Header;
-use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\MessageStory;
-use Storm\Reporter\Attribute\AsSubscriber;
 
-//#[AsSubscriber(eventName: Reporter::DISPATCH_EVENT, priority: 98000)]
 final readonly class NameReporter
 {
     public function __construct(private string $name)

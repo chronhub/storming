@@ -56,7 +56,7 @@ class StreamDraft implements StreamStory
 
     public function hasStreamNotFound(): bool
     {
-        // checkMe check behaviour with NoStreamEventReturn
+        // checkMe the behavior with NoStreamEventReturn
         return $this->exception instanceof StreamNotFound;
     }
 
