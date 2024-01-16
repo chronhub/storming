@@ -2,11 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Storm\Message;
+namespace Storm\Reporter\Producer;
 
 use RuntimeException;
 use Storm\Contract\Message\Header;
 use Storm\Contract\Message\MessageProducer;
+use Storm\Message\Message;
 
 final class SyncMessageProducer implements MessageProducer
 {

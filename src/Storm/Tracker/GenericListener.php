@@ -35,7 +35,7 @@ final class GenericListener implements Listener
 
     public function story(): callable
     {
-        return $this->story;
+        return ($this->story)();
     }
 
     public function origin(): string

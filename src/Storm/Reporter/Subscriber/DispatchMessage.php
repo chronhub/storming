@@ -16,7 +16,6 @@ final readonly class DispatchMessage
 
     public function __invoke(): Closure
     {
-        // todo assume sync
         return function (MessageStory $story): void {
             $message = $story->message();
 

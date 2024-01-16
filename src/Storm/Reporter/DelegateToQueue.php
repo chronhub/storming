@@ -19,7 +19,6 @@ trait DelegateToQueue
 
     /**
      * Queue and process one message at a time.
-     * Only relevant for sync process.
      *
      * @throws Throwable
      */

@@ -7,7 +7,6 @@ namespace Storm\Message;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 use Storm\Contract\Message\MessageFactory;
-use Storm\Contract\Message\MessageProducer;
 use Storm\Contract\Serializer\MessageSerializer;
 use Storm\Serializer\JsonSerializer;
 use Storm\Serializer\MessageContentSerializer;
@@ -25,7 +24,6 @@ class MessageServiceProvider extends ServiceProvider implements DeferrableProvid
         });
 
         $this->app->singleton(MessageFactory::class, GenericMessageFactory::class);
-        $this->app->singleton('message.producer.sync', SyncMessageProducer::class);
     }
 
     public function provides(): array
@@ -33,7 +31,6 @@ class MessageServiceProvider extends ServiceProvider implements DeferrableProvid
         return [
             MessageSerializer::class,
             MessageFactory::class,
-            MessageProducer::class,
         ];
     }
 }
