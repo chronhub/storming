@@ -11,7 +11,7 @@ final class StreamName implements Stringable
 {
     public function __construct(public string $name)
     {
-        if ($this->name === '') {
+        if (blank($this->name)) {
             throw new InvalidArgumentException('Stream name given can not be empty');
         }
     }

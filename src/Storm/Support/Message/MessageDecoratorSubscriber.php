@@ -22,7 +22,7 @@ final class MessageDecoratorSubscriber
             }
 
             if ($message->hasNot(Header::EVENT_TIME)) {
-                $message = $message->withHeader(Header::EVENT_TIME, Carbon::now('UTC')->format('Y-m-d TH:i:s.u'));
+                $message = $message->withHeader(Header::EVENT_TIME, Carbon::now('UTC')->format('Y-m-d\TH:i:s.u'));
             }
 
             if ($message->hasNot(Header::EVENT_TYPE)) {

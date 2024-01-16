@@ -17,7 +17,7 @@ final readonly class GenericMessageFactory implements MessageFactory
     }
 
     /**
-     * @param object|array{content:array|empty,headers:array} $message
+     * @param object|array{content:array|empty,headers:array|empty} $message
      */
     public function createMessageFrom(object|array $message): Message
     {

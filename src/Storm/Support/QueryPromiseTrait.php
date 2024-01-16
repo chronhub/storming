@@ -8,7 +8,7 @@ use React\Promise\PromiseInterface;
 
 trait QueryPromiseTrait
 {
-    public function handle(PromiseInterface $promise, bool $raiseException = true): mixed
+    public function handlePromise(PromiseInterface $promise, bool $raiseException = true): mixed
     {
         $result = null;
         $exception = null;
