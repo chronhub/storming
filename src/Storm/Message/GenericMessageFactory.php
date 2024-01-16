@@ -21,12 +21,8 @@ final readonly class GenericMessageFactory implements MessageFactory
      */
     public function createMessageFrom(object|array $message): Message
     {
-        // checkMe we delegate error to the serializer
-        // we could normalize message here or with dependency
-        // to fit requirement of payload/serializer with Header::EventType
         if (is_array($message)) {
             $message = $this->messageSerializer->deserializePayload(
-                /** @phpstan-ignore-next-line  */
                 new Payload($message['content'] ?? [], $message['headers'] ?? [])
             );
         }
