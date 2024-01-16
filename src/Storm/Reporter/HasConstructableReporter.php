@@ -11,6 +11,7 @@ use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\Listener;
 use Storm\Contract\Tracker\MessageStory;
 use Storm\Contract\Tracker\MessageTracker;
+use Storm\Reporter\Exception\MessageNotHandled;
 use Storm\Tracker\TrackMessage;
 use Throwable;
 use TypeError;

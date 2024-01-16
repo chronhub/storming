@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Reporter;
+namespace Storm\Reporter\Exception;
 
 use RuntimeException;
 
