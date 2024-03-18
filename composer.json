@@ -27,13 +27,14 @@
     "chronhub/serializer": "self.version",
     "chronhub/chronicler": "self.version",
     "chronhub/reporter": "self.version",
+    "chronhub/projector": "self.version",
     "chronhub/support": "self.version"
   },
   "require-dev": {
     "ext-pcntl": "*",
     "ext-posix": "*",
-    "doctrine/dbal": "^3.7",
-    "laravel/pint": "^v1.3",
+    "doctrine/dbal": "^3.9",
+    "laravel/pint": "^v1.14",
     "pestphp/pest": "2.x-dev",
     "pestphp/pest-plugin-type-coverage": "2.x-dev",
     "larastan/larastan": "^2.8",
