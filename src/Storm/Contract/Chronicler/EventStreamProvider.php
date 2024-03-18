@@ -13,12 +13,12 @@ interface EventStreamProvider
     /**
      * @return array<string>
      */
-    public function filterByAscendantStreams(array $streamNames): array;
+    public function filterByStreams(array $streamNames): array;
 
     /**
      * @return array<string>
      */
-    public function filterByAscendantCategories(array $categoryNames): array;
+    public function filterByCategories(array $categoryNames): array;
 
     /**
      * @return array<string>

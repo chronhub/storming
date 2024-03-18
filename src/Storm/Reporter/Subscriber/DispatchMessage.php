@@ -8,6 +8,9 @@ use Closure;
 use Storm\Contract\Message\MessageProducer;
 use Storm\Contract\Tracker\MessageStory;
 
+/**
+ * @deprecated
+ */
 final readonly class DispatchMessage
 {
     public function __construct(private MessageProducer $messageProducer)

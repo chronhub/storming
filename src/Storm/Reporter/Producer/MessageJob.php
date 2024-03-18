@@ -34,7 +34,7 @@ class MessageJob
 
     public function __construct(public readonly array $payload)
     {
-        $this->setQueueOptions($this->payload['headers']['queue'] ?? []);
+        $this->setQueueOptions($this->payload['headers'][Header::QUEUE] ?? []);
     }
 
     public function handle(Container $container): void

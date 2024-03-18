@@ -41,13 +41,13 @@ describe('create', function (): void {
     test('new event stream with category', function (): void {
         expect($this->eventStreamProvider->createStream('credit_card', null, 'payment'))->toBe(true)
             ->and($this->eventStreamProvider->createStream('bitcoin', null, 'payment'))->toBe(true)
-            ->and($this->eventStreamProvider->filterByAscendantCategories(['payment']))->toBe(['bitcoin', 'credit_card']);
+            ->and($this->eventStreamProvider->filterByCategories(['payment']))->toBe(['bitcoin', 'credit_card']);
     });
 
     test('does not duplicate category when already exists', function (): void {
         expect($this->eventStreamProvider->createStream('bitcoin', null, 'payment'))->toBe(true)
             ->and($this->eventStreamProvider->createStream('bitcoin', null, 'payment'))->toBe(false)
-            ->and($this->eventStreamProvider->filterByAscendantCategories(['payment']))->toBe(['bitcoin']);
+            ->and($this->eventStreamProvider->filterByCategories(['payment']))->toBe(['bitcoin']);
     });
 });
 
@@ -62,9 +62,9 @@ describe('delete', function (): void {
     test('event stream per category', function (): void {
         expect($this->eventStreamProvider->createStream('bitcoin', null, 'payment'))->toBe(true)
             ->and($this->eventStreamProvider->createStream('credit_card', null, 'payment'))->toBe(true)
-            ->and($this->eventStreamProvider->filterByAscendantCategories(['payment']))->toBe(['bitcoin', 'credit_card'])
+            ->and($this->eventStreamProvider->filterByCategories(['payment']))->toBe(['bitcoin', 'credit_card'])
             ->and($this->eventStreamProvider->deleteStream('credit_card'))->toBe(true)
-            ->and($this->eventStreamProvider->filterByAscendantCategories(['payment']))->toBe(['bitcoin']);
+            ->and($this->eventStreamProvider->filterByCategories(['payment']))->toBe(['bitcoin']);
     });
 
     test('return false when event stream does not exists', function (string $streamName): void {
@@ -85,6 +85,6 @@ describe('filter event stream', function (): void {
         expect($this->eventStreamProvider->createStream('foo', null))->toBe(true)
             ->and($this->eventStreamProvider->createStream('bar', null, 'some_category'))->toBe(true)
             ->and($this->eventStreamProvider->createStream('$_internal', null))->toBe(true)
-            ->and($this->eventStreamProvider->filterByAscendantStreams([new StreamName('foo'), '$_internal', 'some_category', 'bar', 'no_stream']))->toBe(['$_internal', 'foo']);
+            ->and($this->eventStreamProvider->filterByStreams([new StreamName('foo'), '$_internal', 'some_category', 'bar', 'no_stream']))->toBe(['$_internal', 'foo']);
     });
 });

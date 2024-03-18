@@ -8,6 +8,9 @@ use Closure;
 use Storm\Contract\Tracker\MessageStory;
 use Storm\Reporter\Routing;
 
+/**
+ * @deprecated
+ */
 final readonly class RouteMessage
 {
     public function __construct(private Routing $routing)

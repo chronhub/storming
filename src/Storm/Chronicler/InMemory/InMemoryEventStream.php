@@ -17,7 +17,7 @@ use function str_starts_with;
 final readonly class InMemoryEventStream implements EventStreamProvider
 {
     /**
-     * @var Collection{non-empty-string, non-empty-string|null}
+     * @var Collection{string, string|null}
      */
     private Collection $eventStreams;
 
@@ -48,7 +48,7 @@ final readonly class InMemoryEventStream implements EventStreamProvider
         return true;
     }
 
-    public function filterByAscendantStreams(array $streamNames): array
+    public function filterByStreams(array $streamNames): array
     {
         foreach ($streamNames as &$streamName) {
             if ($streamName instanceof StreamName) {
@@ -56,21 +56,21 @@ final readonly class InMemoryEventStream implements EventStreamProvider
             }
         }
 
-        return $this->sortAndPluckKeys(
+        return $this->pluckKeys(
             static fn (?string $category, string $streamName) => is_null($category) && in_array($streamName, $streamNames, true)
         );
     }
 
-    public function filterByAscendantCategories(array $categoryNames): array
+    public function filterByCategories(array $categoryNames): array
     {
-        return $this->sortAndPluckKeys(
+        return $this->pluckKeys(
             static fn (?string $category) => is_string($category) && in_array($category, $categoryNames, true)
         );
     }
 
     public function allWithoutInternal(): array
     {
-        return $this->sortAndPluckKeys(
+        return $this->pluckKeys(
             static fn (?string $category, string $streamName) => ! str_starts_with($streamName, '$')
         );
     }
@@ -80,8 +80,8 @@ final readonly class InMemoryEventStream implements EventStreamProvider
         return $this->eventStreams->has($streamName);
     }
 
-    private function sortAndPluckKeys(Closure $callback): array
+    private function pluckKeys(Closure $callback): array
     {
-        return $this->eventStreams->filter($callback)->sortKeys()->keys()->toArray();
+        return $this->eventStreams->filter($callback)->keys()->toArray();
     }
 }

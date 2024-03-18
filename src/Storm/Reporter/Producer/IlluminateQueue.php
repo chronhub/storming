@@ -19,21 +19,10 @@ class IlluminateQueue
 
     public function toQueue(Message $message): void
     {
-        $queueMessage = $this->bindQueue($message);
-
-        $payload = $this->messageSerializer->serializeMessage($queueMessage);
+        $payload = $this->messageSerializer->serializeMessage($message);
 
         $messageJob = new MessageJob($payload->jsonSerialize());
 
         $this->dispatcher->dispatchToQueue($messageJob);
-    }
-
-    protected function bindQueue(Message $message): Message
-    {
-        if ($message->hasNot(Header::QUEUE)) {
-            $message = $message->withHeader(Header::QUEUE, 'default');
-        }
-
-        return $message;
     }
 }
