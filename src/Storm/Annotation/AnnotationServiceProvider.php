@@ -9,7 +9,7 @@ use Illuminate\Support\ServiceProvider;
 
 class AnnotationServiceProvider extends ServiceProvider implements DeferrableProvider
 {
-    protected string $configPath = __DIR__.'./config/annotation.php';
+    protected string $configPath = __DIR__.'/config/annotation.php';
 
     public function boot(): void
     {
