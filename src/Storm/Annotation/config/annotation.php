@@ -19,6 +19,7 @@ return [
         \Storm\Reporter\Subscriber\HandleQuery::class,
         \Storm\Reporter\Subscriber\TransactionalCommand::class,
         \Storm\Reporter\Subscriber\CorrelationHeaderCommand::class,
+        \Storm\Chronicler\Publisher\EventPublisherSubscriber::class,
     ],
 
     'message_handlers' => [
