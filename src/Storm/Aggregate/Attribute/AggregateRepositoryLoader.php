@@ -18,7 +18,7 @@ use function count;
 
 class AggregateRepositoryLoader extends AnnotationLoader
 {
-    public const ATTRIBUTE_NAME = AsAggregateRepository::class;
+    public const string ATTRIBUTE_NAME = AsAggregateRepository::class;
 
     /**
      * @var Collection<SubscriberAttribute>
@@ -34,7 +34,7 @@ class AggregateRepositoryLoader extends AnnotationLoader
     {
         $classes = config('annotation.aggregate_repository');
 
-        $this->loadAttributes($classes);
+        $this->loadAttributes(collect($classes));
 
         return $this->attributes;
     }
