@@ -10,7 +10,7 @@
     }
   ],
   "require": {
-    "php": "^8.2",
+    "php": "^8.3",
     "laravel/framework": "10.x-dev",
     "react/promise": "^3.x-dev",
     "symfony/uid": "6.3.x",
@@ -19,6 +19,7 @@
     "composer-runtime-api": "^2.2"
   },
   "replace": {
+    "chronhub/annotation": "self.version",
     "chronhub/contract": "self.version",
     "chronhub/stream": "self.version",
     "chronhub/tracker": "self.version",
