@@ -32,7 +32,7 @@ class AggregateRepositoryLoader extends AnnotationLoader
 
     public function getAttributes(): Collection
     {
-        $classes = config('annotation.aggregate_repository');
+        $classes = config('annotation.aggregate_repositories');
 
         $this->loadAttributes(collect($classes));
 

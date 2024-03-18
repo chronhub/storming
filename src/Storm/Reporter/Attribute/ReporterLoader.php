@@ -13,7 +13,7 @@ use Storm\Message\Attribute\MessageAttribute;
 
 class ReporterLoader extends AnnotationLoader
 {
-    public const ATTRIBUTE_NAME = AsReporter::class;
+    public const string ATTRIBUTE_NAME = AsReporter::class;
 
     /**
      * @var Collection<MessageAttribute>
@@ -29,7 +29,7 @@ class ReporterLoader extends AnnotationLoader
     {
         $classes = config('annotation.reporters', []);
 
-        $this->loadAttributes($classes);
+        $this->loadAttributes(collect($classes));
 
         return $this->attributes;
     }
