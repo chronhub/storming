@@ -6,7 +6,7 @@ namespace Storm\Contract\Chronicler;
 
 interface EventStreamProvider
 {
-    public function createStream(string $streamName, ?string $streamTable, string $category = null): bool;
+    public function createStream(string $streamName, ?string $streamTable, ?string $partition = null): bool;
 
     public function deleteStream(string $streamName): bool;
 

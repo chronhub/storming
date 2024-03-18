@@ -28,6 +28,7 @@ remote stream git@github.com:chronhub/stream.git
 remote support git@github.com:chronhub/support.git
 remote tracker git@github.com:chronhub/tracker.git
 remote projector git@github.com:chronhub/projector.git
+remote aggregate git@github.com:chronhub/aggregate.git
 
 split 'src/Storm/Clock' clock
 split 'src/Storm/Contract' contract
@@ -39,3 +40,4 @@ split 'src/Storm/Stream' stream
 split 'src/Storm/Support' support
 split 'src/Storm/Tracker' tracker
 split 'src/Storm/Projector' projector
+split 'src/Storm/Aggregate' aggregate

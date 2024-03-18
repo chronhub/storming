@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Reporter\Producer;
 
 use Illuminate\Contracts\Bus\QueueingDispatcher;
-use Storm\Contract\Message\Header;
+use InvalidArgumentException;
 use Storm\Contract\Serializer\MessageSerializer;
 use Storm\Message\Message;
 
@@ -17,11 +17,15 @@ class IlluminateQueue
     ) {
     }
 
-    public function toQueue(Message $message): void
+    public function toQueue(Message $message, array $currentQueue): void
     {
+        if ($currentQueue === []) {
+            throw new InvalidArgumentException('Queue cannot be empty for message name'.$message->name());
+        }
+
         $payload = $this->messageSerializer->serializeMessage($message);
 
-        $messageJob = new MessageJob($payload->jsonSerialize());
+        $messageJob = new MessageJob($payload->jsonSerialize(), $currentQueue);
 
         $this->dispatcher->dispatchToQueue($messageJob);
     }

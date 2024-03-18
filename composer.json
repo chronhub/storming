@@ -28,6 +28,7 @@
     "chronhub/chronicler": "self.version",
     "chronhub/reporter": "self.version",
     "chronhub/projector": "self.version",
+    "chronhub/aggregate": "self.version",
     "chronhub/support": "self.version"
   },
   "require-dev": {

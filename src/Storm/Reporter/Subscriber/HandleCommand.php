@@ -6,8 +6,16 @@ namespace Storm\Reporter\Subscriber;
 
 use Closure;
 use Storm\Contract\Message\Header;
+use Storm\Contract\Reporter\Reporter;
 use Storm\Contract\Tracker\MessageStory;
+use Storm\Reporter\Attribute\Subscriber\AsReporterSubscriber;
 
+#[AsReporterSubscriber(
+    supports: ['reporter.command.*'],
+    event: Reporter::DISPATCH_EVENT,
+    priority: 0,
+    autowire: true,
+)]
 final class HandleCommand
 {
     public function __invoke(): Closure

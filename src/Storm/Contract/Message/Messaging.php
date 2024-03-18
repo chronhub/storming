@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Message;
 
+use Storm\Message\DomainType;
+
 interface Messaging
 {
     /**
@@ -34,5 +36,5 @@ interface Messaging
      */
     public function headers(): array;
 
-    public function supportType(): string;
+    public function type(): DomainType;
 }

@@ -18,12 +18,12 @@ class MessageJob
     /**
      * The number of times the job may be attempted.
      */
-    public int $tries = 1;
+    public int $tries = 5;
 
     /**
      * The maximum number of unhandled exceptions to allow before failing
      */
-    public int $maxExceptions = 1;
+    public int $maxExceptions = 5;
 
     /**
      * The number of seconds the job can run before timing out
@@ -32,9 +32,9 @@ class MessageJob
 
     public ?int $backoff = null;
 
-    public function __construct(public readonly array $payload)
+    public function __construct(public readonly array $payload, ?array $queue = null)
     {
-        $this->setQueueOptions($this->payload['headers'][Header::QUEUE] ?? []);
+        $this->setQueueOptions($queue ?? $this->payload['headers'][Header::QUEUE] ?? []);
     }
 
     public function handle(Container $container): void

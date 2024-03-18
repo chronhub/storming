@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Storm\Reporter\Producer;
 
 use JsonSerializable;
@@ -33,11 +35,11 @@ class QueueOption implements JsonSerializable
         return [
             'connection' => $this->connection,
             'name' => $this->name,
-            'tries' => $this->tries,
-            'max_exceptions' => $this->maxExceptions,
+            'tries' => $this->tries ?? 5, //fixme: remove 5
+            'max_exceptions' => $this->maxExceptions ?? 5, //fixme: remove 5
             'delay' => $this->delay,
             'timeout' => $this->timeout,
-            'backoff' => $this->backoff,
+            'backoff' => $this->backoff ?? 1, //fixme: remove 1
         ];
     }
 }

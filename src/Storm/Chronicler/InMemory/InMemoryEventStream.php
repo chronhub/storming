@@ -26,13 +26,13 @@ final readonly class InMemoryEventStream implements EventStreamProvider
         $this->eventStreams = new Collection();
     }
 
-    public function createStream(string $streamName, ?string $streamTable, string $category = null): bool
+    public function createStream(string $streamName, ?string $streamTable, ?string $partition = null): bool
     {
         if ($this->eventStreams->has($streamName)) {
             return false;
         }
 
-        $this->eventStreams->put($streamName, $category);
+        $this->eventStreams->put($streamName, $partition);
 
         return true;
     }
