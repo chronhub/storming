@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Exception;
 
+use Storm\Projector\ProjectionStatus;
 use Throwable;
 
 class ProjectionFailed extends RuntimeException

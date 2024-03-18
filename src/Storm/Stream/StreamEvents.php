@@ -13,7 +13,7 @@ use function is_array;
 use function iterator_count;
 use function iterator_to_array;
 
-final class StreamEvents implements IteratorAggregate, Countable
+final class StreamEvents implements Countable, IteratorAggregate
 {
     private IteratorAggregate $events;
 

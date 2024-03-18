@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Clock;
 
+use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
 use DomainException;
@@ -12,6 +13,7 @@ use Storm\Contract\Clock\SystemClock;
 use Symfony\Component\Clock\MonotonicClock;
 
 use function is_string;
+use function strtoupper;
 
 final readonly class PointInTime implements SystemClock
 {
@@ -67,6 +69,25 @@ final readonly class PointInTime implements SystemClock
     public function getFormat(): string
     {
         return self::DATE_TIME_FORMAT;
+    }
+
+    public function isGreaterThan(DateTimeImmutable|string $pointInTime, DateTimeImmutable|string $anotherPointInTime): bool
+    {
+        return $this->toDateTimeImmutable($pointInTime) > $this->toDateTimeImmutable($anotherPointInTime);
+    }
+
+    public function isGreaterThanNow(DateTimeImmutable|string $pointInTime): bool
+    {
+        return $this->now() < $this->toDateTimeImmutable($pointInTime);
+    }
+
+    public function isNowSubGreaterThan(DateInterval|string $interval, DateTimeImmutable|string $pointInTime): bool
+    {
+        if (is_string($interval)) {
+            $interval = new DateInterval(strtoupper($interval));
+        }
+
+        return $this->now()->sub($interval) > $this->toDateTimeImmutable($pointInTime);
     }
 
     public function withTimeZone(DateTimeZone|string $timezone): static

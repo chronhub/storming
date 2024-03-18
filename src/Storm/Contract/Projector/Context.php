@@ -4,12 +4,14 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Projector;
 
+use Closure;
+use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Projector\Exception\InvalidArgumentException;
 
 /**
  * @template TInit of array
- * @template TWhen of array{DomainEvent,TInit,ProjectorScope}|array<DomainEvent,ProjectorScope>
+ * @template TWhen of array{DomainEvent, TInit, ProjectorScope}|array<DomainEvent, ProjectorScope>
  */
 interface Context
 {
@@ -18,13 +20,13 @@ interface Context
      * checkMe: Do not use dot notation in array keys, as we use it internally.
      * Wip unless we move to a collection object
      *
-     * @param \Closure():TInit $userState
+     * @param Closure():TInit $userState
      *
      * @throws InvalidArgumentException When user state is already set
      *
      * @example $context->initialize(fn(): array => ['count' => 0]);
      */
-    public function initialize(\Closure $userState): self;
+    public function initialize(Closure $userState): self;
 
     /**
      * Sets the streams to fetch events from.
@@ -57,14 +59,14 @@ interface Context
      *
      * @throws InvalidArgumentException When reactors are already set
      */
-    public function when(\Closure $reactors): self;
+    public function when(Closure $reactors): self;
 
     /**
      * Stop the projection when a condition is met.
      *
      * @return $this
      */
-    public function haltOn(\Closure $haltOn): self;
+    public function haltOn(Closure $haltOn): self;
 
     /**
      * Sets the query filter to filter events.

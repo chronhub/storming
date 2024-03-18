@@ -1,0 +1,33 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Storm\Projector\Workflow\Activity;
+
+use Storm\Contract\Projector\NotificationHub;
+use Storm\Projector\Support\Notification\Batch\IsBatchReset;
+use Storm\Projector\Support\Notification\Checkpoint\HasGap;
+use Storm\Projector\Support\Notification\Checkpoint\SleepOnGap;
+use Storm\Projector\Support\Notification\Management\ProjectionStored;
+
+final class HandleStreamGap
+{
+    public function __invoke(NotificationHub $hub, callable $next): callable|bool
+    {
+        // when a gap is detected, we first, sleep for a while, to let the remote storage to fix it,
+        // and then we store the projection results if some stream events
+        // have been processed before the gap detection.
+        $hub->notifyWhen(
+            $hub->expect(HasGap::class),
+            function (NotificationHub $hub): void {
+                // sleep and decrement retries left
+                $hub->notify(SleepOnGap::class);
+
+                if (! $hub->expect(IsBatchReset::class)) {
+                    $hub->trigger(new ProjectionStored());
+                }
+            });
+
+        return $next($hub);
+    }
+}

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Storm\Chronicler\Publisher;
 
 use Closure;
