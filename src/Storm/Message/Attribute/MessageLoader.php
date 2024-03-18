@@ -13,7 +13,7 @@ use Storm\Annotation\Reference\ReferenceBuilder;
 
 class MessageLoader extends AnnotationLoader
 {
-    public const ATTRIBUTE_NAME = AsMessageHandler::class;
+    public const string ATTRIBUTE_NAME = AsMessageHandler::class;
 
     /**
      * @var Collection<array<MessageAttribute>>

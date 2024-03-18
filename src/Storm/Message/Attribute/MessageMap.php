@@ -19,9 +19,9 @@ class MessageMap
 {
     use ReferenceResolverTrait;
 
-    public const HANDLER_TAG_PREFIX = '#';
+    public const string HANDLER_TAG_PREFIX = '#';
 
-    public const TAG = 'message.handler.%s';
+    public const string TAG = 'message.handler.%s';
 
     protected DeclaredQueue $queueResolver;
 

@@ -14,7 +14,7 @@ use Storm\Message\Attribute\MessageAttribute;
 
 class ChroniclerLoader extends AnnotationLoader
 {
-    public const ATTRIBUTE_NAME = AsChronicler::class;
+    public const string ATTRIBUTE_NAME = AsChronicler::class;
 
     /**
      * @var Collection<MessageAttribute>
@@ -28,9 +28,9 @@ class ChroniclerLoader extends AnnotationLoader
 
     public function getAttributes(): Collection
     {
-        $classes = config('annotation.classes', []);
+        $classes = config('annotation.chroniclers', []);
 
-        $this->loadAttributes($classes);
+        $this->loadAttributes(collect($classes));
 
         return $this->attributes;
     }

@@ -21,7 +21,7 @@ use function sprintf;
 
 class ChroniclerMap
 {
-    public const ERROR_CHRONICLER_ALREADY_EXISTS = 'Chronicler %s already exists';
+    public const string ERROR_CHRONICLER_ALREADY_EXISTS = 'Chronicler %s already exists';
 
     /**
      * @var Collection<array<string, ChroniclerAttribute>>

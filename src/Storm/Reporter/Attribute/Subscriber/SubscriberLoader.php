@@ -13,7 +13,7 @@ use Storm\Annotation\Reference\ReferenceBuilder;
 
 class SubscriberLoader extends AnnotationLoader
 {
-    public const ATTRIBUTE_NAME = AsReporterSubscriber::class;
+    public const string ATTRIBUTE_NAME = AsReporterSubscriber::class;
 
     /**
      * @var Collection<SubscriberAttribute>
@@ -29,7 +29,7 @@ class SubscriberLoader extends AnnotationLoader
     {
         $classes = config('annotation.reporter_subscribers', []);
 
-        $this->loadAttributes($classes);
+        $this->loadAttributes(collect($classes));
 
         return $this->attributes;
     }

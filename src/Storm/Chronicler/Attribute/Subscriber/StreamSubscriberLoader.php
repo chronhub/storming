@@ -14,7 +14,7 @@ use Storm\Annotation\Reference\ReferenceBuilder;
 
 class StreamSubscriberLoader extends AnnotationLoader
 {
-    public const ATTRIBUTE_NAME = AsStreamSubscriber::class;
+    public const string ATTRIBUTE_NAME = AsStreamSubscriber::class;
 
     /**
      * @var Collection<StreamSubscriberAttribute>
