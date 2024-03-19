@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Support\Notification\Handler;
 
-use Chronhub\Storm\Projector\Support\Notification\Checkpoint\GapDetected;
-use Chronhub\Storm\Projector\Support\Notification\Checkpoint\RecoverableGapDetected;
-use Chronhub\Storm\Projector\Support\Notification\Checkpoint\UnrecoverableGapDetected;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Support\Notification\Checkpoint\CheckpointInserted;
+use Storm\Projector\Support\Notification\Checkpoint\GapDetected;
+use Storm\Projector\Support\Notification\Checkpoint\RecoverableGapDetected;
+use Storm\Projector\Support\Notification\Checkpoint\UnrecoverableGapDetected;
 
 class WhenCheckpointInserted
 {

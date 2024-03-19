@@ -16,7 +16,8 @@
     "symfony/uid": "6.3.x",
     "symfony/clock": "^6.4",
     "symfony/serializer": "^6.4",
-    "composer-runtime-api": "^2.2"
+    "composer-runtime-api": "^2.2",
+    "ext-pcntl": "*"
   },
   "replace": {
     "chronhub/annotation": "self.version",
@@ -33,7 +34,6 @@
     "chronhub/support": "self.version"
   },
   "require-dev": {
-    "ext-pcntl": "*",
     "ext-posix": "*",
     "doctrine/dbal": "^3.9",
     "laravel/pint": "^v1.14",
