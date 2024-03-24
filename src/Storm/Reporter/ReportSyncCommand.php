@@ -8,15 +8,13 @@ use Storm\Contract\Reporter\Reporter;
 use Storm\Message\DomainType;
 use Storm\Reporter\Attribute\AsReporter;
 use Storm\Reporter\Attribute\Mode;
-use Storm\Reporter\Producer\QueueOption;
 
 #[AsReporter(
-    id: 'reporter.command.async.default',
+    id: 'reporter.command.sync.default',
     type: DomainType::COMMAND,
-    mode: Mode::ASYNC,
-    defaultQueue: QueueOption::class
+    mode: Mode::SYNC,
 )]
-final class ReportCommand implements Reporter
+final class ReportSyncCommand implements Reporter
 {
     use DelegateToQueue;
     use HasConstructableReporter;

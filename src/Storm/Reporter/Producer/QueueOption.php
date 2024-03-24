@@ -35,11 +35,11 @@ class QueueOption implements JsonSerializable
         return [
             'connection' => $this->connection,
             'name' => $this->name,
-            'tries' => $this->tries ?? 5, //fixme: remove 5
-            'max_exceptions' => $this->maxExceptions ?? 5, //fixme: remove 5
+            'tries' => $this->tries,
+            'max_exceptions' => $this->maxExceptions,
             'delay' => $this->delay,
             'timeout' => $this->timeout,
-            'backoff' => $this->backoff ?? 1, //fixme: remove 1
+            'backoff' => $this->backoff,
         ];
     }
 }

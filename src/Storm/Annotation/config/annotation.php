@@ -5,6 +5,7 @@ declare(strict_types=1);
 return [
     'reporters' => [
         \Storm\Reporter\ReportCommand::class,
+        \Storm\Reporter\ReportSyncCommand::class,
         \Storm\Reporter\ReportEvent::class,
         \Storm\Reporter\ReportQuery::class,
     ],

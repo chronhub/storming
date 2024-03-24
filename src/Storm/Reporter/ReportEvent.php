@@ -10,7 +10,7 @@ use Storm\Reporter\Attribute\AsReporter;
 use Storm\Reporter\Attribute\Mode;
 
 #[AsReporter(
-    id: 'reporter.event.default',
+    id: 'reporter.event.sync.default',
     type: DomainType::EVENT,
     mode: Mode::SYNC,
 )]

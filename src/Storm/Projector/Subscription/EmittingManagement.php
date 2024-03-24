@@ -19,8 +19,12 @@ use Storm\Projector\Workflow\EmittedStream;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
 
+use function sleep;
+
 final readonly class EmittingManagement implements EmitterManagement
 {
+    public const int DEFAULT_SLEEP_ON_FIRST_COMMIT = 2;
+
     use InteractWithManagement;
 
     public function __construct(
@@ -37,11 +41,8 @@ final readonly class EmittingManagement implements EmitterManagement
     {
         $streamName = new StreamName($this->getName());
 
-        // fixMe appendOnly
-
-        // First commit the stream name without the event
         if ($this->streamNotEmittedAndNotExists($streamName)) {
-            $this->chronicler->append(new Stream($streamName));
+            $this->appendStreamAndSleepOnFirstCommit(new Stream($streamName), true);
 
             $this->emittedStream->emitted();
         }
@@ -56,13 +57,9 @@ final readonly class EmittingManagement implements EmitterManagement
 
         $stream = new Stream($newStreamName, [$event]);
 
-        $this->streamIsCachedOrExists($newStreamName);
+        $exists = $this->streamIsCachedOrExists($newStreamName);
 
-        $this->chronicler->append($stream);
-
-        //        $this->streamIsCachedOrExists($newStreamName)
-        //            ? $this->chronicler->amend($stream)
-        //            : $this->chronicler->firstCommit($stream);
+        $this->appendStreamAndSleepOnFirstCommit($stream, ! $exists);
     }
 
     public function rise(): void
@@ -103,6 +100,20 @@ final readonly class EmittingManagement implements EmitterManagement
         $this->hub->notify(SprintStopped::class);
 
         $this->resetState();
+    }
+
+    /**
+     * @todo
+     * With standard strategy, we need to sleep,
+     * to let the stream be created by the sql procedure
+     */
+    private function appendStreamAndSleepOnFirstCommit(Stream $stream, bool $shouldSleep): void
+    {
+        $this->chronicler->append($stream);
+
+        if ($shouldSleep) {
+            sleep(self::DEFAULT_SLEEP_ON_FIRST_COMMIT);
+        }
     }
 
     private function streamNotEmittedAndNotExists(StreamName $streamName): bool

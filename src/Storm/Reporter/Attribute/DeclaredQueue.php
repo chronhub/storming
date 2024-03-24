@@ -14,11 +14,11 @@ use function sprintf;
 
 class DeclaredQueue
 {
-    public const ERROR_DEFAULT_QUEUE_NOT_DEFINED_FOR_ASYNC = 'Default queue cannot be null for reporter %s when mode is async';
+    public const string ERROR_DEFAULT_QUEUE_NOT_DEFINED_FOR_ASYNC = 'Default queue cannot be null for reporter %s when mode is async';
 
-    public const ERROR_QUEUE_DEFINED_FOR_ASYNC = 'Handler queue cannot be defined for reporter %s when mode is async';
+    public const string ERROR_QUEUE_DEFINED_FOR_ASYNC = 'Handler queue cannot be defined for reporter %s when mode is async';
 
-    public const ERROR_DEFAULT_QUEUE_NOT_DEFINED = 'Default queue cannot be null for reporter %s when mode is delegate to merge';
+    public const string ERROR_DEFAULT_QUEUE_NOT_DEFINED = 'Default queue cannot be null for reporter %s when mode is delegate to merge';
 
     /**
      * @param array<ReporterQueue> $queues

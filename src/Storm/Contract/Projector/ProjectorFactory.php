@@ -8,7 +8,7 @@ use Closure;
 
 /**
  * @template TInit of array
- * @template TWhen of array{ProjectorScope}
+ * @template TWhen of array{ProjectorScope|EmitterScope|ReadModelScope|QueryProjectorScope}
  */
 interface ProjectorFactory extends Projector
 {

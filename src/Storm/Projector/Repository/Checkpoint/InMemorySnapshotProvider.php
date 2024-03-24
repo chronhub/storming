@@ -79,7 +79,6 @@ final class InMemorySnapshotProvider implements RecognitionProvider
         );
     }
 
-    // todo model id
     public function deleteById(CheckpointId $checkpointId): void
     {
         $this->checkpoints = $this->checkpoints->reject(

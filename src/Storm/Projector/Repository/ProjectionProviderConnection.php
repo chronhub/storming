@@ -1,0 +1,130 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Storm\Projector\Repository;
+
+use Illuminate\Database\Connection;
+use Illuminate\Database\Query\Builder;
+use Storm\Contract\Clock\SystemClock;
+use Storm\Contract\Projector\ProjectionData;
+use Storm\Contract\Projector\ProjectionModel;
+use Storm\Contract\Projector\ProjectionProvider;
+use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Exception\ProjectionAlreadyExists;
+use Storm\Projector\Exception\ProjectionAlreadyRunning;
+use Storm\Projector\Exception\ProjectionConnectionFailed;
+use Storm\Projector\Exception\ProjectionNotFound;
+use Storm\Projector\Repository\Data\CreateData;
+use Storm\Projector\Repository\Data\StartData;
+
+use function sprintf;
+
+final readonly class ProjectionProviderConnection implements ProjectionProvider
+{
+    public const string TABLE = 'projections';
+
+    public function __construct(
+        private Connection $connection,
+        private SystemClock $clock
+    ) {
+    }
+
+    public function createProjection(string $projectionName, ProjectionData $data): void
+    {
+        if (! $data instanceof CreateData) {
+            throw new InvalidArgumentException(sprintf('Invalid data provided, expected class %s', CreateData::class));
+        }
+
+        if ($this->exists($projectionName)) {
+            throw ProjectionAlreadyExists::withName($projectionName);
+        }
+
+        $this->query()->insert([
+            'name' => $projectionName,
+            'status' => $data->status,
+            'state' => '{}',
+            'checkpoint' => '{}',
+            'locked_until' => null,
+        ]);
+    }
+
+    public function acquireLock(string $projectionName, ProjectionData $data): void
+    {
+        if (! $data instanceof StartData) {
+            throw new InvalidArgumentException(sprintf('Invalid data provided, expected class %s', StartData::class));
+        }
+
+        $success = $this->query()
+            ->where('name', $projectionName)
+            ->where(function (Builder $query): void {
+                $query->whereRaw('locked_until IS NULL OR locked_until < ?', [$this->clock->generate()]);
+            })->update([
+                'status' => $data->status,
+                'locked_until' => $data->lockedUntil,
+            ]);
+
+        if ($success === 0) {
+            $this->assertProjectionExists($projectionName);
+
+            throw ProjectionAlreadyRunning::withName($projectionName);
+        }
+    }
+
+    public function updateProjection(string $projectionName, ProjectionData $data): void
+    {
+        $success = $this->query()->where('name', $projectionName)->update($data->toArray());
+
+        if ($success === 0) {
+            $this->assertProjectionExists($projectionName);
+
+            throw new ProjectionConnectionFailed(
+                sprintf('Failed to update projection with name %s and data class %s', $projectionName, $data::class)
+            );
+        }
+    }
+
+    public function deleteProjection(string $projectionName): void
+    {
+        $success = $this->query()->where('name', $projectionName)->delete();
+
+        if ($success === 0) {
+            $this->assertProjectionExists($projectionName);
+
+            throw new ProjectionConnectionFailed(sprintf('Failed to delete projection with name %s', $projectionName));
+        }
+    }
+
+    public function retrieve(string $projectionName): ?ProjectionModel
+    {
+        $projection = $this->query()->where('name', $projectionName)->first();
+
+        if ($projection === null) {
+            return null;
+        }
+
+        return ProjectionFactory::make($projection);
+    }
+
+    public function filterByNames(string ...$projectionNames): array
+    {
+        return $this->query()->whereIn('name', $projectionNames)->pluck('name')->toArray();
+    }
+
+    public function exists(string $projectionName): bool
+    {
+        return $this->query()->where('name', $projectionName)->exists();
+    }
+
+    private function assertProjectionExists(string $projectionName): void
+    {
+        if (! $this->exists($projectionName)) {
+            throw ProjectionNotFound::withName($projectionName);
+        }
+    }
+
+    private function query(): Builder
+    {
+        return $this->connection->table(self::TABLE);
+    }
+}

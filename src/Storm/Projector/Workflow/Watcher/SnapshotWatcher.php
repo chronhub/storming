@@ -67,7 +67,7 @@ class SnapshotWatcher
     protected function onInterval(): Closure
     {
         return function (Checkpoint $checkpoint): bool {
-            $checkpointTime = $this->clock->toPointInTime($checkpoint->createdAt)->getTimestamp();
+            $checkpointTime = $this->clock->toDateTimeImmutable($checkpoint->createdAt)->getTimestamp();
 
             if (! isset($this->checkpointCreatedAt[$checkpoint->streamName])) {
                 $this->checkpointCreatedAt[$checkpoint->streamName] = $checkpointTime;

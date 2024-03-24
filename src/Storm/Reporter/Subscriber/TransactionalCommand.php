@@ -14,12 +14,13 @@ use Storm\Reporter\Attribute\Subscriber\AsReporterSubscriber;
 
 final readonly class TransactionalCommand
 {
-    public function __construct(#[Reference('chronicler.event.transactional.standard.pgsql')] private Chronicler $chronicler)
-    {
+    public function __construct(
+        #[Reference('chronicler.event.transactional.standard.pgsql')] private Chronicler $chronicler
+    ) {
     }
 
     #[AsReporterSubscriber(
-        supports: ['reporter.command.default'],
+        supports: ['reporter.command.async.*'],
         event: Reporter::DISPATCH_EVENT,
         method: 'startTransaction',
         priority: 30000,
@@ -35,7 +36,7 @@ final readonly class TransactionalCommand
     }
 
     #[AsReporterSubscriber(
-        supports: ['reporter.command.default'],
+        supports: ['reporter.command.async.*'],
         event: Reporter::FINALIZE_EVENT,
         method: 'finalizeTransaction',
         priority: 100,

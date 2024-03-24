@@ -9,6 +9,7 @@ use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 use Storm\Contract\Message\MessageFactory;
 use Storm\Contract\Serializer\MessageSerializer;
+use Storm\Message\Console\MapMessageSubscriberCommand;
 use Storm\Message\Decorator\EventDispatched;
 use Storm\Message\Decorator\EventId;
 use Storm\Message\Decorator\EventTime;
@@ -19,6 +20,15 @@ use Storm\Serializer\MessagingSerializer;
 
 class MessageServiceProvider extends ServiceProvider implements DeferrableProvider
 {
+    public function boot(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->commands([
+                MapMessageSubscriberCommand::class,
+            ]);
+        }
+    }
+
     public function register(): void
     {
         $this->registerMessageSerializer();

@@ -6,8 +6,6 @@ namespace Storm\Projector\Repository\Checkpoint;
 
 use Storm\Contract\Projector\CheckpointModel;
 
-use function sha1;
-
 final readonly class InMemoryCheckpointModel implements CheckpointModel
 {
     public function __construct(
@@ -22,7 +20,9 @@ final readonly class InMemoryCheckpointModel implements CheckpointModel
 
     public function id(): string
     {
-        return sha1($this->projectionName.':'.$this->streamName.':'.$this->position);
+        $id = new CheckpointId($this->projectionName, $this->streamName, $this->position);
+
+        return $id->toString();
     }
 
     public function projectionName(): string

@@ -12,7 +12,7 @@ use Storm\Contract\Projector\ContextReader;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Repository\EventStream\DiscoverAllStream;
 use Storm\Projector\Repository\EventStream\DiscoverCategories;
-use Storm\Projector\Repository\EventStream\DiscoverStream;
+use Storm\Projector\Support\Notification\Handler\DiscoverStream;
 
 final class DefaultContext implements ContextReader
 {

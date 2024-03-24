@@ -18,17 +18,17 @@ class MessageJob
     /**
      * The number of times the job may be attempted.
      */
-    public int $tries = 5;
+    public int $tries = 10;
 
     /**
      * The maximum number of unhandled exceptions to allow before failing
      */
-    public int $maxExceptions = 5;
+    public int $maxExceptions = 10;
 
     /**
      * The number of seconds the job can run before timing out
      */
-    public int $timeout = 10;
+    public int $timeout = 60;
 
     public ?int $backoff = null;
 

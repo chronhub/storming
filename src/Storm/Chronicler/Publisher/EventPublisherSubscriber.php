@@ -17,8 +17,9 @@ use Storm\Contract\Tracker\StreamStory;
 
 final readonly class EventPublisherSubscriber
 {
-    public function __construct(#[Reference('event.publisher.in_memory')] private EventPublisher $eventPublisher)
-    {
+    public function __construct(
+        #[Reference('event.publisher.in_memory')] private EventPublisher $eventPublisher
+    ) {
     }
 
     #[AsStreamSubscriber(

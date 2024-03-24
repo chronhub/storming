@@ -14,7 +14,7 @@ use Storm\Contract\Reporter\Reporter;
  */
 class Report extends Facade
 {
-    public const REPORTER_ID = 'reporter.manager';
+    public const string REPORTER_ID = 'reporter.manager';
 
     protected static function getFacadeAccessor(): string
     {

@@ -14,7 +14,7 @@ class LockManager
 
     /**
      * @param positive-int $lockTimeout   The duration for which a lock is valid, in milliseconds
-     * @param int<0,max>   $lockThreshold The duration after which a lock should be refreshed, in milliseconds
+     * @param int<0, max>  $lockThreshold The duration after which a lock should be refreshed, in milliseconds
      */
     public function __construct(
         protected readonly SystemClock $clock,

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Reporter\Subscriber;
 
 use Closure;
+use Storm\Chronicler\Attribute\Subscriber\AsStreamSubscriber;
 use Storm\Contract\Chronicler\EventableChronicler;
 use Storm\Contract\Message\DomainCommand;
 use Storm\Contract\Message\EventHeader;
@@ -73,11 +74,11 @@ final class CorrelationHeaderCommand
         $eventId = $command->header(Header::EVENT_ID);
         $eventType = $command->header(Header::EVENT_TYPE);
 
-        return new class($eventId, $eventType) implements MessageDecorator
+        return new readonly class($eventId, $eventType) implements MessageDecorator
         {
             public function __construct(
-                private readonly string $eventId,
-                private readonly string $eventType
+                private string $eventId,
+                private string $eventType
             ) {
             }
 
