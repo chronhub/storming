@@ -14,7 +14,7 @@ use function array_map;
 
 #[AsCommand(
     name: 'storm:message-subscriber',
-    description: 'Display the message subscriber by message name',
+    description: 'Display the message subscriber(s) by message name',
 )]
 class MapMessageSubscriberCommand extends Command
 {
@@ -24,7 +24,7 @@ class MapMessageSubscriberCommand extends Command
     // todo add a vertical table when message is requested
     public const array TABLE_HEADERS = ['Reporter', 'Type', 'Message', 'Handler class', 'Handler method', 'Queue', 'Mode'];
 
-    protected $signature = 'reporter-message:map
+    protected $signature = 'storm:message-subscriber
                             { --message= : Message name either full or short class name }
                             { --ask=1    : Ask for complete message name }
                             { --short=1  : Short class base name output }';

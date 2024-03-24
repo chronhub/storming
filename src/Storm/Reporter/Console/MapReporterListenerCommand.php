@@ -23,7 +23,7 @@ class MapReporterListenerCommand extends Command
 {
     public const array TABLE_HEADERS = ['Event', 'Origin', 'Priority', 'Listener'];
 
-    protected $signature = 'reporter-listener:map
+    protected $signature = 'storm:reporter-listener
                             { id?        : reporter id }
                             { --choice=1 : request for choice }';
 
