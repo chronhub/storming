@@ -10,10 +10,11 @@ use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\ProjectorFactory;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\ReadModel;
+use Symfony\Component\Console\Command\SignalableCommandInterface;
 
 use function pcntl_async_signals;
 
-abstract class ReadModelProjectionCommand extends Command
+abstract class ReadModelProjectionCommand extends Command implements SignalableCommandInterface
 {
     protected bool $dispatchSignal = true;
 
@@ -50,6 +51,8 @@ abstract class ReadModelProjectionCommand extends Command
         $this->info("Stopping read model projection: {$this->projectionName()}");
 
         $this->projectorManager->monitor()->markAsStop($this->projectionName());
+
+        return self::SUCCESS;
     }
 
     abstract protected function readModel(): ReadModel;
