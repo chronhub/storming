@@ -20,13 +20,13 @@ use Storm\Projector\Repository\Data\StartData;
 
 use function sprintf;
 
-final readonly class ProjectionProviderConnection implements ProjectionProvider
+final readonly class ConnectionProjectionProvider implements ProjectionProvider
 {
     public const string TABLE = 'projections';
 
     public function __construct(
         private Connection $connection,
-        private SystemClock $clock
+        private SystemClock $clock,
     ) {
     }
 
@@ -40,13 +40,13 @@ final readonly class ProjectionProviderConnection implements ProjectionProvider
             throw ProjectionAlreadyExists::withName($projectionName);
         }
 
-        $this->query()->insert([
-            'name' => $projectionName,
-            'status' => $data->status,
-            'state' => '{}',
-            'checkpoint' => '{}',
-            'locked_until' => null,
-        ]);
+        $projection = ProjectionFactory::create($projectionName, $data->status);
+
+        $success = $this->query()->insert($projection->jsonSerialize());
+
+        if ($success === false) {
+            throw new ProjectionConnectionFailed(sprintf('Failed to create projection with name %s', $projectionName));
+        }
     }
 
     public function acquireLock(string $projectionName, ProjectionData $data): void
@@ -91,7 +91,9 @@ final readonly class ProjectionProviderConnection implements ProjectionProvider
         if ($success === 0) {
             $this->assertProjectionExists($projectionName);
 
-            throw new ProjectionConnectionFailed(sprintf('Failed to delete projection with name %s', $projectionName));
+            throw new ProjectionConnectionFailed(
+                sprintf('Failed to delete projection with name %s', $projectionName)
+            );
         }
     }
 

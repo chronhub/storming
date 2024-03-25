@@ -15,7 +15,7 @@ use Storm\Contract\Projector\SubscriptionFactory;
 use Storm\Projector\Factory\ConnectionSubscriptionFactory;
 use Storm\Projector\Filter\QueryScopeConnection;
 use Storm\Projector\Options\DefaultOption;
-use Storm\Projector\Repository\ProjectionProviderConnection;
+use Storm\Projector\Repository\ConnectionProjectionProvider;
 use Storm\Serializer\JsonSerializer;
 
 class ProjectorServiceProvider extends ServiceProvider implements DeferrableProvider
@@ -73,6 +73,6 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
     {
         $this->app->bind('event_stream.provider.connection', EventStreamProvider::class);
 
-        $this->app->bind('projection.provider.connection', ProjectionProviderConnection::class);
+        $this->app->bind('projection.provider.connection', ConnectionProjectionProvider::class);
     }
 }

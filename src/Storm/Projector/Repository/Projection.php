@@ -7,6 +7,15 @@ namespace Storm\Projector\Repository;
 use JsonSerializable;
 use Storm\Contract\Projector\ProjectionModel;
 
+/**
+ * @phpstan-type ProjectionArray array{
+ *     'name': string,
+ *     'status': string,
+ *     'state': string,
+ *     'checkpoint': string,
+ *     'locked_until': ?string,
+ * }
+ */
 final readonly class Projection implements JsonSerializable, ProjectionModel
 {
     private string $state;
@@ -50,13 +59,7 @@ final readonly class Projection implements JsonSerializable, ProjectionModel
     }
 
     /**
-     * @return array{
-     *     'name': string,
-     *     'status': string,
-     *     'state': string,
-     *     'checkpoint': string,
-     *     'locked_until': ?string,
-     * }
+     * @return ProjectionArray
      */
     public function jsonSerialize(): array
     {

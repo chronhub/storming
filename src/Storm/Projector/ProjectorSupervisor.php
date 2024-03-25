@@ -80,16 +80,15 @@ final readonly class ProjectorSupervisor implements ProjectorSupervisorInterface
     private function applyStatus(string $projectionName, ProjectionStatus $projectionStatus): void
     {
         try {
-            $this->projectionProvider->updateProjection(
-                $projectionName,
-                new UpdateStatusData($projectionStatus->value)
-            );
+            $data = new UpdateStatusData($projectionStatus->value);
+
+            $this->projectionProvider->updateProjection($projectionName, $data);
         } catch (Throwable $exception) {
             if ($exception instanceof ProjectionFailed || $exception instanceof ProjectionNotFound) {
                 throw $exception;
             }
 
-            throw ProjectionFailed::failedOnUpdateStatus($projectionName, $projectionStatus, $exception);
+            throw new ProjectionFailed($exception->getMessage(), (int) $exception->getCode(), $exception);
         }
     }
 
