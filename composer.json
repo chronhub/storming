@@ -17,6 +17,7 @@
     "symfony/clock": "^6.4",
     "symfony/serializer": "^6.4",
     "composer-runtime-api": "^2.2",
+    "zircote/swagger-php" : "^4.8",
     "ext-pcntl": "*"
   },
   "replace": {

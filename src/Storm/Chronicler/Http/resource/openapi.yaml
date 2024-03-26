@@ -1,0 +1,112 @@
+openapi: 3.0.0
+info:
+  title: 'Event Stream API'
+  description: 'Event Stream API'
+  version: '1.0'
+paths:
+  /event-stream:
+    get:
+      tags:
+        - Stream
+      summary: 'Check if an event stream exists'
+      operationId: a037660ef1e0262acf62e539041e4274
+      parameters:
+        -
+          name: name
+          in: query
+          description: 'Stream name'
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ok
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/StreamNotFound'
+        '422':
+          $ref: '#/components/responses/422'
+        '500':
+          $ref: '#/components/responses/500'
+    post:
+      tags:
+        - Stream
+      summary: 'Create a new event stream'
+      operationId: bb6c8fa2c9f7d900f372da343b8ef330
+      parameters:
+        -
+          name: name
+          in: query
+          description: 'Stream name'
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ok
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '419':
+          $ref: '#/components/responses/StreamAlreadyExists'
+        '422':
+          $ref: '#/components/responses/422'
+        '500':
+          $ref: '#/components/responses/500'
+components:
+  schemas:
+    Error:
+      properties:
+        message:
+          type: string
+        code:
+          type: integer
+      type: object
+    ValidationError:
+      type: array
+      items: {  }
+  responses:
+    '422':
+      description: 'Bad request'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ValidationError'
+    '401':
+      description: 'Authentication failed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '403':
+      description: 'Authorization failed'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    StreamNotFound:
+      description: 'Stream not found'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    StreamAlreadyExists:
+      description: 'Stream already exists'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    '500':
+      description: 'Internal error'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+tags:
+  -
+    name: Stream
+    description: 'Event Stream API'

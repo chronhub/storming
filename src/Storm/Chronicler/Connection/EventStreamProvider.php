@@ -19,6 +19,7 @@ final readonly class EventStreamProvider implements Provider
 
     public function createStream(string $streamName, ?string $streamTable, ?string $partition = null): bool
     {
+        //fixMe not available for standard projection which use procedure
         $eventStream = new EventStream($streamName, $streamTable, $partition);
 
         return $this->query()->insert($eventStream->jsonSerialize());
