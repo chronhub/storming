@@ -15,7 +15,7 @@ class HaltOn
     protected array $callbacks;
 
     /**
-     * Stop the projector when the event stream is empty after a given time is given
+     * Stop the projector when the event stream is empty after a given time if given
      * or, it will stop at the end of the first cycle.
      *
      * @return $this

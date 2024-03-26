@@ -13,7 +13,7 @@ use function sprintf;
 
 class MessageServiceLocator
 {
-    const UNPROCESSABLE_FOUND_MESSAGE = 'Message %s found but it belongs to %s reporter id and expected %s reporter id';
+    public const string UNPROCESSABLE_FOUND_MESSAGE = 'Message %s found but it belongs to %s reporter id and relay in %s reporter id';
 
     public function __construct(protected KernelStorage $container)
     {
