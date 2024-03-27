@@ -8,7 +8,6 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
 use RuntimeException;
-use Storm\Chronicler\Connection\PgsqlTransactionalChronicler;
 use Storm\Chronicler\StreamListener;
 use Storm\Chronicler\TrackStream;
 use Storm\Chronicler\TrackTransactionalStream;
@@ -17,6 +16,7 @@ use Storm\Contract\Chronicler\ChroniclerDecorator;
 use Storm\Contract\Tracker\StreamTracker;
 use Storm\Reporter\Attribute\ReporterQueue;
 
+use function method_exists;
 use function sprintf;
 
 class ChroniclerMap
@@ -62,10 +62,6 @@ class ChroniclerMap
             throw new RuntimeException(sprintf(self::ERROR_CHRONICLER_ALREADY_EXISTS, $attribute->abstract));
         }
 
-        if ($attribute->chronicler !== PgsqlTransactionalChronicler::class) {
-            throw new RuntimeException('Chronicler class not supported yet. use reference in constructor later');
-        }
-
         $this->entries->put($attribute->abstract, $attribute);
     }
 
@@ -76,13 +72,16 @@ class ChroniclerMap
 
     protected function makeInstance(ChroniclerAttribute $attribute): Chronicler
     {
+        // todo delegate to factory
         $connection = $this->makeConnection($attribute->connection);
         $eventStreamProvider = $this->app[$attribute->evenStreamProvider];
         $streamPersistence = $this->app[$attribute->persistence];
         $streamEventLoader = $this->app[$attribute->streamEventLoader];
         $streamEventTable = $attribute->tableName;
 
-        $realInstance = new $attribute->chronicler(
+        $instanceClass = $attribute->firstClass ?? $attribute->chronicler;
+
+        $instance = new $instanceClass(
             $connection,
             $eventStreamProvider,
             $streamPersistence,
@@ -90,8 +89,16 @@ class ChroniclerMap
             $streamEventTable
         );
 
+        if ($attribute->firstClass !== null) {
+            $instance = new $attribute->chronicler($instance);
+
+            if (method_exists($instance, 'setConnection')) {
+                $instance->setConnection($connection);
+            }
+        }
+
         if (! $attribute->eventable) {
-            return $realInstance;
+            return $instance;
         }
 
         $streamTracker = new TrackStream();
@@ -99,9 +106,9 @@ class ChroniclerMap
 
         if ($attribute->transactional) {
             $streamTracker = new TrackTransactionalStream();
-            $chroniclerDecorator = $decoratorFactory->makeTransactionalEventableChronicler($realInstance, $streamTracker);
+            $chroniclerDecorator = $decoratorFactory->makeTransactionalEventableChronicler($instance, $streamTracker);
         } else {
-            $chroniclerDecorator = $decoratorFactory->makeEventableChronicler($realInstance, $streamTracker);
+            $chroniclerDecorator = $decoratorFactory->makeEventableChronicler($instance, $streamTracker);
         }
 
         $subscribers = $attribute->subscribers;
@@ -110,7 +117,7 @@ class ChroniclerMap
             return $chroniclerDecorator;
         }
 
-        $this->attachSubscribers($realInstance, $streamTracker, $subscribers);
+        $this->attachSubscribers($instance, $streamTracker, $subscribers);
 
         return $chroniclerDecorator;
     }

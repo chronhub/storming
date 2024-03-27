@@ -12,7 +12,6 @@ use OpenApi\Attributes\Response;
 use OpenApi\Attributes\Schema;
 
 #[Components(
-
     schemas: [
         new Schema(
             schema: 'Error',

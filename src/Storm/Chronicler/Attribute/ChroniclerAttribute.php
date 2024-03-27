@@ -8,6 +8,7 @@ class ChroniclerAttribute
 {
     public function __construct(
         public string $chronicler,
+        public ?string $firstClass,
         public string $connection,
         public string $tableName,
         public string $persistence,

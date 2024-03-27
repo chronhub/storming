@@ -28,7 +28,11 @@ class AsChronicler
          * @var string|array
          */
         public string|array $subscribers = [],
-        public string $tableName = 'stream_event' // todo: move to config
+        public string $tableName = 'stream_event',// todo: move to config
+        /**
+         * First class
+         */
+        public ?string $firstClass = null,
     ) {
     }
 }

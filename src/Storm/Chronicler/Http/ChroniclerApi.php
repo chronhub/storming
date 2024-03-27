@@ -2,19 +2,23 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Connection;
+namespace Storm\Chronicler\Http;
 
 use Illuminate\Database\Connection;
 use Storm\Chronicler\Attribute\AsChronicler;
+use Storm\Chronicler\Connection\PgsqlChronicler;
+use Storm\Chronicler\Connection\ProvideChroniclerTrait;
+use Storm\Chronicler\Connection\TransactionalStoreTrait;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\TransactionalChronicler;
 
 #[AsChronicler(
     connection: 'pgsql',
-    abstract: 'chronicler.event.transactional.standard.pgsql',
+    abstract: 'chronicler.api.standard',
+    eventable: false,
     firstClass: PgsqlChronicler::class
 )]
-final class PgsqlTransactionalChronicler implements TransactionalChronicler
+final class ChroniclerApi implements TransactionalChronicler
 {
     use ProvideChroniclerTrait;
     use TransactionalStoreTrait;

@@ -7,60 +7,48 @@ namespace Storm\Chronicler\Connection;
 use Generator;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Database\QueryException;
+use Illuminate\Support\LazyCollection;
+use PDO;
 use Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Storm\Chronicler\Exceptions\StreamNotFound;
-use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Serializer\StreamEventSerializer;
-use Storm\Serializer\Payload;
+use Storm\Contract\Chronicler\StreamEventConverter;
 use Storm\Stream\StreamName;
 
-class CursorConnectionLoader
+final class CursorConnectionLoader
 {
-    public function __construct(protected StreamEventSerializer $streamEventSerializer)
+    public function __construct(protected StreamEventConverter $eventConverter)
     {
     }
 
     public function load(Builder $builder, StreamName $streamName): Generator
     {
-        $streamEvents = $builder->cursor();
+        try {
+            $streamEvents = $builder->cursor();
 
-        yield from $this->deserializeEvents($streamEvents, $streamName);
+            return $this->deserializeEvents($streamEvents, $streamName);
+        } catch (QueryException $queryException) {
+            $this->handleException($queryException, $streamName);
+        }
+    }
+
+    protected function deserializeEvents(LazyCollection $streamEvents, StreamName $streamName): Generator
+    {
+        if ($streamEvents->isEmpty()) {
+            throw NoStreamEventReturn::withStreamName($streamName);
+        }
+
+        foreach ($streamEvents as $streamEvent) {
+            yield $this->eventConverter->toDomainEvent($streamEvent, $streamName);
+        }
 
         return $streamEvents->count();
     }
 
-    /**
-     * @return Generator<DomainEvent>
-     *
-     * @throws StreamNotFound      when the stream is not found
-     * @throws NoStreamEventReturn when no events are returned
-     */
-    protected function deserializeEvents(iterable $streamEvents, StreamName $streamName): Generator
+    protected function handleException(QueryException $exception, StreamName $streamName): void
     {
-        try {
-            $count = 0;
-
-            foreach ($streamEvents as $streamEvent) {
-                $payload = new Payload(
-                    $streamEvent->content,
-                    $streamEvent->metadata,
-                    $streamEvent->position,
-                );
-
-                yield $this->streamEventSerializer->deserializePayload($payload);
-
-                $count++;
-            }
-
-            if ($count === 0) {
-                throw NoStreamEventReturn::withStreamName($streamName);
-            }
-
-            return $count;
-        } catch (QueryException $exception) {
-            if ($exception->getCode() !== '00000') {
-                throw StreamNotFound::withStreamName($streamName);
-            }
-        }
+        match ($exception->getCode()) {
+            PDO::ERR_NONE => throw NoStreamEventReturn::withStreamName($streamName),
+            default => throw StreamNotFound::withStreamName($streamName, $exception),
+        };
     }
 }

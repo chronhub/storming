@@ -52,6 +52,7 @@ class ChroniclerLoader extends AnnotationLoader
                 $this->attributes->push(
                     new ChroniclerAttribute(
                         $reflectionClass->getName(),
+                        $attribute->firstClass,
                         $attribute->connection,
                         $attribute->tableName,
                         $attribute->persistence,

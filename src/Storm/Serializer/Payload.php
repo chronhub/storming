@@ -20,7 +20,7 @@ final readonly class Payload implements JsonSerializable
     }
 
     /**
-     * @return array{headers:T,content:T,seqNo:S}
+     * @return array{headers:T, content:T, seqNo:S}
      */
     public function jsonSerialize(): array
     {
