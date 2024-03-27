@@ -18,7 +18,7 @@ class ChroniclerAttribute
         public string $streamEventLoader,
         public string $abstract,
         public array $subscribers,
-        public string $decoratorFactory,
+        public string $factory,
     ) {
     }
 }

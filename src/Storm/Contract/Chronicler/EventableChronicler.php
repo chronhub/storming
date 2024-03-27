@@ -12,42 +12,42 @@ interface EventableChronicler extends ChroniclerDecorator
     /**
      * @var string
      */
-    public const APPEND_STREAM_EVENT = 'append_stream';
+    public const string APPEND_STREAM_EVENT = 'append_stream';
 
     /**
      * @var string
      */
-    public const DELETE_STREAM_EVENT = 'delete_stream';
+    public const string DELETE_STREAM_EVENT = 'delete_stream';
 
     /**
      * @var string
      */
-    public const ALL_STREAM_EVENT = 'all_stream';
+    public const string ALL_STREAM_EVENT = 'all_stream';
 
     /**
      * @var string
      */
-    public const ALL_BACKWARDS_STREAM_EVENT = 'all_backwards_stream';
+    public const string ALL_BACKWARDS_STREAM_EVENT = 'all_backwards_stream';
 
     /**
      * @var string
      */
-    public const FILTERED_STREAM_EVENT = 'filtered_stream';
+    public const string FILTERED_STREAM_EVENT = 'filtered_stream';
 
     /**
      * @var string
      */
-    public const FILTER_STREAM_EVENT = 'filter_streams';
+    public const string FILTER_STREAM_EVENT = 'filter_streams';
 
     /**
      * @var string
      */
-    public const FILTER_CATEGORY_EVENT = 'filter_categories';
+    public const string FILTER_CATEGORY_EVENT = 'filter_categories';
 
     /**
      * @var string
      */
-    public const HAS_STREAM_EVENT = 'has_stream';
+    public const string HAS_STREAM_EVENT = 'has_stream';
 
     public function subscribe(string $eventName, callable $streamContext, int $priority = 0): Listener;
 

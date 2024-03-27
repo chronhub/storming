@@ -5,18 +5,11 @@ declare(strict_types=1);
 namespace Storm\Chronicler\Attribute;
 
 use Illuminate\Contracts\Foundation\Application;
-use Illuminate\Database\Connection;
 use Illuminate\Support\Collection;
 use RuntimeException;
-use Storm\Chronicler\StreamListener;
-use Storm\Chronicler\TrackStream;
-use Storm\Chronicler\TrackTransactionalStream;
 use Storm\Contract\Chronicler\Chronicler;
-use Storm\Contract\Chronicler\ChroniclerDecorator;
-use Storm\Contract\Tracker\StreamTracker;
 use Storm\Reporter\Attribute\ReporterQueue;
 
-use function method_exists;
 use function sprintf;
 
 class ChroniclerMap
@@ -72,96 +65,13 @@ class ChroniclerMap
 
     protected function makeInstance(ChroniclerAttribute $attribute): Chronicler
     {
-        // todo delegate to factory
-        $connection = $this->makeConnection($attribute->connection);
-        $eventStreamProvider = $this->app[$attribute->evenStreamProvider];
-        $streamPersistence = $this->app[$attribute->persistence];
-        $streamEventLoader = $this->app[$attribute->streamEventLoader];
-        $streamEventTable = $attribute->tableName;
+        $chroniclerFactory = $this->createFromFactory($attribute->factory);
 
-        $instanceClass = $attribute->firstClass ?? $attribute->chronicler;
-
-        $instance = new $instanceClass(
-            $connection,
-            $eventStreamProvider,
-            $streamPersistence,
-            $streamEventLoader,
-            $streamEventTable
-        );
-
-        if ($attribute->firstClass !== null) {
-            $instance = new $attribute->chronicler($instance);
-
-            if (method_exists($instance, 'setConnection')) {
-                $instance->setConnection($connection);
-            }
-        }
-
-        if (! $attribute->eventable) {
-            return $instance;
-        }
-
-        $streamTracker = new TrackStream();
-        $decoratorFactory = $this->makeDecoratorFactory($attribute->decoratorFactory);
-
-        if ($attribute->transactional) {
-            $streamTracker = new TrackTransactionalStream();
-            $chroniclerDecorator = $decoratorFactory->makeTransactionalEventableChronicler($instance, $streamTracker);
-        } else {
-            $chroniclerDecorator = $decoratorFactory->makeEventableChronicler($instance, $streamTracker);
-        }
-
-        $subscribers = $attribute->subscribers;
-
-        if ($subscribers === []) {
-            return $chroniclerDecorator;
-        }
-
-        $this->attachSubscribers($instance, $streamTracker, $subscribers);
-
-        return $chroniclerDecorator;
+        return $chroniclerFactory->fromAttribute($attribute);
     }
 
-    protected function attachSubscribers(Chronicler $chronicler, StreamTracker $streamTracker, array $subscribers): void
-    {
-        $realInstance = $this->getRealInstance($chronicler);
-
-        foreach ($subscribers as $subscriber) {
-            $listener = $this->makeNewCallback($subscriber, $realInstance);
-
-            $streamTracker->listen($listener);
-        }
-    }
-
-    protected function makeNewCallback(string $listenerClass, Chronicler $chronicler): StreamListener
-    {
-        $listener = $this->app[$listenerClass];
-
-        if (! $listener instanceof StreamListener) {
-            throw new RuntimeException('Stream listener must be an instance of StreamListener');
-        }
-
-        $callback = $listener->story()($chronicler);
-
-        return new StreamListener($listener->name(), $callback, $listener->priority());
-    }
-
-    protected function getRealInstance(Chronicler $chronicler): Chronicler
-    {
-        while ($chronicler instanceof ChroniclerDecorator) {
-            $chronicler = $chronicler->innerChronicler();
-        }
-
-        return $chronicler;
-    }
-
-    protected function makeDecoratorFactory(string $decoratorFactory): ChroniclerDecoratorFactory
+    protected function createFromFactory(string $decoratorFactory): ChroniclerConnectionFactory
     {
         return $this->app[$decoratorFactory];
-    }
-
-    protected function makeConnection(string $connection): Connection
-    {
-        return $this->app['db']->connection($connection);
     }
 }

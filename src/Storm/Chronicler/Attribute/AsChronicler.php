@@ -8,6 +8,7 @@ use Attribute;
 use Storm\Chronicler\Connection\CursorConnectionLoader;
 use Storm\Chronicler\Connection\EventStreamProvider;
 use Storm\Chronicler\Connection\StandardStreamPersistence;
+use Storm\Chronicler\StreamListener;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 class AsChronicler
@@ -20,14 +21,14 @@ class AsChronicler
         public string $streamEventLoader = CursorConnectionLoader::class,
         public bool $eventable = true,
         public bool $transactional = true,
-        public string $decoratorFactory = ChroniclerDecoratorFactory::class,
+        public string $factory = ChroniclerConnectionFactory::class,
         /**
-         * string as invokable service where the instance of ES and stream tracker is injected
-         * array as a list of subscriber, they must return an instance of StreamListener
+         * Dedicate subscribers to a specific event store
+         * stream subscribers attribute will be ignored
          *
-         * @var string|array
+         * @var array<StreamListener>
          */
-        public string|array $subscribers = [],
+        public array $subscribers = [],
         public string $tableName = 'stream_event',// todo: move to config
         /**
          * First class

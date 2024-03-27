@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Chronicler\Attribute;
 
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use ReflectionAttribute;
 use ReflectionClass;
@@ -61,8 +60,8 @@ class ChroniclerLoader extends AnnotationLoader
                         $attribute->evenStreamProvider,
                         $attribute->streamEventLoader,
                         $attribute->abstract,
-                        Arr::wrap($attribute->subscribers),
-                        $attribute->decoratorFactory,
+                        $attribute->subscribers,
+                        $attribute->factory,
                     ),
                 );
             });
