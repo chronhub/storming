@@ -80,7 +80,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
                 DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
             ]);
 
-            //fixMe temporary fix for json serialization normalizer for Checkpoint
+            //fixMe temporary for json serialization normalizer for Checkpoint
             // should embrace the serializer with object normalizer
             $factory->withNormalizer($dateNormalizer, new JsonSerializableNormalizer());
 
