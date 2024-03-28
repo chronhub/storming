@@ -6,13 +6,13 @@ namespace Storm\Tests\Unit\Serializer;
 
 use DateTimeImmutable;
 use DateTimeZone;
-use Storm\Serializer\JsonSerializer;
+use Storm\Serializer\JsonSerializerFactory;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 beforeEach(function () {
-    $this->jsonSerializer = new JsonSerializer();
+    $this->jsonSerializer = new JsonSerializerFactory();
 });
 
 afterEach(function () {
@@ -78,10 +78,6 @@ describe('json encoder instance', function (): void {
             ->toBeInstanceOf(JsonEncoder::class)
             ->toHaveScalarProperty('defaultContext', [JsonDecode::ASSOCIATIVE => true, 'foo' => 'bar']);
     });
-
-    it('create instance with given options', function () {
-        //$jsonSerializer = new JsonSerializer();
-    })->todo();
 });
 
 describe('symfony serializer instance', function (): void {
@@ -105,4 +101,21 @@ describe('symfony serializer instance', function (): void {
         expect($symfonySerializer->serialize($data, 'json'))
             ->toBe('{"foo":"bar","int":42,"datetime":"2023-12-25T00:00:00.000000"}');
     });
+
+    it('decode', function (): void {
+        $data = ['foo' => 'bar', 'int' => 42, 'datetime' => new DateTimeImmutable('2023-12-25', new DateTimeZone('UTC'))];
+
+        $normalizer =
+            new DateTimeNormalizer([
+                DateTimeNormalizer::FORMAT_KEY => 'Y-m-d\TH:i:s.u',
+                DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
+            ]);
+
+        $symfonySerializer = $this->jsonSerializer->create($normalizer);
+
+        $serialized = $symfonySerializer->serialize($data, 'json');
+
+        dd($symfonySerializer->deserialize($serialized, 'array', 'json'));
+    });
+
 });

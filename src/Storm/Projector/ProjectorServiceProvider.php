@@ -12,11 +12,13 @@ use Storm\Chronicler\Connection\EventStreamProvider;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\SubscriptionFactory;
+use Storm\Contract\Serializer\JsonSerializer;
 use Storm\Projector\Factory\ConnectionSubscriptionFactory;
 use Storm\Projector\Filter\QueryScopeConnection;
 use Storm\Projector\Options\DefaultOption;
 use Storm\Projector\Repository\ConnectionProjectionProvider;
-use Storm\Serializer\JsonSerializer;
+use Storm\Serializer\JsonSerializerFactory;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 
 class ProjectorServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -37,6 +39,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
             'event_stream.provider.connection',
             'projection.provider.connection',
             'projector.subscription_factory.connection',
+            'projection.serializer.json.default',
             ProjectorManagerInterface::class,
         ];
     }
@@ -66,7 +69,20 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
 
     private function registerJsonSerializer(): void
     {
-        $this->app->singleton('projection.serializer.json.default', fn () => new JsonSerializer());
+        $this->app->singleton('projection.serializer.json.default', function (Application $app): JsonSerializer {
+            $factory = new JsonSerializerFactory();
+            $factory->withEncodeOptions(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION);
+            $factory->withDecodeOptions(JSON_BIGINT_AS_STRING);
+
+            $dateNormalizer = new DateTimeNormalizer([
+                DateTimeNormalizer::FORMAT_KEY => $app[SystemClock::class]->getFormat(),
+                DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
+            ]);
+
+            $factory->withNormalizer($dateNormalizer);
+
+            return $factory;
+        });
     }
 
     private function registerProviders(): void

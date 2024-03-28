@@ -10,19 +10,15 @@ use Storm\Contract\Projector\ProjectorSupervisorInterface;
 use Storm\Projector\Exception\ProjectionFailed;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\Repository\Data\UpdateStatusData;
-use Storm\Serializer\JsonSerializer;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Serializer;
 use Throwable;
 
 final readonly class ProjectorSupervisor implements ProjectorSupervisorInterface
 {
-    private JsonEncoder $jsonEncoder;
-
     public function __construct(
         private ProjectionProvider $projectionProvider,
-        private JsonSerializer $jsonSerializer,
+        private Serializer $serializer,
     ) {
-        $this->jsonEncoder = $this->jsonSerializer->getJsonEncoder();
     }
 
     public function markAsStop(string $projectionName): void
@@ -53,14 +49,14 @@ final readonly class ProjectorSupervisor implements ProjectorSupervisorInterface
     {
         $projection = $this->tryRetrieveProjectionByName($projectionName);
 
-        return $this->jsonEncoder->decode($projection->checkpoint(), 'array');
+        return $this->serializer->decode($projection->checkpoint(), 'json');
     }
 
     public function stateOf(string $projectionName): array
     {
         $projection = $this->tryRetrieveProjectionByName($projectionName);
 
-        return $this->jsonEncoder->decode($projection->state(), 'array');
+        return $this->serializer->decode($projection->state(), 'json');
     }
 
     public function filterNames(string ...$streamNames): array

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Projector;
 
-use Storm\Serializer\JsonSerializer;
+use Symfony\Component\Serializer\Serializer;
 
 interface SubscriptionFactory
 {
@@ -36,7 +36,7 @@ interface SubscriptionFactory
     /**
      * Get the projection serializer.
      */
-    public function getSerializer(): JsonSerializer;
+    public function getSerializer(): Serializer;
 
     /**
      * Get the projection query scope.

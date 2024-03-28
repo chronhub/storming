@@ -18,8 +18,7 @@ use Storm\Projector\Repository\Data\StartAgainData;
 use Storm\Projector\Repository\Data\StartData;
 use Storm\Projector\Repository\Data\StopData;
 use Storm\Projector\Repository\Data\UpdateLockData;
-use Storm\Serializer\JsonSerializer;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Serializer;
 
 // add datetime created_at, stopped_at, updated_at, reset_at, deleted_at, deleted_with_emitted_events_at
 // which should be handled by a ProjectionTimeTracker for storage, log, db, etc...
@@ -30,15 +29,12 @@ use Symfony\Component\Serializer\Encoder\JsonEncoder;
 // we also need to change type position and state to accept array in projection model
 final readonly class InMemoryRepository implements ProjectionRepository
 {
-    private JsonEncoder $jsonEncoder;
-
     public function __construct(
         private ProjectionProvider $provider,
         private LockManager $lockManager,
-        private JsonSerializer $serializer, // todo contract
+        private Serializer $serializer,
         private string $streamName
     ) {
-        $this->jsonEncoder = $this->serializer->getJsonEncoder();
     }
 
     public function create(ProjectionStatus $status): void
@@ -59,8 +55,8 @@ final readonly class InMemoryRepository implements ProjectionRepository
     {
         $data = new StopData(
             $projectionStatus->value,
-            $this->jsonEncoder->encode($projectionDetail->userState, 'json'),
-            $this->jsonEncoder->encode($projectionDetail->checkpoints, 'json'),
+            $this->serializer->serialize($projectionDetail->userState, 'json'),
+            $this->serializer->serialize($projectionDetail->checkpoints, 'json'),
             $this->lockManager->refresh()
         );
 
@@ -84,8 +80,8 @@ final readonly class InMemoryRepository implements ProjectionRepository
     public function persist(ProjectionResult $projectionDetail): void
     {
         $data = new PersistData(
-            $this->jsonEncoder->encode($projectionDetail->userState, 'json'),
-            $this->jsonEncoder->encode($projectionDetail->checkpoints, 'json'),
+            $this->serializer->serialize($projectionDetail->userState, 'json'),
+            $this->serializer->serialize($projectionDetail->checkpoints, 'json'),
             $this->lockManager->refresh()
         );
 
@@ -96,8 +92,8 @@ final readonly class InMemoryRepository implements ProjectionRepository
     {
         $data = new ResetData(
             $currentStatus->value,
-            $this->jsonEncoder->encode($projectionDetail->userState, 'json'),
-            $this->jsonEncoder->encode($projectionDetail->checkpoints, 'json'),
+            $this->serializer->serialize($projectionDetail->userState, 'json'),
+            $this->serializer->serialize($projectionDetail->checkpoints, 'json'),
         );
 
         $this->updateProjection($data);
@@ -117,8 +113,8 @@ final readonly class InMemoryRepository implements ProjectionRepository
         }
 
         return new ProjectionResult(
-            $this->jsonEncoder->decode($projection->checkpoint(), 'array'),
-            $this->jsonEncoder->decode($projection->state(), 'array'),
+            $this->serializer->decode($projection->checkpoint(), 'json'),
+            $this->serializer->decode($projection->state(), 'json'),
         );
     }
 

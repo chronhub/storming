@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Serializer;
 
+use Storm\Contract\Serializer\JsonSerializer;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -11,10 +12,16 @@ use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Serializer;
 
+use function array_merge;
 use function is_int;
 
-final class JsonSerializer
+final class JsonSerializerFactory implements JsonSerializer
 {
+    /**
+     * @var array NormalizerInterface|DenormalizerInterface[]
+     */
+    private array $normalizers = [];
+
     private array $context = [];
 
     private ?int $encodeOptions = null;
@@ -42,9 +49,16 @@ final class JsonSerializer
         return $this;
     }
 
-    public function create(NormalizerInterface|DenormalizerInterface ...$normalizers): Serializer
+    public function withNormalizer(NormalizerInterface|DenormalizerInterface ...$normalizers): self
     {
-        return new Serializer($normalizers, [$this->getJsonEncoder()]);
+        $this->normalizers = array_merge($this->normalizers, $normalizers);
+
+        return $this;
+    }
+
+    public function create(): Serializer
+    {
+        return new Serializer($this->normalizers, [$this->getJsonEncoder()]);
     }
 
     public function getJsonEncoder(): JsonEncoder

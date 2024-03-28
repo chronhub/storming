@@ -13,7 +13,6 @@ use Storm\Contract\Serializer\StreamEventSerializer;
 use Symfony\Component\Serializer\Serializer;
 
 use function is_string;
-use function json_decode;
 
 final readonly class DomainEventSerializer implements StreamEventSerializer
 {
@@ -26,8 +25,8 @@ final readonly class DomainEventSerializer implements StreamEventSerializer
     public function serializeEvent(DomainEvent $event): Payload
     {
         return new Payload(
-            $this->contentSerializer->serialize($event),
             $this->serializer->normalize($event->headers(), 'json'),
+            $this->contentSerializer->serialize($event),
         );
     }
 
@@ -53,22 +52,23 @@ final readonly class DomainEventSerializer implements StreamEventSerializer
 
     private function decodePayload(Payload $payload): Payload
     {
+        // todo use serializer to decode
         $content = $payload->content;
 
         if (is_string($content)) {
-            $content = json_decode($content, true, 512, JSON_THROW_ON_ERROR);
+            $content = $this->serializer->decode($content, 'json');
         }
 
         $headers = $payload->headers;
 
         if (is_string($headers)) {
-            $headers = json_decode($headers, true, 512, JSON_THROW_ON_ERROR);
+            $headers = $this->serializer->decode($headers, 'json');
         }
 
         if (! isset($headers[EventHeader::INTERNAL_POSITION]) && $payload->seqNo !== null) {
             $headers[EventHeader::INTERNAL_POSITION] = $payload->seqNo;
         }
 
-        return new Payload($content, $headers);
+        return new Payload($headers, $content);
     }
 }

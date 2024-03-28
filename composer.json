@@ -11,15 +11,16 @@
   ],
   "require": {
     "php": "^8.3",
+    "ext-pcntl": "*",
+    "ext-pdo": "*",
+    "composer-runtime-api": "^2.2",
     "laravel/framework": "10.x-dev",
     "react/promise": "^3.x-dev",
-    "symfony/uid": "6.3.x",
     "symfony/clock": "^6.4",
-    "symfony/serializer": "^6.4",
-    "composer-runtime-api": "^2.2",
-    "zircote/swagger-php" : "^4.8",
-    "ext-pcntl": "*",
-    "ext-pdo": "*"
+    "symfony/property-access": "7.1.x-dev",
+    "symfony/serializer": "^v6.4",
+    "symfony/uid": "6.3.x",
+    "zircote/swagger-php": "^4.8"
   },
   "replace": {
     "chronhub/annotation": "self.version",

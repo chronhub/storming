@@ -133,9 +133,9 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
 
             $onSuccess();
         } catch (Throwable $exception) {
-            $this->eventDispatcher->dispatch(
-                new ProjectionError($this->projectionName(), $failedEvent, $exception)
-            );
+            $errorEvent = new ProjectionError($this->projectionName(), $failedEvent, $exception);
+
+            $this->eventDispatcher->dispatch($errorEvent);
 
             throw $exception;
         }

@@ -42,7 +42,7 @@ final readonly class StandardStreamPersistence implements StreamPersistence
             'type' => $payload->headers[EventHeader::AGGREGATE_TYPE],
             'id' => $payload->headers[EventHeader::AGGREGATE_ID],
             'version' => $payload->headers[EventHeader::AGGREGATE_VERSION],
-            'metadata' => $this->streamEventSerializer->encodePayload($payload->headers),
+            'header' => $this->streamEventSerializer->encodePayload($payload->headers),
             'content' => $this->streamEventSerializer->encodePayload($payload->content),
             'created_at' => $this->clock->generate(),
         ];

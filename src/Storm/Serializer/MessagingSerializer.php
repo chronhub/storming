@@ -25,8 +25,8 @@ final readonly class MessagingSerializer implements MessageSerializer
     public function serializeMessage(Message $message): Payload
     {
         return new Payload(
-            $this->contentSerializer->serialize($message->event()),
             $this->serializer->normalize($message->headers(), 'json'),
+            $this->contentSerializer->serialize($message->event()),
         );
     }
 
@@ -59,6 +59,6 @@ final readonly class MessagingSerializer implements MessageSerializer
             $headers = $this->serializer->deserialize($content, 'array', 'json');
         }
 
-        return new Payload($content, $headers);
+        return new Payload($headers, $content);
     }
 }

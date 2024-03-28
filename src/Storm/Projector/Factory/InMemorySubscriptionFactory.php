@@ -22,7 +22,7 @@ final class InMemorySubscriptionFactory extends AbstractSubscriptionFactory
         $repository = new InMemoryRepository(
             $this->projectionProvider,
             $this->createLockManager($options),
-            $this->jsonSerializer,
+            $this->serializer,
             $streamName
         );
 

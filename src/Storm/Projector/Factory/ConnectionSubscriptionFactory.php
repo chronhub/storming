@@ -30,7 +30,7 @@ final class ConnectionSubscriptionFactory extends AbstractSubscriptionFactory
         $repository = new InMemoryRepository(
             $this->projectionProvider,
             $this->createLockManager($options),
-            $this->jsonSerializer,
+            $this->serializer,
             $streamName
         );
 
@@ -48,10 +48,7 @@ final class ConnectionSubscriptionFactory extends AbstractSubscriptionFactory
 
         // fixMe no gap detector still save gaps
         if ($detectGap) {
-            return new CheckpointManager(
-                $checkpoints,
-                new NoopGapDetector()
-            );
+            return new CheckpointManager($checkpoints, new NoopGapDetector());
         }
 
         return new CheckpointInMemory($checkpoints);

@@ -62,7 +62,7 @@ use Storm\Projector\Workflow\Watcher\StopWatcher;
 use Storm\Projector\Workflow\Watcher\TimeWatcher;
 use Storm\Projector\Workflow\Watcher\UserStateWatcher;
 use Storm\Projector\Workflow\Watcher\WatcherManager;
-use Storm\Serializer\JsonSerializer;
+use Symfony\Component\Serializer\Serializer;
 
 abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 {
@@ -73,7 +73,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         protected readonly ProjectionProvider $projectionProvider,
         protected readonly EventStreamProvider $eventStreamProvider,
         protected readonly SystemClock $clock,
-        protected readonly JsonSerializer $jsonSerializer,
+        protected readonly Serializer $serializer,
         protected readonly Dispatcher $dispatcher,
         protected readonly ?ProjectionQueryScope $queryScope = null,
         protected readonly ProjectionOption|array $options = [],
@@ -155,9 +155,9 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return $this->projectionProvider;
     }
 
-    public function getSerializer(): JsonSerializer
+    public function getSerializer(): Serializer
     {
-        return $this->jsonSerializer;
+        return $this->serializer;
     }
 
     public function getQueryScope(): ?ProjectionQueryScope

@@ -23,7 +23,7 @@ final readonly class GenericMessageFactory implements MessageFactory
     {
         if (is_array($message)) {
             $message = $this->messageSerializer->deserializePayload(
-                new Payload($message['content'] ?? [], $message['headers'] ?? [])
+                new Payload($message['headers'] ?? [], $message['content'] ?? [])
             );
         }
 

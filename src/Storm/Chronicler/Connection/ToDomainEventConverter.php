@@ -30,9 +30,8 @@ final readonly class ToDomainEventConverter implements StreamEventConverter
 
     private function deserializeEvent(object $streamEvent): DomainEvent
     {
-        // fixMe: metadata to header
         return $this->streamEventSerializer->deserializePayload(
-            new Payload($streamEvent->content, $streamEvent->metadata, $streamEvent->position)
+            new Payload($streamEvent->header, $streamEvent->content, $streamEvent->position)
         );
     }
 
