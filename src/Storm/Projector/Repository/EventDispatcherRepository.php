@@ -62,11 +62,11 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
         );
     }
 
-    public function reset(ProjectionResult $projectionDetail, ProjectionStatus $currentStatus): void
+    public function reset(ProjectionResult $projectionResult, ProjectionStatus $currentStatus): void
     {
         $this->dispatchWhen(
-            fn () => $this->repository->reset($projectionDetail, $currentStatus),
-            fn () => $this->eventDispatcher->dispatch(new ProjectionReset($this->projectionName(), $projectionDetail)),
+            fn () => $this->repository->reset($projectionResult, $currentStatus),
+            fn () => $this->eventDispatcher->dispatch(new ProjectionReset($this->projectionName(), $projectionResult)),
             ProjectionReset::class
         );
     }

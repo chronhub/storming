@@ -48,8 +48,8 @@ final class LoadStreams
     }
 
     /**
-     * @param  array<string,Checkpoint>               $streams
-     * @return null|Collection<string,StreamIterator>
+     * @param  array<string, Checkpoint>               $streams
+     * @return null|Collection<string, StreamIterator>
      */
     private function collectStreams(array $streams): ?Collection
     {

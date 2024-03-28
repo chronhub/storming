@@ -54,7 +54,7 @@ interface ProjectionRepository
     /**
      * Resets projection data.
      */
-    public function reset(ProjectionResult $projectionDetail, ProjectionStatus $currentStatus): void;
+    public function reset(ProjectionResult $projectionResult, ProjectionStatus $currentStatus): void;
 
     /**
      * Deletes the projection.

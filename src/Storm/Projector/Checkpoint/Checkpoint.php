@@ -30,7 +30,7 @@ final readonly class Checkpoint implements JsonSerializable
     }
 
     /**
-     * @return array{stream_name: string, position: int<0,max>, event_time: ?string, created_at: string, gaps: array<positive-int>}
+     * @return array{stream_name: string, position: int<0, max>, event_time: ?string, created_at: string, gaps: array<positive-int>}
      */
     public function jsonSerialize(): array
     {

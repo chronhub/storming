@@ -88,12 +88,12 @@ final readonly class InMemoryRepository implements ProjectionRepository
         $this->updateProjection($data);
     }
 
-    public function reset(ProjectionResult $projectionDetail, ProjectionStatus $currentStatus): void
+    public function reset(ProjectionResult $projectionResult, ProjectionStatus $currentStatus): void
     {
         $data = new ResetData(
             $currentStatus->value,
-            $this->serializer->serialize($projectionDetail->userState, 'json'),
-            $this->serializer->serialize($projectionDetail->checkpoints, 'json'),
+            $this->serializer->serialize($projectionResult->userState, 'json'),
+            $this->serializer->serialize($projectionResult->checkpoints, 'json'),
         );
 
         $this->updateProjection($data);
