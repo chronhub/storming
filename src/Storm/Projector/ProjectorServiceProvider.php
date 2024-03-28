@@ -52,7 +52,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
                 $app['projection.provider.connection'],
                 $app['event_stream.provider.connection'],
                 $app[SystemClock::class],
-                $app['projection.serializer.json.default'],
+                $app['projection.serializer.json.default']->create(),
                 $app[Dispatcher::class],
                 $app[QueryScopeConnection::class],
                 new DefaultOption(signal: true, retries: [])
