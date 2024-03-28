@@ -18,8 +18,8 @@ final readonly class MessagingSerializer implements MessageSerializer
 {
     public function __construct(
         private Serializer $serializer,
-        private ContentSerializer $contentSerializer)
-    {
+        private ContentSerializer $contentSerializer
+    ) {
     }
 
     public function serializeMessage(Message $message): Payload

@@ -51,6 +51,7 @@ class ChroniclerServiceProvider extends ServiceProvider implements DeferrablePro
 
     private function registerStreamEventSerializer(): void
     {
+        // todo jsons serializer contracts and normalizers
         $this->app->bind(StreamEventSerializer::class, function () {
             return new DomainEventSerializer(
                 (new JsonSerializer())->create(),

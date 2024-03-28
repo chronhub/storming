@@ -27,7 +27,10 @@ final class CursorConnectionLoader
 
             return $this->deserializeEvents($streamEvents, $streamName);
         } catch (QueryException $queryException) {
-            $this->handleException($queryException, $streamName);
+            match ($queryException->getCode()) {
+                PDO::ERR_NONE => throw NoStreamEventReturn::withStreamName($streamName),
+                default => throw StreamNotFound::withStreamName($streamName, $queryException),
+            };
         }
     }
 
@@ -38,17 +41,9 @@ final class CursorConnectionLoader
         }
 
         foreach ($streamEvents as $streamEvent) {
-            yield $this->eventConverter->toDomainEvent($streamEvent, $streamName);
+            yield $this->eventConverter->toDomainEvent($streamEvent);
         }
 
         return $streamEvents->count();
-    }
-
-    protected function handleException(QueryException $exception, StreamName $streamName): void
-    {
-        match ($exception->getCode()) {
-            PDO::ERR_NONE => throw NoStreamEventReturn::withStreamName($streamName),
-            default => throw StreamNotFound::withStreamName($streamName, $exception),
-        };
     }
 }

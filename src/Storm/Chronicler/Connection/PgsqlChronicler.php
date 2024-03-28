@@ -39,7 +39,11 @@ final readonly class PgsqlChronicler implements Chronicler
         try {
             $this->connection->table($this->masterTable)->useWritePdo()->insert($streamEvents);
         } catch (QueryException $exception) {
-            $this->handleException($exception, $stream->name());
+            match ($exception->getCode()) {
+                '42P01' => throw StreamNotFound::withStreamName($stream->name, $exception),
+                '23000', '23505' => throw new ConnectionConcurrencyFailure($exception->getMessage(), (int) $exception->getCode(), $exception),
+                default => throw new ConnectionQueryFailure($exception->getMessage(), (int) $exception->getCode(), $exception)
+            };
         }
     }
 
@@ -90,15 +94,6 @@ final readonly class PgsqlChronicler implements Chronicler
     public function filterStreams(string ...$streams): array
     {
         return $this->eventStreamProvider->filterByStreams($streams);
-    }
-
-    private function handleException(QueryException $exception, StreamName $streamName): void
-    {
-        match ($exception->getCode()) {
-            '42P01' => throw StreamNotFound::withStreamName($streamName),
-            '23000', '23505' => throw new ConnectionConcurrencyFailure($exception->getMessage(), (int) $exception->getCode(), $exception),
-            default => throw new ConnectionQueryFailure($exception->getMessage(), (int) $exception->getCode(), $exception)
-        };
     }
 
     public function filterCategories(string ...$categories): array
