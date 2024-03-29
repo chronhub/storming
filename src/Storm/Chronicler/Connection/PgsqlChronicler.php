@@ -30,7 +30,7 @@ final readonly class PgsqlChronicler implements Chronicler
 
     public function append(Stream $stream): void
     {
-        $streamEvents = $this->streamPersistence->serialize($stream);
+        $streamEvents = $this->streamPersistence->normalize($stream);
 
         if ($streamEvents === []) {
             return;

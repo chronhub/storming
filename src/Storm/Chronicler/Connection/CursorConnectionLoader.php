@@ -41,7 +41,7 @@ final class CursorConnectionLoader
         }
 
         foreach ($streamEvents as $streamEvent) {
-            yield $this->eventConverter->toDomainEvent($streamEvent);
+            yield $this->eventConverter->toDomainEvent($streamEvent, $streamName);
         }
 
         return $streamEvents->count();

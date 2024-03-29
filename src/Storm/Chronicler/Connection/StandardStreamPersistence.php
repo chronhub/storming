@@ -5,46 +5,41 @@ declare(strict_types=1);
 namespace Storm\Chronicler\Connection;
 
 use Storm\Contract\Chronicler\StreamPersistence;
-use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Message\EventHeader;
-use Storm\Contract\Serializer\StreamEventSerializer;
 use Storm\Stream\Stream;
-use Storm\Stream\StreamName;
+use Symfony\Component\Serializer\Serializer;
 
 use function array_map;
 use function iterator_to_array;
 
 final readonly class StandardStreamPersistence implements StreamPersistence
 {
-    public function __construct(
-        protected StreamEventSerializer $streamEventSerializer,
-        protected SystemClock $clock
-    ) {
+    public const string STRATEGY_NAME = 'standard';
+
+    public function __construct(private Serializer $serializer)
+    {
     }
 
-    public function serialize(Stream $stream): array
+    public function normalize(Stream $stream): array
     {
-        $streamName = $stream->name();
-
         return array_map(
-            fn (DomainEvent $event) => $this->serializeEvent($event, $streamName),
+            fn (DomainEvent $event) => $this->normalizeEvent($event, $stream->byName),
             iterator_to_array($stream->events())
         );
     }
 
-    protected function serializeEvent(DomainEvent $event, StreamName $streamName): array
+    public function getStrategyName(): string
     {
-        $payload = $this->streamEventSerializer->serializeEvent($event);
+        return self::STRATEGY_NAME;
+    }
 
-        return [
-            'stream_name' => $streamName->name,
-            'type' => $payload->headers[EventHeader::AGGREGATE_TYPE],
-            'id' => $payload->headers[EventHeader::AGGREGATE_ID],
-            'version' => $payload->headers[EventHeader::AGGREGATE_VERSION],
-            'header' => $this->streamEventSerializer->encodePayload($payload->headers),
-            'content' => $this->streamEventSerializer->encodePayload($payload->content),
-            'created_at' => $this->clock->generate(),
-        ];
+    private function normalizeEvent(DomainEvent $event, string $streamName): array
+    {
+        return $this->serializer->normalize($event, null, $this->getContext($streamName));
+    }
+
+    private function getContext(string $streamName): array
+    {
+        return ['strategy' => self::STRATEGY_NAME, 'streamName' => $streamName];
     }
 }

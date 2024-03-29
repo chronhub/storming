@@ -7,7 +7,7 @@ namespace Storm\Chronicler\Connection;
 use Storm\Contract\Chronicler\StreamEventConverter;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Serializer\StreamEventSerializer;
-use Storm\Serializer\Payload;
+use Storm\Stream\StreamName;
 
 use function array_map;
 use function is_iterable;
@@ -19,7 +19,7 @@ final readonly class ToDomainEventConverter implements StreamEventConverter
     {
     }
 
-    public function toDomainEvent(object|iterable $streamEvents): array|DomainEvent
+    public function toDomainEvent(object|iterable $streamEvents, StreamName $streamName): array|DomainEvent
     {
         if (is_iterable($streamEvents)) {
             return $this->deserializeEvents($streamEvents);
@@ -30,9 +30,7 @@ final readonly class ToDomainEventConverter implements StreamEventConverter
 
     private function deserializeEvent(object $streamEvent): DomainEvent
     {
-        return $this->streamEventSerializer->deserializePayload(
-            new Payload($streamEvent->header, $streamEvent->content, $streamEvent->position)
-        );
+        return $this->streamEventSerializer->deserialize($streamEvent);
     }
 
     /**

@@ -39,7 +39,7 @@ it('create message from array', function (string $messaging): void {
     $stub = $messaging::fromContent($payload['content'])->withHeaders($payload['headers']);
 
     $this->messagingSerializer
-        ->shouldReceive('deserializePayload')
+        ->shouldReceive('deserialize')
         ->with(Mockery::on(static function ($expected) use ($payload): bool {
             assertInstanceOf(Payload::class, $expected);
             assertEquals($expected->content, $payload['content']);

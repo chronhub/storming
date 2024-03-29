@@ -8,5 +8,7 @@ use Storm\Stream\Stream;
 
 interface StreamPersistence
 {
-    public function serialize(Stream $stream): array;
+    public function normalize(Stream $stream): array;
+
+    public function getStrategyName(): string;
 }

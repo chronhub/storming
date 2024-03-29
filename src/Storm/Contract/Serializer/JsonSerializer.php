@@ -31,4 +31,9 @@ interface JsonSerializer
     public function create(): Serializer;
 
     public function getJsonEncoder(): JsonEncoder;
+
+    /**
+     * @return NormalizerInterface[]|DenormalizerInterface[]
+     */
+    public function getNormalizers(): array;
 }

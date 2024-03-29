@@ -8,15 +8,21 @@ use Storm\Contract\Serializer\JsonSerializer;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
+use Symfony\Component\Serializer\Normalizer\UidNormalizer;
 use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\SerializerAwareInterface;
 
 use function array_merge;
 use function is_int;
 
 final class JsonSerializerFactory implements JsonSerializer
 {
+    private bool $useCommonNormalizers = true;
+
     /**
      * @var array NormalizerInterface|DenormalizerInterface[]
      */
@@ -27,6 +33,18 @@ final class JsonSerializerFactory implements JsonSerializer
     private ?int $encodeOptions = null;
 
     private ?int $decodeOptions = null;
+
+    public function disableCommon(): self
+    {
+        $this->useCommonNormalizers = false;
+
+        return $this;
+    }
+
+    public function isCommonEnabled(): bool
+    {
+        return $this->useCommonNormalizers;
+    }
 
     public function withContext(array $context = []): self
     {
@@ -58,7 +76,17 @@ final class JsonSerializerFactory implements JsonSerializer
 
     public function create(): Serializer
     {
-        return new Serializer($this->normalizers, [$this->getJsonEncoder()]);
+        $normalizers = $this->getNormalizers();
+
+        $serializer = new Serializer($normalizers, [$this->getJsonEncoder()]);
+
+        foreach ($normalizers as $normalizer) {
+            if ($normalizer instanceof SerializerAwareInterface) {
+                $normalizer->setSerializer($serializer);
+            }
+        }
+
+        return $serializer;
     }
 
     public function getJsonEncoder(): JsonEncoder
@@ -71,5 +99,29 @@ final class JsonSerializerFactory implements JsonSerializer
             new JsonDecode($decodeOptions),
             $this->context
         );
+    }
+
+    public function getNormalizers(): array
+    {
+        $normalizers = $this->normalizers;
+
+        if ($this->useCommonNormalizers) {
+            $normalizers = array_merge($normalizers, $this->commons());
+        }
+
+        return $normalizers;
+    }
+
+    private function commons(): array
+    {
+        return [
+            new UidNormalizer(),
+            new DateTimeNormalizer([
+                DateTimeNormalizer::FORMAT_KEY => 'Y-m-d\TH:i:s.u',
+                DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
+            ]),
+            new JsonSerializableNormalizer(),
+            new PayloadNormalizer(),
+        ];
     }
 }

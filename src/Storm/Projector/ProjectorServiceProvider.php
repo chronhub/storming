@@ -18,8 +18,7 @@ use Storm\Projector\Filter\QueryScopeConnection;
 use Storm\Projector\Options\DefaultOption;
 use Storm\Projector\Repository\ConnectionProjectionProvider;
 use Storm\Serializer\JsonSerializerFactory;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer;
+use Storm\Serializer\StreamEventNormalizer;
 
 class ProjectorServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -75,14 +74,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
             $factory->withEncodeOptions(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_FORCE_OBJECT);
             $factory->withDecodeOptions(JSON_OBJECT_AS_ARRAY | JSON_BIGINT_AS_STRING);
 
-            $dateNormalizer = new DateTimeNormalizer([
-                DateTimeNormalizer::FORMAT_KEY => $app[SystemClock::class]->getFormat(),
-                DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
-            ]);
-
-            //fixMe temporary for json serialization normalizer for Checkpoint
-            // should embrace the serializer with object normalizer
-            $factory->withNormalizer($dateNormalizer, new JsonSerializableNormalizer());
+            $factory->withNormalizer($app[StreamEventNormalizer::class]);
 
             return $factory;
         });

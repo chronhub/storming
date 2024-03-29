@@ -6,15 +6,16 @@ namespace Storm\Tests\Unit\Serializer;
 
 use Storm\Serializer\Payload;
 
-it('creates payload with given values', function (array|string $content, array|string $headers, ?int $seqNo): void {
-    $payload = new Payload($content, $headers, $seqNo);
+it('creates payload with given values', function (array|string $content, array|string $header, ?int $seqNo): void {
+    $payload = new Payload($header, $content, $seqNo);
 
     expect($payload->content)->toBe($content)
-        ->and($payload->headers)->toBe($headers)
+        ->and($payload->header)->toBe($header)
         ->and($payload->seqNo)->toBe($seqNo);
 })->with([
     'content as array' => fn (): array => ['foo' => 'bar'],
     'content as json' => fn (): string => '"{"foo":"bar"}"',
+    'allow empty content' => fn (): array => [],
 ])->with([
     'headers as array' => fn (): array => ['key' => 'value'],
     'headers as json' => fn (): string => '"{"key":"value"}"',
@@ -24,10 +25,11 @@ it('creates payload with given values', function (array|string $content, array|s
     'null seqNo' => fn (): null => null,
 ]);
 
-it('serializes payload to json', function (): void {
+it('serializes payload', function (): void {
     $payload = new Payload(['some' => 'content'], ['key' => 'value'], 123);
 
     expect($payload->jsonSerialize())
+        ->toBeArray()
         ->toHaveKeys(['content', 'headers', 'seqNo'])
         ->toBe(['headers' => ['key' => 'value'], 'content' => ['some' => 'content'], 'seqNo' => 123]);
 });

@@ -10,7 +10,6 @@ use Illuminate\Support\ServiceProvider;
 use Storm\Chronicler\Connection\ToDomainEventConverter;
 use Storm\Chronicler\Publisher\InMemoryEventPublisher;
 use Storm\Contract\Chronicler\StreamEventConverter;
-use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Serializer\StreamEventSerializer;
 use Storm\Message\ChainMessageDecorator;
 use Storm\Message\Decorator\EventId;
@@ -19,9 +18,8 @@ use Storm\Message\Decorator\EventType;
 use Storm\Reporter\Subscriber\CorrelationHeaderCommand;
 use Storm\Serializer\DomainEventSerializer;
 use Storm\Serializer\JsonSerializerFactory;
-use Storm\Serializer\MessageContentSerializer;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Normalizer\UidNormalizer;
+use Storm\Serializer\PayloadNormalizer;
+use Storm\Serializer\StreamEventNormalizer;
 
 class ChroniclerServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -54,17 +52,12 @@ class ChroniclerServiceProvider extends ServiceProvider implements DeferrablePro
 
     private function registerStreamEventSerializer(): void
     {
-        $this->app->bind(StreamEventSerializer::class, function (Application $app) {
+        $this->app->bind(StreamEventSerializer::class, function (Application $app): StreamEventSerializer {
             $factory = new JsonSerializerFactory();
+            $factory->withNormalizer($app[PayloadNormalizer::class]);
+            $factory->withNormalizer($app[StreamEventNormalizer::class]);
 
-            $dateNormalizer = new DateTimeNormalizer([
-                DateTimeNormalizer::FORMAT_KEY => $app[SystemClock::class]->getFormat(),
-                DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
-            ]);
-
-            $factory->withNormalizer($dateNormalizer, new UidNormalizer());
-
-            return new DomainEventSerializer($factory->create(), new MessageContentSerializer());
+            return new DomainEventSerializer($factory->create());
         });
     }
 

@@ -7,58 +7,37 @@ namespace Storm\Serializer;
 use InvalidArgumentException;
 use Storm\Contract\Message\Header;
 use Storm\Contract\Message\Messaging;
-use Storm\Contract\Serializer\ContentSerializer;
 use Storm\Contract\Serializer\MessageSerializer;
 use Storm\Message\Message;
 use Symfony\Component\Serializer\Serializer;
 
-use function is_string;
+use function is_array;
 
+// fixMe naming as its more a normalization than serialization
 final readonly class MessagingSerializer implements MessageSerializer
 {
-    public function __construct(
-        private Serializer $serializer,
-        private ContentSerializer $contentSerializer
-    ) {
+    public function __construct(private Serializer $serializer)
+    {
     }
 
     public function serializeMessage(Message $message): Payload
     {
         return new Payload(
             $this->serializer->normalize($message->headers(), 'json'),
-            $this->contentSerializer->serialize($message->event()),
+            $this->serializer->serialize($message->event()->toContent(), 'json')
         );
     }
 
-    public function deserializePayload(Payload $payload): Messaging
+    public function deserialize(mixed $data): Messaging
     {
-        $decodedPayload = $this->decodePayload($payload);
-
-        $source = $decodedPayload->headers[Header::EVENT_TYPE] ?? null;
-
-        if (is_string($source)) {
-            $event = $this->contentSerializer->deserialize($source, $decodedPayload);
-
-            return $event->withHeaders($decodedPayload->headers);
+        if (! is_array($data)) {
+            throw new InvalidArgumentException('Data must be an array');
         }
 
-        throw new InvalidArgumentException('Missing event type header string to deserialize payload');
-    }
+        $payload = $this->serializer->denormalize($data, Payload::class, 'json');
 
-    private function decodePayload(Payload $payload): Payload
-    {
-        $content = $payload->content;
+        $event = $payload->header[Header::EVENT_TYPE];
 
-        if (is_string($content)) {
-            $content = $this->serializer->deserialize($content, 'array', 'json');
-        }
-
-        $headers = $payload->headers;
-
-        if (is_string($headers)) {
-            $headers = $this->serializer->deserialize($content, 'array', 'json');
-        }
-
-        return new Payload($headers, $content);
+        return $this->serializer->denormalize($payload->jsonSerialize(), $event, 'json');
     }
 }

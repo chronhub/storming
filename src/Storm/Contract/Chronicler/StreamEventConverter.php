@@ -5,11 +5,12 @@ declare(strict_types=1);
 namespace Storm\Contract\Chronicler;
 
 use Storm\Contract\Message\DomainEvent;
+use Storm\Stream\StreamName;
 
 interface StreamEventConverter
 {
     /**
      * @return array<DomainEvent>|DomainEvent
      */
-    public function toDomainEvent(object|iterable $streamEvents): array|DomainEvent;
+    public function toDomainEvent(object|iterable $streamEvents, StreamName $streamName): array|DomainEvent;
 }

@@ -6,7 +6,6 @@ namespace Storm\Message;
 
 use Storm\Contract\Message\MessageFactory;
 use Storm\Contract\Serializer\MessageSerializer;
-use Storm\Serializer\Payload;
 
 use function is_array;
 
@@ -16,15 +15,10 @@ final readonly class GenericMessageFactory implements MessageFactory
     {
     }
 
-    /**
-     * @param object|array{content:array|empty,headers:array|empty} $message
-     */
     public function createMessageFrom(object|array $message): Message
     {
         if (is_array($message)) {
-            $message = $this->messageSerializer->deserializePayload(
-                new Payload($message['headers'] ?? [], $message['content'] ?? [])
-            );
+            $message = $this->messageSerializer->deserialize($message);
         }
 
         if ($message instanceof Message) {

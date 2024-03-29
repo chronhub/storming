@@ -10,6 +10,8 @@ use function count;
 
 final class Stream
 {
+    public readonly string $byName;
+
     private StreamEvents $events;
 
     public function __construct(
@@ -17,6 +19,7 @@ final class Stream
         iterable $events = []
     ) {
         $this->events = new StreamEvents($events);
+        $this->byName = $name->name;
     }
 
     public function name(): StreamName

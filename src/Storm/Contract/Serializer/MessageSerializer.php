@@ -12,5 +12,5 @@ interface MessageSerializer
 {
     public function serializeMessage(Message $message): Payload;
 
-    public function deserializePayload(Payload $payload): Messaging;
+    public function deserialize(mixed $data): Messaging;
 }
