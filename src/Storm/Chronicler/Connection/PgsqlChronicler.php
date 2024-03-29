@@ -57,7 +57,7 @@ final readonly class PgsqlChronicler implements Chronicler
             }
         } catch (QueryException $exception) {
             if ($exception->getCode() !== '00000') {
-                throw $exception;
+                throw new ConnectionQueryFailure($exception->getMessage(), (int) $exception->getCode(), $exception);
             }
         }
 
@@ -65,7 +65,7 @@ final readonly class PgsqlChronicler implements Chronicler
             $this->connection->getSchemaBuilder()->drop($streamName->name);
         } catch (QueryException $exception) {
             if ($exception->getCode() !== '00000') {
-                throw $exception;
+                throw new ConnectionQueryFailure($exception->getMessage(), (int) $exception->getCode(), $exception);
             }
         }
     }

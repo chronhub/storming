@@ -3,11 +3,14 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use Storm\Chronicler\Http\Controllers\EventStream\CreateEventStreamApi;
-use Storm\Chronicler\Http\Controllers\EventStream\RequestEventStreamExistsApi;
+use Storm\Chronicler\Http\Controllers\EventStream\CreateStreamApi;
+use Storm\Chronicler\Http\Controllers\EventStream\DeleteStreamApi;
+use Storm\Chronicler\Http\Controllers\EventStream\RequestStreamExistsApi;
 
 Route::group(['prefix' => 'event-stream'], function () {
-    Route::get('/', RequestEventStreamExistsApi::class);
+    Route::get('/', RequestStreamExistsApi::class);
 
-    Route::post('/', CreateEventStreamApi::class);
+    Route::post('/', CreateStreamApi::class);
+
+    Route::delete('/', DeleteStreamApi::class);
 });

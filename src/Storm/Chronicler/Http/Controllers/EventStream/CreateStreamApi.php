@@ -6,16 +6,16 @@ namespace Storm\Chronicler\Http\Controllers\EventStream;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use OpenApi\Attributes\Get;
 use OpenApi\Attributes\Parameter;
+use OpenApi\Attributes\Post;
 use OpenApi\Attributes\Response;
 use OpenApi\Attributes\Schema;
-use Storm\Chronicler\Http\Controllers\EventStreamApi;
+use Storm\Chronicler\Http\Controllers\StreamApi;
 use Throwable;
 
-#[Get(
+#[Post(
     path: '/event-stream',
-    summary: 'Check if an event stream exists',
+    summary: 'Create a new event stream',
     tags: ['Stream'],
     parameters: [
         new Parameter(
@@ -31,17 +31,17 @@ use Throwable;
         new Response(response: 204, description: 'ok'),
         new Response(ref: '#/components/responses/401', response: 401),
         new Response(ref: '#/components/responses/403', response: 403),
-        new Response(ref: '#/components/responses/StreamNotFound', response: 404),
+        new Response(ref: '#/components/responses/StreamAlreadyExists', response: 419),
         new Response(ref: '#/components/responses/422', response: 422),
         new Response(ref: '#/components/responses/500', response: 500),
     ],
 )]
-final readonly class RequestEventStreamExistsApi extends EventStreamApi
+final readonly class CreateStreamApi extends StreamApi
 {
-    public function __invoke(Request $request, RequestEventStreamExists $requestEventStreamExists): JsonResponse
+    public function __invoke(Request $request, CreateStream $createEventStream): JsonResponse
     {
         try {
-            $response = $requestEventStreamExists->process($request);
+            $response = $createEventStream($request);
         } catch (Throwable $exception) {
             return $this->handleException($exception, $request);
         }

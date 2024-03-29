@@ -12,7 +12,7 @@ use Storm\Contract\Chronicler\Chronicler;
 use Storm\Stream\StreamName;
 use Throwable;
 
-final readonly class RequestEventStreamExists
+final readonly class RequestStreamExists
 {
     public function __construct(
         private Chronicler $chronicler,
@@ -25,7 +25,7 @@ final readonly class RequestEventStreamExists
      * @throws ValidationException
      * @throws Throwable
      */
-    public function process(Request $request): ResponseFactory
+    public function __invoke(Request $request): ResponseFactory
     {
         $this->validator->make($request->all(), ['name' => 'required|string'])->validate();
 

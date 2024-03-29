@@ -17,13 +17,13 @@ use Throwable;
 #[
     Info(
         version: '1.0',
-        description: 'Event Stream API',
-        title: 'Event Stream API',
+        description: 'Stream API',
+        title: 'Stream API',
     ),
 
-    Tag(name: 'Stream', description: 'Event Stream API')
+    Tag(name: 'Stream', description: 'Stream API')
 ]
-abstract readonly class EventStreamApi
+abstract readonly class StreamApi
 {
     public function __construct(protected ResponseFactory $responseFactory)
     {
