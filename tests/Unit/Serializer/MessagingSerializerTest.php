@@ -36,7 +36,7 @@ it('serializes a message', function (): void {
     expect($payload)->toBeInstanceOf(Payload::class)
         ->and($payload->content)->toBeString()
         ->and($payload->header)->toBe($headers)
-        ->and($payload->seqNo)->toBeNull();
+        ->and($payload->position)->toBeNull();
 
     $toArray = $payload->jsonSerialize();
 

@@ -11,7 +11,7 @@ it('creates payload with given values', function (array|string $content, array|s
 
     expect($payload->content)->toBe($content)
         ->and($payload->header)->toBe($header)
-        ->and($payload->seqNo)->toBe($seqNo);
+        ->and($payload->position)->toBe($seqNo);
 })->with([
     'content as array' => fn (): array => ['foo' => 'bar'],
     'content as json' => fn (): string => '"{"foo":"bar"}"',

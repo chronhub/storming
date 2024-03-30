@@ -1,15 +1,15 @@
 openapi: 3.0.0
 info:
-  title: 'Event Stream API'
-  description: 'Event Stream API'
+  title: 'Stream API'
+  description: 'Stream API'
   version: '1.0'
 paths:
-  /event-stream:
+  /stream:
     get:
       tags:
         - Stream
-      summary: 'Check if an event stream exists'
-      operationId: a037660ef1e0262acf62e539041e4274
+      summary: 'Check if a stream exists by stream name'
+      operationId: ddcd72718bd557144eff4fcbba208743
       parameters:
         -
           name: name
@@ -34,8 +34,8 @@ paths:
     post:
       tags:
         - Stream
-      summary: 'Create a new event stream'
-      operationId: bb6c8fa2c9f7d900f372da343b8ef330
+      summary: 'Create a new stream'
+      operationId: 977db311fc816fb3ad5bf8aa282b1be4
       parameters:
         -
           name: name
@@ -57,8 +57,160 @@ paths:
           $ref: '#/components/responses/422'
         '500':
           $ref: '#/components/responses/500'
+    delete:
+      tags:
+        - Stream
+      summary: 'Delete stream by stream name'
+      operationId: 70602ac5522262faeff836eac1b93385
+      parameters:
+        -
+          name: name
+          in: query
+          description: 'Stream name'
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: ok
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/StreamNotFound'
+        '422':
+          $ref: '#/components/responses/422'
+        '500':
+          $ref: '#/components/responses/500'
+  /stream/from_to:
+    get:
+      tags:
+        - Stream
+      description: 'Retrieve stream events from included position to next included position'
+      operationId: retrieveFromToStreamPosition
+      parameters:
+        -
+          name: name
+          in: query
+          description: 'Stream name'
+          required: true
+          schema:
+            type: string
+        -
+          name: from
+          in: query
+          description: 'from included stream position'
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        -
+          name: to
+          in: query
+          description: 'to included stream position, must be greater than from'
+          required: true
+          schema:
+            type: integer
+            minimum: 2
+        -
+          name: direction
+          in: query
+          description: 'sort stream by direction'
+          required: true
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+      responses:
+        '200':
+          $ref: '#/components/responses/StreamEvents'
+        '204':
+          $ref: '#/components/responses/NoStreamEventReturned'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/StreamNotFound'
+        '500':
+          $ref: '#/components/responses/500'
 components:
   schemas:
+    BodyData:
+      properties:
+        data:
+          type: array
+          items:
+            properties:
+              '':
+                $ref: '#/components/schemas/StreamEvents'
+            type: object
+      type: object
+    StreamEvents:
+      required:
+        - position
+        - header
+        - content
+      properties:
+        position:
+          $ref: '#/components/schemas/StreamEventPosition'
+        header:
+          $ref: '#/components/schemas/StreamEventHeader'
+        content:
+          $ref: '#/components/schemas/StreamEventContent'
+      type: object
+    StreamEventPosition:
+      required:
+        - position
+      properties:
+        position:
+          type: integer
+          minimum: 1
+      type: object
+      additionalProperties: true
+    StreamEventHeader:
+      required:
+        - __event_id
+        - __event_time
+        - __event_type
+        - __aggregate_id
+        - __aggregate_id_type
+        - __aggregate_type
+        - __aggregate_version
+        - __internal_position
+      properties:
+        __event_id:
+          type: string
+          format: uuid
+        __event_time:
+          type: string
+          format: date-time
+        __event_type:
+          type: string
+        __aggregate_id:
+          type: string
+          format: uuid
+        __aggregate_id_type:
+          type: string
+        __aggregate_type:
+          type: string
+        __aggregate_version:
+          type: integer
+          minimum: 1
+        __internal_position:
+          type: integer
+          minimum: 1
+        __event_causation_id:
+          type: string
+          format: uuid
+        __event_causation_type:
+          type: string
+      type: object
+      additionalProperties: true
+    StreamEventContent:
+      type: object
     Error:
       properties:
         message:
@@ -70,8 +222,16 @@ components:
       type: array
       items: {  }
   responses:
+    StreamEvents:
+      description: 'Stream events'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/BodyData'
+    NoStreamEventReturned:
+      description: 'Stream exists but no stream event returned'
     '422':
-      description: 'Bad request'
+      description: 'Validation failed'
       content:
         application/json:
           schema:
@@ -109,4 +269,4 @@ components:
 tags:
   -
     name: Stream
-    description: 'Event Stream API'
+    description: 'Stream API'

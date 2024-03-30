@@ -15,19 +15,19 @@ final readonly class Payload implements JsonSerializable
     public function __construct(
         /** @var T */ public string|array $header,
         /** @var T */ public string|array $content,
-        /** @var S */ public ?int $seqNo = null
+        /** @var S */ public ?int $position = null
     ) {
     }
 
     /**
-     * @return array{header:T, content:T, seqNo:S}
+     * @return array{header:T, content:T, position:S}
      */
     public function jsonSerialize(): array
     {
         return [
             'header' => $this->header,
             'content' => $this->content,
-            'seqNo' => $this->seqNo,
+            'position' => $this->position,
         ];
     }
 }

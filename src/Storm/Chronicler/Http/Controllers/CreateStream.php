@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http\Controllers\EventStream;
+namespace Storm\Chronicler\Http\Controllers;
 
 use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Http\Request;

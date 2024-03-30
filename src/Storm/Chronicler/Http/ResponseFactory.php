@@ -56,7 +56,7 @@ class ResponseFactory
     /**
      * @return $this
      */
-    public function withErrors(MessageBag|array $errors): self
+    public function withErrors(array|MessageBag $errors): self
     {
         $this->errors = $errors;
 

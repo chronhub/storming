@@ -12,4 +12,6 @@ interface StreamEventSerializer
     public function serialize(DomainEvent $event): Payload;
 
     public function deserialize(object $object): DomainEvent;
+
+    public function toStreamEvent(mixed $data): Payload;
 }

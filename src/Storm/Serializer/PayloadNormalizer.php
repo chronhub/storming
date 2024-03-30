@@ -33,23 +33,14 @@ class PayloadNormalizer implements DenormalizerInterface, NormalizerInterface, S
 
     public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
-        return [
-            'header' => $object->header,
-            'content' => $object->content,
-            'seqNo' => $object->seqNo,
-        ];
+        return $object->jsonSerialize();
     }
 
     public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Payload
     {
         $data = $this->convertData($data);
 
-        [$header, $content] = $this->decodePartsIfNeeded($data);
-
-        $seqNo = $data['position'] ?? null;
-        if (! isset($header[EventHeader::INTERNAL_POSITION]) && $seqNo !== null) {
-            $header[EventHeader::INTERNAL_POSITION] = $seqNo;
-        }
+        [$header, $content, $seqNo] = $this->decodePartsIfNeeded($data);
 
         return new Payload($header, $content, $seqNo);
     }
@@ -87,7 +78,7 @@ class PayloadNormalizer implements DenormalizerInterface, NormalizerInterface, S
     }
 
     /**
-     * @return array{0: array, 1: array}
+     * @return array{0: array, 1: array, 2: positive-int|null}
      */
     private function decodePartsIfNeeded(array $payload): array
     {
@@ -102,6 +93,11 @@ class PayloadNormalizer implements DenormalizerInterface, NormalizerInterface, S
             $content = $this->serializer()->decode($content, 'json');
         }
 
-        return [$header, $content];
+        $position = $payload['position'] ?? null;
+        if (! isset($header[EventHeader::INTERNAL_POSITION]) && $position !== null) {
+            $header[EventHeader::INTERNAL_POSITION] = $position;
+        }
+
+        return [$header, $content, $position];
     }
 }

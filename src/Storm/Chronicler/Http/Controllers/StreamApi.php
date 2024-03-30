@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use OpenApi\Attributes\Info;
 use OpenApi\Attributes\Tag;
+use Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Storm\Chronicler\Exceptions\StreamNotFound;
 use Storm\Chronicler\Http\ResponseFactory;
@@ -32,6 +33,7 @@ abstract readonly class StreamApi
     protected function handleException(Throwable $exception, Request $request): JsonResponse
     {
         return match ($exception::class) {
+            NoStreamEventReturn::class => $this->toResponse($exception->getMessage(), 204, $request),
             StreamNotFound::class => $this->toResponse($exception->getMessage(), 404, $request),
             StreamAlreadyExists::class => $this->toResponse($exception->getMessage(), 419, $request),
             ValidationException::class => $this->handleValidationException($exception, $request),

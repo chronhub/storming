@@ -31,4 +31,9 @@ final readonly class DomainEventSerializer implements StreamEventSerializer
 
         return $this->serializer->denormalize($payload->jsonSerialize(), $event, 'json');
     }
+
+    public function toStreamEvent(mixed $data): Payload
+    {
+        return $this->serializer->denormalize($data, Payload::class, 'json');
+    }
 }
