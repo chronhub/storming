@@ -17,7 +17,7 @@ trait TransactionalStoreTrait
             throw new TransactionAlreadyStarted('Transaction already started');
         }
 
-        $this->connection->beginTransaction();
+        $this->connection()->beginTransaction();
     }
 
     public function commitTransaction(): void
@@ -26,7 +26,7 @@ trait TransactionalStoreTrait
             throw new TransactionNotStarted('Transaction not started');
         }
 
-        $this->connection->commit();
+        $this->connection()->commit();
     }
 
     public function rollbackTransaction(): void
@@ -35,7 +35,7 @@ trait TransactionalStoreTrait
             throw new TransactionNotStarted('Transaction not started');
         }
 
-        $this->connection->rollBack();
+        $this->connection()->rollBack();
     }
 
     public function transactional(callable $callback): bool|array|string|int|float|object

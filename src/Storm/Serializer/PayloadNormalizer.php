@@ -44,7 +44,12 @@ class PayloadNormalizer implements DenormalizerInterface, NormalizerInterface, S
     {
         $data = $this->convertData($data);
 
-        [$header, $content, $seqNo] = $this->decodePartsIfNeeded($data);
+        [$header, $content] = $this->decodePartsIfNeeded($data);
+
+        $seqNo = $data['position'] ?? null;
+        if (! isset($header[EventHeader::INTERNAL_POSITION]) && $seqNo !== null) {
+            $header[EventHeader::INTERNAL_POSITION] = $seqNo;
+        }
 
         return new Payload($header, $content, $seqNo);
     }
@@ -82,13 +87,12 @@ class PayloadNormalizer implements DenormalizerInterface, NormalizerInterface, S
     }
 
     /**
-     * @return array{0: array, 1: array, 2: int|null}
+     * @return array{0: array, 1: array}
      */
     private function decodePartsIfNeeded(array $payload): array
     {
         $header = $payload['header'];
         $content = $payload['content'];
-        $seqNo = $payload['seqNo'] ?? null;
 
         if (is_string($header)) {
             $header = $this->serializer()->decode($header, 'json');
@@ -98,10 +102,6 @@ class PayloadNormalizer implements DenormalizerInterface, NormalizerInterface, S
             $content = $this->serializer()->decode($content, 'json');
         }
 
-        if (! isset($header[EventHeader::INTERNAL_POSITION]) && $seqNo !== null) {
-            $header[EventHeader::INTERNAL_POSITION] = $seqNo;
-        }
-
-        return [$header, $content, $seqNo];
+        return [$header, $content];
     }
 }
