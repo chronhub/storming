@@ -21,8 +21,6 @@ use function is_int;
 
 final class JsonSerializerFactory implements JsonSerializer
 {
-    private bool $useCommonNormalizers = true;
-
     /**
      * @var array NormalizerInterface|DenormalizerInterface[]
      */
@@ -33,18 +31,6 @@ final class JsonSerializerFactory implements JsonSerializer
     private ?int $encodeOptions = null;
 
     private ?int $decodeOptions = null;
-
-    public function disableCommon(): self
-    {
-        $this->useCommonNormalizers = false;
-
-        return $this;
-    }
-
-    public function isCommonEnabled(): bool
-    {
-        return $this->useCommonNormalizers;
-    }
 
     public function withContext(array $context = []): self
     {
@@ -103,13 +89,7 @@ final class JsonSerializerFactory implements JsonSerializer
 
     public function getNormalizers(): array
     {
-        $normalizers = $this->normalizers;
-
-        if ($this->useCommonNormalizers) {
-            $normalizers = array_merge($normalizers, $this->commons());
-        }
-
-        return $normalizers;
+        return array_merge($this->normalizers, $this->commons());
     }
 
     private function commons(): array

@@ -34,12 +34,12 @@ class MessageJob
 
     public function __construct(public readonly array $payload, ?array $queue = null)
     {
-        $this->setQueueOptions($queue ?? $this->payload['headers'][Header::QUEUE] ?? []);
+        $this->setQueueOptions($queue ?? $this->payload['header'][Header::QUEUE] ?? []);
     }
 
     public function handle(Container $container): void
     {
-        $container[$this->payload['headers'][Header::REPORTER_ID]]->relay($this->payload);
+        $container[$this->payload['header'][Header::REPORTER_ID]]->relay($this->payload);
     }
 
     /**
@@ -55,7 +55,7 @@ class MessageJob
      */
     public function displayName(): string
     {
-        return $this->payload['headers'][Header::EVENT_TYPE];
+        return $this->payload['header'][Header::EVENT_TYPE];
     }
 
     private function setQueueOptions(array $queue): void

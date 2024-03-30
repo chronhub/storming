@@ -15,8 +15,8 @@ use Storm\Message\Decorator\EventId;
 use Storm\Message\Decorator\EventTime;
 use Storm\Message\Decorator\EventType;
 use Storm\Serializer\JsonSerializerFactory;
-use Storm\Serializer\MessageContentSerializer;
 use Storm\Serializer\MessagingSerializer;
+use Storm\Serializer\PayloadNormalizer;
 
 class MessageServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -52,11 +52,13 @@ class MessageServiceProvider extends ServiceProvider implements DeferrableProvid
 
     protected function registerMessageSerializer(): void
     {
-        $this->app->singleton(MessageSerializer::class, function () {
-            return new MessagingSerializer(
-                (new JsonSerializerFactory())->create(),
-                new MessageContentSerializer()
-            );
+        $this->app->singleton(MessageSerializer::class, function (Application $app) {
+            $factory = new JsonSerializerFactory();
+            $factory->withNormalizer($app[PayloadNormalizer::class]);
+
+            $serializer = $factory->create();
+
+            return new MessagingSerializer($serializer);
         });
     }
 
