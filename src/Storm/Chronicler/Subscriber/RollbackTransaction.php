@@ -9,7 +9,6 @@ use Storm\Chronicler\Attribute\Subscriber\AsStreamSubscriber;
 use Storm\Chronicler\Exceptions\TransactionNotStarted;
 use Storm\Contract\Chronicler\TransactionalChronicler;
 use Storm\Contract\Chronicler\TransactionalEventableChronicler;
-use Storm\Contract\Tracker\StreamStory;
 use Storm\Contract\Tracker\TransactionalStreamStory;
 
 #[AsStreamSubscriber(
@@ -20,7 +19,7 @@ final class RollbackTransaction
 {
     public function __invoke(TransactionalChronicler $chronicler): Closure
     {
-        return static function (TransactionalStreamStory|StreamStory $story) use ($chronicler): void {
+        return static function (TransactionalStreamStory $story) use ($chronicler): void {
             try {
                 $chronicler->rollbackTransaction();
             } catch (TransactionNotStarted $exception) {

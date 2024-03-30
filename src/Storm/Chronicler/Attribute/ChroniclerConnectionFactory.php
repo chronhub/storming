@@ -6,11 +6,9 @@ namespace Storm\Chronicler\Attribute;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Database\Connection;
-use RuntimeException;
 use Storm\Contract\Chronicler\Chronicler;
 
 use function method_exists;
-use function sprintf;
 
 class ChroniclerConnectionFactory extends AbstractChroniclerFactory
 {
@@ -32,13 +30,6 @@ class ChroniclerConnectionFactory extends AbstractChroniclerFactory
     protected function createInstance(ChroniclerAttribute $attribute): Chronicler
     {
         $connection = $this->makeConnection($attribute->connection);
-
-        if ($attribute->firstClass === $attribute->chronicler) {
-            throw new RuntimeException(sprintf(
-                'First class cannot be the same as the chronicler class %s',
-                $attribute->chronicler
-            ));
-        }
 
         $instanceClass = $attribute->firstClass ?? $attribute->chronicler;
 

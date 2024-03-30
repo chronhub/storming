@@ -5,10 +5,13 @@ declare(strict_types=1);
 namespace Storm\Chronicler\Attribute;
 
 use Attribute;
+use RuntimeException;
 use Storm\Chronicler\Connection\CursorConnectionLoader;
 use Storm\Chronicler\Connection\EventStreamProvider;
 use Storm\Chronicler\Connection\StandardStreamPersistence;
 use Storm\Chronicler\StreamListener;
+
+use function sprintf;
 
 #[Attribute(Attribute::TARGET_CLASS)]
 class AsChronicler
@@ -35,5 +38,11 @@ class AsChronicler
          */
         public ?string $firstClass = null,
     ) {
+        if ($this->firstClass === $this->abstract) {
+            throw new RuntimeException(sprintf(
+                'First class cannot be the same as the chronicler class %s',
+                $this->abstract
+            ));
+        }
     }
 }
