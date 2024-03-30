@@ -31,8 +31,8 @@ class CheckpointFactory
         return new Checkpoint(
             $checkpoint['stream_name'],
             $checkpoint['position'],
-            $checkpoint['created_at'],
             $checkpoint['event_time'],
+            $checkpoint['created_at'],
             $checkpoint['gaps'],
             null
         );

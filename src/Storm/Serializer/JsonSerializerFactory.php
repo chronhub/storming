@@ -95,13 +95,13 @@ final class JsonSerializerFactory implements JsonSerializer
     private function commons(): array
     {
         return [
+            new PayloadNormalizer(),
             new UidNormalizer(),
             new DateTimeNormalizer([
                 DateTimeNormalizer::FORMAT_KEY => 'Y-m-d\TH:i:s.u',
                 DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
             ]),
             new JsonSerializableNormalizer(),
-            new PayloadNormalizer(),
         ];
     }
 }
