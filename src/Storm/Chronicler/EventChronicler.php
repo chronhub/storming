@@ -128,10 +128,10 @@ readonly class EventChronicler implements EventableChronicler
         );
     }
 
-    public function unsubscribe(Listener ...$eventSubscribers): void
+    public function unsubscribe(Listener ...$listeners): void
     {
-        foreach ($eventSubscribers as $eventSubscriber) {
-            $this->streamTracker->forget($eventSubscriber);
+        foreach ($listeners as $listener) {
+            $this->streamTracker->forget($listener);
         }
     }
 

@@ -21,8 +21,8 @@ class CheckpointFactory
      * @param array{
      *     'stream_name': string,
      *     'position': int<0,max>,
-     *     'created_at': string,
      *     'event_time': null|string,
+     *     'created_at': string,
      *     'gaps': array<positive-int|empty>
      * } $checkpoint
      */

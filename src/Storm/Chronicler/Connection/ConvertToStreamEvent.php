@@ -13,7 +13,7 @@ use function array_map;
 use function is_iterable;
 use function iterator_to_array;
 
-final readonly class ToDomainEventConverter implements StreamEventConverter
+final readonly class ConvertToStreamEvent implements StreamEventConverter
 {
     public function __construct(private StreamEventSerializer $streamEventSerializer)
     {

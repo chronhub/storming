@@ -7,8 +7,8 @@ namespace Storm\Chronicler;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
+use Storm\Chronicler\Connection\ConvertToStreamEvent;
 use Storm\Chronicler\Connection\StandardStreamPersistence;
-use Storm\Chronicler\Connection\ToDomainEventConverter;
 use Storm\Chronicler\Publisher\InMemoryEventPublisher;
 use Storm\Contract\Chronicler\StreamEventConverter;
 use Storm\Contract\Serializer\StreamEventSerializer;
@@ -33,7 +33,7 @@ class ChroniclerServiceProvider extends ServiceProvider implements DeferrablePro
         $this->registerStreamEventSerializer();
         $this->registerEventPublisher();
 
-        $this->app->bind(StreamEventConverter::class, ToDomainEventConverter::class);
+        $this->app->bind(StreamEventConverter::class, ConvertToStreamEvent::class);
 
         // fixMe persistence
         $this->app->bind(StandardStreamPersistence::class, function (Application $app) {

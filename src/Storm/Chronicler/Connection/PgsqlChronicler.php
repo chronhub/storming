@@ -13,6 +13,7 @@ use Storm\Contract\Aggregate\AggregateIdentity;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Chronicler\QueryFilter;
+use Storm\Contract\Chronicler\StreamEventConnectionLoader;
 use Storm\Contract\Chronicler\StreamPersistence;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
@@ -23,7 +24,7 @@ final readonly class PgsqlChronicler implements Chronicler
         protected Connection $connection,
         protected EventStreamProvider $eventStreamProvider,
         protected StreamPersistence $streamPersistence,
-        protected CursorConnectionLoader $streamEventLoader,
+        protected StreamEventConnectionLoader $streamEventLoader,
         protected string $masterTable = 'stream_event',
     ) {
     }

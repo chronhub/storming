@@ -51,7 +51,7 @@ interface EventableChronicler extends ChroniclerDecorator
 
     public function subscribe(string $eventName, callable $streamContext, int $priority = 0): Listener;
 
-    public function unsubscribe(Listener ...$eventSubscribers): void;
+    public function unsubscribe(Listener ...$listeners): void;
 
     public function getStreamTracker(): StreamTracker;
 }

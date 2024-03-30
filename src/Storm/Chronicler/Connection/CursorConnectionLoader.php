@@ -11,10 +11,11 @@ use Illuminate\Support\LazyCollection;
 use PDO;
 use Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Storm\Chronicler\Exceptions\StreamNotFound;
+use Storm\Contract\Chronicler\StreamEventConnectionLoader;
 use Storm\Contract\Chronicler\StreamEventConverter;
 use Storm\Stream\StreamName;
 
-final class CursorConnectionLoader
+final class CursorConnectionLoader implements StreamEventConnectionLoader
 {
     public function __construct(protected StreamEventConverter $eventConverter)
     {
