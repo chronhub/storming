@@ -34,7 +34,7 @@ class PayloadNormalizer implements DenormalizerInterface, NormalizerInterface, S
     public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
         return [
-            'header' => $object->headers,
+            'header' => $object->header,
             'content' => $object->content,
             'seqNo' => $object->seqNo,
         ];

@@ -10,6 +10,7 @@ use Storm\Contract\Message\EventHeader;
 use Storm\Contract\Serializer\StrategyMapper;
 
 use function is_array;
+use function json_encode;
 
 final readonly class StandardStrategyMapper implements StrategyMapper
 {
@@ -32,8 +33,8 @@ final readonly class StandardStrategyMapper implements StrategyMapper
             'type' => $data['header'][EventHeader::AGGREGATE_TYPE],
             'id' => $data['header'][EventHeader::AGGREGATE_ID],
             'version' => $data['header'][EventHeader::AGGREGATE_VERSION],
-            'header' => $data['header'],
-            'content' => $data['content'],
+            'header' => json_encode($data['header'], JSON_THROW_ON_ERROR),
+            'content' => json_encode($data['content'], JSON_THROW_ON_ERROR),
             'created_at' => $this->clock->generate(),
         ];
     }
