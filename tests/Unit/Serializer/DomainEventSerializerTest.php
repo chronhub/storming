@@ -54,5 +54,5 @@ it('serialize domain event', function () {
 
     $toDomainEvent = $this->domainEventSerializer->deserialize($stdClass);
 
-    dump($toDomainEvent);
+    expect($toDomainEvent)->toEqual($this->event);
 });

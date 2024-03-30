@@ -26,10 +26,10 @@ it('creates payload with given values', function (array|string $content, array|s
 ]);
 
 it('serializes payload', function (): void {
-    $payload = new Payload(['some' => 'content'], ['key' => 'value'], 123);
+    $payload = new Payload(['header' => 'value'], ['content' => 'value'], 123);
 
     expect($payload->jsonSerialize())
         ->toBeArray()
-        ->toHaveKeys(['content', 'headers', 'seqNo'])
-        ->toBe(['headers' => ['key' => 'value'], 'content' => ['some' => 'content'], 'seqNo' => 123]);
+        ->toHaveKeys(['content', 'header', 'position'])
+        ->toBe(['header' => ['header' => 'value'], 'content' => ['content' => 'value'], 'position' => 123]);
 });

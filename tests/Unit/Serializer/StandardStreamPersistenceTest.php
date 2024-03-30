@@ -13,32 +13,20 @@ use Storm\Contract\Message\Header;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
-use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
-use Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer;
-use Symfony\Component\Serializer\Normalizer\UidNormalizer;
 use Symfony\Component\Uid\Uuid;
 
 beforeEach(function () {
     $factory = new JsonSerializerFactory();
 
-    $dateNormalizer = new DateTimeNormalizer([
-        DateTimeNormalizer::FORMAT_KEY => 'Y-m-d\TH:i:s.u',
-        DateTimeNormalizer::TIMEZONE_KEY => 'UTC',
-    ]);
-
     $container = Container::getInstance();
     $container->instance(SystemClock::class, new PointInTime());
 
     $strategyFactory = new StrategyMapperFactory($container);
-
-    $uidNormalizer = new UidNormalizer();
-    $payloadNormalizer = new PayloadNormalizer();
     $streamEventNormalizer = new StreamEventNormalizer($strategyFactory);
-
-    $factory->withNormalizer($uidNormalizer, $dateNormalizer, new JsonSerializableNormalizer(), $payloadNormalizer, $streamEventNormalizer);
+    $factory->withNormalizer($streamEventNormalizer);
 
     $this->serializer = $factory->create();
-    $payloadNormalizer->setSerializer($this->serializer);
+
     $streamEventNormalizer->setSerializer($this->serializer);
 
     $this->streamPersistence = new StandardStreamPersistence($this->serializer);

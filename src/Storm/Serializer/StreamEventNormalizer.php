@@ -51,6 +51,10 @@ final class StreamEventNormalizer implements DenormalizerInterface, NormalizerIn
 
     public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): DomainEvent
     {
+        // can not deserialize stream event as header and content are still serialized
+        // todo use an intermediate object to serialize and deserialize as StreamEvent class to simplify this
+        //  and avoid the need of using the payload object and normalizer
+
         // todo add context to return raw data instead of domain event
 
         $eventType = $data['header'][Header::EVENT_TYPE] ?? null;
