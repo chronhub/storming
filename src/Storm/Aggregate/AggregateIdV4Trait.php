@@ -7,6 +7,9 @@ namespace Storm\Aggregate;
 use Storm\Contract\Aggregate\AggregateIdentity;
 use Symfony\Component\Uid\Uuid;
 
+/**
+ * @property-read Uuid $id
+ */
 trait AggregateIdV4Trait
 {
     public function __construct(public readonly Uuid $id)
