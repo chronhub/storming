@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http\Controllers;
+namespace Storm\Chronicler\Http\Controllers\Stream;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -58,9 +58,9 @@ use Throwable;
         ],
     ),
 ]
-final readonly class RetrieveFromToStreamPositionApi extends StreamApi
+final readonly class RetrieveStreamFromToPositionApi extends StreamApi
 {
-    public function __invoke(Request $request, RetrieveFromToStreamPosition $process): JsonResponse
+    public function __invoke(Request $request, RetrieveStreamFromToPosition $process): JsonResponse
     {
         try {
             $response = $process($request);

@@ -16,7 +16,7 @@ use Symfony\Component\Serializer\SerializerAwareTrait;
 
 use function is_a;
 
-class MessagingNormalizer implements DenormalizerInterface, NormalizerInterface, SerializerAwareInterface
+final class MessagingNormalizer implements DenormalizerInterface, NormalizerInterface, SerializerAwareInterface
 {
     use SerializerAwareTrait;
 

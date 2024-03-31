@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http\Controllers;
+namespace Storm\Chronicler\Http\Controllers\Stream;
 
 use Generator;
 use Illuminate\Contracts\Validation\Factory;
@@ -22,7 +22,7 @@ use Throwable;
 use function array_map;
 use function iterator_to_array;
 
-final readonly class RetrieveFromToStreamPosition
+final readonly class RetrieveStreamFromToPosition
 {
     public function __construct(
         private Chronicler $chronicler,

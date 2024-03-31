@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http\Controllers;
+namespace Storm\Chronicler\Http\Controllers\Stream;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use OpenApi\Attributes\Get;
+use OpenApi\Attributes\Delete;
 use OpenApi\Attributes\Parameter;
 use OpenApi\Attributes\Response;
 use OpenApi\Attributes\Schema;
 use Throwable;
 
-#[Get(
+#[Delete(
     path: '/stream',
-    summary: 'Check if a stream exists by stream name',
+    summary: 'Delete stream by stream name',
     tags: ['Stream'],
     parameters: [
         new Parameter(
@@ -35,9 +35,9 @@ use Throwable;
         new Response(ref: '#/components/responses/500', response: 500),
     ],
 )]
-final readonly class RequestStreamExistsApi extends StreamApi
+final readonly class DeleteStreamApi extends StreamApi
 {
-    public function __invoke(Request $request, RequestStreamExists $process): JsonResponse
+    public function __invoke(Request $request, DeleteStream $process): JsonResponse
     {
         try {
             $response = $process($request);

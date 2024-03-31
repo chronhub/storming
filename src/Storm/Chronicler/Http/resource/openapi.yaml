@@ -9,7 +9,7 @@ paths:
       tags:
         - Stream
       summary: 'Check if a stream exists by stream name'
-      operationId: ddcd72718bd557144eff4fcbba208743
+      operationId: af06f8632b591945d1fc5685631cbf44
       parameters:
         -
           name: name
@@ -35,7 +35,7 @@ paths:
       tags:
         - Stream
       summary: 'Create a new stream'
-      operationId: 977db311fc816fb3ad5bf8aa282b1be4
+      operationId: eda459c872260c56ea731525828d23ff
       parameters:
         -
           name: name
@@ -61,7 +61,7 @@ paths:
       tags:
         - Stream
       summary: 'Delete stream by stream name'
-      operationId: 70602ac5522262faeff836eac1b93385
+      operationId: c71c4de58375ad34a2c7f253952adf91
       parameters:
         -
           name: name
@@ -81,6 +81,49 @@ paths:
           $ref: '#/components/responses/StreamNotFound'
         '422':
           $ref: '#/components/responses/422'
+        '500':
+          $ref: '#/components/responses/500'
+  /stream/from:
+    get:
+      tags:
+        - Stream
+      description: 'Retrieve stream events from included position with limit'
+      operationId: retrieveStreamFromIncludedPosition
+      parameters:
+        -
+          name: name
+          in: query
+          description: 'Stream name'
+          required: true
+          schema:
+            type: string
+        -
+          name: from
+          in: query
+          description: 'from included stream position'
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        -
+          name: limit
+          in: query
+          description: 'limit the number of stream events, must be greater than from'
+          required: true
+          schema:
+            type: integer
+            minimum: 2
+      responses:
+        '200':
+          $ref: '#/components/responses/StreamEvents'
+        '204':
+          $ref: '#/components/responses/NoStreamEventReturned'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/StreamNotFound'
         '500':
           $ref: '#/components/responses/500'
   /stream/from_to:

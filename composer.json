@@ -11,8 +11,6 @@
   ],
   "require": {
     "php": "^8.3",
-    "ext-pcntl": "*",
-    "ext-pdo": "*",
     "composer-runtime-api": "^2.2",
     "laravel/framework": "10.x-dev",
     "react/promise": "^3.x-dev",
@@ -38,8 +36,10 @@
   },
   "require-dev": {
     "ext-posix": "*",
+    "ext-pdo": "*",
+    "ext-pcntl": "*",
     "doctrine/dbal": "^3.9",
-    "laravel/pint": "^v1.14",
+    "laravel/pint": "^v1.1",
     "pestphp/pest": "2.x-dev",
     "pestphp/pest-plugin-type-coverage": "2.x-dev",
     "larastan/larastan": "^2.8",

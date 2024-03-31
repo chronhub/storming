@@ -6,7 +6,9 @@ namespace Storm\Chronicler\Connection;
 
 use Generator;
 use Illuminate\Database\Connection;
+use Illuminate\Database\Query\Builder;
 use Illuminate\Database\QueryException;
+use PDO;
 use Storm\Chronicler\Direction;
 use Storm\Chronicler\Exceptions\StreamNotFound;
 use Storm\Contract\Aggregate\AggregateIdentity;
@@ -38,10 +40,10 @@ final readonly class PgsqlChronicler implements Chronicler
         }
 
         try {
-            $this->connection->table($this->masterTable)->useWritePdo()->insert($streamEvents);
+            $this->query()->useWritePdo()->insert($streamEvents);
         } catch (QueryException $exception) {
             match ($exception->getCode()) {
-                '42P01' => throw StreamNotFound::withStreamName($stream->name, $exception),
+                '42P01' => throw StreamNotFound::withStreamName($stream->name, $exception), // checkMe
                 '23000', '23505' => throw new ConnectionConcurrencyFailure($exception->getMessage(), (int) $exception->getCode(), $exception),
                 default => throw new ConnectionQueryFailure($exception->getMessage(), (int) $exception->getCode(), $exception)
             };
@@ -57,7 +59,7 @@ final readonly class PgsqlChronicler implements Chronicler
                 throw StreamNotFound::withStreamName($streamName);
             }
         } catch (QueryException $exception) {
-            if ($exception->getCode() !== '00000') {
+            if ($exception->getCode() !== PDO::ERR_NONE) {
                 throw new ConnectionQueryFailure($exception->getMessage(), (int) $exception->getCode(), $exception);
             }
         }
@@ -65,7 +67,7 @@ final readonly class PgsqlChronicler implements Chronicler
         try {
             $this->connection->getSchemaBuilder()->drop($streamName->name);
         } catch (QueryException $exception) {
-            if ($exception->getCode() !== '00000') {
+            if ($exception->getCode() !== PDO::ERR_NONE) {
                 throw new ConnectionQueryFailure($exception->getMessage(), (int) $exception->getCode(), $exception);
             }
         }
@@ -73,10 +75,9 @@ final readonly class PgsqlChronicler implements Chronicler
 
     public function retrieveAll(StreamName $streamName, AggregateIdentity $aggregateId, Direction $direction = Direction::FORWARD): Generator
     {
-        $query = $this->connection->table($this->masterTable)
+        $query = $this->query()
             ->where('stream_name', $streamName->name)
             ->where('id', $aggregateId->toString())
-
             ->orderBy('position', $direction->value);
 
         return $this->streamEventLoader->load($query, $streamName);
@@ -84,8 +85,7 @@ final readonly class PgsqlChronicler implements Chronicler
 
     public function retrieveFiltered(StreamName $streamName, QueryFilter $queryFilter): Generator
     {
-        $query = $this->connection->table($this->masterTable);
-        $query->where('stream_name', $streamName->name);
+        $query = $this->query()->where('stream_name', $streamName->name);
 
         $queryFilter->apply()($query);
 
@@ -105,5 +105,10 @@ final readonly class PgsqlChronicler implements Chronicler
     public function hasStream(StreamName $streamName): bool
     {
         return $this->eventStreamProvider->hasRealStreamName($streamName->name);
+    }
+
+    private function query(): Builder
+    {
+        return $this->connection->table($this->masterTable);
     }
 }

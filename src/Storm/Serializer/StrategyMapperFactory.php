@@ -15,7 +15,7 @@ class StrategyMapperFactory
     }
 
     /**
-     * @throws InvalidArgumentException if the strategy name is unknown
+     * @throws InvalidArgumentException when the strategy name is unknown
      */
     public function make(?string $strategyName): StrategyMapper
     {

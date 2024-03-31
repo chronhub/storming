@@ -2,19 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http\Controllers;
+namespace Storm\Chronicler\Http\Controllers\Stream;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use OpenApi\Attributes\Get;
 use OpenApi\Attributes\Parameter;
-use OpenApi\Attributes\Post;
 use OpenApi\Attributes\Response;
 use OpenApi\Attributes\Schema;
 use Throwable;
 
-#[Post(
+#[Get(
     path: '/stream',
-    summary: 'Create a new stream',
+    summary: 'Check if a stream exists by stream name',
     tags: ['Stream'],
     parameters: [
         new Parameter(
@@ -30,14 +30,14 @@ use Throwable;
         new Response(response: 204, description: 'ok'),
         new Response(ref: '#/components/responses/401', response: 401),
         new Response(ref: '#/components/responses/403', response: 403),
-        new Response(ref: '#/components/responses/StreamAlreadyExists', response: 419),
+        new Response(ref: '#/components/responses/StreamNotFound', response: 404),
         new Response(ref: '#/components/responses/422', response: 422),
         new Response(ref: '#/components/responses/500', response: 500),
     ],
 )]
-final readonly class CreateStreamApi extends StreamApi
+final readonly class RequestStreamExistsApi extends StreamApi
 {
-    public function __invoke(Request $request, CreateStream $process): JsonResponse
+    public function __invoke(Request $request, RequestStreamExists $process): JsonResponse
     {
         try {
             $response = $process($request);

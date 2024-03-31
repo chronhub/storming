@@ -18,7 +18,7 @@ use function is_string;
 use function json_decode;
 use function json_encode;
 
-class PayloadNormalizer implements DenormalizerInterface, NormalizerInterface, SerializerAwareInterface
+final class PayloadNormalizer implements DenormalizerInterface, NormalizerInterface, SerializerAwareInterface
 {
     use SerializerAwareTrait;
 
