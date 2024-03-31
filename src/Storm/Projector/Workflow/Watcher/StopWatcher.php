@@ -70,7 +70,8 @@ class StopWatcher
                 throw new InvalidArgumentException("Invalid stop watcher callback $name");
             }
 
-            $this->events[] = $this->{$method}($hub, value($callback));
+            $value = value($callback);
+            $this->events[] = $this->{$method}($hub, $value);
         }
 
         $hub->addListener(SprintTerminated::class, function (NotificationHub $hub): void {
