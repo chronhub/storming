@@ -12,12 +12,12 @@ use PDO;
 use Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Storm\Chronicler\Exceptions\StreamNotFound;
 use Storm\Contract\Chronicler\StreamEventConnectionLoader;
-use Storm\Contract\Chronicler\StreamEventConverter;
+use Storm\Contract\Serializer\StreamEventSerializer;
 use Storm\Stream\StreamName;
 
 final class CursorConnectionLoader implements StreamEventConnectionLoader
 {
-    public function __construct(protected StreamEventConverter $eventConverter)
+    public function __construct(protected StreamEventSerializer $serializer)
     {
     }
 
@@ -42,7 +42,7 @@ final class CursorConnectionLoader implements StreamEventConnectionLoader
         }
 
         foreach ($streamEvents as $streamEvent) {
-            yield $this->eventConverter->toDomainEvent($streamEvent, $streamName);
+            yield $this->serializer->deserialize($streamEvent);
         }
 
         return $streamEvents->count();

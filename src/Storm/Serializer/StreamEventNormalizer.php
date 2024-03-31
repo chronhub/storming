@@ -19,6 +19,7 @@ use function is_a;
 
 final class StreamEventNormalizer implements DenormalizerInterface, NormalizerInterface, SerializerAwareInterface
 {
+    use PayloadDecoderTrait;
     use SerializerAwareTrait;
 
     protected function serializer(): Serializer
@@ -51,22 +52,18 @@ final class StreamEventNormalizer implements DenormalizerInterface, NormalizerIn
 
     public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): DomainEvent
     {
-        // can not deserialize stream event as header and content are still serialized
-        // todo use an intermediate object to serialize and deserialize as StreamEvent class to simplify this
-        //  and avoid the need of using the payload object and normalizer
-
         // todo add context to return raw data instead of domain event
 
-        $eventType = $data['header'][Header::EVENT_TYPE] ?? null;
+        [$header, $content] = $this->decodePartsIfNeeded($data);
+
+        $eventType = $header[Header::EVENT_TYPE] ?? null;
 
         /** @var DomainEvent|null $eventType */
         if ($eventType === null) {
             throw new InvalidArgumentException('Missing event type header string to deserialize payload');
         }
 
-        $event = $eventType::fromContent($data['content']);
-
-        return $event->withHeaders($data['header']);
+        return $eventType::fromContent($content)->withHeaders($header);
     }
 
     public function supportsNormalization(mixed $data, ?string $format = null): bool

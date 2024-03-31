@@ -15,7 +15,7 @@ use stdClass;
 use Storm\Chronicler\Connection\CursorConnectionLoader;
 use Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Storm\Chronicler\Exceptions\StreamNotFound;
-use Storm\Contract\Chronicler\StreamEventConverter;
+use Storm\Contract\Serializer\StreamEventSerializer;
 use Storm\Stream\StreamName;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 use Throwable;
@@ -25,9 +25,9 @@ use function iterator_to_array;
 beforeEach(function () {
     $this->connection = mock(Connection::class);
     $this->builder = mock(Builder::class);
-    $this->converter = mock(StreamEventConverter::class);
+    $this->serializer = mock(StreamEventSerializer::class);
     $this->streamName = new StreamName('stream_name');
-    $this->instance = new CursorConnectionLoader($this->converter);
+    $this->instance = new CursorConnectionLoader($this->serializer);
 });
 
 it('load stream event from cursor', function () {
@@ -37,16 +37,12 @@ it('load stream event from cursor', function () {
     $event->content = ['some' => 'content'];
 
     $collection = new LazyCollection([$event]);
-
     $this->builder->shouldReceive('cursor')->andReturn($collection);
 
     $expectedEvent = SomeEvent::fromContent($event->content)->withHeaders($event->headers);
+    $this->serializer->shouldReceive('deserialize')->andReturn($expectedEvent);
 
-    $this->converter->shouldReceive('toDomainEvent')->andReturn($expectedEvent);
-
-    $instance = new CursorConnectionLoader($this->converter);
-
-    $streamEvents = $instance->load($this->builder, $this->streamName);
+    $streamEvents = $this->instance->load($this->builder, $this->streamName);
 
     $events = iterator_to_array($streamEvents);
 
@@ -59,12 +55,9 @@ it('raise exception when no events are returned', function () {
     $collection = new LazyCollection([]);
 
     $this->builder->shouldReceive('cursor')->andReturn($collection);
+    $this->serializer->shouldNotReceive('toDomainEvent');
 
-    $this->converter->shouldNotReceive('toDomainEvent');
-
-    $instance = new CursorConnectionLoader($this->converter);
-
-    $streamEvents = $instance->load($this->builder, $this->streamName);
+    $streamEvents = $this->instance->load($this->builder, $this->streamName);
 
     $streamEvents->current();
 })->throws(NoStreamEventReturn::class);
@@ -78,12 +71,10 @@ it('assert stream not found exception when query exception', function () {
     $this->builder->connection = $this->connection;
 
     $this->builder->shouldReceive('cursor')->andThrow($queryException);
-    $this->converter->shouldNotReceive('toDomainEvent');
-
-    $instance = new CursorConnectionLoader($this->converter);
+    $this->serializer->shouldNotReceive('toDomainEvent');
 
     try {
-        $streamEvents = $instance->load($this->builder, $this->streamName);
+        $streamEvents = $this->instance->load($this->builder, $this->streamName);
         $streamEvents->current();
     } catch (StreamNotFound $exception) {
         expect($exception::class)->toBe(StreamNotFound::class)
@@ -96,12 +87,10 @@ it('raise exception when not query exception', function (Throwable $exception) {
     $this->builder->connection = $this->connection;
 
     $this->builder->shouldReceive('cursor')->andThrow($exception);
-    $this->converter->shouldNotReceive('toDomainEvent');
-
-    $instance = new CursorConnectionLoader($this->converter);
+    $this->serializer->shouldNotReceive('toDomainEvent');
 
     try {
-        $streamEvents = $instance->load($this->builder, $this->streamName);
+        $streamEvents = $this->instance->load($this->builder, $this->streamName);
         $streamEvents->current();
     } catch (Throwable $exception) {
         expect($exception)->toBe($exception);

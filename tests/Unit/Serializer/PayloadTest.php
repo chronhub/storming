@@ -6,12 +6,12 @@ namespace Storm\Tests\Unit\Serializer;
 
 use Storm\Serializer\Payload;
 
-it('creates payload with given values', function (array|string $content, array|string $header, ?int $seqNo): void {
-    $payload = new Payload($header, $content, $seqNo);
+it('creates payload with given values', function (array|string $content, array|string $header, ?int $position): void {
+    $payload = new Payload($header, $content, $position);
 
     expect($payload->content)->toBe($content)
         ->and($payload->header)->toBe($header)
-        ->and($payload->position)->toBe($seqNo);
+        ->and($payload->position)->toBe($position);
 })->with([
     'content as array' => fn (): array => ['foo' => 'bar'],
     'content as json' => fn (): string => '"{"foo":"bar"}"',
@@ -21,8 +21,8 @@ it('creates payload with given values', function (array|string $content, array|s
     'headers as json' => fn (): string => '"{"key":"value"}"',
     'allow empty headers' => fn (): array => [],
 ])->with([
-    'seqNo' => fn (): int => 123,
-    'null seqNo' => fn (): null => null,
+    'position' => fn (): int => 123,
+    'null position' => fn (): null => null,
 ]);
 
 it('serializes payload', function (): void {

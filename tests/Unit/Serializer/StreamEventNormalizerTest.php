@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Serializer;
 
-use InvalidArgumentException;
 use Storm\Contract\Message\EventHeader;
 use Storm\Contract\Message\Header;
 use Storm\Serializer\JsonSerializerFactory;
@@ -31,12 +30,10 @@ beforeEach(function () {
     $this->event = $event;
 });
 
-it('can not deserialize stream event as header and content are still serialized', function () {
+it('deserialize stream event', function () {
     $serialized = $this->serializer->serialize($this->event, 'json', ['strategy' => 'standard', 'streamName' => 'some_stream']);
 
-    try {
-        $this->serializer->deserialize($serialized, SomeEvent::class, 'json');
-    } catch (InvalidArgumentException $e) {
-        expect($e->getMessage())->toBe('Missing event type header string to deserialize payload');
-    }
+    $deserialized = $this->serializer->deserialize($serialized, SomeEvent::class, 'json');
+
+    expect($deserialized)->toEqual($this->event);
 });

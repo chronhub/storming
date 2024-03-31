@@ -45,9 +45,7 @@ final class MessagingNormalizer implements DenormalizerInterface, NormalizerInte
             throw new InvalidArgumentException('Missing event type header string to denormalize Messaging');
         }
 
-        $event = $eventType::fromContent($data['content']);
-
-        return $event->withHeaders($data['header']);
+        return $eventType::fromContent($data['content'])->withHeaders($data['header']);
     }
 
     public function supportsNormalization(mixed $data, ?string $format = null): bool
