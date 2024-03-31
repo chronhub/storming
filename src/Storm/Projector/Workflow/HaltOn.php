@@ -14,6 +14,21 @@ class HaltOn
      */
     protected array $callbacks;
 
+    public function whenRequested(bool &$requested): self
+    {
+        $shouldStop = &$requested;
+
+        $this->callbacks[StopWatcher::REQUESTED] = fn () => $shouldStop;
+
+        return $this;
+    }
+
+    /**
+     * Stop the projector when the given signal is received.
+     *
+     * @param  array<positive-int> $signals
+     * @return $this
+     */
     public function whenSignalReceived(array $signals): self
     {
         $this->callbacks[StopWatcher::SIGNAL_RECEIVED] = fn () => $signals;

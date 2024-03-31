@@ -31,6 +31,8 @@ use function ucfirst;
 
 class StopWatcher
 {
+    public const string REQUESTED = 'requested';
+
     public const string EMPTY_EVENT_STREAM = 'emptyEventStream';
 
     public const string GAP_DETECTED = 'gapDetected';
@@ -56,6 +58,7 @@ class StopWatcher
             $method = 'stopWhen'.ucfirst($name);
 
             /**
+             * @covers stopWhenRequested
              * @covers stopWhenEmptyEventStream
              * @covers stopWhenGapDetected
              * @covers stopWhenCounterReached
@@ -77,6 +80,19 @@ class StopWatcher
 
             $this->events = [];
         });
+    }
+
+    protected function stopWhenRequested(NotificationHub $hub, bool &$shouldStop): string
+    {
+        $listener = CycleRenewed::class;
+
+        $hub->addListener($listener, function (NotificationHub $hub) use (&$shouldStop): void {
+            if ($shouldStop) {
+                $this->notifySprintStopped($hub);
+            }
+        });
+
+        return $listener;
     }
 
     protected function stopWhenSignalReceived(NotificationHub $hub, array $signals): string
