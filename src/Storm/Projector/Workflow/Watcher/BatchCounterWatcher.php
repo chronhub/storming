@@ -9,7 +9,7 @@ use Storm\Projector\Exception\InvalidArgumentException;
 class BatchCounterWatcher
 {
     /**
-     * @var int<0,max>
+     * @var int<0, max>
      */
     protected int $perBatchCount = 0;
 
