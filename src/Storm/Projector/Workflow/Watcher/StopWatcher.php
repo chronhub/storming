@@ -25,6 +25,8 @@ use Storm\Projector\Support\Notification\Timer\CurrentTime;
 use Storm\Projector\Support\Notification\Timer\GetElapsedTime;
 
 use function method_exists;
+use function pcntl_signal;
+use function pcntl_signal_dispatch;
 use function ucfirst;
 
 class StopWatcher
@@ -33,11 +35,13 @@ class StopWatcher
 
     public const string GAP_DETECTED = 'gapDetected';
 
-    public const string CYCLE_REACH = 'cycleReach';
+    public const string CYCLE_REACHED = 'cycleReached';
 
-    public const string COUNTER_REACH = 'counterReach';
+    public const string COUNTER_REACHED = 'counterReached';
 
     public const string TIME_EXPIRED = 'timeExpired';
+
+    public const string SIGNAL_RECEIVED = 'signalReceived';
 
     /**
      * @var array<class-string>
@@ -54,9 +58,10 @@ class StopWatcher
             /**
              * @covers stopWhenEmptyEventStream
              * @covers stopWhenGapDetected
-             * @covers stopWhenCounterReach
-             * @covers stopWhenCycleReach
+             * @covers stopWhenCounterReached
+             * @covers stopWhenCycleReached
              * @covers stopWhenTimeExpired
+             * @covers stopWhenSignalReceived
              */
             if (! method_exists($this, $method)) {
                 throw new InvalidArgumentException("Invalid stop watcher callback $name");
@@ -72,6 +77,23 @@ class StopWatcher
 
             $this->events = [];
         });
+    }
+
+    protected function stopWhenSignalReceived(NotificationHub $hub, array $signals): string
+    {
+        $listener = CycleRenewed::class;
+
+        pcntl_signal_dispatch();
+
+        $hub->addListener($listener, function (NotificationHub $hub) use ($signals): void {
+            foreach ($signals as $signal) {
+                pcntl_signal($signal, function () use ($hub): void {
+                    $this->notifySprintStopped($hub);
+                });
+            }
+        });
+
+        return $listener;
     }
 
     protected function stopWhenEmptyEventStream(NotificationHub $hub, ?int $expiredAt): string
@@ -100,7 +122,7 @@ class StopWatcher
         return $listener;
     }
 
-    protected function stopWhenCounterReach(NotificationHub $hub, array $values): string
+    protected function stopWhenCounterReached(NotificationHub $hub, array $values): string
     {
         [$limit, $resetOnStop] = $values;
         $listener = BatchIncremented::class;
@@ -118,7 +140,7 @@ class StopWatcher
         return $listener;
     }
 
-    protected function stopWhenCycleReach(NotificationHub $hub, int $expectedCycle): string
+    protected function stopWhenCycleReached(NotificationHub $hub, int $expectedCycle): string
     {
         $listener = CycleIncremented::class;
 

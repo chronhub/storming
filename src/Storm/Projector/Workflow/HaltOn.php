@@ -14,6 +14,13 @@ class HaltOn
      */
     protected array $callbacks;
 
+    public function whenSignalReceived(array $signals): self
+    {
+        $this->callbacks[StopWatcher::SIGNAL_RECEIVED] = fn () => $signals;
+
+        return $this;
+    }
+
     /**
      * Stop the projector when the event stream is empty after a given time if given
      * or, it will stop at the end of the first cycle.
@@ -33,9 +40,9 @@ class HaltOn
      * @param  positive-int $cycle
      * @return $this
      */
-    public function whenCycleReach(int $cycle): self
+    public function whenCycleReached(int $cycle): self
     {
-        $this->callbacks[StopWatcher::CYCLE_REACH] = fn () => $cycle;
+        $this->callbacks[StopWatcher::CYCLE_REACHED] = fn () => $cycle;
 
         return $this;
     }
@@ -48,9 +55,9 @@ class HaltOn
      * @param  positive-int $limit
      * @return $this
      */
-    public function whenStreamEventLimitReach(int $limit, bool $resetOnHalt = true): self
+    public function whenStreamEventLimitReached(int $limit, bool $resetOnHalt = true): self
     {
-        $this->callbacks[StopWatcher::COUNTER_REACH] = fn () => [$limit, $resetOnHalt];
+        $this->callbacks[StopWatcher::COUNTER_REACHED] = fn () => [$limit, $resetOnHalt];
 
         return $this;
     }

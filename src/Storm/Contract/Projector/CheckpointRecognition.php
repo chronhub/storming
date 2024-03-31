@@ -8,6 +8,9 @@ use DateTimeImmutable;
 use JsonSerializable;
 use Storm\Projector\Checkpoint\Checkpoint;
 
+/**
+ * @template TCheckpoint of array{stream_name: string, position: int<0,max>, created_at: string, gaps: array<positive-int>|array}
+ */
 interface CheckpointRecognition extends JsonSerializable
 {
     /**
@@ -26,7 +29,7 @@ interface CheckpointRecognition extends JsonSerializable
     /**
      * Update stream checkpoints.
      *
-     * @param array<array{stream_name: string, position: int<0,max>, created_at: string, gaps: array<positive-int>}> $checkpoints
+     * @param array<TCheckpoint> $checkpoints
      */
     public function update(array $checkpoints): void;
 
@@ -53,7 +56,7 @@ interface CheckpointRecognition extends JsonSerializable
     public function sleepWhenGap(): void;
 
     /**
-     * @return array{stream_name: string, position: int<0,max>, created_at: string, gaps: array<positive-int>}
+     * @return TCheckpoint
      */
     public function jsonSerialize(): array;
 }

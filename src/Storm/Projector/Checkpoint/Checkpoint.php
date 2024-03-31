@@ -29,15 +29,6 @@ final readonly class Checkpoint implements JsonSerializable
         return in_array($this->position - 1, $this->gaps, true);
     }
 
-    /**
-     * @return array{
-     *      'stream_name': string,
-     *      'position': int<0,max>,
-     *      'event_time': null|string,
-     *      'created_at': string,
-     *      'gaps': array<positive-int|empty>
-     *  }
-     */
     public function jsonSerialize(): array
     {
         return [

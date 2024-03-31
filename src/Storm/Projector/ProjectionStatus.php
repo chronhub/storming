@@ -19,7 +19,14 @@ enum ProjectionStatus: string
     case IDLE = 'idle';
 
     /**
-     * @return array<int, string>
+     * @return array{
+     *     'running',
+     *     'stopping',
+     *     'deleting',
+     *     'deleting_with_emitted_events',
+     *     'resetting',
+     *     'idle'
+     * }
      */
     public static function strings(): array
     {

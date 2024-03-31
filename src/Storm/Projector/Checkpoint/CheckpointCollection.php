@@ -53,8 +53,6 @@ class CheckpointCollection
         }
 
         $lastCheckpointPosition = $checkpoint->position;
-
-        // checkMe: probably tolerate one gap but no more?
         $gapsToAdd = range($lastCheckpointPosition + 1, $position - 1);
 
         // todo: test in integration
