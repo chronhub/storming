@@ -4,31 +4,20 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Serializer;
 
-use Illuminate\Container\Container;
 use stdClass;
-use Storm\Clock\PointInTime;
-use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\EventHeader;
 use Storm\Contract\Message\Header;
 use Storm\Serializer\DomainEventSerializer;
 use Storm\Serializer\JsonSerializerFactory;
-use Storm\Serializer\PayloadNormalizer;
-use Storm\Serializer\StrategyMapperFactory;
 use Storm\Serializer\StreamEventNormalizer;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 use Symfony\Component\Uid\Uuid;
 
 beforeEach(function () {
     $factory = new JsonSerializerFactory();
+    $streamEventNormalizer = new StreamEventNormalizer();
 
-    $payloadNormalizer = new PayloadNormalizer();
-
-    $container = Container::getInstance();
-    $container->instance(SystemClock::class, new PointInTime());
-    $strategyFactory = new StrategyMapperFactory($container);
-    $streamEventNormalizer = new StreamEventNormalizer($strategyFactory);
-
-    $factory->withNormalizer($payloadNormalizer, $streamEventNormalizer);
+    $factory->withNormalizer($streamEventNormalizer);
 
     $this->serializer = $factory->create();
 

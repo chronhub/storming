@@ -7,6 +7,7 @@ namespace Storm\Serializer;
 use InvalidArgumentException;
 use RuntimeException;
 use Storm\Contract\Message\DomainEvent;
+use Storm\Contract\Message\EventHeader;
 use Storm\Contract\Message\Header;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
@@ -20,10 +21,6 @@ final class StreamEventNormalizer implements DenormalizerInterface, NormalizerIn
 {
     use SerializerAwareTrait;
 
-    public function __construct(private readonly StrategyMapperFactory $mapperFactory)
-    {
-    }
-
     protected function serializer(): Serializer
     {
         if (! $this->serializer instanceof Serializer) {
@@ -35,7 +32,11 @@ final class StreamEventNormalizer implements DenormalizerInterface, NormalizerIn
 
     public function normalize(mixed $object, ?string $format = null, array $context = []): array
     {
-        $strategy = $this->mapperFactory->make($context['strategy'] ?? null); //fixMe cache this
+        $strategy = $context['strategy'] ?? null;
+
+        if ($strategy !== 'standard') {
+            throw new InvalidArgumentException('Only standard strategy is supported');
+        }
 
         $streamName = $context['streamName'] ?? null;
 
@@ -44,9 +45,8 @@ final class StreamEventNormalizer implements DenormalizerInterface, NormalizerIn
         }
 
         $payload = new Payload($object->headers(), $object->toContent());
-        $data = $this->serializer()->normalize($payload, 'json');
 
-        return $strategy->map($data, $streamName);
+        return $this->map($this->serializer()->normalize($payload, 'json'), $streamName);
     }
 
     public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): DomainEvent
@@ -85,6 +85,19 @@ final class StreamEventNormalizer implements DenormalizerInterface, NormalizerIn
             'object' => false,
             '*' => false,
             DomainEvent::class => true,
+        ];
+    }
+
+    protected function map(array $data, string $streamName): array
+    {
+        return [
+            'stream_name' => $streamName,
+            'type' => $data['header'][EventHeader::AGGREGATE_TYPE],
+            'id' => $data['header'][EventHeader::AGGREGATE_ID],
+            'version' => $data['header'][EventHeader::AGGREGATE_VERSION],
+            'header' => $this->serializer()->serialize($data['header'], 'json'),
+            'content' => $this->serializer()->serialize($data['content'], 'json'),
+            //'created_at' => $this->clock->generate(),
         ];
     }
 }

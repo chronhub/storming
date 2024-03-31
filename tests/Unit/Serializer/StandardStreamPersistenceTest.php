@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Serializer;
 
-use Illuminate\Container\Container;
 use Storm\Chronicler\Connection\StandardStreamPersistence;
-use Storm\Clock\PointInTime;
-use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\EventHeader;
 use Storm\Contract\Message\Header;
 use Storm\Stream\Stream;
@@ -17,12 +14,7 @@ use Symfony\Component\Uid\Uuid;
 
 beforeEach(function () {
     $factory = new JsonSerializerFactory();
-
-    $container = Container::getInstance();
-    $container->instance(SystemClock::class, new PointInTime());
-
-    $strategyFactory = new StrategyMapperFactory($container);
-    $streamEventNormalizer = new StreamEventNormalizer($strategyFactory);
+    $streamEventNormalizer = new StreamEventNormalizer();
     $factory->withNormalizer($streamEventNormalizer);
 
     $this->serializer = $factory->create();
@@ -52,6 +44,6 @@ it('normalize stream event', function () {
     $event = $normalized[0];
 
     expect($event)
-        ->toHaveKeys(['stream_name', 'type', 'id', 'version', 'header', 'content', 'created_at'])
+        ->toHaveKeys(['stream_name', 'type', 'id', 'version', 'header', 'content'])
         ->toHaveKey('stream_name', 'some_stream');
 });
