@@ -9,7 +9,7 @@ use Storm\Contract\Message\Header;
 use Storm\Contract\Serializer\StreamEventSerializer;
 use Symfony\Component\Serializer\Serializer;
 
-final readonly class DomainEventSerializer implements StreamEventSerializer
+final readonly class StreamingSerializer implements StreamEventSerializer
 {
     public function __construct(private Serializer $serializer)
     {

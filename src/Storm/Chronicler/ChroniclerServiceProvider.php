@@ -15,9 +15,9 @@ use Storm\Message\Decorator\EventId;
 use Storm\Message\Decorator\EventTime;
 use Storm\Message\Decorator\EventType;
 use Storm\Reporter\Subscriber\CorrelationHeaderCommand;
-use Storm\Serializer\DomainEventSerializer;
 use Storm\Serializer\JsonSerializerFactory;
 use Storm\Serializer\StreamEventNormalizer;
+use Storm\Serializer\StreamingSerializer;
 
 class ChroniclerServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -60,7 +60,7 @@ class ChroniclerServiceProvider extends ServiceProvider implements DeferrablePro
             $factory = new JsonSerializerFactory();
             $factory->withNormalizer($app[StreamEventNormalizer::class]);
 
-            return new DomainEventSerializer($factory->create());
+            return new StreamingSerializer($factory->create());
         });
     }
 

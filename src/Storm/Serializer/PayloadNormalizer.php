@@ -11,8 +11,6 @@ use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerAwareInterface;
 use Symfony\Component\Serializer\SerializerAwareTrait;
 
-use function is_array;
-
 final class PayloadNormalizer implements DenormalizerInterface, NormalizerInterface, SerializerAwareInterface
 {
     use PayloadDecoderTrait;
@@ -34,10 +32,6 @@ final class PayloadNormalizer implements DenormalizerInterface, NormalizerInterf
 
     public function denormalize(mixed $data, string $type, ?string $format = null, array $context = []): Payload
     {
-        if (! is_array($data)) {
-            throw new InvalidArgumentException('Data to denormalize from payload must be an array');
-        }
-
         [$header, $content, $seqNo] = $this->decodePartsIfNeeded($data);
 
         return new Payload($header, $content, $seqNo);

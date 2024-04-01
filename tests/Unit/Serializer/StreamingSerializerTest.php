@@ -7,9 +7,9 @@ namespace Storm\Tests\Unit\Serializer;
 use stdClass;
 use Storm\Contract\Message\EventHeader;
 use Storm\Contract\Message\Header;
-use Storm\Serializer\DomainEventSerializer;
 use Storm\Serializer\JsonSerializerFactory;
 use Storm\Serializer\StreamEventNormalizer;
+use Storm\Serializer\StreamingSerializer;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 use Symfony\Component\Uid\Uuid;
 
@@ -19,9 +19,9 @@ beforeEach(function () {
 
     $factory->withNormalizer($streamEventNormalizer);
 
-    $this->serializer = $factory->create();
+    $serializer = $factory->create();
 
-    $this->domainEventSerializer = new DomainEventSerializer($this->serializer);
+    $this->streamingSerializer = new StreamingSerializer($serializer);
 
     $event = SomeEvent::fromContent(['some' => 'value'])->withHeaders([
         EventHeader::AGGREGATE_ID => Uuid::v4(),
@@ -35,13 +35,13 @@ beforeEach(function () {
 
 it('serialize domain event', function () {
 
-    $payload = $this->domainEventSerializer->serialize($this->event);
+    $payload = $this->streamingSerializer->serialize($this->event);
 
     $stdClass = new stdClass();
     $stdClass->header = $payload->header;
     $stdClass->content = $payload->content;
 
-    $toDomainEvent = $this->domainEventSerializer->deserialize($stdClass);
+    $toDomainEvent = $this->streamingSerializer->deserialize($stdClass);
 
     expect($toDomainEvent)->toEqual($this->event);
 });
