@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http\Controllers\Stream;
+namespace Storm\Chronicler\Api\Controllers\Stream;
 
 use Generator;
 use Illuminate\Contracts\Validation\Factory;
@@ -10,9 +10,9 @@ use Illuminate\Database\Query\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use stdClass;
+use Storm\Chronicler\Api\ResponseFactory;
 use Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Storm\Chronicler\Exceptions\StreamNotFound;
-use Storm\Chronicler\Http\ResponseFactory;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Serializer\StreamEventSerializer;

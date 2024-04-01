@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http;
+namespace Storm\Chronicler\Api;
 
 use Illuminate\Contracts\Support\MessageBag;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-
 use function is_array;
 
 class ResponseFactory

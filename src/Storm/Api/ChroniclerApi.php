@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http;
+namespace Storm\Chronicler\Api;
 
 use Illuminate\Database\Connection;
 use Storm\Chronicler\Attribute\AsChronicler;

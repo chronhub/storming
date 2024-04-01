@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http;
+namespace Storm\Chronicler\Api;
 
 use OpenApi\Attributes\Components;
 use OpenApi\Attributes\Items;

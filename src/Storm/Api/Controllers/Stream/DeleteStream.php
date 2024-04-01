@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http\Controllers\Stream;
+namespace Storm\Chronicler\Api\Controllers\Stream;
 
 use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
+use Storm\Chronicler\Api\ResponseFactory;
 use Storm\Chronicler\Exceptions\StreamNotFound;
-use Storm\Chronicler\Http\ResponseFactory;
 use Storm\Contract\Chronicler\Chronicler;
 use Throwable;
 

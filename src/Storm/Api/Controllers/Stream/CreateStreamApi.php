@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http\Controllers\Stream;
+namespace Storm\Chronicler\Api\Controllers\Stream;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

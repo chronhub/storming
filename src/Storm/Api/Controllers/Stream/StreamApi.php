@@ -2,17 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http\Controllers\Stream;
+namespace Storm\Chronicler\Api\Controllers\Stream;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use OpenApi\Attributes\Info;
 use OpenApi\Attributes\Tag;
+use Storm\Chronicler\Api\ResponseFactory;
 use Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Storm\Chronicler\Exceptions\StreamAlreadyExists;
 use Storm\Chronicler\Exceptions\StreamNotFound;
-use Storm\Chronicler\Http\ResponseFactory;
 use Throwable;
 
 #[

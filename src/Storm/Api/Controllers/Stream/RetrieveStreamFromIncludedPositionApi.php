@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Http\Controllers\Stream;
+namespace Storm\Chronicler\Api\Controllers\Stream;
 
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -14,9 +14,9 @@ use Throwable;
 
 #[
     Get(
-        path: '/stream/from_to',
-        operationId: 'retrieveFromToStreamPosition',
-        description: 'Retrieve stream events from included position to next included position',
+        path: '/stream/from',
+        operationId: 'retrieveStreamFromIncludedPosition',
+        description: 'Retrieve stream events from included position with limit',
         tags: ['Stream'],
         parameters: [
             new Parameter(
@@ -34,18 +34,11 @@ use Throwable;
                 schema: new Schema(type: 'integer', minimum: 1)
             ),
             new Parameter(
-                name: 'to',
-                description: 'to included stream position, must be greater than from',
+                name: 'limit',
+                description: 'limit the number of stream events, must be greater than from',
                 in: 'query',
                 required: true,
                 schema: new Schema(type: 'integer', minimum: 2)
-            ),
-            new Parameter(
-                name: 'direction',
-                description: 'sort stream by direction',
-                in: 'query',
-                required: true,
-                schema: new Schema(type: 'string', enum: ['asc', 'desc'])
             ),
         ],
         responses: [
@@ -58,9 +51,9 @@ use Throwable;
         ],
     ),
 ]
-final readonly class RetrieveStreamFromToPositionApi extends StreamApi
+final readonly class RetrieveStreamFromIncludedPositionApi extends StreamApi
 {
-    public function __invoke(Request $request, RetrieveStreamFromToPosition $process): JsonResponse
+    public function __invoke(Request $request, RetrieveStreamFromIncludedPosition $process): JsonResponse
     {
         try {
             $response = $process($request);

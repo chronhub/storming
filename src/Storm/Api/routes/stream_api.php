@@ -3,11 +3,11 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Route;
-use Storm\Chronicler\Http\Controllers\Stream\CreateStreamApi;
-use Storm\Chronicler\Http\Controllers\Stream\DeleteStreamApi;
-use Storm\Chronicler\Http\Controllers\Stream\RequestStreamExistsApi;
-use Storm\Chronicler\Http\Controllers\Stream\RetrieveStreamFromIncludedPositionApi;
-use Storm\Chronicler\Http\Controllers\Stream\RetrieveStreamFromToPositionApi;
+use Storm\Chronicler\Api\Controllers\Stream\CreateStreamApi;
+use Storm\Chronicler\Api\Controllers\Stream\DeleteStreamApi;
+use Storm\Chronicler\Api\Controllers\Stream\RequestStreamExistsApi;
+use Storm\Chronicler\Api\Controllers\Stream\RetrieveStreamFromIncludedPositionApi;
+use Storm\Chronicler\Api\Controllers\Stream\RetrieveStreamFromToPositionApi;
 
 Route::group(['prefix' => 'stream'], function () {
     Route::get('/', RequestStreamExistsApi::class);

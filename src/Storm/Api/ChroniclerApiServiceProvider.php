@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler;
+namespace Storm\Chronicler\Api;
 
 use Illuminate\Support\ServiceProvider;
 
