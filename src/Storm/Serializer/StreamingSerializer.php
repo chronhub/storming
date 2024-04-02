@@ -28,8 +28,8 @@ final readonly class StreamingSerializer implements StreamEventSerializer
         $payload = $this->serializer->denormalize($object, Payload::class, 'json');
 
         return $this->serializer->denormalize(
-            $payload,
-            $payload['header'][Header::EVENT_TYPE],
+            $payload->jsonSerialize(),
+            $payload->header[Header::EVENT_TYPE],
             'json'
         );
     }
