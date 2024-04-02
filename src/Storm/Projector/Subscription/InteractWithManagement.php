@@ -8,21 +8,20 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Repository\ProjectionResult;
-use Storm\Projector\Support\Notification\Batch\BatchReset;
-use Storm\Projector\Support\Notification\Batch\IsBatchReached;
-use Storm\Projector\Support\Notification\Checkpoint\CheckpointReset;
-use Storm\Projector\Support\Notification\Checkpoint\CheckpointUpdated;
-use Storm\Projector\Support\Notification\Checkpoint\CurrentCheckpoint;
-use Storm\Projector\Support\Notification\Checkpoint\SnapshotTaken;
-use Storm\Projector\Support\Notification\Sprint\SprintContinue;
-use Storm\Projector\Support\Notification\Sprint\SprintStopped;
-use Storm\Projector\Support\Notification\Status\CurrentStatus;
-use Storm\Projector\Support\Notification\Status\StatusChanged;
-use Storm\Projector\Support\Notification\Status\StatusDisclosed;
-use Storm\Projector\Support\Notification\UserState\CurrentUserState;
-use Storm\Projector\Support\Notification\UserState\UserStateChanged;
-use Storm\Projector\Support\Notification\UserState\UserStateRestored;
-
+use Storm\Projector\Workflow\Notification\Batch\BatchReset;
+use Storm\Projector\Workflow\Notification\Batch\IsBatchReached;
+use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointReset;
+use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointUpdated;
+use Storm\Projector\Workflow\Notification\Checkpoint\CurrentCheckpoint;
+use Storm\Projector\Workflow\Notification\Checkpoint\SnapshotTaken;
+use Storm\Projector\Workflow\Notification\Sprint\SprintContinue;
+use Storm\Projector\Workflow\Notification\Sprint\SprintStopped;
+use Storm\Projector\Workflow\Notification\Status\CurrentStatus;
+use Storm\Projector\Workflow\Notification\Status\StatusChanged;
+use Storm\Projector\Workflow\Notification\Status\StatusDisclosed;
+use Storm\Projector\Workflow\Notification\UserState\CurrentUserState;
+use Storm\Projector\Workflow\Notification\UserState\UserStateChanged;
+use Storm\Projector\Workflow\Notification\UserState\UserStateRestored;
 use function in_array;
 
 trait InteractWithManagement

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Support\Notification\Stream\EventStreamDiscovered;
+use Storm\Projector\Workflow\Notification\Stream\EventStreamDiscovered;
 
 final class RefreshProjection
 {
@@ -17,7 +17,7 @@ final class RefreshProjection
 
     public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
-        // monitor update in the remote status
+        // monitor update the remote status
         $this->refreshStatus($hub);
 
         // watch again for event streams which may have changed

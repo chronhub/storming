@@ -6,14 +6,14 @@ namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Support\Notification\Management\ProjectionClosed;
-use Storm\Projector\Support\Notification\Management\ProjectionDiscarded;
-use Storm\Projector\Support\Notification\Management\ProjectionRestarted;
-use Storm\Projector\Support\Notification\Management\ProjectionRevised;
-use Storm\Projector\Support\Notification\Management\ProjectionStatusDisclosed;
-use Storm\Projector\Support\Notification\Management\ProjectionSynchronized;
-use Storm\Projector\Support\Notification\Sprint\IsSprintDaemonize;
-use Storm\Projector\Support\Notification\Status\CurrentStatus;
+use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
+use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
+use Storm\Projector\Workflow\Notification\Management\ProjectionRestarted;
+use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
+use Storm\Projector\Workflow\Notification\Management\ProjectionStatusDisclosed;
+use Storm\Projector\Workflow\Notification\Management\ProjectionSynchronized;
+use Storm\Projector\Workflow\Notification\Sprint\IsSprintDaemonize;
+use Storm\Projector\Workflow\Notification\Status\CurrentStatus;
 
 trait MonitorRemoteStatus
 {

@@ -9,8 +9,8 @@ use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\EmitterSubscriber;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionQueryFilter;
-use Storm\Projector\Support\Notification\Management\ProjectionDiscarded;
-use Storm\Projector\Support\Notification\Management\ProjectionRevised;
+use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
+use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
 
 final readonly class ProjectEmitter implements EmitterProjector
 {

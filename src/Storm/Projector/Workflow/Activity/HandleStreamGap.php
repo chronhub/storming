@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Support\Notification\Batch\IsBatchReset;
-use Storm\Projector\Support\Notification\Checkpoint\HasGap;
-use Storm\Projector\Support\Notification\Checkpoint\SleepOnGap;
-use Storm\Projector\Support\Notification\Management\ProjectionStored;
+use Storm\Projector\Workflow\Notification\Batch\IsBatchReset;
+use Storm\Projector\Workflow\Notification\Checkpoint\HasGap;
+use Storm\Projector\Workflow\Notification\Checkpoint\SleepOnGap;
+use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
 
 final class HandleStreamGap
 {

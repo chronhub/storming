@@ -7,16 +7,16 @@ namespace Storm\Projector\Workflow\Activity;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Iterator\MergeStreamIterator;
-use Storm\Projector\Support\Notification\Sprint\IsSprintRunning;
-use Storm\Projector\Support\Notification\Stream\PullStreamIterator;
-use Storm\Projector\Support\Notification\Stream\StreamProcessed;
+use Storm\Projector\Workflow\Notification\Sprint\IsSprintRunning;
+use Storm\Projector\Workflow\Notification\Stream\PullStreamIterator;
+use Storm\Projector\Workflow\Notification\Stream\StreamProcessed;
 
 use function gc_collect_cycles;
 
 final class HandleStreamEvent
 {
     /**
-     * @var callable{NotificationHub, string, DomainEvent, int<1, max>}
+     * @var callable{NotificationHub, string, DomainEvent, positive-int}
      */
     private $eventProcessor;
 

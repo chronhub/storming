@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Storm\Projector\Subscription;
 
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Support\Notification\Checkpoint\CheckpointInserted;
-use Storm\Projector\Support\Notification\Cycle\CycleBegan;
-use Storm\Projector\Support\Notification\Cycle\CycleRenewed;
-use Storm\Projector\Support\Notification\Handler\WhenBatchLoaded;
-use Storm\Projector\Support\Notification\Handler\WhenCheckpointInserted;
-use Storm\Projector\Support\Notification\Handler\WhenCycleBegin;
-use Storm\Projector\Support\Notification\Handler\WhenCycleRenewed;
-use Storm\Projector\Support\Notification\Handler\WhenEventStreamDiscovered;
-use Storm\Projector\Support\Notification\Stream\EventStreamDiscovered;
-use Storm\Projector\Support\Notification\Stream\StreamIteratorSet;
+use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointInserted;
+use Storm\Projector\Workflow\Notification\Cycle\CycleBegan;
+use Storm\Projector\Workflow\Notification\Cycle\CycleRenewed;
+use Storm\Projector\Workflow\Notification\Handler\WhenBatchLoaded;
+use Storm\Projector\Workflow\Notification\Handler\WhenCheckpointInserted;
+use Storm\Projector\Workflow\Notification\Handler\WhenCycleBegin;
+use Storm\Projector\Workflow\Notification\Handler\WhenCycleRenewed;
+use Storm\Projector\Workflow\Notification\Handler\WhenEventStreamDiscovered;
+use Storm\Projector\Workflow\Notification\Stream\EventStreamDiscovered;
+use Storm\Projector\Workflow\Notification\Stream\StreamIteratorSet;
 
 final class ListenerHandler
 {

@@ -13,7 +13,7 @@ use Storm\Contract\Projector\QueryProjectorScope;
 use Storm\Contract\Projector\QuerySubscriber;
 use Storm\Contract\Projector\Subscriptor;
 use Storm\Projector\Exception\RuntimeException;
-use Storm\Projector\Support\Notification\Sprint\IsSprintTerminated;
+use Storm\Projector\Workflow\Notification\Sprint\IsSprintTerminated;
 use Storm\Projector\Workflow\Workflow;
 
 final readonly class QuerySubscription implements QuerySubscriber

@@ -7,9 +7,8 @@ namespace Storm\Projector\Workflow;
 use Closure;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
-use Storm\Projector\Support\Notification\Management\ProjectionFreed;
+use Storm\Projector\Workflow\Notification\Management\ProjectionFreed;
 use Throwable;
-
 use function array_reduce;
 use function array_reverse;
 

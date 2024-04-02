@@ -9,8 +9,8 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\ReadModelProjector;
 use Storm\Contract\Projector\ReadModelSubscriber;
-use Storm\Projector\Support\Notification\Management\ProjectionDiscarded;
-use Storm\Projector\Support\Notification\Management\ProjectionRevised;
+use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
+use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
 
 final readonly class ProjectReadModel implements ReadModelProjector
 {

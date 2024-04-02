@@ -9,8 +9,8 @@ use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelScope;
-use Storm\Projector\Support\Notification\Management\ProjectionClosed;
-use Storm\Projector\Support\Notification\Stream\CurrentProcessedStream;
+use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
+use Storm\Projector\Workflow\Notification\Stream\CurrentProcessedStream;
 
 final class ReadModelAccess implements ArrayAccess, ReadModelScope
 {

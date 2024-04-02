@@ -6,12 +6,12 @@ namespace Storm\Contract\Projector;
 
 use Closure;
 use Storm\Contract\Chronicler\QueryFilter;
-use Storm\Contract\Message\DomainEvent;
 use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Workflow\HaltOn;
 
 /**
  * @template TInit of array
- * @template TWhen of array{DomainEvent, TInit, ProjectorScope}|array<DomainEvent, ProjectorScope>
+ * @template TWhen of ProjectorScope|ReadModelScope|EmitterScope|QueryProjectorScope
  */
 interface Context
 {
@@ -55,7 +55,7 @@ interface Context
     /**
      * Sets the event handlers to be called when an event is received.
      *
-     * @param Closure(TWhen): ?TInit $reactors
+     * @param Closure(TWhen):void $reactors
      *
      * @throws InvalidArgumentException When reactors are already set
      */
@@ -64,6 +64,7 @@ interface Context
     /**
      * Stop the projection when a condition is met.
      *
+     * @param  Closure(HaltOn):HaltOn $haltOn
      * @return $this
      */
     public function haltOn(Closure $haltOn): self;

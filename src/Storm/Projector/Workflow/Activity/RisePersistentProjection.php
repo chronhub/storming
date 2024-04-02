@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Support\Notification\Cycle\IsFirstCycle;
-use Storm\Projector\Support\Notification\Management\ProjectionRise;
+use Storm\Projector\Workflow\Notification\Cycle\IsFirstCycle;
+use Storm\Projector\Workflow\Notification\Management\ProjectionRise;
 
 final class RisePersistentProjection
 {

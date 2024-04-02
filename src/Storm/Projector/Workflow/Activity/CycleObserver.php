@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Support\Notification\Cycle\CycleBegan;
-use Storm\Projector\Support\Notification\Cycle\CycleRenewed;
-use Storm\Projector\Support\Notification\Sprint\IsSprintTerminated;
+use Storm\Projector\Workflow\Notification\Cycle\CycleBegan;
+use Storm\Projector\Workflow\Notification\Cycle\CycleRenewed;
+use Storm\Projector\Workflow\Notification\Sprint\IsSprintTerminated;
 
 final class CycleObserver
 {
@@ -17,11 +17,6 @@ final class CycleObserver
 
         $next($hub);
 
-        return $this->onCycleRenewed($hub);
-    }
-
-    private function onCycleRenewed(NotificationHub $hub): bool
-    {
         $hub->notify(CycleRenewed::class);
 
         return ! $hub->expect(IsSprintTerminated::class);

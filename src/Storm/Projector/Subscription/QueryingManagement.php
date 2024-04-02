@@ -6,7 +6,7 @@ namespace Storm\Projector\Subscription;
 
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\QueryManagement;
-use Storm\Projector\Support\Notification\Sprint\SprintStopped;
+use Storm\Projector\Workflow\Notification\Sprint\SprintStopped;
 
 final readonly class QueryingManagement implements QueryManagement
 {

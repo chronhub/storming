@@ -7,7 +7,7 @@ namespace Storm\Projector\Subscription;
 use Closure;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Support\Notification\Sprint\IsSprintTerminated;
+use Storm\Projector\Workflow\Notification\Sprint\IsSprintTerminated;
 use Storm\Projector\Workflow\Workflow;
 
 trait InteractWithPersistentSubscription

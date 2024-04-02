@@ -9,7 +9,9 @@ interface Routable
     /**
      * Route message to his handler(s).
      *
-     * @return array<callable>|null
+     * Return null, assume that message is not found.
+     *
+     * @return array<callable>|array|null
      */
     public function route(string $reporterId, string $message): ?array;
 }

@@ -9,15 +9,9 @@ use Storm\Contract\Tracker\MessageTracker;
 
 interface Reporter
 {
-    /**
-     * @var string
-     */
-    public const DISPATCH_EVENT = 'dispatch_event';
+    public const string DISPATCH_EVENT = 'dispatch_event';
 
-    /**
-     * @var string
-     */
-    public const FINALIZE_EVENT = 'finalize_event';
+    public const string FINALIZE_EVENT = 'finalize_event';
 
     /**
      * @return void|PromiseInterface

@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Support\Notification\Batch\BatchSleep;
-use Storm\Projector\Support\Notification\Batch\IsProcessBlank;
-use Storm\Projector\Support\Notification\Checkpoint\HasGap;
-use Storm\Projector\Support\Notification\Management\ProjectionLockUpdated;
-use Storm\Projector\Support\Notification\Management\ProjectionStored;
+use Storm\Projector\Workflow\Notification\Batch\BatchSleep;
+use Storm\Projector\Workflow\Notification\Batch\IsProcessBlank;
+use Storm\Projector\Workflow\Notification\Checkpoint\HasGap;
+use Storm\Projector\Workflow\Notification\Management\ProjectionLockUpdated;
+use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
 
 final readonly class PersistOrUpdate
 {

@@ -11,7 +11,7 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Checkpoint\ShouldSnapshotCheckpoint;
 use Storm\Projector\Exception\InvalidArgumentException;
-use Storm\Projector\Support\Notification\Management\SnapshotCheckpointCaptured;
+use Storm\Projector\Workflow\Notification\Management\SnapshotCheckpointCaptured;
 
 class SnapshotWatcher
 {

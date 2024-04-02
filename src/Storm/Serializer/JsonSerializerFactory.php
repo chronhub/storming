@@ -15,6 +15,7 @@ use Symfony\Component\Serializer\Normalizer\NormalizerInterface;
 use Symfony\Component\Serializer\Normalizer\UidNormalizer;
 use Symfony\Component\Serializer\Serializer;
 use Symfony\Component\Serializer\SerializerAwareInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 use function array_merge;
 use function is_int;
@@ -22,7 +23,7 @@ use function is_int;
 final class JsonSerializerFactory implements JsonSerializer
 {
     /**
-     * @var array NormalizerInterface|DenormalizerInterface[]
+     * @var array<NormalizerInterface|DenormalizerInterface>
      */
     private array $normalizers = [];
 
@@ -60,7 +61,7 @@ final class JsonSerializerFactory implements JsonSerializer
         return $this;
     }
 
-    public function create(): Serializer
+    public function create(): SerializerInterface
     {
         $normalizers = $this->getNormalizers();
 

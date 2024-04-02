@@ -9,9 +9,13 @@ use Storm\Serializer\Payload;
 
 interface StreamEventSerializer
 {
+    /**
+     * Serialize a domain event to a payload instance.
+     */
     public function serialize(DomainEvent $event): Payload;
 
-    public function deserialize(object $object): DomainEvent;
-
-    public function toStreamEvent(mixed $data): Payload;
+    /**
+     * Deserialize data to a domain event instance.
+     */
+    public function deserialize(array|object $object): DomainEvent;
 }

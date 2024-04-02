@@ -9,10 +9,10 @@ use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\EmitterScope;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Support\Notification\Management\EventEmitted;
-use Storm\Projector\Support\Notification\Management\EventLinkedTo;
-use Storm\Projector\Support\Notification\Management\ProjectionClosed;
-use Storm\Projector\Support\Notification\Stream\CurrentProcessedStream;
+use Storm\Projector\Workflow\Notification\Management\EventEmitted;
+use Storm\Projector\Workflow\Notification\Management\EventLinkedTo;
+use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
+use Storm\Projector\Workflow\Notification\Stream\CurrentProcessedStream;
 
 final class EmitterAccess implements ArrayAccess, EmitterScope
 {

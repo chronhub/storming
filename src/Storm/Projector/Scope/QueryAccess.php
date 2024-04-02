@@ -8,8 +8,8 @@ use ArrayAccess;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\QueryProjectorScope;
-use Storm\Projector\Support\Notification\Sprint\SprintStopped;
-use Storm\Projector\Support\Notification\Stream\CurrentProcessedStream;
+use Storm\Projector\Workflow\Notification\Sprint\SprintStopped;
+use Storm\Projector\Workflow\Notification\Stream\CurrentProcessedStream;
 
 final class QueryAccess implements ArrayAccess, QueryProjectorScope
 {

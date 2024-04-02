@@ -6,20 +6,20 @@ namespace Storm\Projector\Subscription;
 
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\PersistentManagement;
-use Storm\Projector\Support\Notification\Management\EventEmitted;
-use Storm\Projector\Support\Notification\Management\EventLinkedTo;
-use Storm\Projector\Support\Notification\Management\ProjectionClosed;
-use Storm\Projector\Support\Notification\Management\ProjectionDiscarded;
-use Storm\Projector\Support\Notification\Management\ProjectionFreed;
-use Storm\Projector\Support\Notification\Management\ProjectionLockUpdated;
-use Storm\Projector\Support\Notification\Management\ProjectionPersistedWhenThresholdIsReached;
-use Storm\Projector\Support\Notification\Management\ProjectionRestarted;
-use Storm\Projector\Support\Notification\Management\ProjectionRevised;
-use Storm\Projector\Support\Notification\Management\ProjectionRise;
-use Storm\Projector\Support\Notification\Management\ProjectionStatusDisclosed;
-use Storm\Projector\Support\Notification\Management\ProjectionStored;
-use Storm\Projector\Support\Notification\Management\ProjectionSynchronized;
-use Storm\Projector\Support\Notification\Management\SnapshotCheckpointCaptured;
+use Storm\Projector\Workflow\Notification\Management\EventEmitted;
+use Storm\Projector\Workflow\Notification\Management\EventLinkedTo;
+use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
+use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
+use Storm\Projector\Workflow\Notification\Management\ProjectionFreed;
+use Storm\Projector\Workflow\Notification\Management\ProjectionLockUpdated;
+use Storm\Projector\Workflow\Notification\Management\ProjectionPersistedWhenThresholdIsReached;
+use Storm\Projector\Workflow\Notification\Management\ProjectionRestarted;
+use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
+use Storm\Projector\Workflow\Notification\Management\ProjectionRise;
+use Storm\Projector\Workflow\Notification\Management\ProjectionStatusDisclosed;
+use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
+use Storm\Projector\Workflow\Notification\Management\ProjectionSynchronized;
+use Storm\Projector\Workflow\Notification\Management\SnapshotCheckpointCaptured;
 
 final class HookHandler
 {

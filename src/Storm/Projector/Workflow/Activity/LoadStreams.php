@@ -12,8 +12,8 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Iterator\MergeStreamIterator;
 use Storm\Projector\Iterator\StreamIterator;
-use Storm\Projector\Support\Notification\Checkpoint\CurrentCheckpoint;
-use Storm\Projector\Support\Notification\Stream\StreamIteratorSet;
+use Storm\Projector\Workflow\Notification\Checkpoint\CurrentCheckpoint;
+use Storm\Projector\Workflow\Notification\Stream\StreamIteratorSet;
 use Storm\Stream\StreamName;
 
 final class LoadStreams
