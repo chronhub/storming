@@ -35,9 +35,7 @@ final class GapDetector implements GapRecognition
             return false;
         }
 
-        $this->gapDetected = true;
-
-        return true;
+        return $this->gapDetected = true;
     }
 
     public function hasGap(): bool
@@ -57,11 +55,7 @@ final class GapDetector implements GapRecognition
 
     public function sleep(): void
     {
-        if (! $this->gapDetected) {
-            return;
-        }
-
-        if (! $this->hasRetry()) {
+        if (! $this->gapDetected || ! $this->hasRetry()) {
             return;
         }
 

@@ -17,7 +17,7 @@ use function strtoupper;
 
 final readonly class PointInTime implements SystemClock
 {
-    final public const DATE_TIME_FORMAT = 'Y-m-d\TH:i:s.u';
+    final public const string DATE_TIME_FORMAT = 'Y-m-d\TH:i:s.u';
 
     private MonotonicClock $clock;
 
