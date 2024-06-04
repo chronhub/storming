@@ -8,6 +8,7 @@ use Closure;
 use Illuminate\Support\Str;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Notification\UserState\CurrentUserState;
+
 use function property_exists;
 
 trait InteractWithProjection

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Notification\Stream;
 
-final class NewEventStreamDiscovered
+final readonly class NewEventStreamDiscovered
 {
-    public function __construct(public readonly string $eventStream)
+    public function __construct(public string $eventStream)
     {
     }
 }

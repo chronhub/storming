@@ -24,6 +24,7 @@ use Storm\Projector\Workflow\Notification\Management\ProjectionStatusDisclosed;
 use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
 use Storm\Projector\Workflow\Notification\Management\ProjectionSynchronized;
 use Storm\Projector\Workflow\Notification\Management\SnapshotCheckpointCaptured;
+
 use function array_key_exists;
 use function is_callable;
 use function is_object;

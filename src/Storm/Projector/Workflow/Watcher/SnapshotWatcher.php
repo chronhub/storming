@@ -40,7 +40,7 @@ class SnapshotWatcher
         }
 
         if ($this->timeInterval && $this->timeInterval < 1) {
-            throw new InvalidArgumentException('Position interval must be greater than 0');
+            throw new InvalidArgumentException('Time interval must be greater than 0');
         }
 
         if ($this->positionInterval) {

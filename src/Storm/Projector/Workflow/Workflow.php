@@ -9,6 +9,7 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
 use Storm\Projector\Workflow\Notification\Management\ProjectionFreed;
 use Throwable;
+
 use function array_reduce;
 use function array_reverse;
 

@@ -6,6 +6,7 @@ namespace Storm\Projector\Workflow\Notification\Handler;
 
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Projector\Exception\InvalidArgumentException;
+
 use function array_unique;
 use function count;
 

@@ -22,6 +22,7 @@ use Storm\Projector\Workflow\Notification\Status\StatusDisclosed;
 use Storm\Projector\Workflow\Notification\UserState\CurrentUserState;
 use Storm\Projector\Workflow\Notification\UserState\UserStateChanged;
 use Storm\Projector\Workflow\Notification\UserState\UserStateRestored;
+
 use function in_array;
 
 trait InteractWithManagement

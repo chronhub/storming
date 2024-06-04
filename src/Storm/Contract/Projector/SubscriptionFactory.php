@@ -24,7 +24,7 @@ interface SubscriptionFactory
     public function createOption(array $options = []): ProjectionOption;
 
     /**
-     * Creates a ContextReader.
+     * Creates the context reader.
      */
     public function createContextBuilder(): ContextReader;
 

@@ -23,6 +23,7 @@ use Storm\Projector\Workflow\Notification\Sprint\SprintTerminated;
 use Storm\Projector\Workflow\Notification\Stream\NoEventStreamDiscovered;
 use Storm\Projector\Workflow\Notification\Timer\CurrentTime;
 use Storm\Projector\Workflow\Notification\Timer\GetElapsedTime;
+
 use function method_exists;
 use function pcntl_signal;
 use function pcntl_signal_dispatch;
