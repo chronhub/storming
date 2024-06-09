@@ -10,6 +10,6 @@ final class CycleStarted
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->cycle()->start();
+        $subscriptor->watcher()->cycle->start();
     }
 }

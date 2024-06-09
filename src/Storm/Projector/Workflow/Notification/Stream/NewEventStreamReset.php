@@ -10,6 +10,6 @@ final class NewEventStreamReset
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->streamDiscovery()->resetNewEventStreams();
+        $subscriptor->watcher()->streamDiscovery->resetNewEventStreams();
     }
 }

@@ -10,7 +10,7 @@ final class IsSprintTerminated
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return ! $subscriptor->watcher()->sprint()->inBackground()
-            || ! $subscriptor->watcher()->sprint()->inProgress();
+        return ! $subscriptor->watcher()->sprint->inBackground()
+            || ! $subscriptor->watcher()->sprint->inProgress();
     }
 }

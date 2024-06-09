@@ -10,6 +10,6 @@ final class CycleReset
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->cycle()->reset();
+        $subscriptor->watcher()->cycle->reset();
     }
 }

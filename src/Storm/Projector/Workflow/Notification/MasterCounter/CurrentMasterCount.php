@@ -10,6 +10,6 @@ final class CurrentMasterCount
 {
     public function __invoke(Subscriptor $subscriptor): int
     {
-        return $subscriptor->watcher()->masterCounter()->current();
+        return $subscriptor->watcher()->masterCounter->current();
     }
 }

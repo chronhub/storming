@@ -17,7 +17,8 @@
     "symfony/clock": "^6.4",
     "symfony/property-access": "7.1.x-dev",
     "symfony/serializer": "^v6.4",
-    "symfony/uid": "6.3.x"
+    "symfony/uid": "6.3.x",
+    "ext-pdo": "*"
   },
   "replace": {
     "chronhub/annotation": "self.version",
@@ -35,7 +36,6 @@
   },
   "require-dev": {
     "ext-posix": "*",
-    "ext-pdo": "*",
     "ext-pcntl": "*",
     "doctrine/dbal": "^3.9",
     "laravel/pint": "^v1.1",

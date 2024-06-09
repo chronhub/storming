@@ -10,6 +10,6 @@ final class IsCycleStarted
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->watcher()->cycle()->hasStarted();
+        return $subscriptor->watcher()->cycle->hasStarted();
     }
 }

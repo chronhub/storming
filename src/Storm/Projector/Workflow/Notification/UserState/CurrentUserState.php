@@ -10,6 +10,6 @@ final class CurrentUserState
 {
     public function __invoke(Subscriptor $subscriptor): array
     {
-        return $subscriptor->watcher()->userState()->get();
+        return $subscriptor->watcher()->userState->get();
     }
 }

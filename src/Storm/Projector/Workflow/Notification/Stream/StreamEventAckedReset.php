@@ -10,6 +10,6 @@ final class StreamEventAckedReset
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->ackedStream()->reset();
+        $subscriptor->watcher()->ackedStream->reset();
     }
 }

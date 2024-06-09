@@ -23,12 +23,12 @@ class CycleWatcher
         $this->cycle = 0;
     }
 
-    public function cycle(): int
+    public function current(): int
     {
         return $this->cycle;
     }
 
-    public function isFirstCycle(): bool
+    public function isFirst(): bool
     {
         return $this->cycle === 1;
     }

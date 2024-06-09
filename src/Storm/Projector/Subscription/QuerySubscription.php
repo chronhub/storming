@@ -81,7 +81,7 @@ final readonly class QuerySubscription implements QuerySubscriber
     private function setupWatcher(ContextReader $context, bool $keepRunning): void
     {
         $this->subscriptor->watcher()->subscribe($this->management->hub(), $context);
-        $this->subscriptor->watcher()->sprint()->runInBackground($keepRunning);
-        $this->subscriptor->watcher()->sprint()->continue();
+        $this->subscriptor->watcher()->sprint->runInBackground($keepRunning);
+        $this->subscriptor->watcher()->sprint->continue();
     }
 }

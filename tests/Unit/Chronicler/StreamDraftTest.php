@@ -26,14 +26,14 @@ afterEach(function (): void {
     $this->draft = null;
 });
 
-dataset('someTypes', [
+dataset('some types', [
     42,
     true,
     false,
     new stdClass(),
 ]);
 
-dataset('eventDecorator', [
+dataset('event decorator', [
     fn (): MessageDecorator => new class implements MessageDecorator
     {
         public function decorate(Message $message): Message
@@ -48,7 +48,7 @@ describe('resolve', function (): void {
         $this->draft->deferred(fn (): mixed => $callback);
 
         expect($this->draft->promise())->toBe($callback);
-    })->with('someTypes');
+    })->with('some types');
 
     test('override promise', function (): void {
         $this->draft->deferred(fn (): int => 42);
@@ -57,7 +57,7 @@ describe('resolve', function (): void {
 
         $this->draft->deferred(fn (): bool => false);
 
-        expect($this->draft->promise())->toBe(false);
+        expect($this->draft->promise())->toBeFalse();
     });
 });
 
@@ -79,8 +79,8 @@ describe('exception', function (): void {
         $exception = StreamAlreadyExists::withStreamName(new StreamName('foo'));
         $this->draft->withRaisedException($exception);
 
-        expect($this->draft->hasException())->toBe(true)
-            ->and($this->draft->hasStreamAlreadyExits())->toBe(true)
+        expect($this->draft->hasException())->toBeTrue()
+            ->and($this->draft->hasStreamAlreadyExits())->toBeTrue()
             ->and($this->draft->exception())->toBe($exception);
     });
 
@@ -90,8 +90,8 @@ describe('exception', function (): void {
         $exception = StreamNotFound::withStreamName(new StreamName('foo'));
         $this->draft->withRaisedException($exception);
 
-        expect($this->draft->hasException())->toBe(true)
-            ->and($this->draft->hasStreamNotFound())->toBe(true)
+        expect($this->draft->hasException())->toBeTrue()
+            ->and($this->draft->hasStreamNotFound())->toBeTrue()
             ->and($this->draft->exception())->toBe($exception);
     });
 
@@ -101,8 +101,8 @@ describe('exception', function (): void {
         $exception = new ConcurrencyException('some error');
         $this->draft->withRaisedException($exception);
 
-        expect($this->draft->hasException())->toBe(true)
-            ->and($this->draft->hasConcurrency())->toBe(true)
+        expect($this->draft->hasException())->toBeTrue()
+            ->and($this->draft->hasConcurrency())->toBeTrue()
             ->and($this->draft->exception())->toBe($exception);
     });
 });
@@ -126,13 +126,13 @@ describe('decorate stream event', function (): void {
             ->and($streamEvent->toContent())->toBe(['name' => 'steph bug'])
             ->and($streamEvent->headers())->toBe(['foo' => 'bar']);
 
-    })->with('eventDecorator');
+    })->with('event decorator');
 
     test('raise exception with invalid deferred type', function (mixed $value, MessageDecorator $eventDecorator): void {
         $this->draft->deferred(fn (): mixed => $value);
         $this->draft->decorate($eventDecorator);
     })
         ->throws(UnexpectedCallback::class, 'No stream has been set as event callback')
-        ->with('someTypes')
-        ->with('eventDecorator');
+        ->with('some types')
+        ->with('event decorator');
 });

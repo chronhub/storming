@@ -10,6 +10,6 @@ final readonly class SprintStopped
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->sprint()->halt();
+        $subscriptor->watcher()->sprint->halt();
     }
 }

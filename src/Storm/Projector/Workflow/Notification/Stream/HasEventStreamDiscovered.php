@@ -10,6 +10,6 @@ final class HasEventStreamDiscovered
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->watcher()->streamDiscovery()->hasEventStreams();
+        return $subscriptor->watcher()->streamDiscovery->hasEventStreams();
     }
 }

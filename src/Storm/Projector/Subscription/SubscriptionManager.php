@@ -63,7 +63,7 @@ final class SubscriptionManager implements Subscriptor
     {
         $originalUserState = value($this->context->userState()) ?? [];
 
-        $this->watcher->userState()->put($originalUserState);
+        $this->watcher->userState->put($originalUserState);
     }
 
     public function isUserStateInitialized(): bool
@@ -98,7 +98,7 @@ final class SubscriptionManager implements Subscriptor
     public function discoverStreams(): void
     {
         tap($this->context->queries(), function (callable $query): void {
-            $eventStreams = $this->watcher->streamDiscovery()->discover($query);
+            $eventStreams = $this->watcher->streamDiscovery->discover($query);
 
             $this->checkpointRecognition->refreshStreams($eventStreams);
         });

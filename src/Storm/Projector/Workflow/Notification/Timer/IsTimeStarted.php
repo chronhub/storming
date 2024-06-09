@@ -10,6 +10,6 @@ final class IsTimeStarted
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->watcher()->time()->isStarted();
+        return $subscriptor->watcher()->time->isStarted();
     }
 }

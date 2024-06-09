@@ -10,6 +10,6 @@ final class GetElapsedTime
 {
     public function __invoke(Subscriptor $subscriptor): int
     {
-        return $subscriptor->watcher()->time()->getElapsedTime();
+        return $subscriptor->watcher()->time->getElapsedTime();
     }
 }

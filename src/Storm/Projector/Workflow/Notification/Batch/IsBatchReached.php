@@ -10,6 +10,6 @@ final class IsBatchReached
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->watcher()->batch()->isReached();
+        return $subscriptor->watcher()->batchCounter->isReached();
     }
 }

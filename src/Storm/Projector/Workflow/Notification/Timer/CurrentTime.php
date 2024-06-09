@@ -10,6 +10,6 @@ final class CurrentTime
 {
     public function __invoke(Subscriptor $subscriptor): int
     {
-        return $subscriptor->watcher()->time()->getCurrentTime();
+        return $subscriptor->watcher()->time->getCurrentTime();
     }
 }

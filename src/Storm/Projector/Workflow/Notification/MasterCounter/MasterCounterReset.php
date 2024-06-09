@@ -10,6 +10,6 @@ final class MasterCounterReset
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->masterCounter()->reset();
+        $subscriptor->watcher()->masterCounter->reset();
     }
 }

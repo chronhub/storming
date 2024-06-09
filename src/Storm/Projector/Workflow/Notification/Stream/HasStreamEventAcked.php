@@ -10,6 +10,6 @@ final class HasStreamEventAcked
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->watcher()->ackedStream()->hasStreams();
+        return $subscriptor->watcher()->ackedStream->hasStreams();
     }
 }

@@ -43,19 +43,9 @@ class Workflow
     {
         return array_reduce(
             array_reverse($this->activities),
-            $this->carry(),
-            $this->prepareDestination($destination)
+            fn (callable $stack, callable $activity) => fn (NotificationHub $hub) => $activity($hub, $stack),
+            fn (NotificationHub $hub) => $destination($hub)
         );
-    }
-
-    private function prepareDestination(Closure $destination): Closure
-    {
-        return fn (NotificationHub $hub) => $destination($hub);
-    }
-
-    private function carry(): Closure
-    {
-        return fn (callable $stack, callable $activity) => fn (NotificationHub $hub) => $activity($hub, $stack);
     }
 
     private function conditionallyReleaseLock(?Throwable $exception): void

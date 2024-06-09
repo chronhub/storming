@@ -45,22 +45,9 @@ use Storm\Projector\Subscription\QuerySubscription;
 use Storm\Projector\Subscription\ReadingModelManagement;
 use Storm\Projector\Subscription\ReadModelSubscription;
 use Storm\Projector\Subscription\SubscriptionManager;
-use Storm\Projector\Support\Token\ConsumeWithSleepToken;
 use Storm\Projector\Workflow\DefaultContext;
 use Storm\Projector\Workflow\EmittedStream;
 use Storm\Projector\Workflow\InMemoryEmittedStreams;
-use Storm\Projector\Workflow\Timer;
-use Storm\Projector\Workflow\Watcher\AckedStreamWatcher;
-use Storm\Projector\Workflow\Watcher\BatchCounterWatcher;
-use Storm\Projector\Workflow\Watcher\BatchStreamWatcher;
-use Storm\Projector\Workflow\Watcher\CycleWatcher;
-use Storm\Projector\Workflow\Watcher\EventStreamWatcher;
-use Storm\Projector\Workflow\Watcher\MasterEventCounterWatcher;
-use Storm\Projector\Workflow\Watcher\SnapshotWatcher;
-use Storm\Projector\Workflow\Watcher\SprintWatcher;
-use Storm\Projector\Workflow\Watcher\StopWatcher;
-use Storm\Projector\Workflow\Watcher\TimeWatcher;
-use Storm\Projector\Workflow\Watcher\UserStateWatcher;
 use Storm\Projector\Workflow\Watcher\WatcherManager;
 use Symfony\Component\Serializer\Serializer;
 
@@ -175,7 +162,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $this->createCheckpointRecognition($option, $detectGap),
             $this->clock,
             $option,
-            $this->createMonitorManager($option),
+            $this->createWatcherManager($option),
         );
     }
 
@@ -198,10 +185,9 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $checkpoints = new CheckpointCollection($this->clock);
 
         if ($detectGap) {
-            return new CheckpointManager(
-                $checkpoints,
-                new GapDetector($option->getRetries())
-            );
+            $gapDetector = new GapDetector($option->getRetries());
+
+            return new CheckpointManager($checkpoints, $gapDetector);
         }
 
         return new CheckpointInMemory($checkpoints);
@@ -217,36 +203,10 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
     }
 
-    protected function createMonitorManager(ProjectionOption $option): WatcherManager
+    protected function createWatcherManager(ProjectionOption $option): WatcherManager
     {
-        return new WatcherManager(
-            new CycleWatcher(),
-            new SprintWatcher(),
-            new UserStateWatcher(),
-            new EventStreamWatcher($this->eventStreamProvider),
-            new BatchCounterWatcher($option->getBlockSize()),
-            new AckedStreamWatcher(),
-            $this->batchStreamWatcher($option),
-            new TimeWatcher(new Timer($this->clock)),
-            new StopWatcher(),
-            new MasterEventCounterWatcher(),
-            $this->snapshotWatcher($option),
-        );
-    }
+        $factory = (new WatcherFactory())->make($option, $this->eventStreamProvider, $this->clock);
 
-    protected function batchStreamWatcher(ProjectionOption $option): BatchStreamWatcher
-    {
-        [$capacity, $rate] = $option->getSleep();
-
-        $bucket = new ConsumeWithSleepToken($capacity, $rate);
-
-        return new BatchStreamWatcher($bucket);
-    }
-
-    protected function snapshotWatcher(ProjectionOption $option): SnapshotWatcher
-    {
-        $interval = $option->getSnapshotInterval();
-
-        return new SnapshotWatcher($this->clock, $interval['position'], $interval['time'], $interval['usleep']);
+        return new WatcherManager($factory);
     }
 }

@@ -10,6 +10,6 @@ final class TimeStarted
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->time()->start();
+        $subscriptor->watcher()->time->start();
     }
 }

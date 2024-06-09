@@ -10,6 +10,6 @@ final class IsFirstCycle
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->watcher()->cycle()->isFirstCycle();
+        return $subscriptor->watcher()->cycle->isFirst();
     }
 }

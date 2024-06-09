@@ -10,8 +10,8 @@ final class BatchIncremented
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->batch()->increment();
+        $subscriptor->watcher()->batchCounter->increment();
 
-        $subscriptor->watcher()->masterCounter()->increment();
+        $subscriptor->watcher()->masterCounter->increment();
     }
 }

@@ -10,6 +10,6 @@ final class IsBatchReset
 {
     public function __invoke(Subscriptor $subscriptor): bool
     {
-        return $subscriptor->watcher()->batch()->isReset();
+        return $subscriptor->watcher()->batchCounter->isReset();
     }
 }

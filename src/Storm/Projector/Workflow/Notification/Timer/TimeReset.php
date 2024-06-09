@@ -10,6 +10,6 @@ final class TimeReset
 {
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->time()->reset();
+        $subscriptor->watcher()->time->reset();
     }
 }

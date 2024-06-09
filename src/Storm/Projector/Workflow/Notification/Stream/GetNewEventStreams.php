@@ -10,6 +10,6 @@ final class GetNewEventStreams
 {
     public function __invoke(Subscriptor $subscriptor): array
     {
-        return $subscriptor->watcher()->streamDiscovery()->newEventStreams();
+        return $subscriptor->watcher()->streamDiscovery->newEventStreams();
     }
 }

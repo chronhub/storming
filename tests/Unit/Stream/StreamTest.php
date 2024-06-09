@@ -21,7 +21,7 @@ it('create new stream instance with empty events', function (StreamName $streamN
         ->and($stream->name())->toBe($streamName)
         ->and(iterator_to_array($stream->events()))->toBeEmpty();
 
-})->with('streamNames');
+})->with('stream names');
 
 it('create new stream instance with iterable stream events', function (iterable $events) {
     $stream = new Stream(new StreamName('stream_name'), $events);

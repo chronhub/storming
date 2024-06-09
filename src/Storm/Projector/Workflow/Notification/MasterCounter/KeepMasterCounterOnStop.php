@@ -14,6 +14,6 @@ final readonly class KeepMasterCounterOnStop
 
     public function __invoke(Subscriptor $subscriptor): void
     {
-        $subscriptor->watcher()->masterCounter()->doNotReset($this->keepMasterCounterOnStop);
+        $subscriptor->watcher()->masterCounter->doNotReset($this->keepMasterCounterOnStop);
     }
 }
