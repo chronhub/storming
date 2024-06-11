@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Watcher;
 
 use AllowDynamicProperties;
-use ArrayAccess;
-use BadMethodCallException;
+use Storm\Contract\Chronicler\EventStreamProvider;
+use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Factory\WatcherFactory;
+use Storm\Contract\Projector\ProjectionOption;
+use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Support\Token\ConsumeWithSleepToken;
+use Storm\Projector\Workflow\Timer;
 
 use function method_exists;
 
@@ -29,38 +32,70 @@ use function method_exists;
  * checkMe allow dynamic properties attribute is only meant for phpStan
  */
 #[AllowDynamicProperties]
-class WatcherManager implements ArrayAccess
+class WatcherManager
 {
-    public function __construct(protected WatcherFactory $factory)
-    {
+    private array $watchers = [];
+
+    public function __construct(
+        protected ProjectionOption $option,
+        protected EventStreamProvider $eventStreamProvider,
+        protected SystemClock $clock
+    ) {
+        $this->watchers['ackedStream'] = new AckedStreamWatcher();
+        $this->watchers['batchCounter'] = new BatchCounterWatcher($option->getBlockSize());
+        $this->watchers['batchStream'] = $this->batchStreamWatcher($option);
+        $this->watchers['cycle'] = new CycleWatcher();
+        $this->watchers['masterCounter'] = new MasterEventCounterWatcher();
+        $this->watchers['snapshot'] = $this->snapshotWatcher($option, $clock);
+        $this->watchers['sprint'] = new SprintWatcher();
+        $this->watchers['stop'] = new StopWatcher();
+        $this->watchers['streamDiscovery'] = new EventStreamWatcher($eventStreamProvider);
+        $this->watchers['time'] = new TimeWatcher(new Timer($clock));
+        $this->watchers['userState'] = new UserStateWatcher();
     }
 
     public function subscribe(NotificationHub $hub, ContextReader $context): void
     {
-        foreach ($this->factory->watchers() as $watcher) {
+        foreach ($this->watchers as $watcher) {
             if (method_exists($watcher, 'subscribe')) {
                 $watcher->subscribe($hub, $context);
             }
         }
     }
 
-    public function offsetExists(mixed $offset): bool
+    /**
+     * @throws InvalidArgumentException when watcher not found
+     */
+    public function get(string $name): ?object
     {
-        return $this->factory->get($offset) !== null;
+        if (isset($this->watchers[$name])) {
+            return $this->watchers[$name];
+        }
+
+        throw new InvalidArgumentException("Watcher $name not found");
     }
 
-    public function offsetGet(mixed $offset): object
+    /**
+     * @return array<string, object>
+     */
+    public function watchers(): array
     {
-        return $this->factory->get($offset);
+        return $this->watchers;
     }
 
-    public function offsetSet(mixed $offset, mixed $value): void
+    protected function batchStreamWatcher(ProjectionOption $option): BatchStreamWatcher
     {
-        throw new BadMethodCallException('WatcherManager is readonly');
+        [$capacity, $rate] = $option->getSleep();
+
+        $bucket = new ConsumeWithSleepToken($capacity, $rate);
+
+        return new BatchStreamWatcher($bucket);
     }
 
-    public function offsetUnset(mixed $offset): void
+    protected function snapshotWatcher(ProjectionOption $option, SystemClock $clock): SnapshotWatcher
     {
-        throw new BadMethodCallException('WatcherManager is readonly');
+        $interval = $option->getSnapshotInterval();
+
+        return new SnapshotWatcher($clock, $interval['position'], $interval['time'], $interval['usleep']);
     }
 }

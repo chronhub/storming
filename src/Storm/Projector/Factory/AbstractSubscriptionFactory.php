@@ -205,8 +205,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     protected function createWatcherManager(ProjectionOption $option): WatcherManager
     {
-        $factory = (new WatcherFactory())->make($option, $this->eventStreamProvider, $this->clock);
-
-        return new WatcherManager($factory);
+        return new WatcherManager($option, $this->eventStreamProvider, $this->clock);
     }
 }
