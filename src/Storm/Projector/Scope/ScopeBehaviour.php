@@ -146,14 +146,11 @@ trait ScopeBehaviour
         $this->event = $event;
         $this->state = $state;
 
-        return fn () => $this->reset();
-    }
-
-    private function reset(): void
-    {
-        $this->event = null;
-        $this->state = null;
-        $this->isAcked = false;
+        return function (): void {
+            $this->event = null;
+            $this->state = null;
+            $this->isAcked = false;
+        };
     }
 
     private function updateUserState(string $field, $value, bool $increment): void

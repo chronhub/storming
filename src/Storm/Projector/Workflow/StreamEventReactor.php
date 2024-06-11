@@ -11,7 +11,6 @@ use Storm\Contract\Message\Header;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\PersistentProjectorScope;
 use Storm\Contract\Projector\ProjectorScope;
-use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Checkpoint\ShouldSnapshotCheckpoint;
 use Storm\Projector\Workflow\Notification\Batch\BatchIncremented;
@@ -70,18 +69,28 @@ class StreamEventReactor
 
         $this->updateUserState($hub, $initializedState, $this->scope->getState());
 
-        $hub->notifyWhen($this->scope->isAcked(), function (NotificationHub $hub) use ($event): void {
-            $hub->notify(StreamEventAcked::class, $event::class);
-        });
+        $hub->notifyWhen(
+            $this->scope->isAcked(),
+            fn (NotificationHub $hub) => $hub->notify(StreamEventAcked::class, $event::class)
+        );
 
         $resetScope();
     }
 
     protected function hasNoGap(NotificationHub $hub, string $streamName, int $expectedPosition, string|DateTimeImmutable $eventTime): bool
     {
-        $checkPoint = $hub->expect(new CheckpointInserted($streamName, $expectedPosition, $eventTime));
+        $checkpoint = $hub->expect(new CheckpointInserted($streamName, $expectedPosition, $eventTime));
 
-        return $this->onCheckpointInserted($hub, $checkPoint);
+        if ($checkpoint->type === null || $checkpoint->type === GapType::IN_GAP) {
+            $hub->notifyWhen(
+                $this->scope instanceof PersistentProjectorScope,
+                fn (NotificationHub $hub) => $hub->notify(ShouldSnapshotCheckpoint::class, $checkpoint)
+            );
+
+            return true;
+        }
+
+        return false;
     }
 
     protected function getUserState(NotificationHub $hub): ?array
@@ -95,20 +104,6 @@ class StreamEventReactor
         if (is_array($initializedState) && is_array($userState)) {
             $hub->notify(UserStateChanged::class, $userState);
         }
-    }
-
-    protected function onCheckpointInserted(NotificationHub $hub, Checkpoint $checkpoint): bool
-    {
-        if ($checkpoint->type === null || $checkpoint->type === GapType::IN_GAP) {
-            $hub->notifyWhen(
-                $this->scope instanceof PersistentProjectorScope,
-                fn (NotificationHub $hub) => $hub->notify(ShouldSnapshotCheckpoint::class, $checkpoint)
-            );
-
-            return true;
-        }
-
-        return false;
     }
 
     protected function dispatchSignalIfRequested(): void
