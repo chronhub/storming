@@ -32,18 +32,18 @@ final class HookHandler
             ProjectionPersistedWhenThresholdIsReached::class => fn () => $management->persistWhenThresholdIsReached(),
             ProjectionClosed::class => fn () => $management->close(),
             ProjectionRevised::class => fn () => $management->revise(),
-            ProjectionDiscarded::class => fn ($listener) => $management->discard($listener->withEmittedEvents),
+            ProjectionDiscarded::class => fn (ProjectionDiscarded $listener) => $management->discard($listener->withEmittedEvents),
             ProjectionFreed::class => fn () => $management->freed(),
             ProjectionRestarted::class => fn () => $management->restart(),
             ProjectionStatusDisclosed::class => fn () => $management->disclose(),
             ProjectionSynchronized::class => fn () => $management->synchronise(),
-            SnapshotCheckpointCaptured::class => fn ($listener) => $management->snapshot($listener->checkpoint),
+            SnapshotCheckpointCaptured::class => fn (SnapshotCheckpointCaptured $listener) => $management->snapshot($listener->checkpoint),
         ]);
 
         if ($management instanceof EmittingManagement) {
             $task->addHooks([
-                EventEmitted::class => fn ($listener) => $management->emit($listener->event),
-                EventLinkedTo::class => fn ($listener) => $management->linkTo($listener->streamName, $listener->event),
+                EventEmitted::class => fn (EventEmitted $listener) => $management->emit($listener->event),
+                EventLinkedTo::class => fn (EventLinkedTo $listener) => $management->linkTo($listener->streamName, $listener->event),
             ]);
         }
     }
