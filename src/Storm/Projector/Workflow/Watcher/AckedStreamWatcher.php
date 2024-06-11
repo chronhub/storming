@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Watcher;
 
-use function in_array;
-
 class AckedStreamWatcher
 {
     protected array $streams = [];
 
     public function ack(string $streamName): void
     {
-        if (! in_array($streamName, $this->streams)) {
+        if (! isset($this->streams[$streamName])) {
             $this->streams[] = $streamName;
         }
     }
