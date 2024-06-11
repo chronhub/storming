@@ -63,9 +63,9 @@ trait MonitorRemoteStatus
         return false;
     }
 
-    protected function onDeleting(NotificationHub $notification, bool $shouldDiscardEvents): bool
+    protected function onDeleting(NotificationHub $hub, bool $shouldDiscardEvents): bool
     {
-        $notification->trigger(new ProjectionDiscarded($shouldDiscardEvents));
+        $hub->trigger(new ProjectionDiscarded($shouldDiscardEvents));
 
         return $this->onRise;
     }
