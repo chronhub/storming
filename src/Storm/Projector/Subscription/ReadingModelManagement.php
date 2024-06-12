@@ -49,7 +49,10 @@ final readonly class ReadingModelManagement implements ReadModelManagement
     {
         $this->resetState();
 
-        $this->projectionRepository->reset($this->getProjectionResult(), $this->hub->expect(CurrentStatus::class));
+        $this->projectionRepository->reset(
+            $this->getProjectionResult(),
+            $this->hub->expect(CurrentStatus::class)
+        );
 
         $this->readModel->reset();
 
