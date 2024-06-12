@@ -74,24 +74,21 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
-        $subscriptor = $this->createSubscriptor($option, false);
-        $notification = new HubManager($subscriptor);
-        ListenerHandler::listen($notification);
+        [$subscriptor, $hub] = $this->buildSubscription($option, false);
 
         $activities = new QueryActivityFactory($this->chronicler);
-        $scope = new QueryAccess($notification, $this->clock);
 
-        return new QuerySubscription($subscriptor, new QueryingManagement($notification), $activities, $scope);
+        $scope = new QueryAccess($hub, $this->clock);
+
+        return new QuerySubscription($subscriptor, new QueryingManagement($hub), $activities, $scope);
     }
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
-        $subscriptor = $this->createSubscriptor($option, true);
-        $notification = new HubManager($subscriptor);
-        ListenerHandler::listen($notification);
+        [$subscriptor, $hub] = $this->buildSubscription($option, true);
 
         $management = new EmittingManagement(
-            $notification,
+            $hub,
             $this->chronicler,
             $this->createProjectionRepository($streamName, $option),
             $this->getSnapshotRepository(),
@@ -99,28 +96,26 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             new EmittedStream(),
         );
 
-        HookHandler::subscribe($notification, $management);
+        HookHandler::subscribe($hub, $management);
 
         $activities = new PersistentActivityFactory($this->chronicler);
-        $scope = new EmitterAccess($notification, $this->clock);
+        $scope = new EmitterAccess($hub, $this->clock);
 
         return new EmitterSubscription($subscriptor, $management, $activities, $scope);
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
-        $subscriptor = $this->createSubscriptor($option, true);
-        $notification = new HubManager($subscriptor);
-        ListenerHandler::listen($notification);
+        [$subscriptor, $hub] = $this->buildSubscription($option, true);
 
         $projectionRepository = $this->createProjectionRepository($streamName, $option);
         $snapshotRepository = $this->getSnapshotRepository();
 
-        $management = new ReadingModelManagement($notification, $projectionRepository, $snapshotRepository, $readModel);
-        HookHandler::subscribe($notification, $management);
+        $management = new ReadingModelManagement($hub, $projectionRepository, $snapshotRepository, $readModel);
+        HookHandler::subscribe($hub, $management);
 
         $activities = new PersistentActivityFactory($this->chronicler);
-        $scope = new ReadModelAccess($notification, $readModel, $this->clock);
+        $scope = new ReadModelAccess($hub, $readModel, $this->clock);
 
         return new ReadModelSubscription($subscriptor, $management, $activities, $scope);
     }
@@ -156,14 +151,22 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
 
-    protected function createSubscriptor(ProjectionOption $option, bool $detectGap): Subscriptor
+    /**
+     * @return array{Subscriptor, HubManager}
+     */
+    protected function buildSubscription(ProjectionOption $option, bool $detectGap): array
     {
-        return new SubscriptionManager(
+        $subscriptor = new SubscriptionManager(
             $this->createCheckpointRecognition($option, $detectGap),
             $this->clock,
             $option,
             $this->createWatcherManager($option),
         );
+
+        $hub = new HubManager($subscriptor);
+        ListenerHandler::listen($hub);
+
+        return [$subscriptor, $hub];
     }
 
     // todo:
