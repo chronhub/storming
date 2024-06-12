@@ -80,7 +80,10 @@ final readonly class EmittingManagement implements EmitterManagement
     {
         $this->resetState();
 
-        $this->projectionRepository->reset($this->getProjectionResult(), $this->hub->expect(CurrentStatus::class));
+        $this->projectionRepository->reset(
+            $this->getProjectionResult(),
+            $this->hub->expect(CurrentStatus::class)
+        );
 
         $this->deleteStream();
 
