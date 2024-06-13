@@ -56,7 +56,7 @@ interface CheckpointRecognition extends JsonSerializable
     public function sleepWhenGap(): void;
 
     /**
-     * @return TCheckpoint
+     * @return array<TCheckpoint>
      */
     public function jsonSerialize(): array;
 }

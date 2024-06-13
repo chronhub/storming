@@ -31,7 +31,10 @@ class CheckpointCollection
     {
         foreach ($streamNames as $streamName) {
             if (! $this->has($streamName)) {
-                $this->checkpoints->put($streamName, $this->newCheckpoint($streamName, 0, null, [], null));
+                $this->checkpoints->put(
+                    $streamName,
+                    $this->newCheckpoint($streamName, 0, null, [], null)
+                );
             }
         }
     }
@@ -41,9 +44,12 @@ class CheckpointCollection
         return $this->checkpoints->get($streamName);
     }
 
-    public function next(string $streamName, int $position, string|DateTimeImmutable $eventTime, array $gaps, ?GapType $gapType): void
+    public function next(string $streamName, int $position, string|DateTimeImmutable $eventTime, array $gaps): void
     {
-        $this->checkpoints->put($streamName, $this->newCheckpoint($streamName, $position, $eventTime, $gaps, $gapType));
+        $this->checkpoints->put(
+            $streamName,
+            $this->newCheckpoint($streamName, $position, $eventTime, $gaps, null)
+        );
     }
 
     public function nextWithGap(Checkpoint $checkpoint, int $position, string|DateTimeImmutable $eventTime, GapType $gapType): void

@@ -108,10 +108,13 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         [$subscriptor, $hub] = $this->buildSubscription($option, true);
 
-        $projectionRepository = $this->createProjectionRepository($streamName, $option);
-        $snapshotRepository = $this->getSnapshotRepository();
+        $management = new ReadingModelManagement(
+            $hub,
+            $this->createProjectionRepository($streamName, $option),
+            $this->getSnapshotRepository(),
+            $readModel
+        );
 
-        $management = new ReadingModelManagement($hub, $projectionRepository, $snapshotRepository, $readModel);
         HookHandler::subscribe($hub, $management);
 
         $activities = new PersistentActivityFactory($this->chronicler);

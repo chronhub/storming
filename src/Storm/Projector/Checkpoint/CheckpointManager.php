@@ -42,7 +42,7 @@ final class CheckpointManager implements CheckpointRecognition
         }
 
         if ($this->hasNextPosition($checkpoint, $streamPosition)) {
-            $this->checkpoints->next($streamName, $streamPosition, $eventTime, $checkpoint->gaps, null);
+            $this->checkpoints->next($streamName, $streamPosition, $eventTime, $checkpoint->gaps);
 
             return $this->lastCheckpoint($streamName);
         }
