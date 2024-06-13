@@ -12,7 +12,7 @@ use Storm\Contract\Projector\ContextReader;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Repository\EventStream\DiscoverAllStream;
 use Storm\Projector\Repository\EventStream\DiscoverCategories;
-use Storm\Projector\Workflow\Notification\Handler\DiscoverStream;
+use Storm\Projector\Repository\EventStream\DiscoverStream;
 
 final class DefaultContext implements ContextReader
 {
@@ -139,7 +139,7 @@ final class DefaultContext implements ContextReader
     public function queries(): callable
     {
         if ($this->query === null) {
-            throw new InvalidArgumentException('Projection streams all|names|categories not set');
+            throw new InvalidArgumentException('Projection query not set');
         }
 
         return $this->query;
@@ -179,7 +179,7 @@ final class DefaultContext implements ContextReader
     private function assertQueriesNotSet(): void
     {
         if ($this->query !== null) {
-            throw new InvalidArgumentException('Projection streams all|names|categories already set');
+            throw new InvalidArgumentException('Projection query already set');
         }
     }
 }
