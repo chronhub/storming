@@ -6,6 +6,7 @@ namespace Storm\Projector\Workflow;
 
 use DateTimeImmutable;
 use Storm\Contract\Clock\SystemClock;
+use Storm\Projector\Exception\RuntimeException;
 
 class Timer
 {
@@ -34,11 +35,22 @@ class Timer
 
     public function getTimestamp(): int
     {
+        $this->assertTimerIsStarted();
+
         return $this->startTime->getTimestamp();
     }
 
     public function getElapsedTime(): int
     {
+        $this->assertTimerIsStarted();
+
         return $this->clock->now()->getTimestamp() - $this->getTimestamp();
+    }
+
+    private function assertTimerIsStarted(): void
+    {
+        if (! $this->isStarted()) {
+            throw new RuntimeException('Timer is not started');
+        }
     }
 }
