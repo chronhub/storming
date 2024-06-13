@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Watcher;
 
+use Countable;
 use Storm\Contract\Projector\TokenBucket;
 
-class BatchStreamWatcher
+class BatchStreamWatcher implements Countable
 {
     protected int $counter;
 
@@ -27,6 +28,14 @@ class BatchStreamWatcher
         if ($this->counter >= $this->bucket->getCapacity()) {
             $this->reset();
         }
+    }
+
+    /**
+     * @return int<0, max>
+     */
+    public function count(): int
+    {
+        return $this->counter;
     }
 
     protected function reset(): void

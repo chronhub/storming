@@ -4,9 +4,10 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Watcher;
 
+use Countable;
 use Storm\Projector\Exception\InvalidArgumentException;
 
-class BatchCounterWatcher
+class BatchCounterWatcher implements Countable
 {
     /**
      * @var int<0, max>
