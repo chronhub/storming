@@ -34,24 +34,27 @@ use function method_exists;
 #[AllowDynamicProperties]
 class WatcherManager
 {
-    private array $watchers = [];
+    public readonly array $watchers;
 
     public function __construct(
         protected ProjectionOption $option,
         protected EventStreamProvider $eventStreamProvider,
         protected SystemClock $clock
     ) {
-        $this->watchers['ackedStream'] = new AckedStreamWatcher();
-        $this->watchers['batchCounter'] = new BatchCounterWatcher($option->getBlockSize());
-        $this->watchers['batchStream'] = $this->batchStreamWatcher($option);
-        $this->watchers['cycle'] = new CycleWatcher();
-        $this->watchers['masterCounter'] = new MasterEventCounterWatcher();
-        $this->watchers['snapshot'] = $this->snapshotWatcher($option, $clock);
-        $this->watchers['sprint'] = new SprintWatcher();
-        $this->watchers['stop'] = new StopWatcher();
-        $this->watchers['streamDiscovery'] = new EventStreamWatcher($eventStreamProvider);
-        $this->watchers['time'] = new TimeWatcher(new Timer($clock));
-        $this->watchers['userState'] = new UserStateWatcher();
+        $this->watchers = [
+            'ackedStream' => new AckedStreamWatcher(),
+            'batchCounter' => new BatchCounterWatcher($option->getBlockSize()),
+            'batchStream' => $this->batchStreamWatcher($option),
+            'cycle' => new CycleWatcher(),
+            'masterCounter' => new MasterEventCounterWatcher(),
+            'snapshot' => $this->snapshotWatcher($option, $clock),
+            'sprint' => new SprintWatcher(),
+            'stop' => new StopWatcher(),
+            'streamDiscovery' => new EventStreamWatcher($eventStreamProvider),
+            'time' => new TimeWatcher(new Timer($clock)),
+            'userState' => new UserStateWatcher(),
+
+        ];
     }
 
     public function subscribe(NotificationHub $hub, ContextReader $context): void
@@ -66,21 +69,13 @@ class WatcherManager
     /**
      * @throws InvalidArgumentException when watcher not found
      */
-    public function get(string $name): ?object
+    public function __get(string $name): ?object
     {
         if (isset($this->watchers[$name])) {
             return $this->watchers[$name];
         }
 
         throw new InvalidArgumentException("Watcher $name not found");
-    }
-
-    /**
-     * @return array<string, object>
-     */
-    public function watchers(): array
-    {
-        return $this->watchers;
     }
 
     protected function batchStreamWatcher(ProjectionOption $option): BatchStreamWatcher
