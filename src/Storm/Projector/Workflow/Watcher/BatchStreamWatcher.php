@@ -22,8 +22,6 @@ class BatchStreamWatcher
 
     public function sleep(): void
     {
-        //dump('Count : '.$this->counter);
-
         $this->bucket->consume($this->counter);
 
         if ($this->counter >= $this->bucket->getCapacity()) {
