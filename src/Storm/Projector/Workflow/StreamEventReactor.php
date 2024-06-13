@@ -21,6 +21,7 @@ use Storm\Projector\Workflow\Notification\Stream\StreamEventAcked;
 use Storm\Projector\Workflow\Notification\UserState\CurrentUserState;
 use Storm\Projector\Workflow\Notification\UserState\IsUserStateInitialized;
 use Storm\Projector\Workflow\Notification\UserState\UserStateChanged;
+
 use function is_array;
 use function pcntl_signal_dispatch;
 
