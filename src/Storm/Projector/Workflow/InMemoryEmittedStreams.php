@@ -42,7 +42,7 @@ final class InMemoryEmittedStreams implements EmittedStreamCache
     }
 
     /**
-     * @return array<int<0,max>,string|null>
+     * @return array<int<0, max>, string|null>
      */
     public function jsonSerialize(): array
     {
