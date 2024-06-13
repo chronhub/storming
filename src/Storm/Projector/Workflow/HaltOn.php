@@ -12,7 +12,7 @@ class HaltOn
     /**
      * @var array<string<StopWatcher::*>, callable>
      */
-    protected array $callbacks;
+    protected array $callbacks = [];
 
     public function whenRequested(bool &$requested): self
     {
@@ -96,7 +96,7 @@ class HaltOn
      * As projector must stop gracefully, it could not stop at the exact time,
      * but it will stop at the next cycle.
      *
-     * @param int<0,max> $timestamp
+     * @param int<0, max> $timestamp
      */
     public function whenTimeExpired(int $timestamp): self
     {
