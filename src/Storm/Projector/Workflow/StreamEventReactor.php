@@ -12,16 +12,15 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\PersistentProjectorScope;
 use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Checkpoint\GapType;
-use Storm\Projector\Checkpoint\ShouldSnapshotCheckpoint;
 use Storm\Projector\Workflow\Notification\Batch\BatchIncremented;
 use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointInserted;
+use Storm\Projector\Workflow\Notification\Checkpoint\ShouldSnapshotCheckpoint;
 use Storm\Projector\Workflow\Notification\Management\ProjectionPersistedWhenThresholdIsReached;
 use Storm\Projector\Workflow\Notification\Sprint\IsSprintRunning;
 use Storm\Projector\Workflow\Notification\Stream\StreamEventAcked;
 use Storm\Projector\Workflow\Notification\UserState\CurrentUserState;
 use Storm\Projector\Workflow\Notification\UserState\IsUserStateInitialized;
 use Storm\Projector\Workflow\Notification\UserState\UserStateChanged;
-
 use function is_array;
 use function pcntl_signal_dispatch;
 

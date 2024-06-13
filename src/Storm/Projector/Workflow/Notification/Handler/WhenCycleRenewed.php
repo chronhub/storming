@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Notification\Handler;
 
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Checkpoint\ShouldSnapshotCheckpoint;
 use Storm\Projector\Workflow\Notification\Batch\BatchReset;
 use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointInserted;
+use Storm\Projector\Workflow\Notification\Checkpoint\ShouldSnapshotCheckpoint;
 use Storm\Projector\Workflow\Notification\Cycle\CycleIncremented;
 use Storm\Projector\Workflow\Notification\Cycle\CycleRenewed;
 use Storm\Projector\Workflow\Notification\Cycle\CycleReset;

@@ -9,8 +9,8 @@ use Illuminate\Support\Sleep;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Checkpoint\Checkpoint;
-use Storm\Projector\Checkpoint\ShouldSnapshotCheckpoint;
 use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Workflow\Notification\Checkpoint\ShouldSnapshotCheckpoint;
 use Storm\Projector\Workflow\Notification\Management\SnapshotCheckpointCaptured;
 
 /**
