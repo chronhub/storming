@@ -8,7 +8,7 @@ use Storm\Projector\Workflow\Timer;
 use Storm\Projector\Workflow\Watcher\TimeWatcher;
 
 beforeEach(function () {
-    $this->timer = $this->createStub(Timer::class);
+    $this->timer = $this->createMock(Timer::class);
     $this->watcher = new TimeWatcher($this->timer);
 });
 

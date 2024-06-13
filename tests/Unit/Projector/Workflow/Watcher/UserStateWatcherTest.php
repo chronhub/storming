@@ -11,32 +11,35 @@ beforeEach(function () {
 });
 
 it('test new instance', function () {
-    expect($this->watcher->get())->toBe([]);
+    expect($this->watcher->get())->toBeEmpty();
 });
 
-it('test put', function () {
+it('test put state', function () {
     $this->watcher->put(['foo' => 'bar']);
 
     expect($this->watcher->get())->toBe(['foo' => 'bar']);
 });
 
-it('test reset', function () {
+it('test reset state', function () {
     $this->watcher->put(['foo' => 'bar']);
-    $this->watcher->reset();
+    expect($this->watcher->get())->toBe(['foo' => 'bar']);
 
-    expect($this->watcher->get())->toBe([]);
+    $this->watcher->reset();
+    expect($this->watcher->get())->toBeEmpty();
 });
 
-it('test put multiple times', function () {
+it('override state', function () {
     $this->watcher->put(['foo' => 'bar']);
-    $this->watcher->put(['bar' => 'baz']);
+    expect($this->watcher->get())->toBe(['foo' => 'bar']);
 
+    $this->watcher->put(['bar' => 'baz']);
     expect($this->watcher->get())->toBe(['bar' => 'baz']);
 });
 
 it('test put empty', function () {
     $this->watcher->put(['foo' => 'bar']);
-    $this->watcher->put([]);
+    expect($this->watcher->get())->toBe(['foo' => 'bar']);
 
-    expect($this->watcher->get())->toBe([]);
+    $this->watcher->put([]);
+    expect($this->watcher->get())->toBeEmpty();
 });
