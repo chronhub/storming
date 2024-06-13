@@ -34,4 +34,9 @@ class MasterEventCounterWatcher
     {
         $this->doNotReset = $doNotReset;
     }
+
+    public function isDoNotReset(): bool
+    {
+        return $this->doNotReset;
+    }
 }
