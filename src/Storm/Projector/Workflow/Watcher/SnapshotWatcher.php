@@ -92,15 +92,19 @@ class SnapshotWatcher
     protected function assertAtLeastOneValidInterval(): void
     {
         if ($this->positionInterval === null && $this->timeInterval === null) {
-            throw new InvalidArgumentException('Provide at least one interval');
+            throw new InvalidArgumentException('Provide at least one interval between position and time');
         }
 
-        if ($this->positionInterval && $this->positionInterval < 1) {
+        if ($this->positionInterval !== null && $this->positionInterval < 1) {
             throw new InvalidArgumentException('Position interval must be greater than 0');
         }
 
-        if ($this->timeInterval && $this->timeInterval < 1) {
+        if ($this->timeInterval !== null && $this->timeInterval < 1) {
             throw new InvalidArgumentException('Time interval must be greater than 0');
+        }
+
+        if ($this->timeInterval !== null && ! $this->clock) {
+            throw new InvalidArgumentException('Clock must be set when time interval is provided');
         }
     }
 }
