@@ -12,7 +12,7 @@ use function count;
 
 final readonly class DiscoverCategories
 {
-    public function __construct(private array $categories)
+    public function __construct(public array $categories)
     {
         $this->validateCategories();
     }

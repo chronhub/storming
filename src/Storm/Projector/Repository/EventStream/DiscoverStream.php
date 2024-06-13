@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Workflow\Notification\Handler;
+namespace Storm\Projector\Repository\EventStream;
 
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Projector\Exception\InvalidArgumentException;
@@ -12,7 +12,7 @@ use function count;
 
 final readonly class DiscoverStream
 {
-    public function __construct(private array $streams)
+    public function __construct(public array $streams)
     {
         $this->validateStreams();
     }
