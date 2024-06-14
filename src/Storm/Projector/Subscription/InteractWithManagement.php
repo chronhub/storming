@@ -67,7 +67,8 @@ trait InteractWithManagement
 
         $this->hub->notify(
             StatusDisclosed::class,
-            $this->hub->expect(CurrentStatus::class), $disclosedStatus
+            $this->hub->expect(CurrentStatus::class),
+            $disclosedStatus
         );
     }
 
