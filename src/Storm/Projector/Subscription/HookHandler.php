@@ -27,7 +27,7 @@ final class HookHandler
     {
         $task->addHooks([
             ProjectionRise::class => fn () => $management->rise(),
-            ProjectionLockUpdated::class => fn () => $management->tryUpdateLock(),
+            ProjectionLockUpdated::class => fn () => $management->shouldUpdateLock(),
             ProjectionStored::class => fn () => $management->store(),
             ProjectionPersistedWhenThresholdIsReached::class => fn () => $management->persistWhenThresholdIsReached(),
             ProjectionClosed::class => fn () => $management->close(),

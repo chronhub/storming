@@ -39,7 +39,7 @@ interface PersistentManagement extends Management
     /**
      * Update lock if it can be refreshed.
      */
-    public function tryUpdateLock(): void;
+    public function shouldUpdateLock(): void;
 
     /**
      * Persist the current projection when the threshold is reached.

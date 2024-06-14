@@ -27,7 +27,7 @@ use function in_array;
 
 trait InteractWithManagement
 {
-    public function tryUpdateLock(): void
+    public function shouldUpdateLock(): void
     {
         $this->projectionRepository->updateLock();
     }
