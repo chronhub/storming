@@ -6,6 +6,7 @@ namespace Storm\Projector\Checkpoint;
 
 use Storm\Contract\Projector\GapRecognition;
 use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Exception\RuntimeException;
 
 use function array_key_exists;
 use function count;
@@ -18,7 +19,7 @@ final class GapDetector implements GapRecognition
     private bool $gapDetected = false;
 
     /**
-     * @param array<int<0,max>> $retriesInMs The array of retry durations in milliseconds.
+     * @param array<int<0, max>> $retriesInMs The array of retry durations in milliseconds.
      */
     public function __construct(public readonly array $retriesInMs)
     {
@@ -56,7 +57,7 @@ final class GapDetector implements GapRecognition
     public function sleep(): void
     {
         if (! $this->gapDetected || ! $this->hasRetry()) {
-            return;
+            throw new RuntimeException('Gap not detected or no retries left');
         }
 
         usleep($this->retriesInMs[$this->retries]);
