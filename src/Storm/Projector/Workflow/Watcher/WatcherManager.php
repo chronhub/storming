@@ -69,7 +69,7 @@ class WatcherManager
     /**
      * @throws InvalidArgumentException when watcher not found
      */
-    public function __get(string $name): ?object
+    public function __get(string $name): object
     {
         if (isset($this->watchers[$name])) {
             return $this->watchers[$name];
