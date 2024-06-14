@@ -80,7 +80,6 @@ final class CheckpointManager implements CheckpointRecognition
 
     public function jsonSerialize(): array
     {
-        /** @phpstan-ignore-next-line */
         return array_map(fn (Checkpoint $checkpoint): array => $checkpoint->jsonSerialize(), $this->checkpoints());
     }
 
