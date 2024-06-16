@@ -6,9 +6,10 @@ namespace Storm\Projector\Checkpoint;
 
 use Storm\Projector\Exception\CheckpointViolation;
 
-use function in_array;
-use function max;
-use function min;
+use function array_intersect;
+use function count;
+use function reset;
+use function sort;
 
 class GapRules
 {
@@ -33,10 +34,10 @@ class GapRules
      */
     public function shouldNotAlreadyBeRecorded(Checkpoint $checkpoint, array $gaps): self
     {
-        foreach ($gaps as $gap) {
-            if (in_array($gap, $checkpoint->gaps, true)) {
-                throw CheckpointViolation::gapAlreadyRecorded($checkpoint->streamName, $gap);
-            }
+        $duplicateGaps = count(array_intersect($gaps, $checkpoint->gaps));
+
+        if ($duplicateGaps > 0) {
+            throw CheckpointViolation::gapAlreadyRecorded($checkpoint->streamName, reset($gaps));
         }
 
         return $this;
@@ -49,7 +50,16 @@ class GapRules
      */
     public function mustBeGreaterThanPreviousGaps(Checkpoint $checkpoint, array $gaps): self
     {
-        if ($checkpoint->gaps !== [] && (max($checkpoint->gaps) > min($gaps))) {
+        $previousGaps = $checkpoint->gaps;
+
+        if ($previousGaps === []) {
+            return $this;
+        }
+
+        sort($previousGaps);
+        sort($gaps);
+
+        if ($previousGaps[count($previousGaps) - 1] > $gaps[0]) {
             throw CheckpointViolation::gapLowerThanPrevious($checkpoint->streamName);
         }
 

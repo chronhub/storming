@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Checkpoint;
 
+use LogicException;
 use Storm\Contract\Projector\GapRecognition;
 use Storm\Projector\Checkpoint\NoopGapDetector;
 
@@ -32,3 +33,7 @@ it('assert reset does not perform any action', function () {
     $instance->reset();
     expect($instance)->toBe($this->instance);
 });
+
+it('raise exception when gapType method is called', function () {
+    $this->instance->gapType();
+})->throws(LogicException::class, 'Method not available for class NoopGapDetector');

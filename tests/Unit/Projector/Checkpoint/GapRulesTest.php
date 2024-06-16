@@ -66,6 +66,7 @@ it('raise exception if gap is already recorded', function (array $gaps, int $las
         [[1, 2], 2],
         [[1, 2], 3],
     ])
+    //fixMe partial exception message
     ->throws(CheckpointViolation::class, 'already recorded');
 
 it('validate when previous gap is empty', function () {

@@ -156,11 +156,9 @@ final class CheckpointStore implements CheckpointRecognition
      *
      * @return array<int>|array
      */
-    private function getGapRange(Checkpoint $checkpoint, int $position): array
+    private function getGapRange(Checkpoint $lastCheckpoint, int $position): array
     {
-        $lastCheckpointPosition = $checkpoint->position;
-
-        return range($lastCheckpointPosition + 1, $position - 1);
+        return range($lastCheckpoint->position + 1, $position - 1);
     }
 
     /**
