@@ -7,13 +7,7 @@ namespace Storm\Projector\Checkpoint;
 use DateTimeImmutable;
 use Illuminate\Support\Collection;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Projector\Exception\InvalidArgumentException;
-
-use function array_merge;
-use function in_array;
-use function max;
-use function min;
-use function range;
+use Storm\Projector\Exception\CheckpointViolation;
 
 class CheckpointCollection
 {
@@ -31,89 +25,115 @@ class CheckpointCollection
     {
         foreach ($streamNames as $streamName) {
             if (! $this->has($streamName)) {
-                $this->checkpoints->put(
-                    $streamName,
-                    $this->newCheckpoint($streamName, 0, null, [], null)
-                );
+                $this->insertNewCheckpoint($streamName, 0, null, [], null);
             }
         }
     }
 
+    /**
+     * Get the last checkpoint for the stream name.
+     *
+     * @throws CheckpointViolation when the checkpoint is not found for the stream name
+     */
     public function last(string $streamName): Checkpoint
     {
+        $this->assertStreamExists($streamName);
+
         return $this->checkpoints->get($streamName);
     }
 
-    public function next(string $streamName, int $position, string|DateTimeImmutable $eventTime, array $gaps): void
+    /**
+     * Insert a new checkpoint.
+     */
+    public function next(Checkpoint $checkpoint, int $position, string|DateTimeImmutable $eventTime, ?GapType $gapType): Checkpoint
     {
-        $this->checkpoints->put(
-            $streamName,
-            $this->newCheckpoint($streamName, $position, $eventTime, $gaps, null)
-        );
-    }
-
-    public function nextWithGap(Checkpoint $checkpoint, int $position, string|DateTimeImmutable $eventTime, GapType $gapType): void
-    {
-        if ($position - $checkpoint->position < 0) {
-            throw new InvalidArgumentException('Invalid position: no gap or checkpoints are outdated');
-        }
-
-        $lastCheckpointPosition = $checkpoint->position;
-        $gapsToAdd = range($lastCheckpointPosition + 1, $position - 1);
-
-        // todo: test in integration
-        // use cases when projection move to one recovered checkpoint to another
-        // meant the projection state is probably invalid
-        foreach ($gapsToAdd as $gap) {
-            if (in_array($gap, $checkpoint->gaps, true)) {
-                throw new InvalidArgumentException('Gap '.$gap.' already recorded');
-            }
-        }
-
-        if ($checkpoint->gaps !== [] && (max($checkpoint->gaps) > min($gapsToAdd))) {
-            throw new InvalidArgumentException('Cannot record gaps which are lower than previous recorded gaps');
-        }
-
-        // another scenario is the event position is no longer part of the gaps,
-        // meaning the gap was resolved
-
-        $newCheckpoint = $this->newCheckpoint(
+        return $this->insertNewCheckpoint(
             $checkpoint->streamName,
             $position,
             $eventTime,
-            array_merge($checkpoint->gaps, $gapsToAdd),
+            $checkpoint->gaps,
             $gapType
         );
-
-        $this->checkpoints->put($checkpoint->streamName, $newCheckpoint);
     }
 
+    /**
+     * Create a new checkpoint.
+     */
     public function newCheckpoint(string $streamName, int $position, null|string|DateTimeImmutable $eventTime, array $gaps, ?GapType $gapType): Checkpoint
     {
+        if ($eventTime === null && $position !== 0) {
+            throw CheckpointViolation::invalidEventTime($streamName);
+        }
+
         if ($eventTime instanceof DateTimeImmutable) {
             $eventTime = $this->clock->format($eventTime);
         }
 
-        return CheckpointFactory::from($streamName, $position, $eventTime, $this->clock->generate(), $gaps, $gapType);
+        return CheckpointFactory::from(
+            $streamName,
+            $position,
+            $eventTime,
+            $this->clock->generate(),
+            $gaps,
+            $gapType
+        );
     }
 
+    /**
+     * Update the checkpoint.
+     *
+     * @throws CheckpointViolation when the checkpoint is not found for the stream name
+     */
     public function update(string $streamName, Checkpoint $checkpoint): void
     {
+        $this->assertStreamExists($streamName);
+
         $this->checkpoints->put($streamName, $checkpoint);
     }
 
+    /**
+     * Check if the checkpoint exists by stream name.
+     */
     public function has(string $streamName): bool
     {
         return $this->checkpoints->has($streamName);
     }
 
+    /**
+     * Flush all checkpoints.
+     */
     public function flush(): void
     {
         $this->checkpoints = new Collection();
     }
 
+    /**
+     * Get all checkpoints as a collection.
+     */
     public function all(): Collection
     {
         return $this->checkpoints;
+    }
+
+    /**
+     * Insert a new checkpoint.
+     */
+    protected function insertNewCheckpoint(string $streamName, int $position, null|string|DateTimeImmutable $eventTime, array $gaps, ?GapType $gapType): Checkpoint
+    {
+        $checkpoint = $this->newCheckpoint($streamName, $position, $eventTime, $gaps, $gapType);
+
+        $this->checkpoints->put($streamName, $checkpoint);
+
+        return $checkpoint;
+    }
+
+    /**
+     * @throws CheckpointViolation when the checkpoint is not found for the stream name
+     */
+    protected function assertStreamExists(string $streamName): void
+    {
+        if (! $this->has($streamName)) {
+            throw CheckpointViolation::checkpointNotFound($streamName);
+        }
     }
 }

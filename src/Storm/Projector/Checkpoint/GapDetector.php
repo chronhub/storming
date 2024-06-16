@@ -39,21 +39,6 @@ final class GapDetector implements GapRecognition
         return $this->gapDetected = true;
     }
 
-    public function hasGap(): bool
-    {
-        return $this->gapDetected;
-    }
-
-    public function hasRetry(): bool
-    {
-        return array_key_exists($this->retries, $this->retriesInMs);
-    }
-
-    public function retryLeft(): int
-    {
-        return count($this->retriesInMs) - $this->retries;
-    }
-
     public function sleep(): void
     {
         if (! $this->gapDetected || ! $this->hasRetry()) {
@@ -70,5 +55,31 @@ final class GapDetector implements GapRecognition
         $this->gapDetected = false;
 
         $this->retries = 0;
+    }
+
+    public function gapType(): GapType
+    {
+        $retryLeft = $this->retryLeft();
+
+        return match ($retryLeft) {
+            0 => GapType::IN_GAP,
+            1 => GapType::UNRECOVERABLE_GAP,
+            default => GapType::RECOVERABLE_GAP,
+        };
+    }
+
+    public function hasGap(): bool
+    {
+        return $this->gapDetected;
+    }
+
+    public function hasRetry(): bool
+    {
+        return array_key_exists($this->retries, $this->retriesInMs);
+    }
+
+    public function retryLeft(): int
+    {
+        return count($this->retriesInMs) - $this->retries;
     }
 }

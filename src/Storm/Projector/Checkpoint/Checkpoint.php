@@ -6,8 +6,6 @@ namespace Storm\Projector\Checkpoint;
 
 use JsonSerializable;
 
-use function in_array;
-
 final readonly class Checkpoint implements JsonSerializable
 {
     public function __construct(
@@ -16,19 +14,20 @@ final readonly class Checkpoint implements JsonSerializable
         public ?string $eventTime,
         public string $createdAt,
         public array $gaps,
-        public ?GapType $type = null
+        public ?GapType $gapType = null
     ) {
     }
 
-    public function isGap(): bool
-    {
-        if ($this->type !== null) {
-            return true;
-        }
-
-        return in_array($this->position - 1, $this->gaps, true);
-    }
-
+    /**
+     * @return array{
+     *     stream_name: string,
+     *     position: int<0, max>,
+     *     event_time: string|null,
+     *     created_at: string,
+     *     gaps: array<positive-int>|array,
+     *     gap_type: string|null
+     * }
+     */
     public function jsonSerialize(): array
     {
         return [
@@ -37,6 +36,7 @@ final readonly class Checkpoint implements JsonSerializable
             'event_time' => $this->eventTime,
             'created_at' => $this->createdAt,
             'gaps' => $this->gaps,
+            'gap_type' => $this->gapType?->value ?? null,
         ];
     }
 }

@@ -8,22 +8,14 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointInserted;
-use Storm\Projector\Workflow\Notification\Checkpoint\GapDetected;
-use Storm\Projector\Workflow\Notification\Checkpoint\RecoverableGapDetected;
-use Storm\Projector\Workflow\Notification\Checkpoint\UnrecoverableGapDetected;
 
 class WhenCheckpointInserted
 {
     public function __invoke(NotificationHub $hub, CheckpointInserted $event, Checkpoint $checkpoint): void
     {
-        $listener = match ($checkpoint->type) {
-            GapType::IN_GAP => GapDetected::class,
-            GapType::RECOVERABLE_GAP => RecoverableGapDetected::class,
-            GapType::UNRECOVERABLE_GAP => UnrecoverableGapDetected::class,
-            default => null,
-        };
+        if ($checkpoint->gapType instanceof GapType) {
+            $listener = $checkpoint->gapType->value;
 
-        if ($listener !== null) {
             $hub->notify($listener, $event->streamName, $event->streamPosition);
         }
     }

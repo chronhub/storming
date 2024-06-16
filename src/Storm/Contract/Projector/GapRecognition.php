@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Projector;
 
+use Storm\Projector\Checkpoint\GapType;
+
 interface GapRecognition
 {
     /**
@@ -25,6 +27,11 @@ interface GapRecognition
      * Get retry left.
      */
     public function retryLeft(): int;
+
+    /**
+     * Get the gap type depends on the retry left.
+     */
+    public function gapType(): GapType;
 
     /**
      * Sleep when a gap is detected.

@@ -9,7 +9,14 @@ use JsonSerializable;
 use Storm\Projector\Checkpoint\Checkpoint;
 
 /**
- * @template TCheckpoint of array{stream_name: string, position: int<0,max>, created_at: string, gaps: array<positive-int>|array}
+ * @template TCheckpoint of array{
+ *     stream_name: string,
+ *     position: int<0, max>,
+ *     event_time: string|null,
+ *     created_at: string,
+ *     gaps: array<positive-int>|array,
+ *     gap_type: string|null
+ * }
  */
 interface CheckpointRecognition extends JsonSerializable
 {
@@ -34,11 +41,11 @@ interface CheckpointRecognition extends JsonSerializable
     public function update(array $checkpoints): void;
 
     /**
-     * Returns the last inserted stream checkpoints.
+     * Returns the inserted stream checkpoints.
      *
      * @return array<string, Checkpoint>
      */
-    public function checkpoints(): array;
+    public function toArray(): array;
 
     /**
      * Resets stream positions.

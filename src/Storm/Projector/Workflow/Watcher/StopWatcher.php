@@ -10,9 +10,6 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Workflow\Notification\Batch\BatchIncremented;
-use Storm\Projector\Workflow\Notification\Checkpoint\GapDetected;
-use Storm\Projector\Workflow\Notification\Checkpoint\RecoverableGapDetected;
-use Storm\Projector\Workflow\Notification\Checkpoint\UnrecoverableGapDetected;
 use Storm\Projector\Workflow\Notification\Cycle\CurrentCycle;
 use Storm\Projector\Workflow\Notification\Cycle\CycleIncremented;
 use Storm\Projector\Workflow\Notification\Cycle\CycleRenewed;
@@ -128,11 +125,7 @@ class StopWatcher
 
     protected function stopWhenGapDetected(NotificationHub $hub, GapType $gapType): string
     {
-        $listener = match ($gapType) {
-            GapType::RECOVERABLE_GAP => RecoverableGapDetected::class,
-            GapType::UNRECOVERABLE_GAP => UnrecoverableGapDetected::class,
-            GapType::IN_GAP => GapDetected::class,
-        };
+        $listener = $gapType->value;
 
         $hub->addListener($listener, fn (NotificationHub $hub) => $this->notifySprintStopped($hub));
 

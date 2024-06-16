@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Checkpoint;
 
+use LogicException;
 use Storm\Contract\Projector\GapRecognition;
 
 final class NoopGapDetector implements GapRecognition
@@ -34,5 +35,10 @@ final class NoopGapDetector implements GapRecognition
 
     public function reset(): void
     {
+    }
+
+    public function gapType(): GapType
+    {
+        throw new LogicException('Method not available for class NoopGapDetector');
     }
 }

@@ -14,6 +14,6 @@ final class CurrentCheckpoint
      */
     public function __invoke(Subscriptor $subscriptor): array
     {
-        return $subscriptor->recognition()->checkpoints();
+        return $subscriptor->recognition()->toArray();
     }
 }

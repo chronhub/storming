@@ -9,9 +9,10 @@ use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ProjectionRepository;
 use Storm\Projector\Checkpoint\CheckpointCollection;
-use Storm\Projector\Checkpoint\CheckpointInMemory;
-use Storm\Projector\Checkpoint\CheckpointManager;
+use Storm\Projector\Checkpoint\CheckpointStore;
+use Storm\Projector\Checkpoint\GapRules;
 use Storm\Projector\Checkpoint\NoopGapDetector;
+use Storm\Projector\Checkpoint\ReadOnlyCheckpointStore;
 use Storm\Projector\Repository\InMemoryRepository;
 
 final class ConnectionSubscriptionFactory extends AbstractSubscriptionFactory
@@ -46,11 +47,14 @@ final class ConnectionSubscriptionFactory extends AbstractSubscriptionFactory
     {
         $checkpoints = new CheckpointCollection($this->clock);
 
-        // fixMe no gap detector still save gaps
         if ($detectGap) {
-            return new CheckpointManager($checkpoints, new NoopGapDetector());
+            return new CheckpointStore(
+                $checkpoints,
+                new NoopGapDetector(), // fixMe
+                new GapRules()
+            );
         }
 
-        return new CheckpointInMemory($checkpoints);
+        return new ReadOnlyCheckpointStore($checkpoints);
     }
 }

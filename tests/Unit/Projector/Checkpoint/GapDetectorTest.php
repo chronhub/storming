@@ -6,7 +6,8 @@ namespace Storm\Tests\Unit\Projector\Checkpoint;
 
 use Storm\Contract\Projector\GapRecognition;
 use Storm\Projector\Checkpoint\GapDetector;
-use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Checkpoint\GapType;
+use Storm\Projector\Exception\RuntimeException;
 
 it('test default instance', function () {
     $instance = new GapDetector([1, 2]);
@@ -70,7 +71,7 @@ it('raise exception when call sleep if gap is not detected', function () {
         ->and($instance->hasGap())->toBeFalse();
 
     $instance->sleep();
-})->throws(InvalidArgumentException::class, 'Gap not detected or no retries left');
+})->throws(RuntimeException::class, 'Gap not detected or no retries left');
 
 it('raise exception when call sleep if retries are exhausted', function () {
     $instance = new GapDetector([1, 2]);
@@ -87,4 +88,23 @@ it('raise exception when call sleep if retries are exhausted', function () {
         ->and($instance->hasGap())->toBeTrue();
 
     $instance->sleep();
-})->throws(InvalidArgumentException::class, 'Gap not detected or no retries left');
+})->throws(RuntimeException::class, 'Gap not detected or no retries left');
+
+it('assert gap type depends on retries left', function () {
+    $instance = new GapDetector([1, 2]);
+
+    expect($instance->retryLeft())->toBe(2)
+        ->and($instance->isRecoverable())->toBeTrue()
+        ->and($instance->gapType())->toEqual(GapType::RECOVERABLE_GAP);
+
+    $instance->sleep();
+
+    expect($instance->retryLeft())->toBe(1)
+        ->and($instance->isRecoverable())->toBeTrue()
+        ->and($instance->gapType())->toEqual(GapType::UNRECOVERABLE_GAP);
+
+    $instance->sleep();
+
+    expect($instance->retryLeft())->toBe(0)
+        ->and($instance->gapType())->toEqual(GapType::IN_GAP);
+});

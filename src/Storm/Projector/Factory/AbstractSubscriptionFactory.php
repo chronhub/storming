@@ -24,9 +24,10 @@ use Storm\Contract\Projector\SnapshotRepository;
 use Storm\Contract\Projector\SubscriptionFactory;
 use Storm\Contract\Projector\Subscriptor;
 use Storm\Projector\Checkpoint\CheckpointCollection;
-use Storm\Projector\Checkpoint\CheckpointInMemory;
-use Storm\Projector\Checkpoint\CheckpointManager;
+use Storm\Projector\Checkpoint\CheckpointStore;
 use Storm\Projector\Checkpoint\GapDetector;
+use Storm\Projector\Checkpoint\GapRules;
+use Storm\Projector\Checkpoint\ReadOnlyCheckpointStore;
 use Storm\Projector\Options\ProjectionOptionResolver;
 use Storm\Projector\Repository\Checkpoint\InMemorySnapshotProvider;
 use Storm\Projector\Repository\Checkpoint\SnapshotCheckpointRepository;
@@ -191,12 +192,14 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $checkpoints = new CheckpointCollection($this->clock);
 
         if ($detectGap) {
-            $gapDetector = new GapDetector($option->getRetries());
-
-            return new CheckpointManager($checkpoints, $gapDetector);
+            return new CheckpointStore(
+                $checkpoints,
+                new GapDetector($option->getRetries()),
+                new GapRules()
+            );
         }
 
-        return new CheckpointInMemory($checkpoints);
+        return new ReadOnlyCheckpointStore($checkpoints);
     }
 
     protected function createStreamCache(ProjectionOption $option): EmittedStreamCache
