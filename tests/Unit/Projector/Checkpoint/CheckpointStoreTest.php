@@ -7,7 +7,6 @@ namespace Storm\Tests\Unit\Projector\Checkpoint;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Contract\Projector\GapRecognition;
-use Storm\Projector\Checkpoint\CheckpointCollection;
 use Storm\Projector\Checkpoint\CheckpointStore;
 use Storm\Projector\Checkpoint\GapRules;
 use Storm\Projector\Checkpoint\GapType;
@@ -15,13 +14,11 @@ use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Exception\CheckpointViolation;
 
 beforeEach(function () {
-    $this->checkpoints = new CheckpointCollection();
     $this->gapDetector = $this->createMock(GapRecognition::class);
     $this->rules = new GapRules();
     $this->clock = $this->createMock(SystemClock::class);
 
-    $this->store = new CheckpointStore(
-        $this->checkpoints, $this->gapDetector, $this->rules, $this->clock
+    $this->store = new CheckpointStore($this->gapDetector, $this->rules, $this->clock
     );
 });
 
@@ -108,7 +105,7 @@ it('raise exception when stream not found on updating', function () {
         'gaps' => [],
         'gap_type' => null,
     ]]);
-})->throws(CheckpointViolation::class, 'Checkpoint not found for stream stream-1');
+})->throws(CheckpointViolation::class, 'Checkpoint not tracked for stream stream-1');
 
 it('check if gap is detected', function (bool $isGapDetected) {
     $this->gapDetector->expects($this->once())->method('hasGap')->willReturn($isGapDetected);

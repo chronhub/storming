@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Checkpoint;
 
+use Illuminate\Support\Collection;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Contract\Projector\GapRecognition;
@@ -12,14 +13,16 @@ use Storm\Projector\Exception\CheckpointViolation;
 use function array_merge;
 use function range;
 
-final readonly class CheckpointStore implements CheckpointRecognition
+final class CheckpointStore implements CheckpointRecognition
 {
+    private Collection $checkpoints;
+
     public function __construct(
-        private CheckpointCollection $checkpoints,
-        private GapRecognition $gapDetector,
-        private GapRules $rules,
-        private SystemClock $clock
+        private readonly GapRecognition $gapDetector,
+        private readonly GapRules $rules,
+        private readonly SystemClock $clock
     ) {
+        $this->checkpoints = new Collection();
     }
 
     public function discover(string ...$streamNames): void
@@ -28,7 +31,7 @@ final readonly class CheckpointStore implements CheckpointRecognition
             if (! $this->checkpoints->has($streamName)) {
                 $checkpoint = CheckpointFactory::fromEmpty($streamName, $this->clock->generate());
 
-                $this->checkpoints->with($checkpoint);
+                $this->checkpoints->put($checkpoint->streamName, $checkpoint);
             }
         }
     }
@@ -51,7 +54,7 @@ final readonly class CheckpointStore implements CheckpointRecognition
 
             $this->assertStreamTracked($streamName);
 
-            $this->checkpoints->update(CheckpointFactory::fromArray($checkpoint));
+            $this->checkpoints->put($streamName, CheckpointFactory::fromArray($checkpoint));
         }
     }
 
@@ -67,19 +70,19 @@ final readonly class CheckpointStore implements CheckpointRecognition
 
     public function resets(): void
     {
-        $this->checkpoints->flush();
+        $this->checkpoints = new Collection();
 
         $this->gapDetector->reset();
     }
 
     public function toArray(): array
     {
-        return $this->checkpoints->all()->toArray();
+        return $this->checkpoints->toArray();
     }
 
     public function jsonSerialize(): array
     {
-        return $this->checkpoints->all()->jsonSerialize();
+        return $this->checkpoints->jsonSerialize();
     }
 
     private function insertNextCheckpoint(StreamPoint $streamPoint, array $gaps): Checkpoint
@@ -116,7 +119,7 @@ final readonly class CheckpointStore implements CheckpointRecognition
 
     private function insertCheckpoint(Checkpoint $checkpoint): Checkpoint
     {
-        $this->checkpoints->update($checkpoint);
+        $this->checkpoints->put($checkpoint->streamName, $checkpoint);
 
         return $checkpoint;
     }
@@ -130,10 +133,7 @@ final readonly class CheckpointStore implements CheckpointRecognition
     {
         $this->assertStreamTracked($streamPoint->name);
 
-        // checkMe could be asserted in streamPoint
-        $this->assertStreamPositionGreaterThanZero($streamPoint);
-
-        $lastCheckpoint = $this->checkpoints->retrieve($streamPoint->name);
+        $lastCheckpoint = $this->checkpoints->get($streamPoint->name);
 
         $this->assertStreamPositionGreaterThanPrevious($streamPoint, $lastCheckpoint);
 
@@ -142,6 +142,8 @@ final readonly class CheckpointStore implements CheckpointRecognition
 
     /**
      * Get the validated gaps between the last checkpoint position and the current position.
+     *
+     * @param positive-int $streamPosition
      *
      * @throws CheckpointViolation when the position is less than the previous position
      * @throws CheckpointViolation when the gap is already recorded
@@ -168,20 +170,6 @@ final readonly class CheckpointStore implements CheckpointRecognition
     {
         if (! $this->checkpoints->has($streamName)) {
             throw CheckpointViolation::streamNotTracked($streamName);
-        }
-    }
-
-    /**
-     * Check if the stream position is valid.
-     *
-     * @throws CheckpointViolation when the stream position is less than 1
-     */
-    private function assertStreamPositionGreaterThanZero(StreamPoint $streamPoint): void
-    {
-        if ($streamPoint->position < 1) {
-            throw CheckpointViolation::invalidStreamPosition(
-                $streamPoint->name, $streamPoint->position
-            );
         }
     }
 
