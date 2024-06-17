@@ -27,7 +27,7 @@ use Storm\Projector\Checkpoint\CheckpointCollection;
 use Storm\Projector\Checkpoint\CheckpointStore;
 use Storm\Projector\Checkpoint\GapDetector;
 use Storm\Projector\Checkpoint\GapRules;
-use Storm\Projector\Checkpoint\ReadOnlyCheckpointStore;
+use Storm\Projector\Checkpoint\NoopGapDetector;
 use Storm\Projector\Options\ProjectionOptionResolver;
 use Storm\Projector\Repository\Checkpoint\InMemorySnapshotProvider;
 use Storm\Projector\Repository\Checkpoint\SnapshotCheckpointRepository;
@@ -189,17 +189,15 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     protected function createCheckpointRecognition(ProjectionOption $option, bool $detectGap): CheckpointRecognition
     {
-        $checkpoints = new CheckpointCollection($this->clock);
+        $checkpoints = new CheckpointCollection();
 
-        if ($detectGap) {
-            return new CheckpointStore(
-                $checkpoints,
-                new GapDetector($option->getRetries()),
-                new GapRules()
-            );
-        }
+        $gapDetector = $detectGap
+            ? new GapDetector($option->getRetries())
+            : new NoopGapDetector();
 
-        return new ReadOnlyCheckpointStore($checkpoints);
+        // fixMe add boolean to enable/disable saving gaps remotely
+
+        return new CheckpointStore($checkpoints, $gapDetector, new GapRules(), $this->clock);
     }
 
     protected function createStreamCache(ProjectionOption $option): EmittedStreamCache

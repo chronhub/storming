@@ -19,6 +19,9 @@ class CheckpointCollection
         $this->checkpoints = new Collection();
     }
 
+    /**
+     * Add a new unique checkpoint.
+     */
     public function with(Checkpoint $checkpoint): void
     {
         if (! $this->has($checkpoint->streamName)) {
@@ -29,11 +32,11 @@ class CheckpointCollection
     /**
      * Update the checkpoint.
      *
-     * @throws CheckpointViolation when the checkpoint is not found for the stream name
+     * @throws CheckpointViolation when the stream name is not tracked
      */
     public function update(Checkpoint $checkpoint): void
     {
-        $this->assertStreamExists($checkpoint->streamName);
+        $this->assertStreamTracked($checkpoint->streamName);
 
         $this->checkpoints->put($checkpoint->streamName, $checkpoint);
     }
@@ -41,11 +44,11 @@ class CheckpointCollection
     /**
      * Get the last checkpoint for the stream name.
      *
-     * @throws CheckpointViolation when the checkpoint is not found for the stream name
+     * @throws CheckpointViolation when the stream name is not tracked
      */
     public function retrieve(string $streamName): Checkpoint
     {
-        $this->assertStreamExists($streamName);
+        $this->assertStreamTracked($streamName);
 
         return $this->checkpoints->get($streamName);
     }
@@ -75,12 +78,12 @@ class CheckpointCollection
     }
 
     /**
-     * @throws CheckpointViolation when the checkpoint is not found for the stream name
+     * @throws CheckpointViolation when the stream name is not tracked
      */
-    protected function assertStreamExists(string $streamName): void
+    protected function assertStreamTracked(string $streamName): void
     {
         if (! $this->has($streamName)) {
-            throw CheckpointViolation::checkpointNotFound($streamName);
+            throw CheckpointViolation::streamNotTracked($streamName);
         }
     }
 }

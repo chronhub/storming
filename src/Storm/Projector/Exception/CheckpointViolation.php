@@ -6,14 +6,14 @@ namespace Storm\Projector\Exception;
 
 class CheckpointViolation extends RuntimeException
 {
-    public static function streamNotDiscovered(string $streamName): self
+    public static function streamNotTracked(string $streamName): self
     {
-        return new self("Stream $streamName is not watched");
+        return new self("Checkpoint not tracked for stream $streamName");
     }
 
-    public static function invalidStreamPosition(string $streamName): self
+    public static function invalidStreamPosition(string $streamName, int $streamPosition): self
     {
-        return new self("Stream event position must be greater than 0 for stream $streamName");
+        return new self("Stream position $streamPosition must be greater than 0 for stream $streamName");
     }
 
     public static function outdatedStreamPosition(string $streamName, int $streamPosition): self
@@ -34,10 +34,5 @@ class CheckpointViolation extends RuntimeException
     public static function gapLowerThanPrevious(string $streamName): self
     {
         return new self("Cannot record gaps which are lower than previous recorded gaps for stream $streamName");
-    }
-
-    public static function checkpointNotFound(string $streamName): self
-    {
-        return new self("Checkpoint not found for stream $streamName");
     }
 }

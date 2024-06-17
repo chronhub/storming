@@ -129,15 +129,13 @@ final readonly class CheckpointStore implements CheckpointRecognition
     private function getLastCheckpoint(StreamPoint $streamPoint): Checkpoint
     {
         $this->assertStreamTracked($streamPoint->name);
-        $this->assertValidStreamPosition($streamPoint->name, $streamPoint->position);
+
+        // checkMe could be asserted in streamPoint
+        $this->assertStreamPositionGreaterThanZero($streamPoint);
 
         $lastCheckpoint = $this->checkpoints->retrieve($streamPoint->name);
 
-        if ($streamPoint->position < $lastCheckpoint->position) {
-            throw CheckpointViolation::outdatedStreamPosition(
-                $streamPoint->name, $streamPoint->position
-            );
-        }
+        $this->assertStreamPositionGreaterThanPrevious($streamPoint, $lastCheckpoint);
 
         return $lastCheckpoint;
     }
@@ -169,7 +167,7 @@ final readonly class CheckpointStore implements CheckpointRecognition
     private function assertStreamTracked(string $streamName): void
     {
         if (! $this->checkpoints->has($streamName)) {
-            throw CheckpointViolation::checkpointNotFound($streamName);
+            throw CheckpointViolation::streamNotTracked($streamName);
         }
     }
 
@@ -178,10 +176,26 @@ final readonly class CheckpointStore implements CheckpointRecognition
      *
      * @throws CheckpointViolation when the stream position is less than 1
      */
-    private function assertValidStreamPosition(string $streamName, int $streamPosition): void
+    private function assertStreamPositionGreaterThanZero(StreamPoint $streamPoint): void
     {
-        if ($streamPosition < 1) {
-            throw CheckpointViolation::invalidStreamPosition($streamName);
+        if ($streamPoint->position < 1) {
+            throw CheckpointViolation::invalidStreamPosition(
+                $streamPoint->name, $streamPoint->position
+            );
+        }
+    }
+
+    /**
+     * Check if the stream position is greater than the previous position.
+     *
+     * @throws CheckpointViolation when the stream position is outdated
+     */
+    private function assertStreamPositionGreaterThanPrevious(StreamPoint $streamPoint, Checkpoint $lastCheckpoint): void
+    {
+        if ($streamPoint->position < $lastCheckpoint->position) {
+            throw CheckpointViolation::outdatedStreamPosition(
+                $streamPoint->name, $streamPoint->position
+            );
         }
     }
 }
