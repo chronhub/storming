@@ -44,7 +44,7 @@ final class CheckpointStore implements CheckpointRecognition
 
         return $isNextPosition
             ? $this->insertNextCheckpoint($streamPoint, $lastCheckpoint->gaps)
-            : $this->insertCheckpointWithNonRecoverableGap($lastCheckpoint, $streamPoint);
+            : $this->insertCheckpointWithNonRecoverableGap($streamPoint, $lastCheckpoint);
     }
 
     public function update(array $checkpoints): void
@@ -97,7 +97,7 @@ final class CheckpointStore implements CheckpointRecognition
         return $this->insertCheckpoint($checkpoint);
     }
 
-    private function insertCheckpointWithNonRecoverableGap(Checkpoint $lastCheckPoint, StreamPoint $streamPoint): Checkpoint
+    private function insertCheckpointWithNonRecoverableGap(StreamPoint $streamPoint, Checkpoint $lastCheckPoint): Checkpoint
     {
         $gapType = $this->gapDetector->gapType();
         $isRecoverable = $this->gapDetector->isRecoverable();
