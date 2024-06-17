@@ -11,15 +11,18 @@ use Storm\Projector\Checkpoint\CheckpointCollection;
 use Storm\Projector\Checkpoint\CheckpointStore;
 use Storm\Projector\Checkpoint\GapRules;
 use Storm\Projector\Checkpoint\GapType;
+use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Exception\CheckpointViolation;
 
 beforeEach(function () {
-    $this->clock = $this->createMock(SystemClock::class);
-    $this->checkpoints = new CheckpointCollection($this->clock);
+    $this->checkpoints = new CheckpointCollection();
     $this->gapDetector = $this->createMock(GapRecognition::class);
     $this->rules = new GapRules();
+    $this->clock = $this->createMock(SystemClock::class);
 
-    $this->store = new CheckpointStore($this->checkpoints, $this->gapDetector, $this->rules);
+    $this->store = new CheckpointStore(
+        $this->checkpoints, $this->gapDetector, $this->rules, $this->clock
+    );
 });
 
 it('test default instance', function () {
@@ -29,10 +32,10 @@ it('test default instance', function () {
         ->and($this->store->hasGap())->toBeFalse();
 });
 
-it('refresh streams', function () {
+it('discover streams', function () {
     $this->clock->expects($this->once())->method('generate')->willReturn('2025-01-01 00:00:00');
 
-    $this->store->refreshStreams(['stream-1']);
+    $this->store->discover('stream-1');
 
     expect($this->store->toArray())->toHaveKey('stream-1');
 });
@@ -40,9 +43,10 @@ it('refresh streams', function () {
 it('insert checkpoint without gap', function () {
     $this->clock->expects($this->exactly(2))->method('generate')->willReturn('2025-01-01 00:00:00');
 
-    $this->store->refreshStreams(['stream-1']);
+    $this->store->discover('stream-1');
 
-    $checkpoint = $this->store->insert('stream-1', 1, '2021-01-01 00:00:00');
+    $streamPoint = new StreamPoint('stream-1', 1, '2021-01-01 00:00:00');
+    $checkpoint = $this->store->insert($streamPoint);
 
     expect($checkpoint->streamName)->toBe('stream-1')
         ->and($checkpoint->position)->toBe(1)
@@ -53,13 +57,14 @@ it('insert checkpoint without gap', function () {
 });
 
 it('insert checkpoint with gap', function () {
-    $this->clock->expects($this->exactly(3))->method('generate')->willReturn('2025-01-01 00:00:00');
+    $this->clock->expects($this->exactly(2))->method('generate')->willReturn('2025-01-01 00:00:00');
     $this->gapDetector->expects($this->once())->method('gapType')->willReturn(GapType::IN_GAP);
     $this->gapDetector->expects($this->once())->method('isRecoverable')->willReturn(false);
 
-    $this->store->refreshStreams(['stream-1']);
+    $this->store->discover('stream-1');
 
-    $checkpoint = $this->store->insert('stream-1', 2, '2021-01-01 00:00:00');
+    $streamPoint = new StreamPoint('stream-1', 2, '2021-01-01 00:00:00');
+    $checkpoint = $this->store->insert($streamPoint);
 
     expect($checkpoint->streamName)->toBe('stream-1')
         ->and($checkpoint->position)->toBe(2)
@@ -71,8 +76,10 @@ it('insert checkpoint with gap', function () {
 
 it('update checkpoints', function () {
     $this->clock->expects($this->exactly(2))->method('generate')->willReturn('2025-01-01 00:00:00');
-    $this->store->refreshStreams(['stream-1']);
-    $this->store->insert('stream-1', 1, '2021-01-01 00:00:00');
+    $this->store->discover('stream-1');
+
+    $streamPoint = new StreamPoint('stream-1', 1, '2021-01-01 00:00:00');
+    $this->store->insert($streamPoint);
 
     $checkpointUpdated = [
         'stream_name' => 'stream-1',
@@ -101,7 +108,7 @@ it('raise exception when stream not found on updating', function () {
         'gaps' => [],
         'gap_type' => null,
     ]]);
-})->throws(CheckpointViolation::class, 'Stream stream-1 is not watched');
+})->throws(CheckpointViolation::class, 'Checkpoint not found for stream stream-1');
 
 it('check if gap is detected', function (bool $isGapDetected) {
     $this->gapDetector->expects($this->once())->method('hasGap')->willReturn($isGapDetected);
@@ -117,12 +124,18 @@ it('sleep when gap is detected', function () {
 
 it('reset checkpoints and gap detection', function () {
     $this->clock->expects($this->exactly(4))->method('generate')->willReturn('2025-01-01 00:00:00');
+
+    $this->gapDetector->expects($this->never())->method('gapType');
     $this->gapDetector->expects($this->once())->method('reset');
 
-    $this->store->refreshStreams(['stream-1']);
-    $this->store->insert('stream-1', 1, '2021-01-01 00:00:00');
-    $this->store->refreshStreams(['stream-2']);
-    $this->store->insert('stream-2', 1, '2021-01-01 00:00:00');
+    $this->store->discover('stream-1');
+
+    $streamPoint1 = new StreamPoint('stream-1', 1, '2021-01-01 00:00:00');
+    $this->store->insert($streamPoint1);
+
+    $streamPoint2 = new StreamPoint('stream-2', 1, '2021-01-01 00:00:00');
+    $this->store->discover('stream-2');
+    $this->store->insert($streamPoint2);
 
     expect($this->store->toArray())->toHaveKey('stream-1')
         ->and($this->store->toArray())->toHaveKey('stream-2');

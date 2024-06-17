@@ -4,42 +4,44 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Checkpoint;
 
-use DateTimeImmutable;
+use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Contract\Projector\GapRecognition;
 use Storm\Projector\Exception\CheckpointViolation;
 
 use function array_merge;
-use function in_array;
 use function range;
 
-final class CheckpointStore implements CheckpointRecognition
+final readonly class CheckpointStore implements CheckpointRecognition
 {
-    protected array $eventStreams = [];
-
     public function __construct(
-        private readonly CheckpointCollection $checkpoints,
-        private readonly GapRecognition $gapDetector,
-        private readonly GapRules $rules
+        private CheckpointCollection $checkpoints,
+        private GapRecognition $gapDetector,
+        private GapRules $rules,
+        private SystemClock $clock
     ) {
     }
 
-    public function refreshStreams(array $eventStreams): void
+    public function discover(string ...$streamNames): void
     {
-        $this->eventStreams = array_merge($this->eventStreams, $eventStreams);
+        foreach ($streamNames as $streamName) {
+            if (! $this->checkpoints->has($streamName)) {
+                $checkpoint = CheckpointFactory::fromEmpty($streamName, $this->clock->generate());
 
-        $this->checkpoints->onDiscover(...$eventStreams);
+                $this->checkpoints->with($checkpoint);
+            }
+        }
     }
 
-    public function insert(string $streamName, int $streamPosition, string|DateTimeImmutable $eventTime): Checkpoint
+    public function insert(StreamPoint $streamPoint): Checkpoint
     {
-        $lastCheckpoint = $this->lastCheckpoint($streamName, $streamPosition);
+        $lastCheckpoint = $this->getLastCheckpoint($streamPoint);
 
-        if ($this->hasNextPosition($lastCheckpoint, $streamPosition)) {
-            return $this->checkpoints->next($lastCheckpoint, $streamPosition, $eventTime, null);
-        }
+        $isNextPosition = $streamPoint->position === $lastCheckpoint->position + 1;
 
-        return $this->handleGap($lastCheckpoint, $streamPosition, $eventTime);
+        return $isNextPosition
+            ? $this->insertNextCheckpoint($streamPoint, $lastCheckpoint->gaps)
+            : $this->insertCheckpointWithNonRecoverableGap($lastCheckpoint, $streamPoint);
     }
 
     public function update(array $checkpoints): void
@@ -47,9 +49,9 @@ final class CheckpointStore implements CheckpointRecognition
         foreach ($checkpoints as $checkpoint) {
             $streamName = $checkpoint['stream_name'];
 
-            $this->assertStreamDiscovered($streamName);
+            $this->assertStreamTracked($streamName);
 
-            $this->checkpoints->update($streamName, CheckpointFactory::fromArray($checkpoint));
+            $this->checkpoints->update(CheckpointFactory::fromArray($checkpoint));
         }
     }
 
@@ -80,94 +82,106 @@ final class CheckpointStore implements CheckpointRecognition
         return $this->checkpoints->all()->jsonSerialize();
     }
 
-    private function hasNextPosition(Checkpoint $checkpoint, int $expectedPosition): bool
+    private function insertNextCheckpoint(StreamPoint $streamPoint, array $gaps): Checkpoint
     {
-        return $expectedPosition === $checkpoint->position + 1;
+        $checkpoint = CheckpointFactory::fromStreamPoint(
+            $streamPoint,
+            $this->clock->generate(),
+            $gaps,
+            null
+        );
+
+        return $this->insertCheckpoint($checkpoint);
     }
 
-    private function handleGap(Checkpoint $lastCheckPoint, int $streamPosition, string|DateTimeImmutable $eventTime): Checkpoint
+    private function insertCheckpointWithNonRecoverableGap(Checkpoint $lastCheckPoint, StreamPoint $streamPoint): Checkpoint
     {
         $gapType = $this->gapDetector->gapType();
+        $isRecoverable = $this->gapDetector->isRecoverable();
+        $gaps = $lastCheckPoint->gaps;
 
-        // insert a new checkpoint with a non-recoverable gap
-        if (! $this->gapDetector->isRecoverable()) {
-            $checkpoint = $this->newCheckpointWithGap($lastCheckPoint, $streamPosition, $eventTime, $gapType);
-
-            return $this->checkpoints->next(
-                $checkpoint, $streamPosition, $eventTime, $gapType
-            );
+        if (! $isRecoverable) {
+            $gaps = array_merge($gaps, $this->getValidatedGaps($lastCheckPoint, $streamPoint->position));
         }
 
-        // return a new checkpoint with a recoverable gap
-        return $this->checkpoints->newCheckpoint(
-            $lastCheckPoint->streamName, $streamPosition, $eventTime, $lastCheckPoint->gaps, $gapType
+        $checkpoint = CheckpointFactory::fromStreamPoint(
+            $streamPoint,
+            $this->clock->generate(),
+            $gaps,
+            $gapType
         );
+
+        return ! $isRecoverable ? $this->insertCheckpoint($checkpoint) : $checkpoint;
+    }
+
+    private function insertCheckpoint(Checkpoint $checkpoint): Checkpoint
+    {
+        $this->checkpoints->update($checkpoint);
+
+        return $checkpoint;
     }
 
     /**
-     * @throws CheckpointViolation when the stream name is not watched
-     * @throws CheckpointViolation when the event position is less than 1
-     * @throws CheckpointViolation when the event position is outdated
+     * @throws CheckpointViolation when the stream name is not tracked.
+     * @throws CheckpointViolation when the stream position is less than 1
+     * @throws CheckpointViolation when the stream position is outdated
      */
-    private function lastCheckpoint(string $streamName, int $eventPosition): Checkpoint
+    private function getLastCheckpoint(StreamPoint $streamPoint): Checkpoint
     {
-        $this->assertStreamDiscovered($streamName);
+        $this->assertStreamTracked($streamPoint->name);
+        $this->assertValidStreamPosition($streamPoint->name, $streamPoint->position);
 
-        if ($eventPosition < 1) {
-            throw CheckpointViolation::invalidEventPosition($streamName);
-        }
+        $lastCheckpoint = $this->checkpoints->retrieve($streamPoint->name);
 
-        $lastCheckpoint = $this->checkpoints->last($streamName);
-
-        if ($eventPosition < $lastCheckpoint->position) {
-            throw CheckpointViolation::outdatedEventPosition($streamName);
+        if ($streamPoint->position < $lastCheckpoint->position) {
+            throw CheckpointViolation::outdatedStreamPosition(
+                $streamPoint->name, $streamPoint->position
+            );
         }
 
         return $lastCheckpoint;
     }
 
     /**
-     * Insert a new checkpoint with a gap.
+     * Get the validated gaps between the last checkpoint position and the current position.
      *
      * @throws CheckpointViolation when the position is less than the previous position
      * @throws CheckpointViolation when the gap is already recorded
      * @throws CheckpointViolation when the gap is lower than the previous recorded gaps
      */
-    private function newCheckpointWithGap(Checkpoint $checkpoint, int $position, string|DateTimeImmutable $eventTime, GapType $gapType): Checkpoint
+    private function getValidatedGaps(Checkpoint $lastCheckpoint, int $streamPosition): array
     {
-        $gaps = $this->getGapRange($checkpoint, $position);
+        $gaps = range($lastCheckpoint->position + 1, $streamPosition - 1);
 
         $this->rules
-            ->mustBeGap($checkpoint, $position)
-            ->shouldNotAlreadyBeRecorded($checkpoint, $gaps)
-            ->mustBeGreaterThanPreviousGaps($checkpoint, $gaps);
+            ->mustBeGap($lastCheckpoint, $streamPosition)
+            ->shouldNotAlreadyBeRecorded($lastCheckpoint, $gaps)
+            ->mustBeGreaterThanPreviousGaps($lastCheckpoint, $gaps);
 
-        return $this->checkpoints->newCheckpoint(
-            $checkpoint->streamName,
-            $position,
-            $eventTime,
-            array_merge($checkpoint->gaps, $gaps),
-            $gapType
-        );
+        return $gaps;
     }
 
     /**
-     * Get the gap range between the last checkpoint position and the current position.
+     * Check if the stream name is tracked.
      *
-     * @return array<int>|array
+     * @throws CheckpointViolation when the checkpoint is not found for the stream name
      */
-    private function getGapRange(Checkpoint $lastCheckpoint, int $position): array
+    private function assertStreamTracked(string $streamName): void
     {
-        return range($lastCheckpoint->position + 1, $position - 1);
+        if (! $this->checkpoints->has($streamName)) {
+            throw CheckpointViolation::checkpointNotFound($streamName);
+        }
     }
 
     /**
-     * @throws CheckpointViolation when the stream name is not watched
+     * Check if the stream position is valid.
+     *
+     * @throws CheckpointViolation when the stream position is less than 1
      */
-    private function assertStreamDiscovered(string $streamName): void
+    private function assertValidStreamPosition(string $streamName, int $streamPosition): void
     {
-        if (! in_array($streamName, $this->eventStreams, true)) {
-            throw CheckpointViolation::streamNotDiscovered($streamName);
+        if ($streamPosition < 1) {
+            throw CheckpointViolation::invalidStreamPosition($streamName);
         }
     }
 }

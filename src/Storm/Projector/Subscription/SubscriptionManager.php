@@ -100,7 +100,7 @@ final class SubscriptionManager implements Subscriptor
         tap($this->context->queries(), function (callable $query): void {
             $eventStreams = $this->watcher->streamDiscovery->discover($query);
 
-            $this->checkpointRecognition->refreshStreams($eventStreams);
+            $this->checkpointRecognition->discover(...$eventStreams);
         });
     }
 

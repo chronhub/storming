@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Projector;
 
-use DateTimeImmutable;
 use JsonSerializable;
 use Storm\Projector\Checkpoint\Checkpoint;
+use Storm\Projector\Checkpoint\StreamPoint;
 
 /**
  * @template TCheckpoint of array{
@@ -21,17 +21,16 @@ use Storm\Projector\Checkpoint\Checkpoint;
 interface CheckpointRecognition extends JsonSerializable
 {
     /**
-     * Refresh event streams.
+     * Track event streams.
      */
-    public function refreshStreams(array $eventStreams): void;
+    public function discover(string ...$streamNames): void;
 
     /**
      * Insert stream checkpoint.
      *
-     * @param  positive-int $streamPosition
-     * @return Checkpoint   the last checkpoint inserted with or without a gap
+     * @return Checkpoint the checkpoint inserted with or without a gap
      */
-    public function insert(string $streamName, int $streamPosition, string|DateTimeImmutable $eventTime): Checkpoint;
+    public function insert(StreamPoint $streamPoint): Checkpoint;
 
     /**
      * Update stream checkpoints.

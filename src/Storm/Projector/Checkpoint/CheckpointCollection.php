@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Checkpoint;
 
-use DateTimeImmutable;
 use Illuminate\Support\Collection;
-use Storm\Contract\Clock\SystemClock;
 use Storm\Projector\Exception\CheckpointViolation;
 
 class CheckpointCollection
@@ -14,69 +12,18 @@ class CheckpointCollection
     /**
      * @var Collection<string, Checkpoint>
      */
-    private Collection $checkpoints;
+    protected Collection $checkpoints;
 
-    public function __construct(protected readonly SystemClock $clock)
+    public function __construct()
     {
         $this->checkpoints = new Collection();
     }
 
-    public function onDiscover(string ...$streamNames): void
+    public function with(Checkpoint $checkpoint): void
     {
-        foreach ($streamNames as $streamName) {
-            if (! $this->has($streamName)) {
-                $this->insertNewCheckpoint($streamName, 0, null, [], null);
-            }
+        if (! $this->has($checkpoint->streamName)) {
+            $this->checkpoints->put($checkpoint->streamName, $checkpoint);
         }
-    }
-
-    /**
-     * Get the last checkpoint for the stream name.
-     *
-     * @throws CheckpointViolation when the checkpoint is not found for the stream name
-     */
-    public function last(string $streamName): Checkpoint
-    {
-        $this->assertStreamExists($streamName);
-
-        return $this->checkpoints->get($streamName);
-    }
-
-    /**
-     * Insert a new checkpoint.
-     */
-    public function next(Checkpoint $checkpoint, int $position, string|DateTimeImmutable $eventTime, ?GapType $gapType): Checkpoint
-    {
-        return $this->insertNewCheckpoint(
-            $checkpoint->streamName,
-            $position,
-            $eventTime,
-            $checkpoint->gaps,
-            $gapType
-        );
-    }
-
-    /**
-     * Create a new checkpoint.
-     */
-    public function newCheckpoint(string $streamName, int $position, null|string|DateTimeImmutable $eventTime, array $gaps, ?GapType $gapType): Checkpoint
-    {
-        if ($eventTime === null && $position !== 0) {
-            throw CheckpointViolation::invalidEventTime($streamName);
-        }
-
-        if ($eventTime instanceof DateTimeImmutable) {
-            $eventTime = $this->clock->format($eventTime);
-        }
-
-        return CheckpointFactory::from(
-            $streamName,
-            $position,
-            $eventTime,
-            $this->clock->generate(),
-            $gaps,
-            $gapType
-        );
     }
 
     /**
@@ -84,11 +31,23 @@ class CheckpointCollection
      *
      * @throws CheckpointViolation when the checkpoint is not found for the stream name
      */
-    public function update(string $streamName, Checkpoint $checkpoint): void
+    public function update(Checkpoint $checkpoint): void
+    {
+        $this->assertStreamExists($checkpoint->streamName);
+
+        $this->checkpoints->put($checkpoint->streamName, $checkpoint);
+    }
+
+    /**
+     * Get the last checkpoint for the stream name.
+     *
+     * @throws CheckpointViolation when the checkpoint is not found for the stream name
+     */
+    public function retrieve(string $streamName): Checkpoint
     {
         $this->assertStreamExists($streamName);
 
-        $this->checkpoints->put($streamName, $checkpoint);
+        return $this->checkpoints->get($streamName);
     }
 
     /**
@@ -113,18 +72,6 @@ class CheckpointCollection
     public function all(): Collection
     {
         return $this->checkpoints;
-    }
-
-    /**
-     * Insert a new checkpoint.
-     */
-    protected function insertNewCheckpoint(string $streamName, int $position, null|string|DateTimeImmutable $eventTime, array $gaps, ?GapType $gapType): Checkpoint
-    {
-        $checkpoint = $this->newCheckpoint($streamName, $position, $eventTime, $gaps, $gapType);
-
-        $this->checkpoints->put($streamName, $checkpoint);
-
-        return $checkpoint;
     }
 
     /**

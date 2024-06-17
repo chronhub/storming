@@ -17,6 +17,27 @@ class CheckpointFactory
         return new Checkpoint($streamName, $position, $eventTime, $createdAt, $gaps, $gapType);
     }
 
+    public static function fromEmpty(string $streamName, string $createdAt): Checkpoint
+    {
+        return new Checkpoint($streamName, 0, null, $createdAt, [], null);
+    }
+
+    public static function fromStreamPoint(
+        StreamPoint $streamPoint,
+        string $createdAt,
+        array $gaps,
+        ?GapType $gapType
+    ): Checkpoint {
+        return new Checkpoint(
+            $streamPoint->name,
+            $streamPoint->position,
+            $streamPoint->eventTime,
+            $createdAt,
+            $gaps,
+            $gapType
+        );
+    }
+
     /**
      * @param array{
      *     stream_name: string,

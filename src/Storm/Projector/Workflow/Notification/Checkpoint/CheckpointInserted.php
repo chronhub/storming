@@ -7,6 +7,7 @@ namespace Storm\Projector\Workflow\Notification\Checkpoint;
 use DateTimeImmutable;
 use Storm\Contract\Projector\Subscriptor;
 use Storm\Projector\Checkpoint\Checkpoint;
+use Storm\Projector\Checkpoint\StreamPoint;
 
 final readonly class CheckpointInserted
 {
@@ -19,6 +20,8 @@ final readonly class CheckpointInserted
 
     public function __invoke(Subscriptor $subscriptor): Checkpoint
     {
-        return $subscriptor->recognition()->insert($this->streamName, $this->streamPosition, $this->eventTime);
+        $streamPoint = new StreamPoint($this->streamName, $this->streamPosition, $this->eventTime);
+
+        return $subscriptor->recognition()->insert($streamPoint);
     }
 }

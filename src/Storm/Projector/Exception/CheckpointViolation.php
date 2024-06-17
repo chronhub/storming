@@ -11,19 +11,14 @@ class CheckpointViolation extends RuntimeException
         return new self("Stream $streamName is not watched");
     }
 
-    public static function invalidEventPosition(string $streamName): self
+    public static function invalidStreamPosition(string $streamName): self
     {
         return new self("Stream event position must be greater than 0 for stream $streamName");
     }
 
-    public static function invalidEventTime(string $streamName): self
+    public static function outdatedStreamPosition(string $streamName, int $streamPosition): self
     {
-        return new self("Stream event time must be a valid date when position is not zero for stream $streamName");
-    }
-
-    public static function outdatedEventPosition(string $streamName): self
-    {
-        return new self("Position given for stream $streamName is outdated");
+        return new self("Position given $streamPosition for stream $streamName is outdated");
     }
 
     public static function invalidGapPosition(string $streamName): self
