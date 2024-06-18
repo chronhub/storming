@@ -58,15 +58,6 @@ it('discover streams and insert new checkpoint', function () {
     });
 });
 
-it('does not duplicate stream on discover', function () {
-    expectCreatedAt()($this);
-
-    $this->checkpoints->onDiscover('stream-1', 'stream-1');
-
-    expect($this->checkpoints->all())->toHaveCount(1)
-        ->and($this->checkpoints->has('stream-1'))->toBeTrue();
-});
-
 it('flush all checkpoints', function () {
     expectCreatedAt(times: 3)($this);
 
