@@ -21,7 +21,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
         protected NotificationHub $hub,
         protected ProjectionRepository $projectionRepository,
         protected SnapshotRepository $snapshotRepository,
-        private ReadModel $readModel
+        private ReadModel $readModel,
     ) {
     }
 

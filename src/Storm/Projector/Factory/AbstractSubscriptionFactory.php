@@ -13,6 +13,8 @@ use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmittedStreamCache;
 use Storm\Contract\Projector\EmitterSubscriber;
+use Storm\Contract\Projector\Management;
+use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Projector\ProjectionQueryScope;
@@ -37,14 +39,13 @@ use Storm\Projector\Scope\QueryAccess;
 use Storm\Projector\Scope\ReadModelAccess;
 use Storm\Projector\Subscription\EmitterSubscription;
 use Storm\Projector\Subscription\EmittingManagement;
-use Storm\Projector\Subscription\HookHandler;
 use Storm\Projector\Subscription\HubManager;
-use Storm\Projector\Subscription\ListenerHandler;
 use Storm\Projector\Subscription\QueryingManagement;
 use Storm\Projector\Subscription\QuerySubscription;
 use Storm\Projector\Subscription\ReadingModelManagement;
 use Storm\Projector\Subscription\ReadModelSubscription;
 use Storm\Projector\Subscription\SubscriptionManager;
+use Storm\Projector\Subscription\SubscriptionMap;
 use Storm\Projector\Workflow\DefaultContext;
 use Storm\Projector\Workflow\EmittedStream;
 use Storm\Projector\Workflow\InMemoryEmittedStreams;
@@ -74,18 +75,22 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
-        [$subscriptor, $hub] = $this->buildSubscription($option, false);
+        $subscriptor = $this->buildSubscription($option, false);
+        $hub = $this->createNotificationManager($subscriptor);
+        $management = new QueryingManagement($hub);
+
+        $this->subscribeToMap($management);
 
         $activities = new QueryActivityFactory($this->chronicler);
-
         $scope = new QueryAccess($hub, $this->clock);
 
-        return new QuerySubscription($subscriptor, new QueryingManagement($hub), $activities, $scope);
+        return new QuerySubscription($subscriptor, $management, $activities, $scope);
     }
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
-        [$subscriptor, $hub] = $this->buildSubscription($option, true);
+        $subscriptor = $this->buildSubscription($option, true);
+        $hub = $this->createNotificationManager($subscriptor);
 
         $management = new EmittingManagement(
             $hub,
@@ -96,31 +101,33 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             new EmittedStream(),
         );
 
-        HookHandler::subscribe($hub, $management);
+        $this->subscribeToMap($management);
 
-        $activities = new PersistentActivityFactory($this->chronicler);
-        $scope = new EmitterAccess($hub, $this->clock);
-
-        return new EmitterSubscription($subscriptor, $management, $activities, $scope);
+        return new EmitterSubscription(
+            $subscriptor,
+            $management,
+            new PersistentActivityFactory($this->chronicler),
+            new EmitterAccess($hub, $this->clock)
+        );
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
-        [$subscriptor, $hub] = $this->buildSubscription($option, true);
+        $subscriptor = $this->buildSubscription($option, true);
+        $hub = $this->createNotificationManager($subscriptor);
+        $projectionRepository = $this->createProjectionRepository($streamName, $option);
+        $snapshotRepository = $this->getSnapshotRepository();
 
-        $management = new ReadingModelManagement(
-            $hub,
-            $this->createProjectionRepository($streamName, $option),
-            $this->getSnapshotRepository(),
-            $readModel
+        $management = new ReadingModelManagement($hub, $projectionRepository, $snapshotRepository, $readModel);
+
+        $this->subscribeToMap($management);
+
+        return new ReadModelSubscription(
+            $subscriptor,
+            $management,
+            new PersistentActivityFactory($this->chronicler),
+            new ReadModelAccess($hub, $readModel, $this->clock)
         );
-
-        HookHandler::subscribe($hub, $management);
-
-        $activities = new PersistentActivityFactory($this->chronicler);
-        $scope = new ReadModelAccess($hub, $readModel, $this->clock);
-
-        return new ReadModelSubscription($subscriptor, $management, $activities, $scope);
     }
 
     public function createOption(array $options = []): ProjectionOption
@@ -154,22 +161,14 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
 
-    /**
-     * @return array{Subscriptor, HubManager}
-     */
-    protected function buildSubscription(ProjectionOption $option, bool $detectGap): array
+    protected function buildSubscription(ProjectionOption $option, bool $detectGap): Subscriptor
     {
-        $subscriptor = new SubscriptionManager(
+        return new SubscriptionManager(
             $this->createCheckpointRecognition($option, $detectGap),
             $this->clock,
             $option,
             $this->createWatcherManager($option),
         );
-
-        $hub = new HubManager($subscriptor);
-        ListenerHandler::listen($hub);
-
-        return [$subscriptor, $hub];
     }
 
     // todo:
@@ -192,7 +191,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             ? new GapDetector($option->getRetries())
             : new NoopGapDetector();
 
-        // fixMe add boolean to enable/disable saving gaps remotely
+        // fixMe add boolean to enable/disable saving gaps remotely or in option
 
         return new CheckpointStore($gapDetector, new GapRules(), $this->clock);
     }
@@ -210,5 +209,17 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     protected function createWatcherManager(ProjectionOption $option): WatcherManager
     {
         return new WatcherManager($option, $this->eventStreamProvider, $this->clock);
+    }
+
+    protected function createNotificationManager(Subscriptor $subscriptor): NotificationHub
+    {
+        return new HubManager($subscriptor);
+    }
+
+    protected function subscribeToMap(Management $management): void
+    {
+        $map = new SubscriptionMap();
+
+        $map->subscribeTo($management);
     }
 }

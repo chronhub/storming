@@ -4,8 +4,17 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Subscription;
 
+use Storm\Contract\Projector\Management;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\PersistentManagement;
+use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointInserted;
+use Storm\Projector\Workflow\Notification\Cycle\CycleBegan;
+use Storm\Projector\Workflow\Notification\Cycle\CycleRenewed;
+use Storm\Projector\Workflow\Notification\Handler\WhenBatchLoaded;
+use Storm\Projector\Workflow\Notification\Handler\WhenCheckpointInserted;
+use Storm\Projector\Workflow\Notification\Handler\WhenCycleBegin;
+use Storm\Projector\Workflow\Notification\Handler\WhenCycleRenewed;
+use Storm\Projector\Workflow\Notification\Handler\WhenEventStreamDiscovered;
 use Storm\Projector\Workflow\Notification\Management\EventEmitted;
 use Storm\Projector\Workflow\Notification\Management\EventLinkedTo;
 use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
@@ -20,12 +29,23 @@ use Storm\Projector\Workflow\Notification\Management\ProjectionStatusDisclosed;
 use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
 use Storm\Projector\Workflow\Notification\Management\ProjectionSynchronized;
 use Storm\Projector\Workflow\Notification\Management\SnapshotCheckpointCaptured;
+use Storm\Projector\Workflow\Notification\Stream\EventStreamDiscovered;
+use Storm\Projector\Workflow\Notification\Stream\StreamIteratorSet;
 
-final class HookHandler
+final class SubscriptionMap
 {
-    public static function subscribe(NotificationHub $task, PersistentManagement $management): void
+    public function subscribeTo(Management $management): void
     {
-        $task->addHooks([
+        if ($management instanceof PersistentManagement) {
+            $this->withHooks($management);
+        }
+
+        $this->withListeners($management->hub());
+    }
+
+    private function withHooks(PersistentManagement $management): void
+    {
+        $management->hub()->addHooks([
             ProjectionRise::class => fn () => $management->rise(),
             ProjectionLockUpdated::class => fn () => $management->shouldUpdateLock(),
             ProjectionStored::class => fn () => $management->store(),
@@ -41,10 +61,21 @@ final class HookHandler
         ]);
 
         if ($management instanceof EmittingManagement) {
-            $task->addHooks([
+            $management->hub()->addHooks([
                 EventEmitted::class => fn (EventEmitted $listener) => $management->emit($listener->event),
                 EventLinkedTo::class => fn (EventLinkedTo $listener) => $management->linkTo($listener->streamName, $listener->event),
             ]);
         }
+    }
+
+    private function withListeners(NotificationHub $hub): void
+    {
+        $hub->addListeners([
+            CycleBegan::class => WhenCycleBegin::class,
+            CycleRenewed::class => WhenCycleRenewed::class,
+            StreamIteratorSet::class => WhenBatchLoaded::class,
+            CheckpointInserted::class => WhenCheckpointInserted::class,
+            EventStreamDiscovered::class => WhenEventStreamDiscovered::class,
+        ]);
     }
 }

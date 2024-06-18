@@ -10,22 +10,7 @@ use Illuminate\Support\Collection;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\Subscriptor;
 use Storm\Projector\Exception\InvalidArgumentException;
-use Storm\Projector\Workflow\Notification\Management\EventEmitted;
-use Storm\Projector\Workflow\Notification\Management\EventLinkedTo;
-use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
-use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
-use Storm\Projector\Workflow\Notification\Management\ProjectionFreed;
-use Storm\Projector\Workflow\Notification\Management\ProjectionLockUpdated;
-use Storm\Projector\Workflow\Notification\Management\ProjectionPersistedWhenThresholdIsReached;
-use Storm\Projector\Workflow\Notification\Management\ProjectionRestarted;
-use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
-use Storm\Projector\Workflow\Notification\Management\ProjectionRise;
-use Storm\Projector\Workflow\Notification\Management\ProjectionStatusDisclosed;
-use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
-use Storm\Projector\Workflow\Notification\Management\ProjectionSynchronized;
-use Storm\Projector\Workflow\Notification\Management\SnapshotCheckpointCaptured;
 
-use function array_key_exists;
 use function is_callable;
 use function is_object;
 use function is_string;
@@ -35,22 +20,7 @@ final class HubManager implements NotificationHub
     /**
      * @var array<string, array<callable>>
      */
-    private array $hooks = [
-        ProjectionRise::class => [],
-        ProjectionStored::class => [],
-        ProjectionClosed::class => [],
-        ProjectionRevised::class => [],
-        ProjectionDiscarded::class => [],
-        ProjectionFreed::class => [],
-        ProjectionRestarted::class => [],
-        ProjectionLockUpdated::class => [],
-        ProjectionSynchronized::class => [],
-        ProjectionStatusDisclosed::class => [],
-        ProjectionPersistedWhenThresholdIsReached::class => [],
-        EventEmitted::class => [],
-        EventLinkedTo::class => [],
-        SnapshotCheckpointCaptured::class => [],
-    ];
+    private array $hooks = [];
 
     /**
      * @var Collection<string, array<string|callable>>
@@ -64,8 +34,6 @@ final class HubManager implements NotificationHub
 
     public function addHook(string $hook, callable $trigger): void
     {
-        $this->assertHookIsSupported($hook);
-
         $this->hooks[$hook][] = $trigger;
     }
 
@@ -78,11 +46,13 @@ final class HubManager implements NotificationHub
 
     public function trigger(object $hook): void
     {
-        $hookClassName = $hook::class;
+        $hookHandlers = $this->hooks[$hook::class] ?? [];
 
-        $this->assertHookIsSupported($hookClassName);
+        if ($hookHandlers === []) {
+            return;
+        }
 
-        foreach ($this->hooks[$hookClassName] as $trigger) {
+        foreach ($hookHandlers as $trigger) {
             $trigger($hook);
         }
     }
@@ -171,12 +141,5 @@ final class HubManager implements NotificationHub
         }
 
         return new $notification(...$arguments);
-    }
-
-    private function assertHookIsSupported(string $hookClassName): void
-    {
-        if (! array_key_exists($hookClassName, $this->hooks)) {
-            throw new InvalidArgumentException("Hook $hookClassName is not supported");
-        }
     }
 }
