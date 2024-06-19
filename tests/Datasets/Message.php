@@ -8,7 +8,7 @@ use Storm\Tests\Stubs\Double\Message\SomeCommand;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 use Storm\Tests\Stubs\Double\Message\SomeQuery;
 
-dataset('provideMessaging', [
+dataset('provide messaging', [
     ['command' => new SomeCommand(['name' => 'steph bug'])],
     ['event' => new SomeEvent(['name' => 'steph bug'])],
     ['query' => new SomeQuery(['name' => 'steph bug'])],
