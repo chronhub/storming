@@ -16,7 +16,6 @@ use Storm\Projector\Workflow\Watcher\BatchStreamWatcher;
 use Storm\Projector\Workflow\Watcher\CycleWatcher;
 use Storm\Projector\Workflow\Watcher\EventStreamWatcher;
 use Storm\Projector\Workflow\Watcher\MasterEventCounterWatcher;
-use Storm\Projector\Workflow\Watcher\SnapshotWatcher;
 use Storm\Projector\Workflow\Watcher\SprintWatcher;
 use Storm\Projector\Workflow\Watcher\StopWatcher;
 use Storm\Projector\Workflow\Watcher\TimeWatcher;
@@ -48,7 +47,6 @@ dataset('watchers', [
     'batch stream watcher' => ['batchStream', BatchStreamWatcher::class, false],
     'cycle watcher' => ['cycle', CycleWatcher::class, false],
     'master event counter watcher' => ['masterCounter', MasterEventCounterWatcher::class, false],
-    'snapshot watcher' => ['snapshot', SnapshotWatcher::class, true],
     'sprint watcher' => ['sprint', SprintWatcher::class, false],
     'stop watcher' => ['stop', StopWatcher::class, true],
     'event stream watcher' => ['streamDiscovery', EventStreamWatcher::class, false],

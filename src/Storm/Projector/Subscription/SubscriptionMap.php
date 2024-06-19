@@ -28,7 +28,6 @@ use Storm\Projector\Workflow\Notification\Management\ProjectionRise;
 use Storm\Projector\Workflow\Notification\Management\ProjectionStatusDisclosed;
 use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
 use Storm\Projector\Workflow\Notification\Management\ProjectionSynchronized;
-use Storm\Projector\Workflow\Notification\Management\SnapshotCheckpointCaptured;
 use Storm\Projector\Workflow\Notification\Stream\EventStreamDiscovered;
 use Storm\Projector\Workflow\Notification\Stream\StreamIteratorSet;
 
@@ -57,7 +56,6 @@ final class SubscriptionMap
             ProjectionRestarted::class => fn () => $management->restart(),
             ProjectionStatusDisclosed::class => fn () => $management->disclose(),
             ProjectionSynchronized::class => fn () => $management->synchronise(),
-            SnapshotCheckpointCaptured::class => fn (SnapshotCheckpointCaptured $listener) => $management->snapshot($listener->checkpoint),
         ]);
 
         if ($management instanceof EmittingManagement) {

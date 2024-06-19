@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Projector;
 
-use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Exception\ProjectionNotFound;
 
 interface PersistentManagement extends Management
@@ -64,11 +63,6 @@ interface PersistentManagement extends Management
      * Release the projection lock.
      */
     public function freed(): void;
-
-    /**
-     * Take a snapshot of the projection.
-     */
-    public function snapshot(Checkpoint $checkpoint): void;
 
     /**
      * Get the projection name (aka stream name).

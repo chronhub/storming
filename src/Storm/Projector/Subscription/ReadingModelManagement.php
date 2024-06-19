@@ -8,7 +8,6 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionRepository;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelManagement;
-use Storm\Contract\Projector\SnapshotRepository;
 use Storm\Projector\Workflow\Notification\Sprint\SprintStopped;
 use Storm\Projector\Workflow\Notification\Status\CurrentStatus;
 use Storm\Projector\Workflow\Notification\Stream\EventStreamDiscovered;
@@ -20,7 +19,6 @@ final readonly class ReadingModelManagement implements ReadModelManagement
     public function __construct(
         protected NotificationHub $hub,
         protected ProjectionRepository $projectionRepository,
-        protected SnapshotRepository $snapshotRepository,
         private ReadModel $readModel,
     ) {
     }
@@ -55,15 +53,11 @@ final readonly class ReadingModelManagement implements ReadModelManagement
         );
 
         $this->readModel->reset();
-
-        $this->snapshotRepository->deleteByProjectionName($this->getName());
     }
 
     public function discard(bool $withEmittedEvents): void
     {
         $this->projectionRepository->delete($withEmittedEvents);
-
-        $this->snapshotRepository->deleteByProjectionName($this->getName());
 
         if ($withEmittedEvents) {
             $this->readModel->down();

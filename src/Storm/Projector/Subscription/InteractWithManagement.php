@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Storm\Projector\Subscription;
 
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Repository\ProjectionResult;
 use Storm\Projector\Workflow\Notification\Batch\BatchReset;
@@ -13,7 +12,6 @@ use Storm\Projector\Workflow\Notification\Batch\IsBatchReached;
 use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointReset;
 use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointUpdated;
 use Storm\Projector\Workflow\Notification\Checkpoint\CurrentCheckpoint;
-use Storm\Projector\Workflow\Notification\Checkpoint\SnapshotTaken;
 use Storm\Projector\Workflow\Notification\Sprint\SprintContinue;
 use Storm\Projector\Workflow\Notification\Sprint\SprintStopped;
 use Storm\Projector\Workflow\Notification\Status\CurrentStatus;
@@ -104,13 +102,6 @@ trait InteractWithManagement
         }
     }
 
-    public function snapshot(Checkpoint $checkpoint): void
-    {
-        $this->snapshotRepository->snapshot($this->getName(), $checkpoint);
-
-        $this->hub->notify(SnapshotTaken::class, $checkpoint);
-    }
-
     public function getName(): string
     {
         return $this->projectionRepository->projectionName();
@@ -145,7 +136,8 @@ trait InteractWithManagement
     {
         $this->hub->notify(
             StatusChanged::class,
-            $this->hub->expect(CurrentStatus::class), $status
+            $this->hub->expect(CurrentStatus::class),
+            $status
         );
     }
 

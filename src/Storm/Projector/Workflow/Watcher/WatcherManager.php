@@ -23,7 +23,6 @@ use function method_exists;
  * @property CycleWatcher              $cycle
  * @property EventStreamWatcher        $streamDiscovery
  * @property MasterEventCounterWatcher $masterCounter
- * @property SnapshotWatcher           $snapshot
  * @property SprintWatcher             $sprint
  * @property StopWatcher               $stop
  * @property TimeWatcher               $time
@@ -47,7 +46,6 @@ class WatcherManager
             'batchStream' => $this->batchStreamWatcher($option),
             'cycle' => new CycleWatcher(),
             'masterCounter' => new MasterEventCounterWatcher(),
-            'snapshot' => $this->snapshotWatcher($option, $clock),
             'sprint' => new SprintWatcher(),
             'stop' => new StopWatcher(),
             'streamDiscovery' => new EventStreamWatcher($eventStreamProvider),
@@ -85,12 +83,5 @@ class WatcherManager
         $bucket = new ConsumeWithSleepToken($capacity, $rate);
 
         return new BatchStreamWatcher($bucket);
-    }
-
-    protected function snapshotWatcher(ProjectionOption $option, SystemClock $clock): SnapshotWatcher
-    {
-        $interval = $option->getSnapshotInterval();
-
-        return new SnapshotWatcher($clock, $interval['position'], $interval['time'], $interval['usleep']);
     }
 }

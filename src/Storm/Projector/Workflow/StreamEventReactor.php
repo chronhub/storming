@@ -9,12 +9,10 @@ use DateTimeImmutable;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\Header;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\PersistentProjectorScope;
 use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Workflow\Notification\Batch\BatchIncremented;
 use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointInserted;
-use Storm\Projector\Workflow\Notification\Checkpoint\ShouldSnapshotCheckpoint;
 use Storm\Projector\Workflow\Notification\Management\ProjectionPersistedWhenThresholdIsReached;
 use Storm\Projector\Workflow\Notification\Sprint\IsSprintRunning;
 use Storm\Projector\Workflow\Notification\Stream\StreamEventAcked;
@@ -25,12 +23,12 @@ use Storm\Projector\Workflow\Notification\UserState\UserStateChanged;
 use function is_array;
 use function pcntl_signal_dispatch;
 
-class StreamEventReactor
+readonly class StreamEventReactor
 {
     public function __construct(
-        protected readonly Closure $reactors,
-        protected readonly ProjectorScope $scope,
-        protected readonly bool $dispatchSignal
+        protected Closure $reactors,
+        protected ProjectorScope $scope,
+        protected bool $dispatchSignal
     ) {
     }
 
@@ -81,16 +79,7 @@ class StreamEventReactor
     {
         $checkpoint = $hub->expect(new CheckpointInserted($streamName, $expectedPosition, $eventTime));
 
-        if ($checkpoint->type === null || $checkpoint->type === GapType::IN_GAP) {
-            $hub->notifyWhen(
-                $this->scope instanceof PersistentProjectorScope,
-                fn (NotificationHub $hub) => $hub->notify(ShouldSnapshotCheckpoint::class, $checkpoint)
-            );
-
-            return true;
-        }
-
-        return false;
+        return $checkpoint->type === null || $checkpoint->type === GapType::IN_GAP;
     }
 
     protected function getUserState(NotificationHub $hub): ?array

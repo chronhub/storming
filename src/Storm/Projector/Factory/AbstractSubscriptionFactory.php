@@ -22,7 +22,6 @@ use Storm\Contract\Projector\ProjectionRepository;
 use Storm\Contract\Projector\QuerySubscriber;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelSubscriber;
-use Storm\Contract\Projector\SnapshotRepository;
 use Storm\Contract\Projector\SubscriptionFactory;
 use Storm\Contract\Projector\Subscriptor;
 use Storm\Projector\Checkpoint\CheckpointStore;
@@ -30,8 +29,6 @@ use Storm\Projector\Checkpoint\GapDetector;
 use Storm\Projector\Checkpoint\GapRules;
 use Storm\Projector\Checkpoint\NoopGapDetector;
 use Storm\Projector\Options\ProjectionOptionResolver;
-use Storm\Projector\Repository\Checkpoint\InMemorySnapshotProvider;
-use Storm\Projector\Repository\Checkpoint\SnapshotCheckpointRepository;
 use Storm\Projector\Repository\EventDispatcherRepository;
 use Storm\Projector\Repository\LockManager;
 use Storm\Projector\Scope\EmitterAccess;
@@ -96,7 +93,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $hub,
             $this->chronicler,
             $this->createProjectionRepository($streamName, $option),
-            $this->getSnapshotRepository(),
             $this->createStreamCache($option),
             new EmittedStream(),
         );
@@ -116,9 +112,8 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $subscriptor = $this->buildSubscription($option, true);
         $hub = $this->createNotificationManager($subscriptor);
         $projectionRepository = $this->createProjectionRepository($streamName, $option);
-        $snapshotRepository = $this->getSnapshotRepository();
 
-        $management = new ReadingModelManagement($hub, $projectionRepository, $snapshotRepository, $readModel);
+        $management = new ReadingModelManagement($hub, $projectionRepository, $readModel);
 
         $this->subscribeToMap($management);
 
@@ -169,15 +164,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $option,
             $this->createWatcherManager($option),
         );
-    }
-
-    // todo:
-    //  - snapshot provider in constructor
-    //  - we snapshot per stream name but we could also work per projection name, and insert in batch
-    //  - should not support fromAll (option enableSnapshot)
-    protected function getSnapshotRepository(): SnapshotRepository
-    {
-        return new SnapshotCheckpointRepository(new InMemorySnapshotProvider());
     }
 
     protected function createLockManager(ProjectionOption $option): LockManager

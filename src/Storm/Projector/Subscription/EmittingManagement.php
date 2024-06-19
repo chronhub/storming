@@ -11,7 +11,6 @@ use Storm\Contract\Projector\EmittedStreamCache;
 use Storm\Contract\Projector\EmitterManagement;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionRepository;
-use Storm\Contract\Projector\SnapshotRepository;
 use Storm\Projector\Workflow\EmittedStream;
 use Storm\Projector\Workflow\Notification\Sprint\SprintStopped;
 use Storm\Projector\Workflow\Notification\Status\CurrentStatus;
@@ -31,7 +30,6 @@ final readonly class EmittingManagement implements EmitterManagement
         protected NotificationHub $hub,
         protected Chronicler $chronicler,
         protected ProjectionRepository $projectionRepository,
-        protected SnapshotRepository $snapshotRepository,
         private EmittedStreamCache $streamCache,
         private EmittedStream $emittedStream,
     ) {
@@ -86,15 +84,11 @@ final readonly class EmittingManagement implements EmitterManagement
         );
 
         $this->deleteStream();
-
-        $this->snapshotRepository->deleteByProjectionName($this->getName());
     }
 
     public function discard(bool $withEmittedEvents): void
     {
         $this->projectionRepository->delete($withEmittedEvents);
-
-        $this->snapshotRepository->deleteByProjectionName($this->getName());
 
         if ($withEmittedEvents) {
             $this->deleteStream();
