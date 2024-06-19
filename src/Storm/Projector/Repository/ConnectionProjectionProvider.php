@@ -22,6 +22,12 @@ use function sprintf;
 
 final readonly class ConnectionProjectionProvider implements ProjectionProvider
 {
+    private const array FAILS = [
+        'create' => 'Fail to create projection with name %s',
+        'update' => 'Failed to update projection with name %s and data class %s',
+        'delete' => 'Failed to delete projection with name %s',
+    ];
+
     public const string TABLE = 'projections';
 
     public function __construct(
@@ -44,8 +50,8 @@ final readonly class ConnectionProjectionProvider implements ProjectionProvider
 
         $success = $this->query()->insert($projection->jsonSerialize());
 
-        if ($success === false) {
-            throw new ProjectionConnectionFailed(sprintf('Failed to create projection with name %s', $projectionName));
+        if (! $success) {
+            $this->raiseOperationFailed('create', $projectionName);
         }
     }
 
@@ -78,9 +84,7 @@ final readonly class ConnectionProjectionProvider implements ProjectionProvider
         if ($success === 0) {
             $this->assertProjectionExists($projectionName);
 
-            throw new ProjectionConnectionFailed(
-                sprintf('Failed to update projection with name %s and data class %s', $projectionName, $data::class)
-            );
+            $this->raiseOperationFailed('update', $projectionName, $data::class);
         }
     }
 
@@ -91,9 +95,7 @@ final readonly class ConnectionProjectionProvider implements ProjectionProvider
         if ($success === 0) {
             $this->assertProjectionExists($projectionName);
 
-            throw new ProjectionConnectionFailed(
-                sprintf('Failed to delete projection with name %s', $projectionName)
-            );
+            $this->raiseOperationFailed('delete', $projectionName);
         }
     }
 
@@ -123,6 +125,13 @@ final readonly class ConnectionProjectionProvider implements ProjectionProvider
         if (! $this->exists($projectionName)) {
             throw ProjectionNotFound::withName($projectionName);
         }
+    }
+
+    private function raiseOperationFailed(string $operation, string $projectionName, ?string $dataClass = null): void
+    {
+        $message = sprintf(self::FAILS[$operation], $projectionName, $dataClass);
+
+        throw new ProjectionConnectionFailed($message);
     }
 
     private function query(): Builder
