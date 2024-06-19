@@ -85,7 +85,7 @@ it('insert checkpoint with gap', function () {
         ->and($checkpoint->gapType)->toBe(GapType::IN_GAP);
 });
 
-it('update checkpoints', function () {
+it('update checkpoints as array', function () {
     mockCreatedAt(2)($this);
 
     $this->store->discover('stream-1');
@@ -134,20 +134,17 @@ it('sleep when gap is detected', function () {
     $this->store->sleepWhenGap();
 });
 
-it('reset checkpoints and gap detection', function () {
+it('reset checkpoints and gap detection', function (array $streams) {
     mockCreatedAt(4)($this);
 
     $this->gapDetector->expects($this->never())->method('gapType');
     $this->gapDetector->expects($this->once())->method('reset');
 
-    $this->store->discover('stream-1');
-
-    $streamPoint1 = new StreamPoint('stream-1', 1, '2021-01-01 00:00:00');
-    $this->store->insert($streamPoint1);
-
-    $streamPoint2 = new StreamPoint('stream-2', 1, '2021-01-01 00:00:00');
-    $this->store->discover('stream-2');
-    $this->store->insert($streamPoint2);
+    foreach ($streams as $stream) {
+        $this->store->discover($stream);
+        $streamPoint = new StreamPoint($stream, 1, '2021-01-01 00:00:00');
+        $this->store->insert($streamPoint);
+    }
 
     expect($this->store->toArray())->toHaveKey('stream-1')
         ->and($this->store->toArray())->toHaveKey('stream-2');
@@ -155,4 +152,4 @@ it('reset checkpoints and gap detection', function () {
     $this->store->resets();
 
     expect($this->store->toArray())->toBeEmpty();
-});
+})->with(['streams' => [['stream-1', 'stream-2']]]);
