@@ -9,8 +9,8 @@ use Storm\Projector\Repository\ProjectionResult;
 final readonly class ProjectionReset
 {
     public function __construct(
-        public string $streamName,
-        public ProjectionResult $projectionDetail
+        public string $projectionName,
+        public ProjectionResult $projectionResult
     ) {
     }
 }

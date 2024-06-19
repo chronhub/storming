@@ -9,7 +9,7 @@ use Throwable;
 final readonly class ProjectionError
 {
     public function __construct(
-        public string $streamName,
+        public string $projectionName,
         public string $event,
         public Throwable $error
     ) {
