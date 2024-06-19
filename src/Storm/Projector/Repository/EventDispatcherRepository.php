@@ -44,10 +44,10 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
         );
     }
 
-    public function stop(ProjectionResult $projectionDetail, ProjectionStatus $projectionStatus): void
+    public function stop(ProjectionResult $projectionResult, ProjectionStatus $projectionStatus): void
     {
         $this->dispatchWhen(
-            fn () => $this->repository->stop($projectionDetail, $projectionStatus),
+            fn () => $this->repository->stop($projectionResult, $projectionStatus),
             fn () => $this->eventDispatcher->dispatch(new ProjectionStopped($this->projectionName())),
             ProjectionStopped::class
         );
@@ -91,9 +91,9 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
         );
     }
 
-    public function persist(ProjectionResult $projectionDetail): void
+    public function persist(ProjectionResult $projectionResult): void
     {
-        $this->repository->persist($projectionDetail);
+        $this->repository->persist($projectionResult);
     }
 
     public function updateLock(): void

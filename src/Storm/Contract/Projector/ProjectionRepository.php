@@ -33,7 +33,7 @@ interface ProjectionRepository
      *
      * @throws ProjectionFailed When projection data cannot be stored.
      */
-    public function persist(ProjectionResult $projectionDetail): void;
+    public function persist(ProjectionResult $projectionResult): void;
 
     /**
      * Stops the projection and store data.
@@ -41,7 +41,7 @@ interface ProjectionRepository
      * @throws ProjectionNotFound When a projection with the given name doesn't exist.
      * @throws ProjectionFailed   When projection data cannot be stored.
      */
-    public function stop(ProjectionResult $projectionDetail, ProjectionStatus $projectionStatus): void;
+    public function stop(ProjectionResult $projectionResult, ProjectionStatus $projectionStatus): void;
 
     /**
      * Starts the projection again.
