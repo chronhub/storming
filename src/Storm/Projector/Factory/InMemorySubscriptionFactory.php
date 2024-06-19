@@ -6,7 +6,7 @@ namespace Storm\Projector\Factory;
 
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ProjectionRepository;
-use Storm\Projector\Repository\InMemoryRepository;
+use Storm\Projector\Repository\ProjectionStore;
 
 final class InMemorySubscriptionFactory extends AbstractSubscriptionFactory
 {
@@ -19,7 +19,7 @@ final class InMemorySubscriptionFactory extends AbstractSubscriptionFactory
 
     protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository
     {
-        $repository = new InMemoryRepository(
+        $repository = new ProjectionStore(
             $this->projectionProvider,
             $this->createLockManager($options),
             $this->serializer,

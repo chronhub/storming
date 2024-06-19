@@ -27,7 +27,7 @@ use Symfony\Component\Serializer\Serializer;
 
 // todo add transformer to transform from/to array which hold the jsonSerializer
 // we also need to change type position and state to accept array in projection model
-final readonly class InMemoryRepository implements ProjectionRepository
+final readonly class ProjectionStore implements ProjectionRepository
 {
     public function __construct(
         private ProjectionProvider $provider,

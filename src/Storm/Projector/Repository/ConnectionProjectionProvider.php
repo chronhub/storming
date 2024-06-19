@@ -7,7 +7,6 @@ namespace Storm\Projector\Repository;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Builder;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\ProjectionData;
 use Storm\Contract\Projector\ProjectionModel;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Projector\Exception\InvalidArgumentException;
@@ -16,6 +15,7 @@ use Storm\Projector\Exception\ProjectionAlreadyRunning;
 use Storm\Projector\Exception\ProjectionConnectionFailed;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\Repository\Data\CreateData;
+use Storm\Projector\Repository\Data\ProjectionData;
 use Storm\Projector\Repository\Data\StartData;
 
 use function sprintf;
@@ -40,7 +40,7 @@ final readonly class ConnectionProjectionProvider implements ProjectionProvider
             throw ProjectionAlreadyExists::withName($projectionName);
         }
 
-        $projection = ProjectionFactory::create($projectionName, $data->status);
+        $projection = new Projection($projectionName, $data->status, null, null, null);
 
         $success = $this->query()->insert($projection->jsonSerialize());
 
@@ -105,7 +105,13 @@ final readonly class ConnectionProjectionProvider implements ProjectionProvider
             return null;
         }
 
-        return ProjectionFactory::make($projection);
+        return new Projection(
+            name: $projection->name,
+            status: $projection->status,
+            state: $projection->state,
+            checkpoint: $projection->checkpoint,
+            lockedUntil: $projection->locked_until,
+        );
     }
 
     public function filterByNames(string ...$projectionNames): array

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Repository\Data;
 
-final readonly class PersistData extends ProjectionDTO
+final readonly class PersistData extends ProjectionData
 {
     public function __construct(
         public string $state,

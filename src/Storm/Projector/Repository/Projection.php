@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Repository;
 
-use JsonSerializable;
 use Storm\Contract\Projector\ProjectionModel;
 
 /**
@@ -16,7 +15,7 @@ use Storm\Contract\Projector\ProjectionModel;
  *     'locked_until': ?string,
  * }
  */
-final readonly class Projection implements JsonSerializable, ProjectionModel
+final readonly class Projection implements ProjectionModel
 {
     private string $state;
 

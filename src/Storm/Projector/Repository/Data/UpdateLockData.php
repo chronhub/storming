@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Repository\Data;
 
-final readonly class UpdateLockData extends ProjectionDTO
+final readonly class UpdateLockData extends ProjectionData
 {
     public function __construct(public string $lockedUntil)
     {

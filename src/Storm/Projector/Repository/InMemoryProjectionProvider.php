@@ -5,24 +5,25 @@ declare(strict_types=1);
 namespace Storm\Projector\Repository;
 
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\ProjectionData;
 use Storm\Contract\Projector\ProjectionModel;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Projector\Exception\InMemoryProjectionFailed;
 use Storm\Projector\Exception\ProjectionAlreadyExists;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
 use Storm\Projector\Exception\ProjectionNotFound;
+use Storm\Projector\Repository\Data\ProjectionData;
 
-use function array_filter;
 use function array_key_exists;
+use function array_merge;
 use function in_array;
 
 final readonly class InMemoryProjectionProvider implements ProjectionProvider
 {
+    private const array FIELDS_REQUIRED_ON_UPDATE = ['status', 'state', 'checkpoint', 'locked_until'];
+
     /**
-     * @var Collection<string, InMemoryProjection>
+     * @var Collection<string, ProjectionModel>
      */
     private Collection $projections;
 
@@ -37,9 +38,10 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
             throw ProjectionAlreadyExists::withName($projectionName);
         }
 
-        $projection = InMemoryProjection::create($projectionName, $data->toArray()['status']);
-
-        $this->projections->put($projectionName, $projection);
+        $this->projections->put(
+            $projectionName,
+            ProjectionFactory::create($projectionName, $data->toArray()['status'])
+        );
     }
 
     public function acquireLock(string $projectionName, ProjectionData $data): void
@@ -74,11 +76,9 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
 
     public function filterByNames(string ...$projectionNames): array
     {
-        if ($projectionNames === []) {
-            return [];
-        }
-
-        $byStreamNames = static fn (InMemoryProjection $projection): bool => in_array($projection->name(), $projectionNames, true);
+        $byStreamNames = static fn (ProjectionModel $projection): bool => in_array(
+            $projection->name(), $projectionNames, true
+        );
 
         return $this->projections->filter($byStreamNames)->keys()->toArray();
     }
@@ -97,38 +97,42 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
         return $this->clock->isGreaterThanNow($projection->lockedUntil());
     }
 
-    private function retrieveOrFail(string $projectionName): InMemoryProjection
+    private function retrieveOrFail(string $projectionName): ProjectionModel
     {
         $projection = $this->retrieve($projectionName);
 
-        if (! $projection instanceof InMemoryProjection) {
+        if (! $projection instanceof ProjectionModel) {
             throw ProjectionNotFound::withName($projectionName);
         }
 
         return $projection;
     }
 
-    private function applyChanges(InMemoryProjection $projection, array $data): void
+    private function applyChanges(ProjectionModel $projection, array $data): void
     {
-        $this->assertUpdateProjectionHasChanges($data, $projection->name());
+        $this->assertHasChangesOnUpdate($data, $projection->name());
 
-        foreach ($data as $key => $value) {
-            $method = 'set'.Str::studly($key);
+        $projection = ProjectionFactory::fromArray(
+            array_merge($projection->jsonSerialize(), $data)
+        );
 
-            $projection->$method($value);
-        }
+        $this->projections->put($projection->name(), $projection);
     }
 
-    private function assertUpdateProjectionHasChanges(array $data, string $name): void
+    private function assertHasChangesOnUpdate(array $data, string $projectionName): void
     {
-        $hasLockedUntil = array_key_exists('locked_until', $data);
+        $found = false;
 
-        if ($hasLockedUntil) {
-            return;
+        foreach (self::FIELDS_REQUIRED_ON_UPDATE as $field) {
+            if (! array_key_exists($field, $data)) {
+                continue;
+            }
+
+            $found = true;
         }
 
-        if (array_filter($data) === []) {
-            throw new InMemoryProjectionFailed('Provide at least one change to update named projection: '.$name);
+        if ($found === false) {
+            throw new InMemoryProjectionFailed("Provide at least one change to update projection $projectionName");
         }
     }
 }

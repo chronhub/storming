@@ -7,13 +7,13 @@ namespace Storm\Projector\Repository;
 use Illuminate\Cache\RedisStore;
 use Illuminate\Contracts\Cache\Repository;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\ProjectionData;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Exception\ProjectionAlreadyExists;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\Repository\Data\CreateData;
+use Storm\Projector\Repository\Data\ProjectionData;
 use Storm\Projector\Repository\Data\StartData;
 
 use function array_filter;

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Projector;
 
-interface ProjectionModel
+use JsonSerializable;
+
+interface ProjectionModel extends JsonSerializable
 {
     /**
      * Get the projection name.
