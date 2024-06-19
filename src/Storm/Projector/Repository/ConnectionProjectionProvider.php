@@ -105,13 +105,7 @@ final readonly class ConnectionProjectionProvider implements ProjectionProvider
             return null;
         }
 
-        return new Projection(
-            name: $projection->name,
-            status: $projection->status,
-            state: $projection->state,
-            checkpoint: $projection->checkpoint,
-            lockedUntil: $projection->locked_until,
-        );
+        return ProjectionFactory::make($projection);
     }
 
     public function filterByNames(string ...$projectionNames): array
