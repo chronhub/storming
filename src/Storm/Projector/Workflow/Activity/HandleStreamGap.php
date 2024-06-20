@@ -23,6 +23,7 @@ final class HandleStreamGap
                 // sleep and decrement retries left
                 $hub->notify(SleepOnGap::class);
 
+                // when a batch has been reset, it already has been stored
                 if (! $hub->expect(IsBatchReset::class)) {
                     $hub->trigger(new ProjectionStored());
                 }
