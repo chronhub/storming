@@ -38,7 +38,7 @@ final class LoadStreams
 
         $streams = $this->collectStreams($checkpoints);
 
-        if ($streams) {
+        if ($streams instanceof Collection) {
             $streams = new MergeStreamIterator($this->clock, $streams);
         }
 
@@ -48,15 +48,15 @@ final class LoadStreams
     }
 
     /**
-     * @param  array<string, Checkpoint>               $streams
+     * @param  array<string, Checkpoint>               $checkpoints
      * @return null|Collection<string, StreamIterator>
      */
-    private function collectStreams(array $streams): ?Collection
+    private function collectStreams(array $checkpoints): ?Collection
     {
         $streamEvents = new Collection();
 
-        foreach ($streams as $streamName => $stream) {
-            $queryFilter = ($this->queryFilterResolver)($streamName, $stream->position + 1, $this->loadLimiter);
+        foreach ($checkpoints as $streamName => $checkpoint) {
+            $queryFilter = ($this->queryFilterResolver)($streamName, $checkpoint->position + 1, $this->loadLimiter);
 
             try {
                 $events = $this->chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
