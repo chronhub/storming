@@ -75,6 +75,10 @@ final class MergeStreamIterator implements Countable, Iterator
     }
 
     /**
+     * Returns the total number of events in all streams.
+     * The count decreases as events are iterated over,
+     * unless rewind() is called.
+     *
      * @phpstan-impure
      */
     public function count(): int
