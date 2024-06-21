@@ -7,7 +7,7 @@ namespace Storm\Stream;
 use InvalidArgumentException;
 use Stringable;
 
-final class StreamName implements Stringable
+final readonly class StreamName implements Stringable
 {
     public function __construct(public string $name)
     {
