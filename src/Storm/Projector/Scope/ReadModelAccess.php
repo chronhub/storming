@@ -17,7 +17,7 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
     use ScopeBehaviour;
 
     public function __construct(
-        private readonly NotificationHub $hook,
+        private readonly NotificationHub $hub,
         private readonly ReadModel $readModel,
         private readonly SystemClock $clock
     ) {
@@ -25,7 +25,7 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
 
     public function stop(): void
     {
-        $this->hook->trigger(new ProjectionClosed());
+        $this->hub->trigger(new ProjectionClosed());
     }
 
     public function readModel(): ReadModel
@@ -35,14 +35,14 @@ final class ReadModelAccess implements ArrayAccess, ReadModelScope
 
     public function stack(string $operation, ...$arguments): self
     {
-        $this->readModel()->stack($operation, ...$arguments);
+        $this->readModel->stack($operation, ...$arguments);
 
         return $this;
     }
 
     public function streamName(): string
     {
-        return $this->hook->expect(CurrentProcessedStream::class);
+        return $this->hub->expect(CurrentProcessedStream::class);
     }
 
     public function clock(): SystemClock
