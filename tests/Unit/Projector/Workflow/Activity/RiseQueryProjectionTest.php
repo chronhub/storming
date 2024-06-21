@@ -16,7 +16,6 @@ beforeEach(function () {
 });
 
 test('discover new streams on first cycle', function () {
-
     $this->hub->expects('notifyWhen')
         ->once()
         ->withArgs(function (bool $notification, Closure $callback) {
@@ -40,7 +39,6 @@ test('discover new streams on first cycle', function () {
 });
 
 test('does not discover new streams when not on first cycle', function () {
-
     $this->hub->expects('notifyWhen')->once()->withArgs(
         fn (bool $notification) => $notification === false
     );
