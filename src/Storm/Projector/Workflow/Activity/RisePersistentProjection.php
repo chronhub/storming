@@ -8,14 +8,17 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Notification\Cycle\IsFirstCycle;
 use Storm\Projector\Workflow\Notification\Management\ProjectionRise;
 
-final class RisePersistentProjection
+final readonly class RisePersistentProjection
 {
-    use MonitorRemoteStatus;
+    public function __construct(
+        private DiscoverRemoteStatus $discoverRemoteStatus
+    ) {
+    }
 
     public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
         if ($hub->expect(IsFirstCycle::class)) {
-            if ($this->shouldStop($hub)) {
+            if ($this->discoverRemoteStatus->onlyOnce($hub)) {
                 return false;
             }
 

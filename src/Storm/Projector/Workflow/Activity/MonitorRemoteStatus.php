@@ -17,28 +17,20 @@ use Storm\Projector\Workflow\Notification\Status\CurrentStatus;
 
 trait MonitorRemoteStatus
 {
-    private bool $onRise = true;
-
     /**
-     * Stop projection early if remote status is stopping or deleting
+     * Disclose remote status and act accordingly
      */
-    public function shouldStop(NotificationHub $hub): bool
+    protected function disclosedRemoteStatus(NotificationHub $hub): bool
     {
-        $shouldStop = $this->discovering($hub);
+        $hub->trigger(new ProjectionStatusDisclosed());
 
-        $this->onRise = false;
-
-        return $shouldStop;
-    }
-
-    /**
-     * Refresh projection status at the end of each cycle
-     */
-    public function refreshStatus(NotificationHub $hub): void
-    {
-        $this->onRise = false;
-
-        $this->discovering($hub);
+        return match ($hub->expect(CurrentStatus::class)->value) {
+            ProjectionStatus::STOPPING->value => $this->onStopping($hub),
+            ProjectionStatus::RESETTING->value => $this->onResetting($hub),
+            ProjectionStatus::DELETING->value => $this->onDeleting($hub, false),
+            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting($hub, true),
+            default => false,
+        };
     }
 
     protected function onStopping(NotificationHub $hub): bool
@@ -68,21 +60,5 @@ trait MonitorRemoteStatus
         $hub->trigger(new ProjectionDiscarded($shouldDiscardEvents));
 
         return $this->onRise;
-    }
-
-    /**
-     * Discover remote status and act accordingly
-     */
-    protected function discovering(NotificationHub $hub): bool
-    {
-        $hub->trigger(new ProjectionStatusDisclosed());
-
-        return match ($hub->expect(CurrentStatus::class)->value) {
-            ProjectionStatus::STOPPING->value => $this->onStopping($hub),
-            ProjectionStatus::RESETTING->value => $this->onResetting($hub),
-            ProjectionStatus::DELETING->value => $this->onDeleting($hub, false),
-            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting($hub, true),
-            default => false,
-        };
     }
 }

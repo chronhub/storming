@@ -7,11 +7,13 @@ namespace Storm\Projector\Factory;
 use Storm\Contract\Projector\ProjectorScope;
 use Storm\Contract\Projector\Subscriptor;
 use Storm\Projector\Workflow\Activity\CycleObserver;
+use Storm\Projector\Workflow\Activity\DiscoverRemoteStatus;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
 use Storm\Projector\Workflow\Activity\HandleStreamEvent;
 use Storm\Projector\Workflow\Activity\HandleStreamGap;
 use Storm\Projector\Workflow\Activity\PersistOrUpdate;
 use Storm\Projector\Workflow\Activity\RefreshProjection;
+use Storm\Projector\Workflow\Activity\RefreshRemoteStatus;
 use Storm\Projector\Workflow\Activity\RisePersistentProjection;
 
 final readonly class PersistentActivityFactory extends AbstractActivityFactory
@@ -22,13 +24,16 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory
 
         return [
             fn (): callable => new CycleObserver(),
-            fn (): callable => new RisePersistentProjection(),
+            fn (): callable => new RisePersistentProjection(new DiscoverRemoteStatus()),
             fn (): callable => $this->createStreamLoader($subscriptor),
             fn (): callable => new HandleStreamEvent($eventProcessor),
             fn (): callable => new HandleStreamGap(),
             fn (): callable => new PersistOrUpdate(),
             fn (): callable => new DispatchSignal($subscriptor->option()->getSignal()),
-            fn (): callable => new RefreshProjection($subscriptor->option()->getOnlyOnceDiscovery()),
+            fn (): callable => new RefreshProjection(
+                new RefreshRemoteStatus(),
+                $subscriptor->option()->getOnlyOnceDiscovery()
+            ),
         ];
     }
 }
