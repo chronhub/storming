@@ -10,7 +10,7 @@ use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\Header;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectorScope;
-use Storm\Projector\Checkpoint\GapType;
+use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Workflow\Notification\Batch\BatchIncremented;
 use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointInserted;
 use Storm\Projector\Workflow\Notification\Management\ProjectionPersistedWhenThresholdIsReached;
@@ -79,9 +79,10 @@ readonly class StreamEventReactor
 
     protected function hasNoGap(NotificationHub $hub, string $streamName, int $expectedPosition, string|DateTimeImmutable $eventTime): bool
     {
+        /** @var Checkpoint $checkpoint */
         $checkpoint = $hub->expect(new CheckpointInserted($streamName, $expectedPosition, $eventTime));
 
-        return $checkpoint->type === null || $checkpoint->type === GapType::IN_GAP;
+        return $checkpoint->isGap();
     }
 
     protected function getUserState(NotificationHub $hub): ?array

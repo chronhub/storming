@@ -9,7 +9,7 @@ use Illuminate\Support\Arr;
 use function array_merge;
 use function is_array;
 
-class ScopeState
+class UserStateScope
 {
     public function __construct(protected ?array $state = null)
     {
@@ -40,9 +40,14 @@ class ScopeState
         return $this;
     }
 
-    public function reset(): void
+    public function state(): ?array
     {
-        $this->state = null;
+        return $this->state;
+    }
+
+    public function has(string $field): bool
+    {
+        return Arr::has($this->state, $field);
     }
 
     private function updateUserState(string $field, $value, bool $increment): void

@@ -19,6 +19,14 @@ final readonly class Checkpoint implements JsonSerializable
     }
 
     /**
+     * Determine if the checkpoint is a gap.
+     */
+    public function isGap(): bool
+    {
+        return ! ($this->gapType === null || $this->gapType === GapType::IN_GAP);
+    }
+
+    /**
      * @return array{
      *     stream_name: string,
      *     position: int<0, max>,

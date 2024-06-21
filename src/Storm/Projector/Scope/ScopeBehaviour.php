@@ -25,17 +25,13 @@ trait ScopeBehaviour
 
     public function ack(string $event): ?static
     {
-        if ($this->isAcked) {
+        if ($this->isAcked || $event !== $this->event::class) {
             return null;
         }
 
-        if ($event === $this->event::class) {
-            $this->isAcked = true;
+        $this->isAcked = true;
 
-            return $this;
-        }
-
-        return null;
+        return $this;
     }
 
     public function ackOneOf(string ...$events): ?static
@@ -50,6 +46,26 @@ trait ScopeBehaviour
     public function isOf(string $event): bool
     {
         return $event === $this->event::class;
+    }
+
+    public function decrementState(string $field = 'count', int $value = -1): static
+    {
+        if ($value > 0) {
+            $value = -$value;
+        }
+
+        $this->updateUserState($field, $value, true);
+
+        return $this;
+    }
+
+    public function state(?Closure $callback = null): mixed
+    {
+        if ($callback === null) {
+            return $this->state;
+        }
+
+        return $callback($this->state);
     }
 
     public function incrementState(string $field = 'count', int $value = 1): static
