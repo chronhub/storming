@@ -9,6 +9,7 @@ use Illuminate\Support\Arr;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Projector\Exception\RuntimeException;
 
+use function array_key_exists;
 use function array_merge;
 use function array_walk;
 use function in_array;
@@ -101,11 +102,11 @@ trait ScopeBehaviour
 
     public function event(): DomainEvent
     {
-        if (! $this->isAcked) {
-            throw new RuntimeException('Event must be acked before returning it');
+        if ($this->isAcked) {
+            return $this->event;
         }
 
-        return $this->event;
+        throw new RuntimeException('Event must be acked before returning it');
     }
 
     public function getState(): ?array
@@ -120,7 +121,7 @@ trait ScopeBehaviour
 
     public function offsetExists(mixed $offset): bool
     {
-        return isset($this->state[$offset]);
+        return array_key_exists($offset, $this->state);
     }
 
     public function offsetGet(mixed $offset): mixed
@@ -139,6 +140,9 @@ trait ScopeBehaviour
     }
 
     /**
+     * Set the event and state for the scope.
+     * And return a closure to reset the scope.
+     *
      * @internal
      */
     public function __invoke(DomainEvent $event, ?array $state): Closure
@@ -157,8 +161,8 @@ trait ScopeBehaviour
     {
         $oldValue = data_get($this->state, $field);
 
-        $withIncrement = $increment ? $oldValue + $value : $value;
+        $withValue = $increment ? $oldValue + $value : $value;
 
-        Arr::set($this->state, $field, $withIncrement);
+        Arr::set($this->state, $field, $withValue);
     }
 }
