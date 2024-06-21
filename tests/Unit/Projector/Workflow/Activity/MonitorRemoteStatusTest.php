@@ -18,192 +18,177 @@ use Storm\Projector\Workflow\Notification\Management\ProjectionSynchronized;
 use Storm\Projector\Workflow\Notification\Sprint\IsSprintDaemonize;
 use Storm\Projector\Workflow\Notification\Status\CurrentStatus;
 
-function getInstance(): object
+dataset('selected status', [
+    'stopping' => fn () => ProjectionStatus::STOPPING,
+    'deleting' => fn () => ProjectionStatus::DELETING,
+    'deleting with emitted events' => fn () => ProjectionStatus::DELETING_WITH_EMITTED_EVENTS,
+    'running' => fn () => ProjectionStatus::RUNNING,
+    'idle' => fn () => ProjectionStatus::IDLE,
+]);
+
+function getInstance(bool $onRise): object
 {
-    return new class
+    return new class($onRise)
     {
         use MonitorRemoteStatus;
 
-        public function isOnRise(): bool
+        public function __construct(public readonly bool $onRise)
         {
-            return $this->onRise;
+        }
+
+        public function handle(NotificationHub $hub): ?bool
+        {
+            $result = $this->disclosedRemoteStatus($hub);
+
+            return $this->onRise ? $result : null;
         }
     };
 }
 
-function discoverStatus(ProjectionStatus $status): Closure
+function discoverStatus(): Closure
 {
-    return function ($that) use ($status): void {
-        $that->hub->shouldReceive('trigger')->once()->with(
-            Mockery::on(fn ($trigger) => $trigger instanceof ProjectionStatusDisclosed)
+    return function ($hub, ProjectionStatus $status): void {
+        $hub->shouldReceive('trigger')->once()->with(
+            Mockery::on(fn (object $trigger) => $trigger instanceof ProjectionStatusDisclosed)
         );
 
-        $that->hub->shouldReceive('expect')->once()->with(
-            Mockery::on(fn ($notification) => $notification === CurrentStatus::class)
+        $hub->shouldReceive('expect')->once()->with(
+            Mockery::on(fn (string $notification) => $notification === CurrentStatus::class)
         )->andReturn($status);
     };
 }
 
 function assertStopping(): Closure
 {
-    return function ($that): void {
-        $firstExecution = $that->instance->isOnRise();
-
-        if ($firstExecution) {
-            $that->hub->shouldReceive('trigger')->once()->with(
+    return function ($hub, object $instance): void {
+        if ($instance->onRise) {
+            $hub->shouldReceive('trigger')->once()->with(
                 Mockery::on(fn ($trigger) => $trigger instanceof ProjectionSynchronized)
             );
         }
 
-        $that->hub->shouldReceive('trigger')->once()->with(
+        $hub->shouldReceive('trigger')->once()->with(
             Mockery::on(fn ($trigger) => $trigger instanceof ProjectionClosed)
         );
 
-        if ($firstExecution) {
-            $shouldStop = $that->instance->shouldStop($that->hub);
+        $result = $instance->handle($hub);
 
-            expect($shouldStop)->toBe($firstExecution);
-        } else {
-            $that->instance->refreshStatus($that->hub);
-        }
-
-        expect($that->instance->isOnRise())->toBeFalse();
+        $instance->onRise
+            ? expect($result)->toBe($instance->onRise)
+            : expect($result)->toBeNull();
     };
 }
 
-function assertResetting(bool $firstExecution, bool $runInBackground): Closure
+function assertResetting(): Closure
 {
-    return function ($that) use ($firstExecution, $runInBackground): void {
-        $that->hub->shouldReceive('trigger')->once()->with(
+    return function ($hub, $instance, $runInBackground): void {
+        $hub->shouldReceive('trigger')->once()->with(
             Mockery::on(fn ($trigger) => $trigger instanceof ProjectionRevised)
         );
 
-        if (! $firstExecution) {
-            $that->hub->shouldReceive('expect')->once()->with(
+        if (! $instance->onRise) {
+            $hub->shouldReceive('expect')->once()->with(
                 Mockery::on(fn ($notification) => $notification === IsSprintDaemonize::class)
-            )->willReturn($runInBackground);
+            )->andReturn($runInBackground);
 
             if ($runInBackground) {
-                $that->hub->shouldReceive('trigger')->once()->with(
+                $hub->shouldReceive('trigger')->once()->with(
                     Mockery::on(fn ($trigger) => $trigger instanceof ProjectionRestarted)
                 );
             }
         }
 
-        if ($firstExecution) {
-            $shouldStop = $that->instance->shouldStop($that->hub);
+        $result = $instance->handle($hub);
 
-            expect($shouldStop)->toBeFalse();
-        } else {
-            $that->instance->refreshStatus($that->hub);
-        }
-
-        expect($that->instance->isOnRise())->toBeFalse();
+        $instance->onRise
+            ? expect($result)->toBeFalse()
+            : expect($result)->toBeNull();
     };
 }
 
-function assertDeleting(bool $withEmittedEvents): Closure
+function assertDeleting(): Closure
 {
-    return function ($that) use ($withEmittedEvents): void {
-        $firstExecution = $that->instance->isOnRise();
-
-        $that->hub->shouldReceive('trigger')->once()->with(
-            Mockery::on(fn ($trigger) => $trigger instanceof ProjectionDiscarded && $trigger->withEmittedEvents === $withEmittedEvents)
+    return function ($hub, $instance, bool $withEmittedEvents): void {
+        $hub->shouldReceive('trigger')->once()->with(
+            Mockery::on(fn (object $trigger) => $trigger instanceof ProjectionDiscarded && $trigger->withEmittedEvents === $withEmittedEvents)
         );
 
-        if ($firstExecution) {
-            $shouldStop = $that->instance->shouldStop($that->hub);
-            expect($shouldStop)->toBe($firstExecution);
-        } else {
-            $that->instance->refreshStatus($that->hub);
-        }
+        $result = $instance->handle($hub);
 
-        expect($that->instance->isOnRise())->toBeFalse();
+        $instance->onRise
+            ? expect($result)->toBeTrue()
+            : expect($result)->toBeNull();
     };
 }
 
 beforeEach(function () {
-    $this->instance = getInstance();
     $this->hub = mock(NotificationHub::class);
 });
 
-test('default instance', function () {
-    expect($this->instance->isOnRise())->toBeTrue();
-});
-
 test('should stop depends on disclosed status', function (ProjectionStatus $status) {
-    expect($this->instance->isOnRise())->toBeTrue();
+    $instance = getInstance(true);
 
-    discoverStatus($status)($this);
+    discoverStatus()($this->hub, $status);
 
     switch ($status) {
         case ProjectionStatus::STOPPING:
-            assertStopping()($this);
+            assertStopping()($this->hub, $instance);
 
             break;
 
         case ProjectionStatus::DELETING:
-            assertDeleting(false)($this);
+            assertDeleting()($this->hub, $instance, false);
 
             break;
 
         case ProjectionStatus::DELETING_WITH_EMITTED_EVENTS:
-            assertDeleting(true)($this);
+            assertDeleting()($this->hub, $instance, true);
 
             break;
 
         default:
-            $shouldStop = $this->instance->shouldStop($this->hub);
+            $result = $instance->handle($this->hub);
 
-            expect($shouldStop)->toBeFalse()
-                ->and($this->instance->isOnRise())->toBeFalse();
+            expect($result)->toBeFalse();
     }
-})->with([
-    ProjectionStatus::STOPPING,
-    ProjectionStatus::DELETING,
-    ProjectionStatus::DELETING_WITH_EMITTED_EVENTS,
-    ProjectionStatus::RUNNING,
-    ProjectionStatus::IDLE,
-]);
+})->with('selected status');
 
 test('never stop projection on discovering resetting status', function (bool $keepRunning) {
-    expect($this->instance->isOnRise())->toBeTrue();
+    $instance = getInstance(false);
 
-    discoverStatus(ProjectionStatus::RESETTING)($this);
+    discoverStatus()($this->hub, ProjectionStatus::RESETTING);
 
-    assertResetting(true, $keepRunning)($this);
-})->with([true, false]);
+    assertResetting()($this->hub, $instance, $keepRunning);
+})->with([
+    'keep running' => fn () => true,
+    'run once' => fn () => false,
+]);
 
 test('refresh status at the end of each cycle', function (ProjectionStatus $status) {
-    expect($this->instance->isOnRise())->toBeTrue();
+    $instance = getInstance(false);
+    expect($instance->onRise)->toBeFalse();
 
-    discoverStatus($status)($this);
+    discoverStatus()($this->hub, $status);
 
     switch ($status) {
         case ProjectionStatus::STOPPING:
-            assertStopping()($this);
+            assertStopping()($this->hub, $instance);
 
             break;
 
         case ProjectionStatus::DELETING:
-            assertDeleting(false)($this);
+            assertDeleting()($this->hub, $instance, false);
 
             break;
 
         case ProjectionStatus::DELETING_WITH_EMITTED_EVENTS:
-            assertDeleting(true)($this);
+            assertDeleting()($this->hub, $instance, true);
 
             break;
 
         default:
-            $this->instance->refreshStatus($this->hub);
+            $result = $instance->handle($this->hub);
 
-            expect($this->instance->isOnRise())->toBeFalse();
+            expect($result)->toBeNull();
     }
-})->with([
-    ProjectionStatus::STOPPING,
-    ProjectionStatus::DELETING,
-    ProjectionStatus::DELETING_WITH_EMITTED_EVENTS,
-    ProjectionStatus::RUNNING,
-    ProjectionStatus::IDLE,
-]);
+})->with('selected status');
