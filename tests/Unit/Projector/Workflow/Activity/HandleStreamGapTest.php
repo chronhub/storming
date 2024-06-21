@@ -23,26 +23,16 @@ test('sleep on gap and store projection depends on batch is reset', function (bo
             return $hasGap === true;
         });
 
-    $hub->shouldReceive('expect')
-        ->once()
-        ->with(HasGap::class)
-        ->andReturn(true);
-
-    $hub->shouldReceive('notify')
-        ->once()
-        ->with(SleepOnGap::class);
-
-    $hub->shouldReceive('expect')
-        ->once()
-        ->with(IsBatchReset::class)
-        ->andReturn($resetBatch);
+    $hub->shouldReceive('expect')->once()->with(HasGap::class)->andReturn(true);
+    $hub->shouldReceive('notify')->once()->with(SleepOnGap::class);
+    $hub->shouldReceive('expect')->once()->with(IsBatchReset::class)->andReturn($resetBatch);
 
     if ($resetBatch) {
         $hub->shouldReceive('trigger')->never();
     } else {
-        $hub->shouldReceive('trigger')
-            ->once()
-            ->withArgs(fn (object $trigger) => $trigger instanceof ProjectionStored);
+        $hub->shouldReceive('trigger')->once()->withArgs(
+            fn (object $trigger) => $trigger instanceof ProjectionStored
+        );
     }
 
     $next = fn ($hub) => true;
@@ -57,15 +47,11 @@ test('sleep on gap and store projection depends on batch is reset', function (bo
 test('skip activity when no gap has been detected', function () {
     $hub = mock(NotificationHub::class);
 
-    $hub->shouldReceive('notifyWhen')
-        ->once()
-        ->withArgs(fn (bool $hasGap) => $hasGap === false);
+    $hub->shouldReceive('notifyWhen')->once()->withArgs(
+        fn (bool $hasGap) => $hasGap === false
+    );
 
-    $hub->shouldReceive('expect')
-        ->once()
-        ->with(HasGap::class)
-        ->andReturn(false);
-
+    $hub->shouldReceive('expect')->once()->with(HasGap::class)->andReturn(false);
     $hub->shouldReceive('notify')->never()->with(IsBatchReset::class);
     $hub->shouldReceive('notify')->never()->with(SleepOnGap::class);
     $hub->shouldReceive('trigger')->never();

@@ -41,20 +41,12 @@ test('discover new streams on first cycle', function () {
 
 test('does not discover new streams when not on first cycle', function () {
 
-    $this->hub->expects('notifyWhen')
-        ->once()
-        ->withArgs(function (bool $notification) {
-            return $notification === false;
-        });
+    $this->hub->expects('notifyWhen')->once()->withArgs(
+        fn (bool $notification) => $notification === false
+    );
 
-    $this->hub->expects('expect')
-        ->once()
-        ->with(IsFirstCycle::class)
-        ->andReturn(false);
-
-    $this->hub->expects('notify')
-        ->never()
-        ->with(EventStreamDiscovered::class);
+    $this->hub->expects('expect')->once()->with(IsFirstCycle::class)->andReturn(false);
+    $this->hub->expects('notify')->never()->with(EventStreamDiscovered::class);
 
     $return = ($this->activity)($this->hub, fn ($hub) => true);
 
