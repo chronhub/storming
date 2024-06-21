@@ -9,9 +9,9 @@ use Storm\Contract\Projector\LoadLimiterProjectionQueryFilter;
 use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\StreamNameAwareQueryFilter;
 
-class QueryFilterResolver
+readonly class QueryFilterResolver
 {
-    public function __construct(private readonly QueryFilter $queryFilter)
+    public function __construct(private QueryFilter $queryFilter)
     {
     }
 

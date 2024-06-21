@@ -26,7 +26,7 @@ dataset('selected status', [
     'idle' => fn () => ProjectionStatus::IDLE,
 ]);
 
-function getInstance(bool $onRise): object
+function getNewInstance(bool $onRise): object
 {
     return new class($onRise)
     {
@@ -126,7 +126,7 @@ beforeEach(function () {
 });
 
 test('should stop depends on disclosed status', function (ProjectionStatus $status) {
-    $instance = getInstance(true);
+    $instance = getNewInstance(true);
 
     discoverStatus()($this->hub, $status);
 
@@ -154,7 +154,7 @@ test('should stop depends on disclosed status', function (ProjectionStatus $stat
 })->with('selected status');
 
 test('never stop projection on discovering resetting status', function (bool $keepRunning) {
-    $instance = getInstance(false);
+    $instance = getNewInstance(false);
 
     discoverStatus()($this->hub, ProjectionStatus::RESETTING);
 
@@ -165,7 +165,7 @@ test('never stop projection on discovering resetting status', function (bool $ke
 ]);
 
 test('refresh status at the end of each cycle', function (ProjectionStatus $status) {
-    $instance = getInstance(false);
+    $instance = getNewInstance(false);
     expect($instance->onRise)->toBeFalse();
 
     discoverStatus()($this->hub, $status);
