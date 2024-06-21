@@ -79,8 +79,10 @@ readonly class StreamEventReactor
 
     protected function hasNoGap(NotificationHub $hub, string $streamName, int $expectedPosition, string|DateTimeImmutable $eventTime): bool
     {
+        $notification = new CheckpointInserted($streamName, $expectedPosition, $eventTime);
+
         /** @var Checkpoint $checkpoint */
-        $checkpoint = $hub->expect(new CheckpointInserted($streamName, $expectedPosition, $eventTime));
+        $checkpoint = $hub->expect($notification);
 
         return $checkpoint->isGap();
     }

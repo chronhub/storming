@@ -50,22 +50,21 @@ trait ScopeBehaviour
 
     public function decrementState(string $field = 'count', int $value = -1): static
     {
-        if ($value > 0) {
-            $value = -$value;
-        }
-
-        $this->updateUserState($field, $value, true);
+        $this->updateUserState($field, $value > 0 ? -$value : $value, true);
 
         return $this;
     }
 
-    public function state(?Closure $callback = null): mixed
+    public function access(): mixed
     {
-        if ($callback === null) {
-            return $this->state;
-        }
+        return $this->state;
+    }
 
-        return $callback($this->state);
+    public function through(Closure $callback): static
+    {
+        $callback($this->state);
+
+        return $this;
     }
 
     public function incrementState(string $field = 'count', int $value = 1): static
@@ -95,6 +94,10 @@ trait ScopeBehaviour
 
     public function when(bool $condition, null|callable|array $callback = null, null|callable|array $fallback = null): ?static
     {
+        if ($callback === null && $fallback === null) {
+            return $condition ? $this : null;
+        }
+
         $callbacks = Arr::wrap($condition && $callback !== null ? $callback : $fallback);
 
         array_walk($callbacks, fn (callable $callback) => $callback($this));

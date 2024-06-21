@@ -49,7 +49,12 @@ interface ProjectorScope
     public function mergeState(string $field, mixed $value): static;
 
     /**
-     * Apply the callback on truthy condition or the fallback applied.
+     * Apply the callback on truthy condition or the fallback applied if provided.
+     * When the callback and fallback are null, it returns static if the condition is true,
+     * otherwise, it returns null.
+     *
+     * @param callable|array{callable}|null $callback
+     * @param callable|array{callable}|null $fallback
      */
     public function when(bool $condition, null|callable|array $callback = null, null|callable|array $fallback = null): ?static;
 
@@ -60,6 +65,8 @@ interface ProjectorScope
 
     /**
      * Match the condition
+     *
+     * @deprecated Use `when()` method instead with null callback and fallback
      */
     public function match(bool $condition): ?static;
 
