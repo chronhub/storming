@@ -65,6 +65,8 @@ readonly class StreamEventReactor
 
         ($this->reactors)($this->scope);
 
+        // Update user state if it was initialized,
+        // no matter if the event was acked or not
         $this->updateUserState($hub, $initializedState, $this->scope->getState());
 
         $hub->notifyWhen(
