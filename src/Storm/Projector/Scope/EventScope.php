@@ -72,7 +72,13 @@ final class EventScope
     }
 
     /**
-     * @return mixed|static
+     * @template TEvent of DomainEvent
+     * @template TProjector of ProjectorScope
+     * @template TUserState of UserStateScope|null
+     * @template TReturn of mixed
+     *
+     * @param  Closure(TEvent, TProjector, TUserState): TReturn $callback
+     * @return static|TReturn
      */
     public function then(Closure $callback): mixed
     {
