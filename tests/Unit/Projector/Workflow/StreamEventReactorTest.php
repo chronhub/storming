@@ -33,10 +33,10 @@ beforeEach(function () {
 });
 
 dataset('projection running', ['still running' => [true],    'stopped' => [false]]);
-dataset('no gap', ['in gap' => [GapType::IN_GAP], 'null gap' => [null]]);
+dataset('no gap', ['null gap' => [null], 'in gap' => [GapType::IN_GAP]]);
 dataset('has gap', [GapType::UNRECOVERABLE_GAP, GapType::RECOVERABLE_GAP]);
 
-function expectGap(string $streamName, int $position, ?GapType $gapType): Closure
+function shouldExpectGap(string $streamName, int $position, ?GapType $gapType): Closure
 {
     return function ($that) use ($streamName, $position, $gapType): void {
         $checkpoint = CheckpointFactory::from(
@@ -58,7 +58,7 @@ function expectGap(string $streamName, int $position, ?GapType $gapType): Closur
     };
 }
 
-function expectUserState(?array $state): Closure
+function shouldInitUserState(?array $state): Closure
 {
     return function ($that) use ($state): void {
         $init = is_array($state);
@@ -86,8 +86,8 @@ it('react on event acked', function (bool $stillRunning, ?GapType $gapType) {
             });
     };
 
-    expectGap($streamName, $position, $gapType)($this);
-    expectUserState($userState)($this);
+    shouldExpectGap($streamName, $position, $gapType)($this);
+    shouldInitUserState($userState)($this);
 
     $this->hub->shouldReceive('notify')->with(BatchIncremented::class);
     $this->hub->shouldReceive('notify')->with(UserStateChanged::class, ['count' => 5]);
@@ -121,7 +121,7 @@ it('does not react when gap is found', function (GapType $gapType) {
     $streamName = 'stream-1';
     $position = 10;
 
-    expectGap($streamName, $position, $gapType)($this);
+    shouldExpectGap($streamName, $position, $gapType)($this);
 
     $this->hub->shouldNotReceive('expect')->with(IsUserStateInitialized::class);
     $this->hub->shouldNotReceive('expect')->with(CurrentUserState::class);
@@ -150,8 +150,8 @@ it('react on event but does notify of non acked event', function (bool $stillRun
         $scope->userState->increment(value: 20);
     };
 
-    expectGap($streamName, $position, $gapType)($this);
-    expectUserState($userState)($this);
+    shouldExpectGap($streamName, $position, $gapType)($this);
+    shouldInitUserState($userState)($this);
 
     $this->hub->shouldReceive('notify')->with(BatchIncremented::class);
     $this->hub->shouldReceive('notify')->with(UserStateChanged::class, ['count' => 20]);
@@ -193,8 +193,8 @@ it('react on acked event but does not notify null user state', function (bool $s
         expect($scope->userState)->toBeNull();
     };
 
-    expectGap($streamName, $position, $gapType)($this);
-    expectUserState(null)($this);
+    shouldExpectGap($streamName, $position, $gapType)($this);
+    shouldInitUserState(null)($this);
 
     $this->hub->shouldReceive('notify')->with(BatchIncremented::class);
     $this->hub->shouldNotReceive('notify')->with(UserStateChanged::class, []);

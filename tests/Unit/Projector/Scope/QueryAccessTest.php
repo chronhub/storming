@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Scope;
 
-use ArrayAccess;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\QueryProjectorScope;
@@ -19,8 +18,7 @@ beforeEach(function () {
 });
 
 test('default instance', function () {
-    expect($this->access)->toBeInstanceOf(QueryProjectorScope::class)
-        ->and($this->access)->toBeInstanceOf(ArrayAccess::class);
+    expect($this->access)->toBeInstanceOf(QueryProjectorScope::class);
 });
 
 it('stop projection', function () {
