@@ -5,12 +5,13 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow;
 
 use Closure;
-use DateTimeImmutable;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\Header;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Checkpoint\Checkpoint;
+use Storm\Projector\Scope\EventScope;
+use Storm\Projector\Scope\UserStateScope;
 use Storm\Projector\Workflow\Notification\Batch\BatchIncremented;
 use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointInserted;
 use Storm\Projector\Workflow\Notification\Management\ProjectionPersistedWhenThresholdIsReached;
@@ -20,7 +21,6 @@ use Storm\Projector\Workflow\Notification\UserState\CurrentUserState;
 use Storm\Projector\Workflow\Notification\UserState\IsUserStateInitialized;
 use Storm\Projector\Workflow\Notification\UserState\UserStateChanged;
 
-use function is_array;
 use function pcntl_signal_dispatch;
 
 readonly class StreamEventReactor
@@ -39,7 +39,9 @@ readonly class StreamEventReactor
     {
         $this->dispatchSignalIfRequested();
 
-        if (! $this->hasNoGap($hub, $streamName, $expectedPosition, $event->header(Header::EVENT_TIME))) {
+        $notification = new CheckpointInserted($streamName, $expectedPosition, $event->header(Header::EVENT_TIME));
+
+        if ($this->hasGap($hub, $notification)) {
             return false;
         }
 
@@ -59,45 +61,43 @@ readonly class StreamEventReactor
 
     protected function reactOn(NotificationHub $hub, DomainEvent $event): void
     {
-        $initializedState = $this->getUserState($hub);
+        $userState = $this->getUserState($hub);
+        $eventScope = new EventScope($event, $this->scope, $userState);
 
-        $resetScope = ($this->scope)($event, $initializedState);
+        ($this->reactors)($eventScope);
 
-        ($this->reactors)($this->scope);
-
-        // Update user state if it was initialized,
-        // no matter if the event was acked or not
-        $this->updateUserState($hub, $initializedState, $this->scope->getState());
+        $this->updateUserStateIfInitialized($hub, $userState);
 
         $hub->notifyWhen(
-            $this->scope->isAcked(),
+            $eventScope->isAcked(),
             fn (NotificationHub $hub) => $hub->notify(StreamEventAcked::class, $event::class)
         );
-
-        $resetScope();
     }
 
-    protected function hasNoGap(NotificationHub $hub, string $streamName, int $expectedPosition, string|DateTimeImmutable $eventTime): bool
+    protected function hasGap(NotificationHub $hub, CheckpointInserted $notification): bool
     {
-        $notification = new CheckpointInserted($streamName, $expectedPosition, $eventTime);
-
         /** @var Checkpoint $checkpoint */
         $checkpoint = $hub->expect($notification);
 
         return $checkpoint->isGap();
     }
 
-    protected function getUserState(NotificationHub $hub): ?array
+    protected function getUserState(NotificationHub $hub): ?UserStateScope
     {
-        return $hub->expect(IsUserStateInitialized::class)
-            ? $hub->expect(CurrentUserState::class) : null;
+        if (! $hub->expect(IsUserStateInitialized::class)) {
+            return null;
+        }
+
+        return new UserStateScope($hub->expect(CurrentUserState::class));
     }
 
-    protected function updateUserState(NotificationHub $hub, ?array $initializedState, ?array $userState): void
+    protected function updateUserStateIfInitialized(NotificationHub $hub, ?UserStateScope $userState): void
     {
-        if (is_array($initializedState) && is_array($userState)) {
-            $hub->notify(UserStateChanged::class, $userState);
-        }
+        // checkMe bring back original state and check equality to avoid unnecessary updates
+        $hub->notifyWhen(
+            $userState !== null,
+            fn (NotificationHub $hub) => $hub->notify(UserStateChanged::class, $userState->state())
+        );
     }
 
     protected function dispatchSignalIfRequested(): void

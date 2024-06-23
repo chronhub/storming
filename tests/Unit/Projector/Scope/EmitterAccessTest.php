@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Scope;
 
-use ArrayAccess;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\EmitterScope;
@@ -24,15 +23,14 @@ beforeEach(function () {
 dataset('stream names', ['stream-1', 'stream-2', 'stream-3']);
 
 test('default instance', function () {
-    expect($this->access)->toBeInstanceOf(EmitterScope::class)
-        ->and($this->access)->toBeInstanceOf(ArrayAccess::class);
+    expect($this->access)->toBeInstanceOf(EmitterScope::class);
 });
 
 it('emit event', function () {
     $event = mock(DomainEvent::class);
 
     $this->hub->expects('trigger')
-        ->withArgs(fn (object $e) => $e instanceof EventEmitted && $e->event === $event);
+        ->withArgs(fn (object $trigger) => $trigger instanceof EventEmitted && $trigger->event === $event);
 
     $this->access->emit($event);
 });
@@ -49,19 +47,19 @@ it('link event to stream', function (string $streamName) {
             }
         );
 
-    $this->access->linkTo('stream-1', $event);
+    $this->access->linkTo($streamName, $event);
 })->with('stream names');
 
 it('stop projection', function () {
     $this->hub->expects('trigger')
-        ->withArgs(fn (object $e) => $e instanceof ProjectionClosed);
+        ->withArgs(fn (object $trigger) => $trigger instanceof ProjectionClosed);
 
     $this->access->stop();
 });
 
 it('get current processed stream name', function (string $streamName) {
     $this->hub->expects('expect')
-        ->withArgs(fn (string $type) => $type === CurrentProcessedStream::class)
+        ->withArgs(fn (string $notification) => $notification === CurrentProcessedStream::class)
         ->andReturn($streamName);
 
     expect($this->access->streamName())->toBe($streamName);

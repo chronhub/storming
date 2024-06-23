@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Scope;
 
-use ArrayAccess;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\EmitterScope;
@@ -14,13 +13,11 @@ use Storm\Projector\Workflow\Notification\Management\EventLinkedTo;
 use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
 use Storm\Projector\Workflow\Notification\Stream\CurrentProcessedStream;
 
-final class EmitterAccess implements ArrayAccess, EmitterScope
+final readonly class EmitterAccess implements EmitterScope
 {
-    use ScopeBehaviour;
-
     public function __construct(
-        private readonly NotificationHub $hub,
-        private readonly SystemClock $clock
+        private NotificationHub $hub,
+        private SystemClock $clock
     ) {
     }
 

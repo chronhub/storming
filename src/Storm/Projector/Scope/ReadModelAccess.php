@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Scope;
 
-use ArrayAccess;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ReadModel;
@@ -12,14 +11,12 @@ use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
 use Storm\Projector\Workflow\Notification\Stream\CurrentProcessedStream;
 
-final class ReadModelAccess implements ArrayAccess, ReadModelScope
+final readonly class ReadModelAccess implements ReadModelScope
 {
-    use ScopeBehaviour;
-
     public function __construct(
-        private readonly NotificationHub $hub,
-        private readonly ReadModel $readModel,
-        private readonly SystemClock $clock
+        private NotificationHub $hub,
+        private ReadModel $readModel,
+        private SystemClock $clock
     ) {
     }
 

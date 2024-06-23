@@ -4,20 +4,17 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Scope;
 
-use ArrayAccess;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\QueryProjectorScope;
 use Storm\Projector\Workflow\Notification\Sprint\SprintStopped;
 use Storm\Projector\Workflow\Notification\Stream\CurrentProcessedStream;
 
-final class QueryAccess implements ArrayAccess, QueryProjectorScope
+final readonly class QueryAccess implements QueryProjectorScope
 {
-    use ScopeBehaviour;
-
     public function __construct(
-        private readonly NotificationHub $hub,
-        private readonly SystemClock $clock
+        private NotificationHub $hub,
+        private SystemClock $clock
     ) {
     }
 
