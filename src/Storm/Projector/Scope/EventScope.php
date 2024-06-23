@@ -18,8 +18,8 @@ final class EventScope
 
     public function __construct(
         private readonly DomainEvent $event,
-        private readonly ProjectorScope $scope,
-        private readonly ?UserStateScope $userState = null
+        public readonly ProjectorScope $projector,
+        public readonly ?UserStateScope $userState = null
     ) {
     }
 
@@ -71,28 +71,21 @@ final class EventScope
         return $this->isAcked ? $this->event : null;
     }
 
-    // return TValue|null
+    /**
+     * @return mixed|static
+     */
     public function then(Closure $callback): mixed
     {
         if (! $this->isAcked) {
-            return null;
+            return $this;
         }
 
-        return $callback($this->event, $this->scope, $this->userState);
-    }
-
-    /**
-     * Return the user state scope if it was initialized
-     * It allows altering the state even if the event was not acked
-     */
-    public function state(): ?UserStateScope
-    {
-        return $this->userState;
+        return $callback($this->event, $this->projector, $this->userState);
     }
 
     public function when(bool $condition, null|callable|array $callback = null, null|callable|array $fallback = null): ?self
     {
-        if (! $this->assertValidWhenCallbacks($callback, $fallback)) {
+        if (blank($callback) && blank($fallback)) {
             return $condition ? $this : null;
         }
 
@@ -101,18 +94,5 @@ final class EventScope
         array_walk($callbacks, fn (callable $callback) => $callback($this));
 
         return $this;
-    }
-
-    private function assertValidWhenCallbacks(null|callable|array $callback, null|callable|array $fallback): bool
-    {
-        if ($callback === null && $fallback === null) {
-            return false;
-        }
-
-        if ($callback === [] && $fallback === []) {
-            return false;
-        }
-
-        return true;
     }
 }

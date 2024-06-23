@@ -27,7 +27,7 @@ readonly class StreamEventReactor
 {
     public function __construct(
         protected Closure $reactors,
-        protected ProjectorScope $scope,
+        protected ProjectorScope $projector,
         protected bool $dispatchSignal
     ) {
     }
@@ -62,7 +62,7 @@ readonly class StreamEventReactor
     protected function reactOn(NotificationHub $hub, DomainEvent $event): void
     {
         $userState = $this->getUserState($hub);
-        $eventScope = new EventScope($event, $this->scope, $userState);
+        $eventScope = new EventScope($event, $this->projector, $userState);
 
         ($this->reactors)($eventScope);
 
@@ -93,7 +93,6 @@ readonly class StreamEventReactor
 
     protected function updateUserStateIfInitialized(NotificationHub $hub, ?UserStateScope $userState): void
     {
-        // checkMe bring back original state and check equality to avoid unnecessary updates
         $hub->notifyWhen(
             $userState !== null,
             fn (NotificationHub $hub) => $hub->notify(UserStateChanged::class, $userState->state())
