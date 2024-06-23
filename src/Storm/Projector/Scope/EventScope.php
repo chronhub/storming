@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Scope;
 
-use Closure;
 use Illuminate\Support\Arr;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\ProjectorScope;
@@ -77,10 +76,10 @@ final class EventScope
      * @template TUserState of UserStateScope|null
      * @template TReturn of mixed
      *
-     * @param  Closure(TEvent, TProjector, TUserState): TReturn $callback
+     * @param  callable(TEvent, TProjector, TUserState): TReturn $callback
      * @return static|TReturn
      */
-    public function then(Closure $callback): mixed
+    public function then(callable $callback): mixed
     {
         if (! $this->isAcked) {
             return $this;
