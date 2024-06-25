@@ -69,6 +69,7 @@ final class SubscriptionMap
     private function withListeners(NotificationHub $hub): void
     {
         $hub->addListeners([
+            'foo' => 'bar',
             CycleBegan::class => WhenCycleBegin::class,
             CycleRenewed::class => WhenCycleRenewed::class,
             StreamIteratorSet::class => WhenBatchLoaded::class,

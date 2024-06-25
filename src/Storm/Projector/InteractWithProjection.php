@@ -69,6 +69,7 @@ trait InteractWithProjection
         );
     }
 
+    // fixMe default describeIfNeeded
     protected function describeIfNeeded(): void
     {
         if ($this->context->id() === null) {

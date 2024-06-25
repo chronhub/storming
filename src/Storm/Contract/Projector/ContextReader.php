@@ -8,24 +8,24 @@ use Closure;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Scope\EventScope;
 
 /**
- * @template TState of array|null
- * @template TReactor of array<ProjectorScope>
+ * @template TScope of EventScope
  */
 interface ContextReader extends Context
 {
     /**
      * Get the callback to initialize the state.
      *
-     * @return Closure():TState|null
+     * @return Closure():array|null
      */
     public function userState(): ?Closure;
 
     /**
-     * Get the event handlers as an array to be called when an event is received.
+     * Get the event handlers to be called when an event is received.
      *
-     * @return Closure(TReactor): void
+     * @return Closure(TScope): void
      *
      * @throws InvalidArgumentException When reactors are not set
      */
@@ -63,7 +63,7 @@ interface ContextReader extends Context
     public function id(): ?string;
 
     /**
-     * Get the condition to stop the projection.
+     * Get the conditions to stop the projection.
      *
      * @return array<string, callable>
      */

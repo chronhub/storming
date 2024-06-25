@@ -52,8 +52,6 @@ interface ProjectorSupervisorInterface
     /**
      * Get the projection state.
      *
-     * @return array<string|int,mixed>
-     *
      * @throws ProjectionNotFound
      */
     public function stateOf(string $projectionName): array;

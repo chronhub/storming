@@ -23,7 +23,7 @@ final class HubManager implements NotificationHub
     private array $hooks = [];
 
     /**
-     * @var Collection<string, array<string|callable>>
+     * @var Collection<class-string, array<class-string|callable-string|callable>>
      */
     private Collection $listeners;
 
@@ -57,25 +57,25 @@ final class HubManager implements NotificationHub
         }
     }
 
-    public function addListener(string $event, string|callable|array $callback): void
+    public function addListener(string $listener, string|callable|array $callback): void
     {
         $callbacks = Arr::wrap($callback);
 
-        $this->listeners = ! $this->listeners->has($event)
-            ? $this->listeners->put($event, $callbacks)
-            : $this->listeners->mergeRecursive([$event => $callback]);
+        $this->listeners = ! $this->listeners->has($listener)
+            ? $this->listeners->put($listener, $callbacks)
+            : $this->listeners->mergeRecursive([$listener => $callback]);
     }
 
     public function addListeners(array $listeners): void
     {
-        foreach ($listeners as $event => $callback) {
-            $this->addListener($event, $callback);
+        foreach ($listeners as $listener => $handler) {
+            $this->addListener($listener, $handler);
         }
     }
 
-    public function forgetListener(string $event): void
+    public function forgetListener(string $listener): void
     {
-        $this->listeners = $this->listeners->forget($event);
+        $this->listeners = $this->listeners->forget($listener);
     }
 
     public function forgetAll(): void
@@ -100,37 +100,37 @@ final class HubManager implements NotificationHub
         return $result;
     }
 
-    public function notify(string|object $event, mixed ...$arguments): void
+    public function notify(string|object $listener, mixed ...$arguments): void
     {
-        $this->expect($event, ...$arguments);
+        $this->expect($listener, ...$arguments);
     }
 
-    public function notifyMany(string|object ...$events): void
+    public function notifyMany(string|object ...$listeners): void
     {
-        foreach ($events as $event) {
-            $this->notify($event);
+        foreach ($listeners as $listener) {
+            $this->notify($listener);
         }
     }
 
-    public function notifyWhen(bool $condition, ?Closure $onSuccess = null, ?Closure $fallback = null): self
+    public function notifyWhen(bool $condition, ?Closure $onSuccess = null, ?Closure $onFailure = null): self
     {
-        value($condition ? $onSuccess : $fallback, $this);
+        value($condition ? $onSuccess : $onFailure, $this);
 
         return $this;
     }
 
-    private function handleListener(object $event, mixed $result): void
+    private function handleListener(object $listener, mixed $result): void
     {
-        foreach ($this->listeners->get($event::class, []) as $handler) {
+        foreach ($this->listeners->get($listener::class, []) as $handler) {
             if (is_string($handler)) {
                 $handler = new $handler();
             }
 
             if (! is_callable($handler)) {
-                throw new InvalidArgumentException('Event listener handler must be a callable for event '.$event::class);
+                throw new InvalidArgumentException('Event listener handler must be a callable for event '.$listener::class);
             }
 
-            $handler($this, $event, $result);
+            $handler($this, $listener, $result);
         }
     }
 

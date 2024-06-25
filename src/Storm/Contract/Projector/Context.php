@@ -7,20 +7,18 @@ namespace Storm\Contract\Projector;
 use Closure;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Workflow\HaltOn;
 
 /**
- * @template TInit of array
- * @template TWhen of ProjectorScope|ReadModelScope|EmitterScope|QueryProjectorScope
+ * @template TScope of EventScope
  */
 interface Context
 {
     /**
      * Sets the optional callback to initialize the state.
-     * checkMe: Do not use dot notation in array keys, as we use it internally.
-     * Wip unless we move to a collection object
      *
-     * @param Closure():TInit $userState
+     * @param Closure():array $userState
      *
      * @throws InvalidArgumentException When user state is already set
      *
@@ -55,7 +53,7 @@ interface Context
     /**
      * Sets the event handlers to be called when an event is received.
      *
-     * @param Closure(TWhen):void $reactors
+     * @param Closure(TScope): void $reactors
      *
      * @throws InvalidArgumentException When reactors are already set
      */
@@ -64,7 +62,7 @@ interface Context
     /**
      * Stop the projection when a condition is met.
      *
-     * @param  Closure(HaltOn):HaltOn $haltOn
+     * @param  Closure(HaltOn): HaltOn $haltOn
      * @return $this
      */
     public function haltOn(Closure $haltOn): self;

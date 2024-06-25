@@ -37,8 +37,8 @@ namespace Storm\Contract\Projector;
  * Note: when using withSleep, requested tokens cannot exceed the capacity of the bucket to avoid an infinite loop,
  * and the bucket is overflowed immediately.
  *
- * @property-read int|float $capacity
- * @property-read int|float $rate
+ * @property-read int<positive-int>|float $capacity
+ * @property-read int<positive-int>|float $rate
  */
 interface TokenBucket
 {

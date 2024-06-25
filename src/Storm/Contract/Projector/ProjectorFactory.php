@@ -5,17 +5,17 @@ declare(strict_types=1);
 namespace Storm\Contract\Projector;
 
 use Closure;
+use Storm\Projector\Scope\EventScope;
 
 /**
- * @template TInit of array
- * @template TWhen of array{ProjectorScope|EmitterScope|ReadModelScope|QueryProjectorScope}
+ * @template TScope of EventScope
  */
 interface ProjectorFactory extends Projector
 {
     /**
      * Proxy method to initialize the state.
      *
-     * @param Closure():TInit $userState
+     * @param Closure(): array $userState
      *
      * @see ContextReader::initialize()
      */
@@ -43,9 +43,9 @@ interface ProjectorFactory extends Projector
     public function subscribeToAll(): static;
 
     /**
-     * Proxy method to set the reactos.
+     * Proxy method to set the reactors.
      *
-     * @param Closure(TWhen): void $reactors
+     * @param Closure(TScope): void $reactors
      *
      * @see Context::when()
      */

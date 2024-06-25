@@ -8,10 +8,19 @@ use Symfony\Component\Serializer\Serializer;
 
 interface SubscriptionFactory
 {
+    /**
+     * Creates a query subscription.
+     */
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber;
 
+    /**
+     * Creates a read model projector subscription.
+     */
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber;
 
+    /**
+     * Creates a read model subscription.
+     */
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber;
 
     /**

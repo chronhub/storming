@@ -6,68 +6,82 @@ namespace Storm\Contract\Projector;
 
 use Closure;
 
+/**
+ * @template TListener of class-string|callable-string
+ * @template TLHandler of class-string|callable|array{callable-string|callable}
+ */
 interface NotificationHub
 {
     /**
-     * Add hook
+     * Add hook.
      *
      * @param class-string $hook
      */
     public function addHook(string $hook, callable $trigger): void;
 
     /**
-     * Add hooks
+     * Add hooks.
      *
      * @param array<class-string, callable> $hooks
      */
     public function addHooks(array $hooks): void;
 
     /**
-     * Trigger hook
+     * Trigger hook.
      */
     public function trigger(object $hook): void;
 
     /**
-     * Add listener
+     * Add listener.
+     *
+     * @param TListener $listener
+     * @param TLHandler $callback
      */
-    public function addListener(string $event, string|callable|array $callback): void;
+    public function addListener(string $listener, string|callable|array $callback): void;
 
     /**
      * Add listeners
      *
-     * @param array<class-string, string|callable> $listeners
+     * @param array<TListener, TLHandler> $listeners
      */
     public function addListeners(array $listeners): void;
 
     /**
-     * Forget the event and all its callbacks
+     * Forget the event and all its callbacks.
+     *
+     * @param TListener $listener
      */
-    public function forgetListener(string $event): void;
+    public function forgetListener(string $listener): void;
 
     /**
-     * Forget all events and all its callbacks
+     * Forget all listeners.
      */
     public function forgetAll(): void;
 
     /**
-     * Fire event and forget
-     */
-    public function notify(string|object $event, mixed ...$arguments): void;
-
-    /**
-     * Fire many events and forget
+     * Fire event and forget.
      *
-     * @param class-string|object ...$events
+     * @param TListener|object $listener
      */
-    public function notifyMany(string|object ...$events): void;
+    public function notify(string|object $listener, mixed ...$arguments): void;
 
     /**
-     * Fire event with condition and notify on success or fallback
+     * Fire many listeners and forget.
+     *
+     * @param TListener|object ...$listeners
      */
-    public function notifyWhen(bool $condition, ?Closure $onSuccess = null, ?Closure $fallback = null): self;
+    public function notifyMany(string|object ...$listeners): void;
 
     /**
-     * Fire event and wait for response
+     * Fire event with condition.
+     *
+     * @param Closure(self): void      $onSuccess
+     * @param null|Closure(self): void $onFailure
+     */
+    public function notifyWhen(bool $condition, Closure $onSuccess, ?Closure $onFailure = null): self;
+
+    /**
+     * Fire event and call handler.
      */
     public function expect(string|object $event, mixed ...$arguments): mixed;
 }

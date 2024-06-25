@@ -7,7 +7,7 @@ namespace Storm\Contract\Projector;
 interface QuerySubscriber extends Subscriber
 {
     /**
-     * Resets the stream positions nad user state.
+     * Resets the stream positions and user state.
      */
     public function resets(): void;
 }

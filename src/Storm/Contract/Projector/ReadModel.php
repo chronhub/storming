@@ -14,8 +14,7 @@ interface ReadModel extends StackedReadModel
     public function initialize(): void;
 
     /**
-     * Persist any changes made to the read model made
-     * by the stacked operations.
+     * Persist changes.
      */
     public function persist(): void;
 
