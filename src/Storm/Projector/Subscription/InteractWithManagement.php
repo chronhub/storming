@@ -72,11 +72,11 @@ trait InteractWithManagement
 
     public function synchronise(): void
     {
-        $projectionDetail = $this->projectionRepository->loadDetail();
+        $projectionResult = $this->projectionRepository->loadDetail();
 
-        $this->hub->notify(CheckpointUpdated::class, $projectionDetail->checkpoints);
+        $this->hub->notify(CheckpointUpdated::class, $projectionResult->checkpoints);
 
-        $state = $projectionDetail->userState;
+        $state = $projectionResult->userState;
 
         $this->hub->notifyWhen(
             $state !== [],
@@ -116,15 +116,17 @@ trait InteractWithManagement
     {
         $this->hub->notify(SprintContinue::class);
 
+        $currentStatus = $this->hub->expect(CurrentStatus::class);
+
         if (! $this->projectionRepository->exists()) {
-            $this->projectionRepository->create($this->hub->expect(CurrentStatus::class));
+            $this->projectionRepository->create($currentStatus);
         }
 
         $runningStatus = ProjectionStatus::RUNNING;
 
         $this->projectionRepository->start($runningStatus);
 
-        $this->onStatusChanged($runningStatus);
+        $this->onStatusChanged($runningStatus, $currentStatus);
     }
 
     protected function resetState(): void
@@ -132,12 +134,12 @@ trait InteractWithManagement
         $this->hub->notifyMany(CheckpointReset::class, UserStateRestored::class);
     }
 
-    protected function onStatusChanged(ProjectionStatus $status): void
+    protected function onStatusChanged(ProjectionStatus $newStatus, ?ProjectionStatus $previousStatus = null): void
     {
         $this->hub->notify(
             StatusChanged::class,
-            $this->hub->expect(CurrentStatus::class),
-            $status
+            $newStatus,
+            $previousStatus ?? $this->hub->expect(CurrentStatus::class)
         );
     }
 

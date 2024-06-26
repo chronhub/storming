@@ -10,8 +10,8 @@ use Storm\Projector\ProjectionStatus;
 final readonly class StatusChanged
 {
     public function __construct(
+        public ProjectionStatus $newStatus,
         public ProjectionStatus $oldStatus,
-        public ProjectionStatus $newStatus
     ) {
     }
 

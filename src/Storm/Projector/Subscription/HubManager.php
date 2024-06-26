@@ -37,6 +37,9 @@ final class HubManager implements NotificationHub
         $this->hooks[$hook][] = $trigger;
     }
 
+    // need to separate hooks and listeners
+    // listeners can be subscribed to multiple events
+
     public function addHooks(array $hooks): void
     {
         foreach ($hooks as $hook => $trigger) {
@@ -61,7 +64,7 @@ final class HubManager implements NotificationHub
     {
         $callbacks = Arr::wrap($callback);
 
-        $this->listeners = ! $this->listeners->has($listener)
+        $this->listeners = ! $this->hasListener($listener)
             ? $this->listeners->put($listener, $callbacks)
             : $this->listeners->mergeRecursive([$listener => $callback]);
     }
@@ -78,14 +81,16 @@ final class HubManager implements NotificationHub
         $this->listeners = $this->listeners->forget($listener);
     }
 
-    public function forgetAll(): void
+    public function hasListener(string|object $listener): bool
     {
-        $this->listeners = new Collection();
+        $listenerClass = is_object($listener) ? $listener::class : $listener;
+
+        return $this->listeners->has($listenerClass);
     }
 
-    public function expect(string|object $event, mixed ...$arguments): mixed
+    public function expect(string|object $listener, mixed ...$arguments): mixed
     {
-        $notification = $this->makeEvent($event, ...$arguments);
+        $notification = $this->makeEvent($listener, ...$arguments);
 
         $result = $this->subscriptor->capture($notification);
 

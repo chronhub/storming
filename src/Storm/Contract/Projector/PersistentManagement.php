@@ -55,7 +55,6 @@ interface PersistentManagement extends Management
 
     /**
      * Delete the projection with or without emitted events.
-     * Note it also deletes all snapshots taken for the current projection.
      */
     public function discard(bool $withEmittedEvents): void;
 

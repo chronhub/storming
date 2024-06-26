@@ -54,11 +54,6 @@ interface NotificationHub
     public function forgetListener(string $listener): void;
 
     /**
-     * Forget all listeners.
-     */
-    public function forgetAll(): void;
-
-    /**
      * Fire event and forget.
      *
      * @param TListener|object $listener
@@ -82,6 +77,16 @@ interface NotificationHub
 
     /**
      * Fire event and call handler.
+     * When a listener as object is passed, no arguments would be passed.
+     *
+     * @throw InvalidArgumentException when listener not found.
      */
-    public function expect(string|object $event, mixed ...$arguments): mixed;
+    public function expect(string|object $listener, mixed ...$arguments): mixed;
+
+    /**
+     * Check if listener exists.
+     *
+     * @param TListener|object $listener
+     */
+    public function hasListener(string|object $listener): bool;
 }

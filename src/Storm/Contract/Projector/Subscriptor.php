@@ -78,6 +78,8 @@ interface Subscriptor
 
     /**
      * Capture event and return the result if it can apply.
+     *
+     * @param callable(self): mixed|object $event
      */
     public function capture(callable|object $event): mixed;
 
