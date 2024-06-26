@@ -15,6 +15,8 @@ interface Subscriber
 
     /**
      * Interact with notification hub
+     *
+     * @param Closure(NotificationHub): mixed $callback
      */
     public function interact(Closure $callback): mixed;
 }
