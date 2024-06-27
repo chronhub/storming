@@ -12,6 +12,10 @@ beforeEach(function () {
     $this->detector = new StreamCategoryDetector();
 });
 
+test('default separator is a dash', function () {
+    expect($this->detector::CATEGORY_SEPARATOR)->toBe('-');
+});
+
 test('detect stream category from stream name', function (string $category, string $streamName) {
     $return = $this->detector->detect(new StreamName($streamName));
 
@@ -20,6 +24,7 @@ test('detect stream category from stream name', function (string $category, stri
     ['category' => 'foo', 'stream_name' => 'foo-bar'],
     ['category' => 'foo', 'stream_name' => 'foo-baz'],
     ['category' => 'foo', 'stream_name' => 'foo-bar-baz'],
+    ['category' => 'bar', 'stream_name' => 'bar-foo'],
 ]);
 
 test('does not detect stream category from stream name', function (string $streamName) {
