@@ -39,11 +39,9 @@ final class InMemoryEventStore implements InMemoryChronicler
     {
         $streamName = $stream->name;
 
-        $this->eventStreamProvider->createStream(
-            $streamName->name,
-            null,
-            $this->streamCategory->detect($streamName)
-        );
+        $category = $this->streamCategory->detect($streamName);
+
+        $this->eventStreamProvider->createStream($streamName->name, null, $category);
 
         $this->store($streamName, $stream->events());
     }
@@ -75,11 +73,6 @@ final class InMemoryEventStore implements InMemoryChronicler
         return $this->filter($streamName, $queryFilter);
     }
 
-    public function getStreams(): Collection
-    {
-        return $this->streams;
-    }
-
     public function filterStreams(string ...$streams): array
     {
         return $this->eventStreamProvider->filterByStreams($streams);
@@ -93,6 +86,11 @@ final class InMemoryEventStore implements InMemoryChronicler
     public function hasStream(StreamName $streamName): bool
     {
         return $this->eventStreamProvider->hasRealStreamName($streamName->name);
+    }
+
+    public function getStreams(): Collection
+    {
+        return $this->streams;
     }
 
     private function store(StreamName $streamName, iterable $events): void
