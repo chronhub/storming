@@ -15,6 +15,8 @@ use Storm\Stream\StreamName;
 interface ReadOnlyChronicler
 {
     /**
+     * Retrieve all events for the given stream.
+     *
      * @return Generator{DomainEvent}
      *
      * @throws StreamNotFound      when the stream does not exist
@@ -31,9 +33,18 @@ interface ReadOnlyChronicler
      */
     public function retrieveFiltered(StreamName $streamName, QueryFilter $queryFilter): Generator;
 
+    /**
+     * Retrieve filtered streams.
+     */
     public function filterStreams(string ...$streams): array;
 
+    /**
+     * Retrieve filtered categories.
+     */
     public function filterCategories(string ...$categories): array;
 
+    /**
+     * Check if the stream exists.
+     */
     public function hasStream(StreamName $streamName): bool;
 }

@@ -14,6 +14,8 @@ use Storm\Stream\StreamName;
 interface StreamEventConnectionLoader extends StreamEventLoader
 {
     /**
+     * Load events from a stream.
+     *
      * @return Generator<DomainEvent|array>
      *
      * @throws NoStreamEventReturn when no stream event return
