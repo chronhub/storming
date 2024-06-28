@@ -176,6 +176,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $gapDetector = $detectGap
             ? new GapDetector($option->getRetries())
             : new NoopGapDetector();
+        // disable detect gap for query raise exception cause of gaps
 
         // fixMe add boolean to enable/disable saving gaps remotely or in option
 

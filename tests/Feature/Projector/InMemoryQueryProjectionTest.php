@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector;
 
+use Storm\Chronicler\Direction;
+use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Message\DomainEvent;
+use Storm\Contract\Message\EventHeader;
 use Storm\Contract\Projector\QueryProjectorScope;
 use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Scope\UserStateScope;
@@ -65,7 +68,7 @@ test('query projection', function () {
             BalanceSubtracted::class,
             BalanceSubtracted::class,
         ],
-    ]);
+    ])->and($this->factory->projectionProvider->exists('balance'))->toBeFalse();
 });
 
 test('query projection with two streams', function () {
@@ -216,6 +219,65 @@ test('stop query projection', function () {
         'events' => [
             BalanceCreated::class,
             BalanceAdded::class,
+        ],
+    ]);
+});
+
+test('query projection with query filter and induce gap', function () {
+    //fixMe fails in memory cause of no op gap detector
+    // we introduce gaps here that could not be handled
+    // need a way to enable gap without saving it
+    $queryFilter = new class() implements InMemoryQueryFilter
+    {
+        public function orderBy(): Direction
+        {
+            return Direction::FORWARD;
+        }
+
+        public function apply(): callable
+        {
+            return fn (DomainEvent $event): bool => true;
+            //return fn (DomainEvent $event): bool => (int) $event->header(EventHeader::AGGREGATE_VERSION) >= 3;
+        }
+    };
+
+    $manager = $this->factory->createProjectorManager();
+
+    $balanceId = BalanceId::create();
+    $streamName = new StreamName('balance');
+    $store = new BalanceEventStore($this->factory->chronicler, $streamName, $balanceId);
+    $store
+        ->withBalanceCreated(1, 100)
+        ->withBalanceAdded(2, 200)
+        ->withBalanceSubtracted(3, 150)
+        ->withBalanceSubtracted(4, 50)
+        ->withBalanceSubtracted(5, 10);
+
+    $projector = $manager->newQueryProjector();
+
+    $reactors = function (EventScope $scope): void {
+        $scope
+            ->ack(BalanceSubtracted::class)
+            ?->then(function (DomainEvent $event, QueryProjectorScope $scope, UserStateScope $userState): void {
+                $userState
+                    ->increment()
+                    ->merge('events', [$event::class]);
+            });
+    };
+
+    $projector
+        ->initialize(fn (): array => ['count' => 0])
+        ->subscribeToStream('balance')
+        ->when($reactors)
+        ->filter($queryFilter)
+        ->run(false);
+
+    expect($projector->getState())->toBe([
+        'count' => 3,
+        'events' => [
+            BalanceSubtracted::class,
+            BalanceSubtracted::class,
+            BalanceSubtracted::class,
         ],
     ]);
 });

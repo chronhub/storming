@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Feature;
 
 use Illuminate\Contracts\Events\Dispatcher;
-use Illuminate\Events\Dispatcher as EventDispatcher;
+use Illuminate\Events\Dispatcher as IlluminateEventDispatcher;
 use Storm\Chronicler\InMemory\InMemoryEventStore;
 use Storm\Chronicler\InMemory\InMemoryEventStream;
 use Storm\Clock\PointInTime;
@@ -24,6 +24,7 @@ use Storm\Projector\ProjectorManager;
 use Storm\Projector\Repository\InMemoryProjectionProvider;
 use Storm\Stream\StreamCategoryDetector;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
 class InMemoryTestingFactory
@@ -112,12 +113,13 @@ class InMemoryTestingFactory
 
     public function setupSerializer(): void
     {
-        $this->serializer ??= new Serializer([], [new JsonEncoder()]);
+        $normalizers = [new JsonSerializableNormalizer()];
+        $this->serializer ??= new Serializer($normalizers, [new JsonEncoder()]);
     }
 
     public function setupDispatcher(): void
     {
-        $this->dispatcher ??= new EventDispatcher();
+        $this->dispatcher ??= new IlluminateEventDispatcher();
     }
 
     public function setupProjectionOption(): void
