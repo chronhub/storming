@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Scope;
 
+use ArrayAccess;
 use Illuminate\Support\Arr;
 
 use function array_key_exists;
 use function array_merge;
 use function is_array;
 
-class UserStateScope
+class UserStateScope implements ArrayAccess
 {
     public function __construct(
         protected array $state
@@ -48,6 +49,8 @@ class UserStateScope
 
     public function merge(string $field, mixed $value): self
     {
+        //fixMe if value is not array, it updates the field with the value
+        //force value to be an array
         $oldValue = data_get($this->state, $field);
 
         $withMerge = is_array($oldValue) ? array_merge($oldValue, Arr::wrap($value)) : $value;
@@ -81,5 +84,25 @@ class UserStateScope
         $withValue = $increment ? $oldValue + $value : $value;
 
         Arr::set($this->state, $field, $withValue);
+    }
+
+    public function offsetExists(mixed $offset): bool
+    {
+        return $this->has($offset);
+    }
+
+    public function offsetGet(mixed $offset): mixed
+    {
+        return $this->state[$offset] ?? null;
+    }
+
+    public function offsetSet(mixed $offset, mixed $value): void
+    {
+        $this->upsert($offset, $value);
+    }
+
+    public function offsetUnset(mixed $offset): void
+    {
+        $this->forget($offset);
     }
 }

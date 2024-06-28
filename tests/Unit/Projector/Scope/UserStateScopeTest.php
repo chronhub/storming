@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Scope;
 
+use ArrayAccess;
 use stdClass;
 use Storm\Projector\Scope\UserStateScope;
 
@@ -12,7 +13,7 @@ use function abs;
 test('default instance', function () {
     $scope = new UserStateScope([]);
 
-    expect($scope->state())->toBe([]);
+    expect($scope)->toBeInstanceOf(ArrayAccess::class)->and($scope->state())->toBe([]);
 });
 
 test('default instance with state', function (array $state) {
@@ -105,4 +106,41 @@ test('forget key state', function () {
 
     expect($return)->toBe($scope)
         ->and($scope->state())->toBe([]);
+});
+
+describe('test array access', function () {
+    test('offset exists', function () {
+        $scope = new UserStateScope(['key' => 'value']);
+
+        expect(isset($scope['key']))->toBeTrue()
+            ->and(isset($scope['unknown']))->toBeFalse();
+    });
+
+    test('offset get', function () {
+        $scope = new UserStateScope(['key' => 'value']);
+
+        expect($scope['key'])->toBe('value');
+    });
+
+    test('offset get with unknown field', function () {
+        $scope = new UserStateScope([]);
+
+        expect($scope['unknown'])->toBeNull();
+    });
+
+    test('offset set', function () {
+        $scope = new UserStateScope([]);
+
+        $scope['key'] = 'value';
+
+        expect($scope->state())->toBe(['key' => 'value']);
+    });
+
+    test('offset unset', function () {
+        $scope = new UserStateScope(['key' => 'value']);
+
+        unset($scope['key']);
+
+        expect($scope->state())->toBe([]);
+    });
 });
