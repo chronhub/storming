@@ -32,11 +32,6 @@ beforeEach(function () {
     // configure the option stubs
     $this->option->method('getBlockSize')->willReturn(100);
     $this->option->method('getSleep')->willReturn([100, 100]);
-    $this->option->method('getSnapshotInterval')->willReturn([
-        'position' => 100,
-        'time' => 100,
-        'usleep' => 100,
-    ]);
 
     $this->watcherManager = new WatcherManager($this->option, $this->eventStreamProvider, $this->clock);
 });

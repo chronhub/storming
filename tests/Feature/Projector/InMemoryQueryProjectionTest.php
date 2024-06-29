@@ -7,7 +7,6 @@ namespace Storm\Tests\Feature\Projector;
 use Storm\Chronicler\Direction;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Message\EventHeader;
 use Storm\Contract\Projector\QueryProjectorScope;
 use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Scope\UserStateScope;
@@ -224,9 +223,6 @@ test('stop query projection', function () {
 });
 
 test('query projection with query filter and induce gap', function () {
-    //fixMe fails in memory cause of no op gap detector
-    // we introduce gaps here that could not be handled
-    // need a way to enable gap without saving it
     $queryFilter = new class() implements InMemoryQueryFilter
     {
         public function orderBy(): Direction
@@ -236,8 +232,7 @@ test('query projection with query filter and induce gap', function () {
 
         public function apply(): callable
         {
-            return fn (DomainEvent $event): bool => true;
-            //return fn (DomainEvent $event): bool => (int) $event->header(EventHeader::AGGREGATE_VERSION) >= 3;
+            return fn (DomainEvent $event): bool => $event instanceof BalanceSubtracted;
         }
     };
 

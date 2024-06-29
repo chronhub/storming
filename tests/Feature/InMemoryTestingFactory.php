@@ -6,6 +6,7 @@ namespace Storm\Tests\Feature;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Events\Dispatcher as IlluminateEventDispatcher;
+use RuntimeException;
 use Storm\Chronicler\InMemory\InMemoryEventStore;
 use Storm\Chronicler\InMemory\InMemoryEventStream;
 use Storm\Clock\PointInTime;
@@ -24,7 +25,7 @@ use Storm\Projector\ProjectorManager;
 use Storm\Projector\Repository\InMemoryProjectionProvider;
 use Storm\Serializer\JsonSerializerFactory;
 use Storm\Stream\StreamCategoryDetector;
-use Symfony\Component\Serializer\SerializerInterface;
+use Symfony\Component\Serializer\Serializer;
 
 class InMemoryTestingFactory
 {
@@ -38,7 +39,7 @@ class InMemoryTestingFactory
 
     public ?Dispatcher $dispatcher = null;
 
-    public ?SerializerInterface $serializer = null;
+    public ?Serializer $serializer = null;
 
     public ?ProjectionOption $projectionOption = null;
 
@@ -112,9 +113,20 @@ class InMemoryTestingFactory
 
     public function setupSerializer(): void
     {
-        $factory = new JsonSerializerFactory();
+        if ($this->serializer) {
+            return;
+        }
 
-        $this->serializer ??= $factory->create();
+        $factory = new JsonSerializerFactory();
+        $serializer = $factory->create();
+
+        if (! $serializer instanceof Serializer) {
+            throw new RuntimeException(
+                'Testing serializer must be an instance of Symfony Serializer:'.Serializer::class
+            );
+        }
+
+        $this->serializer = $serializer;
     }
 
     public function setupDispatcher(): void
