@@ -18,25 +18,21 @@ final readonly class ProjectionOptionResolver
 
     public function __invoke(array $options = []): ProjectionOption
     {
-        if ($options !== []) {
-            return $this->mergeOptions($options);
-        }
-
-        if ($this->options instanceof ProjectionOption) {
+        if ($this->options instanceof ProjectionOptionImmutable) {
             return $this->options;
         }
 
-        return new DefaultOption(...$this->options);
+        if ($this->options instanceof ProjectionOption) {
+            return $options !== [] ? $this->mergeOptions($options) : $this->options;
+        }
+
+        return new DefaultOption(...(array_merge($this->options, $options)));
     }
 
     private function mergeOptions(array $options): ProjectionOption
     {
-        if ($this->options instanceof ProjectionOption && ! $this->options instanceof ProjectionOptionImmutable) {
-            $optionClass = get_class($this->options);
+        $optionClass = get_class($this->options);
 
-            return new $optionClass(...array_merge($this->options->jsonSerialize(), $options));
-        }
-
-        return new DefaultOption(...$options);
+        return new $optionClass(...array_merge($this->options->jsonSerialize(), $options));
     }
 }

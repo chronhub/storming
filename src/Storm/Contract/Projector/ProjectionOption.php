@@ -84,11 +84,12 @@ interface ProjectionOption extends JsonSerializable
 
     /**
      * Get retries in milliseconds when a gap detected
-     * Available for persistent projection
      *
-     * By now, two retries are mandatory,
+     * By now, two retries are mandatory when detect gap
      * as the last retry could be considered as an UnrecoverableGap
      * when halt is set to stop projection on an unrecoverable gap.
+     *
+     * To disable gap detection, set an empty array
      *
      * @see StopWatcher
      * @see HaltOn
@@ -122,15 +123,6 @@ interface ProjectionOption extends JsonSerializable
      * Available for persistent projection
      */
     public function getOnlyOnceDiscovery(): bool;
-
-    /**
-     * Get a snapshot interval periodically.
-     *
-     * Usleep meant for testing purpose and usleep while taking snapshot per interval
-     *
-     * @return array{position: null|positive-int, time: null|positive-int, usleep: null|positive-int}
-     */
-    public function getSnapshotInterval(): array;
 
     /**
      * Get sleep emitter on first commit in milliseconds.

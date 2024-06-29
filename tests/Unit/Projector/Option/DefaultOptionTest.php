@@ -1,0 +1,46 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Storm\Tests\Unit\Projector\Option;
+
+use JsonSerializable;
+use Storm\Contract\Projector\ProjectionOption;
+use Storm\Projector\Options\DefaultOption;
+
+test('default instance', function () {
+    $option = new DefaultOption();
+
+    expect($option)->toBeInstanceOf(ProjectionOption::class)
+        ->and($option)->toBeInstanceOf(JsonSerializable::class)
+        ->and($option->getSignal())->toBeFalse()
+        ->and($option->getCacheSize())->toBe(1000)
+        ->and($option->getBlockSize())->toBe(1000)
+        ->and($option->getSleep())->toBe([1, 5])
+        ->and($option->getTimeout())->toBe(10000)
+        ->and($option->getLockout())->toBe(1000000)
+        ->and($option->getLoadLimiter())->toBe(1000)
+        ->and($option->getSleepEmitterOnFirstCommit())->toBe(1000)
+        ->and($option->getOnlyOnceDiscovery())->toBeFalse()
+        ->and($option->getRetries())->toBe([0, 5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500])
+        ->and($option->getDetectionWindows())->toBeNull();
+});
+
+test('json serialize default instance', function () {
+    $option = new DefaultOption();
+
+    expect($option->jsonSerialize())
+        ->toBe([
+            'signal' => false,
+            'cacheSize' => 1000,
+            'blockSize' => 1000,
+            'timeout' => 10000,
+            'sleep' => [1, 5],
+            'lockout' => 1000000,
+            'retries' => [0, 5, 10, 25, 50, 100, 150, 200, 250, 300, 350, 400, 450, 500],
+            'detectionWindows' => null,
+            'loadLimiter' => 1000,
+            'onlyOnceDiscovery' => false,
+            'sleepEmitterOnFirstCommit' => 1000,
+        ]);
+});

@@ -19,7 +19,7 @@ final class InMemoryOption implements ProjectionOption
         protected readonly int $lockout = 0,
         protected readonly int $loadLimiter = 100,
         protected readonly int $sleepEmitterOnFirstCommit = 0,
-        array|string $retries = [1, 2],
+        array|string $retries = [],
         protected readonly ?string $detectionWindows = null,
         protected readonly bool $onlyOnceDiscovery = false,
         protected readonly array $snapshotInterval = ['position' => 1000, 'time' => null, 'usleep' => null],
