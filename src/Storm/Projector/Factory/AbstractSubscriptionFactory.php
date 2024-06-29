@@ -47,7 +47,9 @@ use Storm\Projector\Workflow\DefaultContext;
 use Storm\Projector\Workflow\EmittedStream;
 use Storm\Projector\Workflow\InMemoryEmittedStreams;
 use Storm\Projector\Workflow\Watcher\WatcherManager;
-use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\DecoderInterface;
+use Symfony\Component\Serializer\Encoder\EncoderInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 {
@@ -58,7 +60,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         protected readonly ProjectionProvider $projectionProvider,
         protected readonly EventStreamProvider $eventStreamProvider,
         protected readonly SystemClock $clock,
-        protected readonly Serializer $serializer,
+        protected readonly SerializerInterface&EncoderInterface&DecoderInterface $serializer,
         protected readonly Dispatcher $dispatcher,
         protected readonly ?ProjectionQueryScope $queryScope = null,
         protected readonly ProjectionOption|array $options = [],
@@ -95,6 +97,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $this->createProjectionRepository($streamName, $option),
             $this->createStreamCache($option),
             new EmittedStream(),
+            $option->getSleepEmitterOnFirstCommit()
         );
 
         $this->subscribeToMap($management);
@@ -142,7 +145,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return $this->projectionProvider;
     }
 
-    public function getSerializer(): Serializer
+    public function getSerializer(): SerializerInterface&EncoderInterface&DecoderInterface
     {
         return $this->serializer;
     }

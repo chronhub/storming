@@ -10,14 +10,16 @@ use Storm\Contract\Projector\ProjectorSupervisorInterface;
 use Storm\Projector\Exception\ProjectionFailed;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\Repository\Data\UpdateStatusData;
-use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\DecoderInterface;
+use Symfony\Component\Serializer\Encoder\EncoderInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 use Throwable;
 
 final readonly class ProjectorSupervisor implements ProjectorSupervisorInterface
 {
     public function __construct(
         private ProjectionProvider $projectionProvider,
-        private Serializer $serializer,
+        private SerializerInterface&EncoderInterface&DecoderInterface $serializer,
     ) {
     }
 

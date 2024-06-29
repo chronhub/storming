@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Storm\Contract\Serializer;
 
 use Storm\Serializer\PayloadNormalizer;
+use Symfony\Component\Serializer\Encoder\DecoderInterface;
+use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
 use Symfony\Component\Serializer\Normalizer\DateTimeNormalizer;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
@@ -47,7 +49,7 @@ interface JsonSerializer
     /**
      * Create a new serializer instance.
      */
-    public function create(): SerializerInterface;
+    public function create(): SerializerInterface&EncoderInterface&DecoderInterface;
 
     /**
      * Get the json encoder.

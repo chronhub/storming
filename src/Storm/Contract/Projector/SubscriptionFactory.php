@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Projector;
 
-use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\DecoderInterface;
+use Symfony\Component\Serializer\Encoder\EncoderInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 interface SubscriptionFactory
 {
@@ -45,7 +47,7 @@ interface SubscriptionFactory
     /**
      * Get the projection serializer.
      */
-    public function getSerializer(): Serializer;
+    public function getSerializer(): SerializerInterface&EncoderInterface&DecoderInterface;
 
     /**
      * Get the projection query scope.

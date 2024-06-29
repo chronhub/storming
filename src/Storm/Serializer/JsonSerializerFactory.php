@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Storm\Serializer;
 
 use Storm\Contract\Serializer\JsonSerializer;
+use Symfony\Component\Serializer\Encoder\DecoderInterface;
+use Symfony\Component\Serializer\Encoder\EncoderInterface;
 use Symfony\Component\Serializer\Encoder\JsonDecode;
 use Symfony\Component\Serializer\Encoder\JsonEncode;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
@@ -61,7 +63,7 @@ final class JsonSerializerFactory implements JsonSerializer
         return $this;
     }
 
-    public function create(): SerializerInterface
+    public function create(): SerializerInterface&EncoderInterface&DecoderInterface
     {
         $normalizers = $this->getNormalizers();
 
