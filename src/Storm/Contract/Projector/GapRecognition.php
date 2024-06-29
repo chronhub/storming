@@ -25,6 +25,8 @@ interface GapRecognition
 
     /**
      * Get retry left.
+     *
+     * @return int<0,max>
      */
     public function retryLeft(): int;
 

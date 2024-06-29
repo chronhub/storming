@@ -20,8 +20,11 @@ it('test default instance', function () {
 });
 
 it('test instance with no retries', function () {
-    new GapDetector([]);
-})->throws('Provide at least one retry duration');
+    $instance = new GapDetector([]);
+
+    expect($instance->hasRetry())->toBeFalse()
+        ->and($instance->retryLeft())->toBe(0);
+});
 
 it('increment retries', function () {
     $instance = new GapDetector([1, 2]);
