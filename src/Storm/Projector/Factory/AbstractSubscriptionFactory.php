@@ -27,7 +27,6 @@ use Storm\Contract\Projector\Subscriptor;
 use Storm\Projector\Checkpoint\CheckpointStore;
 use Storm\Projector\Checkpoint\GapDetector;
 use Storm\Projector\Checkpoint\GapRules;
-use Storm\Projector\Checkpoint\NoopGapDetector;
 use Storm\Projector\Options\ProjectionOptionResolver;
 use Storm\Projector\Repository\EventDispatcherRepository;
 use Storm\Projector\Repository\LockManager;
@@ -74,7 +73,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
     {
-        $subscriptor = $this->buildSubscription($option, false);
+        $subscriptor = $this->buildSubscription($option);
         $hub = $this->createNotificationManager($subscriptor);
         $management = new QueryingManagement($hub);
 
@@ -88,7 +87,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
     {
-        $subscriptor = $this->buildSubscription($option, true);
+        $subscriptor = $this->buildSubscription($option);
         $hub = $this->createNotificationManager($subscriptor);
 
         $management = new EmittingManagement(
@@ -112,7 +111,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
     {
-        $subscriptor = $this->buildSubscription($option, true);
+        $subscriptor = $this->buildSubscription($option);
         $hub = $this->createNotificationManager($subscriptor);
         $projectionRepository = $this->createProjectionRepository($streamName, $option);
 
@@ -159,10 +158,10 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
 
-    protected function buildSubscription(ProjectionOption $option, bool $detectGap): Subscriptor
+    protected function buildSubscription(ProjectionOption $option): Subscriptor
     {
         return new SubscriptionManager(
-            $this->createCheckpointRecognition($option, $detectGap),
+            $this->createCheckpointRecognition($option),
             $this->clock,
             $option,
             $this->createWatcherManager($option),
@@ -174,14 +173,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new LockManager($this->clock, $option->getTimeout(), $option->getLockout());
     }
 
-    protected function createCheckpointRecognition(ProjectionOption $option, bool $detectGap): CheckpointRecognition
+    protected function createCheckpointRecognition(ProjectionOption $option): CheckpointRecognition
     {
-        $gapDetector = $detectGap
-            ? new GapDetector($option->getRetries())
-            : new NoopGapDetector();
-        // disable detect gap for query raise exception cause of gaps
+        $gapDetector = new GapDetector($option->getRetries());
 
-        // fixMe add boolean to enable/disable saving gaps remotely or in option
+        // fixMe add boolean to enable/disable saving gaps remotely/inMemory or in option
 
         return new CheckpointStore($gapDetector, new GapRules(), $this->clock);
     }
