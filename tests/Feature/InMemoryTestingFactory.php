@@ -22,10 +22,9 @@ use Storm\Projector\Filter\InMemoryQueryScope;
 use Storm\Projector\Options\InMemoryOption;
 use Storm\Projector\ProjectorManager;
 use Storm\Projector\Repository\InMemoryProjectionProvider;
+use Storm\Serializer\JsonSerializerFactory;
 use Storm\Stream\StreamCategoryDetector;
-use Symfony\Component\Serializer\Encoder\JsonEncoder;
-use Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer;
-use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\SerializerInterface;
 
 class InMemoryTestingFactory
 {
@@ -39,7 +38,7 @@ class InMemoryTestingFactory
 
     public ?Dispatcher $dispatcher = null;
 
-    public ?Serializer $serializer = null;
+    public ?SerializerInterface $serializer = null;
 
     public ?ProjectionOption $projectionOption = null;
 
@@ -113,8 +112,9 @@ class InMemoryTestingFactory
 
     public function setupSerializer(): void
     {
-        $normalizers = [new JsonSerializableNormalizer()];
-        $this->serializer ??= new Serializer($normalizers, [new JsonEncoder()]);
+        $factory = new JsonSerializerFactory();
+
+        $this->serializer ??= $factory->create();
     }
 
     public function setupDispatcher(): void
