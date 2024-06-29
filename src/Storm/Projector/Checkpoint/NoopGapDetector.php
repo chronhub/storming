@@ -7,6 +7,9 @@ namespace Storm\Projector\Checkpoint;
 use LogicException;
 use Storm\Contract\Projector\GapRecognition;
 
+/**
+ * @deprecated
+ */
 final class NoopGapDetector implements GapRecognition
 {
     public function isRecoverable(): bool
