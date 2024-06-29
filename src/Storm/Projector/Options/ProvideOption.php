@@ -38,7 +38,7 @@ trait ProvideOption
     protected readonly int $blockSize;
 
     /**
-     * @var array<int<0,max>>
+     * @var array<int<0,max>>|array
      */
     protected readonly array $retries;
 
@@ -50,11 +50,6 @@ trait ProvideOption
     protected readonly ?string $detectionWindows;
 
     protected readonly bool $onlyOnceDiscovery;
-
-    /**
-     * @var array{position: null|positive-int, time: null|positive-int, usleep: null|positive-int}
-     */
-    protected readonly array $snapshotInterval;
 
     /**
      * @var int<0,max>
@@ -111,11 +106,6 @@ trait ProvideOption
         return $this->onlyOnceDiscovery;
     }
 
-    public function getSnapshotInterval(): array
-    {
-        return $this->snapshotInterval;
-    }
-
     public function getSleepEmitterOnFirstCommit(): int
     {
         return $this->sleepEmitterOnFirstCommit;
@@ -134,7 +124,6 @@ trait ProvideOption
             self::DETECTION_WINDOWS => $this->getDetectionWindows(),
             self::LOAD_LIMITER => $this->getLoadLimiter(),
             self::ONLY_ONCE_DISCOVERY => $this->getOnlyOnceDiscovery(),
-            self::SNAPSHOT_INTERVAL => $this->getSnapshotInterval(),
             self::SLEEP_EMITTER_ON_FIRST_COMMIT => $this->getSleepEmitterOnFirstCommit(),
         ];
     }

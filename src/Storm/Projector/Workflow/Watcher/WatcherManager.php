@@ -51,7 +51,6 @@ class WatcherManager
             'streamDiscovery' => new EventStreamWatcher($eventStreamProvider),
             'time' => new TimeWatcher(new Timer($clock)),
             'userState' => new UserStateWatcher(),
-
         ];
     }
 
