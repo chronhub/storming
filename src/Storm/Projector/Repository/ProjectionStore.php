@@ -18,14 +18,16 @@ use Storm\Projector\Repository\Data\StartAgainData;
 use Storm\Projector\Repository\Data\StartData;
 use Storm\Projector\Repository\Data\StopData;
 use Storm\Projector\Repository\Data\UpdateLockData;
-use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\DecoderInterface;
+use Symfony\Component\Serializer\Encoder\EncoderInterface;
+use Symfony\Component\Serializer\SerializerInterface;
 
 final readonly class ProjectionStore implements ProjectionRepository
 {
     public function __construct(
         private ProjectionProvider $provider,
         private LockManager $lockManager,
-        private Serializer $serializer,
+        private SerializerInterface&EncoderInterface&DecoderInterface $serializer,
         private string $streamName
     ) {
     }
