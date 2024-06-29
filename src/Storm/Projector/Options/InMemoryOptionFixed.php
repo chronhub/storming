@@ -15,10 +15,11 @@ final class InMemoryOptionFixed implements ProjectionOptionImmutable
         $this->signal = false;
         $this->cacheSize = 100;
         $this->blockSize = 1;
-        $this->sleep = [1, 10]; // fixed sleep time with a capacity of 1 every 0.1 second
+        $this->sleep = [1, 10];
         $this->timeout = 1;
         $this->lockout = 0;
         $this->loadLimiter = 100;
+        $this->sleepEmitterOnFirstCommit = 0;
         $this->retries = [1];
         $this->detectionWindows = null;
         $this->onlyOnceDiscovery = false;

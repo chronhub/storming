@@ -17,13 +17,12 @@ use Storm\Projector\Workflow\Notification\Status\CurrentStatus;
 use Storm\Projector\Workflow\Notification\Stream\EventStreamDiscovered;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
+use Throwable;
 
-use function sleep;
+use function usleep;
 
 final readonly class EmittingManagement implements EmitterManagement
 {
-    public const int DEFAULT_SLEEP_ON_FIRST_COMMIT = 2;
-
     use InteractWithManagement;
 
     public function __construct(
@@ -32,6 +31,7 @@ final readonly class EmittingManagement implements EmitterManagement
         protected ProjectionRepository $projectionRepository,
         private EmittedStreamCache $streamCache,
         private EmittedStream $emittedStream,
+        private int $sleepOnFirstCommit,
     ) {
     }
 
@@ -45,7 +45,6 @@ final readonly class EmittingManagement implements EmitterManagement
             $this->emittedStream->emitted();
         }
 
-        // Append the stream with the event
         $this->linkTo($this->getName(), $event);
     }
 
@@ -100,25 +99,29 @@ final readonly class EmittingManagement implements EmitterManagement
     }
 
     /**
-     * @todo
-     * With standard strategy, we need to sleep,
-     * to let the stream be created by the sql procedure
+     * Append the stream and sleep on the first commit.
      */
     private function appendStreamAndSleepOnFirstCommit(Stream $stream, bool $shouldSleep): void
     {
         $this->chronicler->append($stream);
 
         if ($shouldSleep) {
-            sleep(self::DEFAULT_SLEEP_ON_FIRST_COMMIT);
+            usleep($this->sleepOnFirstCommit);
         }
     }
 
+    /**
+     * Check if the stream was not emitted and not exists.
+     */
     private function streamNotEmittedAndNotExists(StreamName $streamName): bool
     {
         return ! $this->emittedStream->wasEmitted()
             && ! $this->chronicler->hasStream($streamName);
     }
 
+    /**
+     * Check if the emitted stream is cached or exists.
+     */
     private function streamIsCachedOrExists(StreamName $streamName): bool
     {
         if ($this->streamCache->has($streamName->name)) {
@@ -130,6 +133,11 @@ final readonly class EmittingManagement implements EmitterManagement
         return $this->chronicler->hasStream($streamName);
     }
 
+    /**
+     * Delete the stream and unlink the emitted stream.
+     *
+     * @throws Throwable
+     */
     private function deleteStream(): void
     {
         try {

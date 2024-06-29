@@ -56,6 +56,11 @@ trait ProvideOption
      */
     protected readonly array $snapshotInterval;
 
+    /**
+     * @var int<0,max>
+     */
+    protected readonly int $sleepEmitterOnFirstCommit;
+
     public function getSignal(): bool
     {
         return $this->signal;
@@ -111,6 +116,11 @@ trait ProvideOption
         return $this->snapshotInterval;
     }
 
+    public function getSleepEmitterOnFirstCommit(): int
+    {
+        return $this->sleepEmitterOnFirstCommit;
+    }
+
     public function jsonSerialize(): array
     {
         return [
@@ -125,6 +135,7 @@ trait ProvideOption
             self::LOAD_LIMITER => $this->getLoadLimiter(),
             self::ONLY_ONCE_DISCOVERY => $this->getOnlyOnceDiscovery(),
             self::SNAPSHOT_INTERVAL => $this->getSnapshotInterval(),
+            self::SLEEP_EMITTER_ON_FIRST_COMMIT => $this->getSleepEmitterOnFirstCommit(),
         ];
     }
 

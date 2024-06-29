@@ -30,6 +30,8 @@ interface ProjectionOption extends JsonSerializable
 
     public const string SNAPSHOT_INTERVAL = 'snapshotInterval';
 
+    public const string SLEEP_EMITTER_ON_FIRST_COMMIT = 'sleepEmitterOnFirstCommit';
+
     /**
      * Dispatch async signal
      */
@@ -129,4 +131,12 @@ interface ProjectionOption extends JsonSerializable
      * @return array{position: null|positive-int, time: null|positive-int, usleep: null|positive-int}
      */
     public function getSnapshotInterval(): array;
+
+    /**
+     * Get sleep emitter on first commit in milliseconds.
+     * Available for emitter projection and depends on strategy.
+     *
+     * @return int<0,max>
+     */
+    public function getSleepEmitterOnFirstCommit(): int;
 }
