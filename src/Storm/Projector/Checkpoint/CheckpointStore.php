@@ -100,7 +100,9 @@ final class CheckpointStore implements CheckpointRecognition
     private function insertCheckpointWithNonRecoverableGap(StreamPoint $streamPoint, Checkpoint $lastCheckPoint): Checkpoint
     {
         $gapType = $this->gapDetector->gapType();
+
         $isRecoverable = $this->gapDetector->isRecoverable();
+
         $gaps = $lastCheckPoint->gaps;
 
         if (! $isRecoverable) {
