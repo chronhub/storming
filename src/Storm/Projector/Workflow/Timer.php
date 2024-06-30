@@ -8,6 +8,10 @@ use DateTimeImmutable;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Projector\Exception\RuntimeException;
 
+/**
+ * fixMe we use timestamp to measure the time of the projection
+ *  but we should use ms for time measurement, specially for tests
+ */
 class Timer
 {
     protected ?DateTimeImmutable $startTime = null;
@@ -33,7 +37,7 @@ class Timer
         return $this->startTime instanceof DateTimeImmutable;
     }
 
-    public function getTimestamp(): int
+    public function getStartedTimestamp(): int
     {
         $this->assertTimerIsStarted();
 
@@ -44,7 +48,12 @@ class Timer
     {
         $this->assertTimerIsStarted();
 
-        return $this->clock->now()->getTimestamp() - $this->getTimestamp();
+        return $this->clock->now()->getTimestamp() - $this->getStartedTimestamp();
+    }
+
+    public function getCurrentTimestamp(): int
+    {
+        return $this->clock->now()->getTimestamp();
     }
 
     private function assertTimerIsStarted(): void

@@ -27,13 +27,18 @@ class TimeWatcher
         $this->timer->reset();
     }
 
-    public function getCurrentTime(): int
+    public function getStartedTime(): int
     {
-        return $this->timer->getTimestamp();
+        return $this->timer->getStartedTimestamp();
     }
 
     public function getElapsedTime(): int
     {
         return $this->timer->getElapsedTime();
+    }
+
+    public function getCurrentTime(): int
+    {
+        return $this->timer->getCurrentTimestamp();
     }
 }

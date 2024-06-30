@@ -11,6 +11,6 @@ final class IsProcessBlank
     public function __invoke(Subscriptor $subscriptor): bool
     {
         return $subscriptor->watcher()->batchCounter->isReset() &&
-            ! $subscriptor->watcher()->ackedStream->hasStreams();
+            ! $subscriptor->watcher()->ackedEvent->hasEvents();
     }
 }

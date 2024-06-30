@@ -24,7 +24,7 @@ it('test start', function () {
 
     $this->instance->start();
     expect($this->instance->isStarted())->toBeTrue()
-        ->and($this->instance->getTimestamp())->toBe(1609459200);
+        ->and($this->instance->getStartedTimestamp())->toBe(1609459200);
 });
 
 it('test reset', function () {
@@ -39,11 +39,11 @@ it('test get timestamp', function () {
     $this->clock->expects($this->once())->method('now')->willReturn(new DateTimeImmutable('2021-01-01 00:00:00'));
 
     $this->instance->start();
-    expect($this->instance->getTimestamp())->toBe(1609459200);
+    expect($this->instance->getStartedTimestamp())->toBe(1609459200);
 });
 
 it('test get timestamp without start', function () {
-    expect(fn () => $this->instance->getTimestamp())->toThrow(new RuntimeException('Timer is not started'));
+    expect(fn () => $this->instance->getStartedTimestamp())->toThrow(new RuntimeException('Timer is not started'));
 });
 
 it('test get elapsed time', function () {

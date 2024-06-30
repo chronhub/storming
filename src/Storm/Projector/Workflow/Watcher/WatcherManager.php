@@ -17,7 +17,7 @@ use Storm\Projector\Workflow\Timer;
 use function method_exists;
 
 /**
- * @property AckedStreamWatcher        $ackedStream
+ * @property AckedEventWatcher         $ackedEvent
  * @property BatchCounterWatcher       $batchCounter
  * @property BatchStreamWatcher        $batchStream
  * @property CycleWatcher              $cycle
@@ -27,6 +27,7 @@ use function method_exists;
  * @property StopWatcher               $stop
  * @property TimeWatcher               $time
  * @property UserStateWatcher          $userState
+ * @property ReportWatcher             $report
  *
  * checkMe allow dynamic properties attribute is only meant for phpStan
  */
@@ -41,7 +42,7 @@ class WatcherManager
         protected SystemClock $clock
     ) {
         $this->watchers = [
-            'ackedStream' => new AckedStreamWatcher(),
+            'ackedEvent' => new AckedEventWatcher(),
             'batchCounter' => new BatchCounterWatcher($option->getBlockSize()),
             'batchStream' => $this->batchStreamWatcher($option),
             'cycle' => new CycleWatcher(),
@@ -51,6 +52,7 @@ class WatcherManager
             'streamDiscovery' => new EventStreamWatcher($eventStreamProvider),
             'time' => new TimeWatcher(new Timer($clock)),
             'userState' => new UserStateWatcher(),
+            'report' => new ReportWatcher(),
         ];
     }
 

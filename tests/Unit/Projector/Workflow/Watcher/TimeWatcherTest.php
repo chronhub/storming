@@ -8,40 +8,40 @@ use Storm\Projector\Workflow\Timer;
 use Storm\Projector\Workflow\Watcher\TimeWatcher;
 
 beforeEach(function () {
-    $this->timer = $this->createMock(Timer::class);
+    $this->timer = mock(Timer::class);
     $this->watcher = new TimeWatcher($this->timer);
 });
 
 it('test new instance', function () {
-    $this->timer->method('isStarted')->willReturn(false);
+    $this->timer->shouldReceive('isStarted')->andReturn(false);
 
     expect($this->watcher->isStarted())->toBeFalse();
 });
 
 it('test start', function () {
-    $this->timer->expects($this->once())->method('start');
+    $this->timer->shouldReceive('start')->once();
 
     $this->watcher->start();
 
-    $this->timer->method('isStarted')->willReturn(true);
+    $this->timer->shouldReceive('isStarted')->andReturn(true);
 
     expect($this->watcher->isStarted())->toBeTrue();
 });
 
 it('test reset', function () {
-    $this->timer->expects($this->once())->method('reset');
+    $this->timer->shouldReceive('reset')->once();
 
     $this->watcher->reset();
 });
 
-it('test get current time', function () {
-    $this->timer->method('getTimestamp')->willReturn(1234567890);
+it('test get started time', function () {
+    $this->timer->shouldReceive('getStartedTimestamp')->andReturn(1234567890);
 
-    expect($this->watcher->getCurrentTime())->toBe(1234567890);
+    expect($this->watcher->getStartedTime())->toBe(1234567890);
 });
 
 it('test get elapsed time', function () {
-    $this->timer->method('getElapsedTime')->willReturn(1234567890);
+    $this->timer->shouldReceive('getElapsedTime')->andReturn(1234567890);
 
     expect($this->watcher->getElapsedTime())->toBe(1234567890);
 });

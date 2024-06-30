@@ -6,7 +6,7 @@ namespace Storm\Projector\Workflow\Notification\Stream;
 
 use Storm\Contract\Projector\Subscriptor;
 
-class CurrentProcessedStream
+final class CurrentProcessedStream
 {
     public function __invoke(Subscriptor $subscriptor): string
     {
