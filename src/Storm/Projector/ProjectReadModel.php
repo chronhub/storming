@@ -9,7 +9,6 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\ReadModelProjector;
 use Storm\Contract\Projector\ReadModelSubscriber;
-use Storm\Projector\Workflow\Notification\GetReport;
 use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
 use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
 
@@ -49,13 +48,6 @@ final readonly class ProjectReadModel implements ReadModelProjector
     {
         $this->subscriber->interact(
             fn (NotificationHub $hub) => $hub->trigger(new ProjectionDiscarded($deleteEmittedEvents))
-        );
-    }
-
-    public function getReport(): array
-    {
-        return $this->subscriber->interact(
-            fn (NotificationHub $hub) => $hub->expect(GetReport::class)
         );
     }
 

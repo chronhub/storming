@@ -7,6 +7,7 @@ namespace Storm\Projector;
 use Closure;
 use Illuminate\Support\Str;
 use Storm\Contract\Projector\NotificationHub;
+use Storm\Projector\Workflow\Notification\GetReport;
 use Storm\Projector\Workflow\Notification\UserState\CurrentUserState;
 
 use function property_exists;
@@ -66,6 +67,13 @@ trait InteractWithProjection
     {
         return $this->subscriber->interact(
             fn (NotificationHub $hub): array => $hub->expect(CurrentUserState::class)
+        );
+    }
+
+    public function getReport(): array
+    {
+        return $this->subscriber->interact(
+            fn (NotificationHub $hub) => $hub->expect(GetReport::class)
         );
     }
 
