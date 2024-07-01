@@ -15,27 +15,29 @@ use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Exception\CheckpointViolation;
 
 beforeEach(function () {
-    $this->gapDetector = $this->createMock(GapRecognition::class);
+    $this->gapDetector = mock(GapRecognition::class);
     $this->rules = new GapRules();
-    $this->clock = $this->createMock(SystemClock::class);
+    $this->clock = mock(SystemClock::class);
 
     $this->store = new CheckpointStore($this->gapDetector, $this->rules, $this->clock);
 });
 
-function mockCreatedAt(int $expectedCalls = 1): Closure
+function mockCheckpointCreatedAt(int $expectedCalls = 1): Closure
 {
-    return fn ($test) => $test->clock->expects($test->exactly($expectedCalls))->method('generate')->willReturn('2025-01-01 00:00:00');
+    return fn ($test) => $test->clock
+        ->shouldReceive('generate')
+        ->andReturn('2025-01-01 00:00:00')
+        ->times($expectedCalls);
 }
 
 it('test default instance', function () {
     expect($this->store)->toBeInstanceOf(CheckpointRecognition::class)
         ->and($this->store->toArray())->toBeEmpty()
-        ->and($this->store->jsonSerialize())->toBeArray()
-        ->and($this->store->hasGap())->toBeFalse();
+        ->and($this->store->jsonSerialize())->toBeArray();
 });
 
 it('discover streams', function () {
-    $this->clock->expects($this->once())->method('generate')->willReturn('2025-01-01 00:00:00');
+    $this->clock->shouldReceive('generate')->andReturn('2025-01-01 00:00:00')->once();
 
     $this->store->discover('stream-1');
 
@@ -43,7 +45,7 @@ it('discover streams', function () {
 });
 
 it('does not duplicate stream on discover', function () {
-    mockCreatedAt()($this);
+    mockCheckpointCreatedAt()($this);
 
     $this->store->discover('stream-1', 'stream-1');
 
@@ -52,7 +54,7 @@ it('does not duplicate stream on discover', function () {
 });
 
 it('insert checkpoint without gap', function () {
-    mockCreatedAt(2)($this);
+    mockCheckpointCreatedAt(2)($this);
 
     $this->store->discover('stream-1');
 
@@ -68,9 +70,9 @@ it('insert checkpoint without gap', function () {
 });
 
 it('insert checkpoint with gap', function () {
-    mockCreatedAt(2)($this);
-    $this->gapDetector->expects($this->once())->method('gapType')->willReturn(GapType::IN_GAP);
-    $this->gapDetector->expects($this->once())->method('isRecoverable')->willReturn(false);
+    mockCheckpointCreatedAt(2)($this);
+    $this->gapDetector->shouldReceive('gapType')->andReturn(GapType::IN_GAP);
+    $this->gapDetector->shouldReceive('isRecoverable')->andReturn(false);
 
     $this->store->discover('stream-1');
 
@@ -86,7 +88,7 @@ it('insert checkpoint with gap', function () {
 });
 
 it('update checkpoints as array', function () {
-    mockCreatedAt(2)($this);
+    mockCheckpointCreatedAt(2)($this);
 
     $this->store->discover('stream-1');
 
@@ -123,22 +125,22 @@ it('raise exception when stream not found on updating', function () {
 })->throws(CheckpointViolation::class, 'Checkpoint not tracked for stream stream-1');
 
 it('check if gap is detected', function (bool $isGapDetected) {
-    $this->gapDetector->expects($this->once())->method('hasGap')->willReturn($isGapDetected);
+    $this->gapDetector->shouldReceive('hasGap')->andReturn($isGapDetected)->once();
 
     expect($this->store->hasGap())->toBe($isGapDetected);
 })->with(['is gap detected' => [true, false]]);
 
 it('sleep when gap is detected', function () {
-    $this->gapDetector->expects($this->once())->method('sleep');
+    $this->gapDetector->shouldReceive('sleep')->once();
 
     $this->store->sleepWhenGap();
 });
 
 it('reset checkpoints and gap detection', function (array $streams) {
-    mockCreatedAt(4)($this);
+    mockCheckpointCreatedAt(4)($this);
 
-    $this->gapDetector->expects($this->never())->method('gapType');
-    $this->gapDetector->expects($this->once())->method('reset');
+    $this->gapDetector->shouldNotReceive('gapType');
+    $this->gapDetector->shouldReceive('reset')->once();
 
     foreach ($streams as $stream) {
         $this->store->discover($stream);

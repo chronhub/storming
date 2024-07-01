@@ -9,14 +9,14 @@ use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Repository\EventStream\DiscoverCategories;
 
 beforeEach(function () {
-    $this->provider = $this->createMock(EventStreamProvider::class);
+    $this->provider = mock(EventStreamProvider::class);
 });
 
 it('return streams by categories', function () {
-    $this->provider->expects($this->once())
-        ->method('filterByCategories')
+    $this->provider
+        ->shouldReceive('filterByCategories')
         ->with(['category-1', 'category-2'])
-        ->willReturn(['category-1', 'category-2']);
+        ->andReturn(['category-1', 'category-2']);
 
     $query = new DiscoverCategories(['category-1', 'category-2']);
     $streams = $query($this->provider);

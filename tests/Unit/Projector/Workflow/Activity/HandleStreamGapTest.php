@@ -16,12 +16,11 @@ test('sleep on gap and store projection depends on batch is reset', function (bo
     $hub = mock(NotificationHub::class);
 
     $hub->shouldReceive('notifyWhen')
-        ->once()
         ->withArgs(function (bool $hasGap, Closure $callback) use ($hub) {
             $callback($hub);
 
             return $hasGap === true;
-        });
+        })->once();
 
     $hub->shouldReceive('expect')->once()->with(HasGap::class)->andReturn(true);
     $hub->shouldReceive('notify')->once()->with(SleepOnGap::class);

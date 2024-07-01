@@ -116,6 +116,13 @@ test('read model projection', function () {
     expect($readModel->getContainer())->toBe([
         $balanceId->toString() => ['balance' => 100],
     ]);
+
+    // assert the projector report
+    $report = $projector->getReport();
+
+    expect($report['cycle'])->toBe(1)
+        ->and($report['acked_event'])->toBe(4)
+        ->and($report['total_event'])->toBe(4);
 });
 
 test('detect gaps with running in background or once and no retry', function (bool $keepRunning) {
@@ -213,6 +220,12 @@ test('detect gaps with running in background or once and no retry', function (bo
     expect($readModel->getContainer())->toBe([
         $balanceId->toString() => ['balance' => 100],
     ]);
+
+    $report = $projector->getReport();
+
+    expect($report['cycle'])->toBe(1)
+        ->and($report['acked_event'])->toBe(4)
+        ->and($report['total_event'])->toBe(4);
 })->with([['keep running' => true], ['run once' => false]]);
 
 test('detect gaps with running in background and setup retries', function (array $retries) {
@@ -308,6 +321,16 @@ test('detect gaps with running in background and setup retries', function (array
     expect($readModel->getContainer())->toBe([
         $balanceId->toString() => ['balance' => 100],
     ]);
+
+    // assert the projector report
+    $report = $projector->getReport();
+
+    // first cycle + number of retries * number of events which have gaps
+    $expectedCycles = 1 + count($retries) * 3;
+
+    expect($report['cycle'])->toBe($expectedCycles)
+        ->and($report['acked_event'])->toBe(4)
+        ->and($report['total_event'])->toBe(4);
 })
     ->with([['one retry' => [1]], ['two retries' => [1, 2]], ['three retries' => [1, 2, 3]]]);
 
@@ -367,4 +390,14 @@ test('fails detect gaps with running once and setup retries', function (array $r
         'balance' => 100,
         'events' => [BalanceCreated::class], // version 1
     ]);
+
+    // assert projection report
+    $report = $projector->getReport();
+
+    expect($report['cycle'])->toBe(1)
+        ->and($report['acked_event'])->toBe(1)
+        //fixMe: its confusing, total_event should be the number of events loaded from streams
+        // not the number of events that have been acked
+        ->and($report['total_event'])->toBe(1);
+
 })->with([['one retry' => [1]], ['two retries' => [1, 2]], ['three retries' => [1, 2, 3]]]);

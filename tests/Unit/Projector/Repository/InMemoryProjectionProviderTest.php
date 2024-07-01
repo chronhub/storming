@@ -24,7 +24,7 @@ use Storm\Projector\Repository\Data\UpdateStatusData;
 use Storm\Projector\Repository\InMemoryProjectionProvider;
 
 beforeEach(function () {
-    $this->clock = $this->createMock(SystemClock::class);
+    $this->clock = mock(SystemClock::class);
     $this->provider = new InMemoryProjectionProvider($this->clock);
 });
 
@@ -50,99 +50,99 @@ function createProjection(string $stream, string $status): Closure
     };
 }
 
-it('test instance', function () {
+test('default instance', function () {
     expect($this->provider)->toBeInstanceOf(ProjectionProvider::class)
-        ->and($this->provider->exists('stream-1'))->toBeFalse()
-        ->and($this->provider->retrieve('stream-1'))->toBeNull();
+        ->and($this->provider->exists('stream1'))->toBeFalse()
+        ->and($this->provider->retrieve('stream1'))->toBeNull();
 });
 
-it('create projection', function () {
-    createProjection('stream-1', 'run')($this);
+test('create projection', function () {
+    createProjection('stream1', 'run')($this);
 
-    $projection = $this->provider->retrieve('stream-1');
+    $projection = $this->provider->retrieve('stream1');
 
-    expect($projection->name())->toBe('stream-1')
+    expect($projection->name())->toBe('stream1')
         ->and($projection->status())->toBe('run')
         ->and($projection->state())->toBe('{}')
         ->and($projection->checkpoint())->toBe('{}')
         ->and($projection->lockedUntil())->toBeNull();
 });
 
-it('raise exception when projection already exists', function () {
-    createProjection('stream-1', 'idle')($this);
+test('raise exception when projection already exists', function () {
+    createProjection('stream1', 'idle')($this);
 
-    $this->provider->createProjection('stream-1', new CreateData('run'));
+    $this->provider->createProjection('stream1', new CreateData('run'));
 })->throws(ProjectionAlreadyExists::class);
 
-it('acquire lock for existing projection with null lock', function () {
-    $this->clock->expects($this->never())->method('isGreaterThanNow');
+test('acquire lock for existing projection with null lock', function () {
+    $this->clock->shouldNotReceive('isGreaterThanNow');
 
-    createProjection('stream-1', 'run')($this);
+    createProjection('stream1', 'run')($this);
 
-    expect($this->provider->retrieve('stream-1')->lockedUntil())->toBeNull();
+    expect($this->provider->retrieve('stream1')->lockedUntil())->toBeNull();
 
     $updateLock = new UpdateLockData('2024-01-01 00:00:00');
-    $this->provider->acquireLock('stream-1', $updateLock);
+    $this->provider->acquireLock('stream1', $updateLock);
 
-    $projection = $this->provider->retrieve('stream-1');
+    $projection = $this->provider->retrieve('stream1');
 
-    expect($projection->name())->toBe('stream-1')
+    expect($projection->name())->toBe('stream1')
         ->and($projection->status())->toBe('run')
         ->and($projection->state())->toBe('{}')
         ->and($projection->checkpoint())->toBe('{}')
         ->and($projection->lockedUntil())->toBe('2024-01-01 00:00:00');
 });
 
-it('acquire lock for existing projection when now is greater than lock', function () {
-    $this->clock->expects($this->once())->method('isGreaterThanNow')->willReturn(true);
+test('acquire lock for existing projection when now is greater than lock', function () {
+    $this->clock->shouldReceive('isGreaterThanNow')->andReturn(true)->once();
 
     $createProjection = new CreateData('run');
-    $this->provider->createProjection('stream-1', $createProjection);
+    $this->provider->createProjection('stream1', $createProjection);
 
     $updateProjection = new StartData('run', '2024-01-01 00:00:00');
-    $this->provider->updateProjection('stream-1', $updateProjection);
+    $this->provider->updateProjection('stream1', $updateProjection);
 
-    expect($this->provider->retrieve('stream-1')->lockedUntil())->toBe('2024-01-01 00:00:00');
+    expect($this->provider->retrieve('stream1')->lockedUntil())->toBe('2024-01-01 00:00:00');
 
     $acquireLock = new StartData('run', '2025-01-01 00:00:00');
-    $this->provider->acquireLock('stream-1', $acquireLock);
+    $this->provider->acquireLock('stream1', $acquireLock);
 
-    expect($this->provider->retrieve('stream-1')->lockedUntil())->toBe('2025-01-01 00:00:00');
+    expect($this->provider->retrieve('stream1')->lockedUntil())->toBe('2025-01-01 00:00:00');
 });
 
-it('raise projection already running exception when it can not acquired lock', function () {
-    $this->clock->expects($this->once())->method('isGreaterThanNow')->willReturn(false);
+test('raise projection already running exception when it can not acquired lock', function () {
+    $this->clock->shouldReceive('isGreaterThanNow')->andReturn(false)->once();
 
-    createProjection('stream-1', 'run')($this);
+    createProjection('stream1', 'run')($this);
 
     $startProjection = new StartData('run', '2024-01-01 00:00:00');
-    $this->provider->updateProjection('stream-1', $startProjection);
+    $this->provider->updateProjection('stream1', $startProjection);
 
-    expect($this->provider->retrieve('stream-1')->lockedUntil())->toBe('2024-01-01 00:00:00');
+    expect($this->provider->retrieve('stream1')->lockedUntil())->toBe('2024-01-01 00:00:00');
 
     $acquireLock = new StartData('run', '2025-01-01 00:00:00');
-    $this->provider->acquireLock('stream-1', $acquireLock);
+    $this->provider->acquireLock('stream1', $acquireLock);
 })->throws(ProjectionAlreadyRunning::class);
 
-it('update projection', function (ProjectionData $data) {
-    $this->clock->expects($this->never())->method('isGreaterThanNow');
+test('update projection', function (ProjectionData $data) {
+    $this->clock->shouldNotReceive('isGreaterThanNow');
 
-    createProjection('stream-1', 'run')($this);
+    createProjection('stream1', 'run')($this);
 
-    $this->provider->updateProjection('stream-1', $data);
+    $this->provider->updateProjection('stream1', $data);
 
-    $projection = $this->provider->retrieve('stream-1');
+    $projection = $this->provider->retrieve('stream1');
     $updated = $data->toArray();
 
-    expect($projection->name())->toBe('stream-1')
+    expect($projection->name())->toBe('stream1')
         ->and($projection->status())->toBe($updated['status'] ?? 'run')
         ->and($projection->state())->toBe($updated['state'] ?? '{}')
         ->and($projection->checkpoint())->toBe($updated['checkpoint'] ?? '{}')
         ->and($projection->lockedUntil())->toBe($updated['locked_until'] ?? null);
 })->with('projection data');
 
-it('raise exception when updating projection with empty data', function () {
-    createProjection('stream-1', 'run')($this);
+test('raise exception when updating projection with empty data', function () {
+    createProjection('stream1', 'run')($this);
 
     $data = new readonly class extends ProjectionData
     {
@@ -152,16 +152,16 @@ it('raise exception when updating projection with empty data', function () {
         }
     };
 
-    $this->provider->updateProjection('stream-1', $data);
-})->throws(InMemoryProjectionFailed::class, 'Provide at least one change to update projection stream-1');
+    $this->provider->updateProjection('stream1', $data);
+})->throws(InMemoryProjectionFailed::class, 'Provide at least one change to update projection stream1');
 
-it('raise projection not found exception when update projection for non existing projection', function (ProjectionData $data) {
-    $this->provider->updateProjection('stream-1', $data);
+test('raise projection not found exception when update projection for non existing projection', function (ProjectionData $data) {
+    $this->provider->updateProjection('stream1', $data);
 })
     ->with('projection data')
     ->throws(ProjectionNotFound::class);
 
-it('delete projection by name', function (array $streams) {
+test('delete projection by name', function (array $streams) {
     foreach ($streams as $stream) {
         createProjection($stream, 'run')($this);
     }
@@ -178,24 +178,20 @@ it('delete projection by name', function (array $streams) {
 
     expect($this->provider->exists($streams[0]))->toBeFalse()
         ->and($this->provider->exists($streams[1]))->toBeFalse();
-})->with(['streams' => [['stream-1', 'stream-2']]]);
+})->with(['streams' => [['stream1', 'stream2']]]);
 
-it('raise exception when delete non existing projection', function () {
-    expect($this->provider->exists('stream-1'))->toBeFalse();
+test('raise exception when delete non existing projection', function () {
+    expect($this->provider->exists('stream1'))->toBeFalse();
 
-    $this->provider->deleteProjection('stream-1');
+    $this->provider->deleteProjection('stream1');
 })->throws(ProjectionNotFound::class);
 
-it('filter projection by names', function (array $streams) {
+test('filter projection by names', function (array $streams) {
     foreach ($streams as $stream) {
         createProjection($stream, 'run')($this);
     }
 
-    expect($this->provider->filterByNames(...$streams))->toBe($streams)
-        ->and($this->provider->filterByNames('foo', 'bar'))->toBe([]);
+    expect($this->provider->filterByNames('stream1', 'foo', 'bar'))->toBe(['stream1'])
+        ->and($this->provider->filterByNames('stream2', 'foo', 'stream1'))->toBe(['stream2', 'stream1']);
 
-    if ($streams !== []) {
-        expect($this->provider->filterByNames('stream-1', 'foo', 'bar'))->toBe(['stream-1'])
-            ->and($this->provider->filterByNames('stream-2', 'foo', 'stream-1'))->toBe(['stream-2', 'stream-1']);
-    }
-})->with(['streams' => [[], ['stream-1', 'stream-2']]]);
+})->with([['many streams' => ['stream2', 'stream1']]]);

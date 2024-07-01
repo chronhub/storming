@@ -13,12 +13,12 @@ use Storm\Projector\Workflow\Workflow;
 use Throwable;
 
 beforeEach(function () {
-    $this->hub = $this->createMock(NotificationHub::class);
+    $this->hub = mock(NotificationHub::class);
 });
 
 function getActivity(int &$count = 0): Closure
 {
-    return function (NotificationHub $hub, Closure $next) use (&$count) {
+    return function ($hub, Closure $next) use (&$count) {
         $count++;
         $next($hub);
     };
@@ -35,7 +35,7 @@ function getDestination(bool $keepRunning): Closure
 }
 
 it('process and release projection', function () {
-    $this->hub->expects($this->once())->method('trigger')->with(new ProjectionFreed());
+    $this->hub->expects('trigger')->withArgs(fn (ProjectionFreed $notification) => true);
 
     $called = 0;
     $instance = new Workflow($this->hub, [
@@ -49,7 +49,7 @@ it('process and release projection', function () {
 });
 
 it('process can be run again', function () {
-    $this->hub->expects($this->exactly(2))->method('trigger')->with(new ProjectionFreed());
+    $this->hub->expects('trigger')->withArgs(fn (ProjectionFreed $notification) => true)->twice();
 
     $called = 0;
     $instance = new Workflow($this->hub, [
@@ -65,7 +65,10 @@ it('process can be run again', function () {
 
 it('process and raise original exception and ignore exception raise while releasing projection', function () {
     $exceptionIgnored = new RuntimeException('exception will be ignored');
-    $this->hub->expects($this->once())->method('trigger')->with(new ProjectionFreed())->willThrowException($exceptionIgnored);
+
+    $this->hub->expects('trigger')
+        ->withArgs(fn (ProjectionFreed $notification) => true)
+        ->andThrow($exceptionIgnored);
 
     $exception = new RuntimeException('foo');
 
@@ -85,7 +88,7 @@ it('process and raise original exception and ignore exception raise while releas
 });
 
 it('raise exception and release projection', function () {
-    $this->hub->expects($this->once())->method('trigger')->with(new ProjectionFreed());
+    $this->hub->expects('trigger')->withArgs(fn (ProjectionFreed $notification) => true);
 
     $exception = new RuntimeException('foo');
 
@@ -105,7 +108,7 @@ it('raise exception and release projection', function () {
 });
 
 it('raise exception and does not release projection when exception is a projection already running instance', function () {
-    $this->hub->expects($this->never())->method('trigger');
+    $this->hub->shouldNotReceive('trigger');
 
     $exception = new ProjectionAlreadyRunning('foo');
 
@@ -125,7 +128,7 @@ it('raise exception and does not release projection when exception is a projecti
 });
 
 it('return false early and release projection', function () {
-    $this->hub->expects($this->once())->method('trigger')->with(new ProjectionFreed());
+    $this->hub->expects('trigger')->withArgs(fn (ProjectionFreed $notification) => true);
 
     $called = 0;
 
@@ -136,7 +139,7 @@ it('return false early and release projection', function () {
 });
 
 it('keep running when destination return true', function () {
-    $this->hub->expects($this->once())->method('trigger')->with(new ProjectionFreed());
+    $this->hub->expects('trigger')->withArgs(fn (ProjectionFreed $notification) => true);
 
     $called = 0;
 

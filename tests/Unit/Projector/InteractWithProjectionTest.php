@@ -9,6 +9,7 @@ use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\Subscriber;
 use Storm\Projector\InteractWithProjection;
+use Storm\Projector\Workflow\Notification\GetProjectionReport;
 use Storm\Projector\Workflow\Notification\UserState\CurrentUserState;
 
 beforeEach(function () {
@@ -36,16 +37,16 @@ test('subscribe to streams', function (array $streams) {
     $this->context->shouldReceive('subscribeToStream')->with(...$streams)->once();
     $this->projector->subscribeToStream(...$streams);
 })->with([
-    'as string' => [['stream-1']],
-    'as strings' => [['stream-1', 'stream-2']],
+    'with one stream' => [['stream-1']],
+    'with many streams' => [['stream-1', 'stream-2']],
 ]);
 
 test('subscribe to categories', function (array $categories) {
     $this->context->shouldReceive('subscribeToCategory')->with(...$categories)->once();
     $this->projector->subscribeToCategory(...$categories);
 })->with([
-    'as string' => [['category-1']],
-    'as strings' => [['category-1', 'category-2']],
+    'with one category' => [['category-1']],
+    'with many categories' => [['category-1', 'category-2']],
 ]);
 
 test('subscribe to all', function () {
@@ -87,4 +88,23 @@ test('get state', function (array $state) {
 })->with([
     'empty state' => [[]],
     'non-empty state' => [['foo' => 'bar']],
+]);
+
+test('get report', function (array $report) {
+    $hub = mock(NotificationHub::class);
+    $hub->shouldReceive('expect')->with(GetProjectionReport::class)->andReturn($report)->once();
+
+    $callback = function (Closure $callback) use ($hub): true {
+        $callback($hub);
+
+        return true;
+    };
+
+    $this->subscriber->shouldReceive('interact')->withArgs($callback)->andReturn($report)->once();
+
+    expect($this->projector->getReport())->toBe($report);
+
+})->with([
+    'empty report' => [[]],
+    'non-empty report' => [['foo' => 'bar']],
 ]);

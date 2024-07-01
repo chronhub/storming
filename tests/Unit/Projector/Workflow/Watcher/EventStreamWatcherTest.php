@@ -8,7 +8,7 @@ use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Projector\Workflow\Watcher\EventStreamWatcher;
 
 beforeEach(function () {
-    $this->eventStreamProvider = $this->createStub(EventStreamProvider::class);
+    $this->eventStreamProvider = mock(EventStreamProvider::class);
     $this->watcher = new EventStreamWatcher($this->eventStreamProvider);
 });
 

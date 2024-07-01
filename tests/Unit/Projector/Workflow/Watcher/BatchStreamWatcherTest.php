@@ -9,7 +9,7 @@ use Storm\Contract\Projector\TokenBucket;
 use Storm\Projector\Workflow\Watcher\BatchStreamWatcher;
 
 beforeEach(function () {
-    $this->bucket = $this->createStub(TokenBucket::class);
+    $this->bucket = mock(TokenBucket::class);
     $this->watcher = new BatchStreamWatcher($this->bucket);
 });
 
@@ -39,8 +39,8 @@ it('reset counter when streams has been loaded', function () {
 });
 
 it('consume token bucket while sleeping', function () {
-    $this->bucket->method('consume')->willReturn(true);
-    $this->bucket->method('getCapacity')->willReturn(2);
+    $this->bucket->expects('consume')->andReturn(true);
+    $this->bucket->expects('getCapacity')->andReturn(2);
 
     $this->watcher->hasLoadedStreams(false);
     expect($this->watcher->count())->toBe(1);
@@ -51,8 +51,8 @@ it('consume token bucket while sleeping', function () {
 });
 
 it('reset counter when it reaches the bucket capacity', function () {
-    $this->bucket->method('consume')->willReturn(true);
-    $this->bucket->method('getCapacity')->willReturn(2);
+    $this->bucket->expects('consume')->andReturn(true)->twice();
+    $this->bucket->expects('getCapacity')->andReturn(2)->twice();
 
     $this->watcher->hasLoadedStreams(false);
     expect($this->watcher->count())->toBe(1);

@@ -10,8 +10,8 @@ use Storm\Contract\Projector\StreamNameAwareQueryFilter;
 use Storm\Projector\Workflow\QueryFilterResolver;
 
 it('set projection query filter', function () {
-    $queryFilter = $this->createMock(ProjectionQueryFilter::class);
-    $queryFilter->expects($this->once())->method('setStreamPosition')->with(1);
+    $queryFilter = mock(ProjectionQueryFilter::class);
+    $queryFilter->expects('setStreamPosition')->with(1)->once();
 
     $resolver = new QueryFilterResolver($queryFilter);
     $instance = $resolver('stream', 1, 0);
@@ -20,9 +20,9 @@ it('set projection query filter', function () {
 });
 
 it('set stream name aware query filter', function () {
-    $queryFilter = $this->createMock(StreamNameAwareQueryFilter::class);
-    $queryFilter->expects($this->once())->method('setStreamName')->with('stream');
-    $queryFilter->expects($this->once())->method('setStreamPosition')->with(5);
+    $queryFilter = mock(StreamNameAwareQueryFilter::class);
+    $queryFilter->expects('setStreamName')->with('stream')->once();
+    $queryFilter->expects('setStreamPosition')->with(5)->once();
 
     $resolver = new QueryFilterResolver($queryFilter);
     $instance = $resolver('stream', 5, 0);
@@ -31,9 +31,9 @@ it('set stream name aware query filter', function () {
 });
 
 it('set load limiter projection query filter', function () {
-    $queryFilter = $this->createMock(LoadLimiterProjectionQueryFilter::class);
-    $queryFilter->expects($this->once())->method('setStreamPosition')->with(10);
-    $queryFilter->expects($this->once())->method('setLoadLimiter')->with(100);
+    $queryFilter = mock(LoadLimiterProjectionQueryFilter::class);
+    $queryFilter->expects('setStreamPosition')->with(10)->once();
+    $queryFilter->expects('setLoadLimiter')->with(100)->once();
 
     $resolver = new QueryFilterResolver($queryFilter);
     $instance = $resolver('stream', 10, 100);

@@ -12,7 +12,7 @@ use function get_class;
 use function in_array;
 
 beforeEach(function () {
-    $this->subscriptor = $this->createStub(Subscriptor::class);
+    $this->subscriptor = mock(Subscriptor::class);
     $this->hub = new HubManager($this->subscriptor);
 });
 

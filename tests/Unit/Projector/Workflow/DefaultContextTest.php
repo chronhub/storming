@@ -30,14 +30,14 @@ it('raise exception when context is already initialized', function () {
 });
 
 it('initialize the context with query filter', function () {
-    $queryFilter = $this->createStub(QueryFilter::class);
+    $queryFilter = mock(QueryFilter::class);
     $this->context->withQueryFilter($queryFilter);
 
     expect($this->context->queryFilter())->toBe($queryFilter);
 });
 
 it('raise exception when query filter is already set', function () {
-    $queryFilter = $this->createStub(QueryFilter::class);
+    $queryFilter = mock(QueryFilter::class);
     $this->context->withQueryFilter($queryFilter);
 
     $this->expectExceptionMessage('Projection query filter already set');

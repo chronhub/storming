@@ -10,7 +10,7 @@ use Storm\Projector\Exception\RuntimeException;
 use Storm\Projector\Workflow\Timer;
 
 beforeEach(function () {
-    $this->clock = $this->createMock(SystemClock::class);
+    $this->clock = mock(SystemClock::class);
     $this->instance = new Timer($this->clock);
 });
 
@@ -20,7 +20,7 @@ it('test instance', function () {
 });
 
 it('test start', function () {
-    $this->clock->expects($this->once())->method('now')->willReturn(new DateTimeImmutable('2021-01-01 00:00:00'));
+    $this->clock->expects('now')->andReturn(new DateTimeImmutable('2021-01-01 00:00:00'))->once();
 
     $this->instance->start();
     expect($this->instance->isStarted())->toBeTrue()
@@ -28,6 +28,7 @@ it('test start', function () {
 });
 
 it('test reset', function () {
+    $this->clock->shouldIgnoreMissing();
     $this->instance->start();
     expect($this->instance->isStarted())->toBeTrue();
 
@@ -36,7 +37,7 @@ it('test reset', function () {
 });
 
 it('test get timestamp', function () {
-    $this->clock->expects($this->once())->method('now')->willReturn(new DateTimeImmutable('2021-01-01 00:00:00'));
+    $this->clock->expects('now')->andReturn(new DateTimeImmutable('2021-01-01 00:00:00'))->once();
 
     $this->instance->start();
     expect($this->instance->getStartedTimestamp())->toBe(1609459200);
@@ -47,12 +48,11 @@ it('test get timestamp without start', function () {
 });
 
 it('test get elapsed time', function () {
-    $this->clock->expects($this->exactly(2))
-        ->method('now')
-        ->willReturnOnConsecutiveCalls(
+    $this->clock->expects('now')
+        ->andReturn(
             new DateTimeImmutable('2021-01-01 00:00:00'),
             new DateTimeImmutable('2021-01-01 00:00:10')
-        );
+        )->twice();
 
     $this->instance->start();
     expect($this->instance->getElapsedTime())->toBe(10);

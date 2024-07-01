@@ -8,24 +8,26 @@ use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Projector\Repository\EventStream\DiscoverAllStream;
 
 beforeEach(function () {
-    $this->provider = $this->createMock(EventStreamProvider::class);
+    $this->provider = mock(EventStreamProvider::class);
     $this->query = new DiscoverAllStream();
 });
 
-it('should return all streams without internal', function () {
-    $this->provider->expects($this->once())
-        ->method('allWithoutInternal')
-        ->willReturn(['stream-1', 'stream-2']);
+it('return all streams without internal', function () {
+    $this->provider
+        ->shouldReceive('allWithoutInternal')
+        ->andReturn(['stream-1', 'stream-2'])
+        ->once();
 
     $streams = ($this->query)($this->provider);
 
     expect($streams)->toBe(['stream-1', 'stream-2']);
 });
 
-it('should return empty array if no streams', function () {
-    $this->provider->expects($this->once())
-        ->method('allWithoutInternal')
-        ->willReturn([]);
+it('return empty array if no streams', function () {
+    $this->provider
+        ->shouldReceive('allWithoutInternal')
+        ->andReturn([])
+        ->once();
 
     $streams = ($this->query)($this->provider);
 
