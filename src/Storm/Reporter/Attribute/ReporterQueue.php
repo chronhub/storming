@@ -10,6 +10,5 @@ readonly class ReporterQueue
         public string $id,
         public Mode $mode,
         public null|string|array $default
-    ) {
-    }
+    ) {}
 }

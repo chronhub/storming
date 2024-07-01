@@ -105,9 +105,7 @@ test('can not rewind iterator when the iterator is no longer valid', function ()
         ->and($streams->count())->toBe(0);
 });
 
-test('it fails prioritize stream event by time when it does not match clock format', function () {
-
-})->todo();
+test('it fails prioritize stream event by time when it does not match clock format', function () {})->todo();
 
 function getMergeStreams(): MergeStreamIterator
 {

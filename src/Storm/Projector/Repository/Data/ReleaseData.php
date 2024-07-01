@@ -6,9 +6,7 @@ namespace Storm\Projector\Repository\Data;
 
 final readonly class ReleaseData extends ProjectionData
 {
-    public function __construct(public string $status, public null $lockedUntil)
-    {
-    }
+    public function __construct(public string $status, public null $lockedUntil) {}
 
     /**
      * @return array{'status': string, 'locked_until': null}

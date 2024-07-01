@@ -32,9 +32,7 @@ function getNewInstance(bool $onRise): object
     {
         use MonitorRemoteStatus;
 
-        public function __construct(public readonly bool $onRise)
-        {
-        }
+        public function __construct(public readonly bool $onRise) {}
 
         public function handle(NotificationHub $hub): ?bool
         {

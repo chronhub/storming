@@ -16,8 +16,7 @@ final readonly class TransactionalCommand
 {
     public function __construct(
         #[Reference('chronicler.event.transactional.standard.pgsql')] private Chronicler $chronicler
-    ) {
-    }
+    ) {}
 
     #[AsReporterSubscriber(
         supports: ['reporter.command.async.*'],

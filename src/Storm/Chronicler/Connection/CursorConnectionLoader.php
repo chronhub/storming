@@ -17,9 +17,7 @@ use Storm\Stream\StreamName;
 
 final class CursorConnectionLoader implements StreamEventConnectionLoader
 {
-    public function __construct(protected StreamEventSerializer $serializer)
-    {
-    }
+    public function __construct(protected StreamEventSerializer $serializer) {}
 
     public function load(Builder $builder, StreamName $streamName): Generator
     {

@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Notification\Stream;
 
-final class NoEventStreamDiscovered
-{
-}
+final class NoEventStreamDiscovered {}

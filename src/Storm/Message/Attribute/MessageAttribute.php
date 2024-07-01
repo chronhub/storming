@@ -19,8 +19,7 @@ class MessageAttribute implements JsonSerializable
         public array $references,
         public ?string $handlerId = null,
         public ?string $messageId = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{

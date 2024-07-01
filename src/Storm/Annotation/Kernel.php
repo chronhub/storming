@@ -24,8 +24,7 @@ class Kernel
         protected StreamSubscriberMap $streamSubscribers,
         protected AggregateRepositoryMap $aggregateRepositories,
         protected Application $app
-    ) {
-    }
+    ) {}
 
     public function boot(): void
     {

@@ -15,6 +15,5 @@ class AggregateRepositoryAttribute
         public string $messageDecorator,
         public string $factory,
         public array $references,
-    ) {
-    }
+    ) {}
 }

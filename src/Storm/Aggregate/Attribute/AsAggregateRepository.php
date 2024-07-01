@@ -16,6 +16,5 @@ class AsAggregateRepository
         public string $messageDecorator,
         public ?string $abstract = null,
         public string $factory = AggregateRepositoryFactory::class,
-    ) {
-    }
+    ) {}
 }

@@ -9,6 +9,5 @@ final readonly class UnrecoverableGapDetected
     public function __construct(
         public string $streamName,
         public int $position
-    ) {
-    }
+    ) {}
 }

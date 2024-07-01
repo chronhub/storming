@@ -19,6 +19,5 @@ final readonly class EmitterSubscription implements EmitterSubscriber
         protected EmitterManagement $management,
         protected ActivityFactory $activities,
         protected EmitterScope $scope
-    ) {
-    }
+    ) {}
 }

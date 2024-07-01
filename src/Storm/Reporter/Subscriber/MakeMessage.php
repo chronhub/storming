@@ -21,8 +21,7 @@ final readonly class MakeMessage
 {
     public function __construct(
         #[Reference('message.factory.default')] private MessageFactory $messageFactory
-    ) {
-    }
+    ) {}
 
     public function __invoke(): Closure
     {

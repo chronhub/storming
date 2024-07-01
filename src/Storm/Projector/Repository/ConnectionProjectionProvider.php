@@ -33,8 +33,7 @@ final readonly class ConnectionProjectionProvider implements ProjectionProvider
     public function __construct(
         private Connection $connection,
         private SystemClock $clock,
-    ) {
-    }
+    ) {}
 
     public function createProjection(string $projectionName, ProjectionData $data): void
     {

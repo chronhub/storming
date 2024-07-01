@@ -11,9 +11,7 @@ use Storm\Contract\Tracker\MessageStory;
 // fixMe
 final readonly class NameReporter
 {
-    public function __construct(private string $reporterId)
-    {
-    }
+    public function __construct(private string $reporterId) {}
 
     public function __invoke(): Closure
     {

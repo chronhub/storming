@@ -10,8 +10,7 @@ final readonly class ResetData extends ProjectionData
         public string $status,
         public string $state,
         public string $checkpoint
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{'status': string, 'state': string, 'checkpoint': string}

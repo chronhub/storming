@@ -6,7 +6,5 @@ namespace Storm\Projector\Workflow\Notification\Management;
 
 final readonly class ProjectionDiscarded
 {
-    public function __construct(public bool $withEmittedEvents)
-    {
-    }
+    public function __construct(public bool $withEmittedEvents) {}
 }

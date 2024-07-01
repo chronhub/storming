@@ -15,8 +15,7 @@ final readonly class ReporterManager implements Manager
     public function __construct(
         private KernelStorage $storage,
         private Application $app
-    ) {
-    }
+    ) {}
 
     public function get(string $name): Reporter
     {

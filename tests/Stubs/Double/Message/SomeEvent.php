@@ -6,6 +6,4 @@ namespace Storm\Tests\Stubs\Double\Message;
 
 use Storm\Message\AbstractDomainEvent;
 
-final class SomeEvent extends AbstractDomainEvent
-{
-}
+final class SomeEvent extends AbstractDomainEvent {}

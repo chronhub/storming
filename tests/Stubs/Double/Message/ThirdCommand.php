@@ -6,6 +6,4 @@ namespace Storm\Tests\Stubs\Double\Message;
 
 use Storm\Message\AbstractDomainCommand;
 
-final class ThirdCommand extends AbstractDomainCommand
-{
-}
+final class ThirdCommand extends AbstractDomainCommand {}

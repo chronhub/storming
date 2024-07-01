@@ -32,13 +32,9 @@ final class NoopGapDetector implements GapRecognition
         return 0;
     }
 
-    public function sleep(): void
-    {
-    }
+    public function sleep(): void {}
 
-    public function reset(): void
-    {
-    }
+    public function reset(): void {}
 
     public function gapType(): GapType
     {

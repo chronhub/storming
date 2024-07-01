@@ -14,6 +14,5 @@ class StreamSubscriberAttribute
         public int $priority,
         public bool $autowire,
         public array $references,
-    ) {
-    }
+    ) {}
 }

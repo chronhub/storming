@@ -15,9 +15,7 @@ class EventStreamWatcher
 
     protected array $newEventStreams = [];
 
-    public function __construct(protected readonly EventStreamProvider $eventStreamProvider)
-    {
-    }
+    public function __construct(protected readonly EventStreamProvider $eventStreamProvider) {}
 
     public function discover(callable $query): array
     {

@@ -28,8 +28,7 @@ final readonly class PgsqlChronicler implements Chronicler
         protected StreamPersistence $streamPersistence,
         protected StreamEventConnectionLoader $streamEventLoader,
         protected string $masterTable = 'stream_event',
-    ) {
-    }
+    ) {}
 
     public function append(Stream $stream): void
     {

@@ -9,6 +9,5 @@ final readonly class GapDetected
     public function __construct(
         public string $streamName,
         public int $position
-    ) {
-    }
+    ) {}
 }

@@ -14,8 +14,7 @@ final readonly class ResolvedListener implements Listener
         public object $instance,
         private string $name,
         private int $priority
-    ) {
-    }
+    ) {}
 
     public function name(): string
     {

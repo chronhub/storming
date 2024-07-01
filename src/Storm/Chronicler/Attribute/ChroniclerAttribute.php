@@ -19,6 +19,5 @@ class ChroniclerAttribute
         public string $abstract,
         public array $subscribers,
         public string $factory,
-    ) {
-    }
+    ) {}
 }

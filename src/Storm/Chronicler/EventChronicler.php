@@ -21,8 +21,7 @@ readonly class EventChronicler implements EventableChronicler
     public function __construct(
         protected Chronicler|TransactionalChronicler $chronicler,
         protected StreamTracker|TransactionalStreamTracker $streamTracker
-    ) {
-    }
+    ) {}
 
     public function append(Stream $stream): void
     {

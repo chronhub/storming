@@ -17,9 +17,7 @@ final class ProjectorManager implements ProjectorManagerInterface
 {
     private ?ProjectorSupervisorInterface $monitor = null;
 
-    public function __construct(private readonly SubscriptionFactory $factory)
-    {
-    }
+    public function __construct(private readonly SubscriptionFactory $factory) {}
 
     public function newQueryProjector(array $options = []): QueryProjector
     {

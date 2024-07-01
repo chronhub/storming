@@ -11,9 +11,7 @@ use function is_string;
 
 final readonly class AliasFromMap implements MessageAlias
 {
-    public function __construct(private iterable $map)
-    {
-    }
+    public function __construct(private iterable $map) {}
 
     public function toAlias(string|object $class): string
     {

@@ -18,8 +18,7 @@ final readonly class EmitterAccess implements EmitterScope
     public function __construct(
         private NotificationHub $hub,
         private SystemClock $clock
-    ) {
-    }
+    ) {}
 
     public function emit(DomainEvent $event): void
     {

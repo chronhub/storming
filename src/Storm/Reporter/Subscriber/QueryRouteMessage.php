@@ -20,9 +20,7 @@ use Storm\Reporter\Attribute\Subscriber\AsReporterSubscriber;
 )]
 final readonly class QueryRouteMessage
 {
-    public function __construct(private Routable $router)
-    {
-    }
+    public function __construct(private Routable $router) {}
 
     public function __invoke(): Closure
     {

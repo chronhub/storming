@@ -15,8 +15,7 @@ final readonly class Checkpoint implements JsonSerializable
         public string $createdAt,
         public array $gaps,
         public ?GapType $gapType = null
-    ) {
-    }
+    ) {}
 
     /**
      * Determine if the checkpoint is a gap.

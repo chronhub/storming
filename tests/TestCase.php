@@ -7,6 +7,4 @@ namespace Storm\Tests;
 use AllowDynamicProperties;
 use PHPUnit\Framework\TestCase as UnitTestCase;
 
-#[AllowDynamicProperties] class TestCase extends UnitTestCase
-{
-}
+#[AllowDynamicProperties] class TestCase extends UnitTestCase {}

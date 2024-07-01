@@ -10,9 +10,7 @@ use Storm\Projector\Workflow\Notification\Sprint\SprintStopped;
 
 final readonly class QueryingManagement implements QueryManagement
 {
-    public function __construct(private NotificationHub $hub)
-    {
-    }
+    public function __construct(private NotificationHub $hub) {}
 
     public function close(): void
     {

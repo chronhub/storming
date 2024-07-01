@@ -6,6 +6,4 @@ namespace Storm\Chronicler\Connection;
 
 use Storm\Chronicler\Exceptions\ConcurrencyException;
 
-class ConnectionConcurrencyFailure extends ConcurrencyException
-{
-}
+class ConnectionConcurrencyFailure extends ConcurrencyException {}

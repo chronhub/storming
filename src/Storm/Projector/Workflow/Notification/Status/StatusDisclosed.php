@@ -12,8 +12,7 @@ final readonly class StatusDisclosed
     public function __construct(
         public ProjectionStatus $oldStatus,
         public ProjectionStatus $newStatus
-    ) {
-    }
+    ) {}
 
     public function __invoke(Subscriptor $subscriptor): void
     {

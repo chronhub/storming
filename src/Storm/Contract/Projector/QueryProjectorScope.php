@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Projector;
 
-interface QueryProjectorScope extends ProjectorScope
-{
-}
+interface QueryProjectorScope extends ProjectorScope {}

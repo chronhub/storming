@@ -9,9 +9,7 @@ use Storm\Message\AbstractDomainQuery;
 use Storm\Tests\Stubs\Double\Message\SomeQuery;
 
 dataset('domainQuery', [
-    'construct' => fn (): AbstractDomainQuery => new class(['foo' => 'bar']) extends AbstractDomainQuery
-    {
-    },
+    'construct' => fn (): AbstractDomainQuery => new class(['foo' => 'bar']) extends AbstractDomainQuery {},
     'static' => fn (): SomeQuery => SomeQuery::fromContent(['foo' => 'bar']),
 ]);
 

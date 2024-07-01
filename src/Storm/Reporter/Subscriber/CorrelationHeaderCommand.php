@@ -79,8 +79,7 @@ final class CorrelationHeaderCommand
             public function __construct(
                 private string $eventId,
                 private string $eventType
-            ) {
-            }
+            ) {}
 
             public function decorate(Message $message): Message
             {

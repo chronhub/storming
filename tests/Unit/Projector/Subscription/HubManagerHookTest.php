@@ -20,9 +20,7 @@ function getDummyHook(string $name): object
 {
     return new class($name)
     {
-        public function __construct(public string $name)
-        {
-        }
+        public function __construct(public string $name) {}
     };
 }
 

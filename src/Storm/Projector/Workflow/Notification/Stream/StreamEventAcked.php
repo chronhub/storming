@@ -8,9 +8,7 @@ use Storm\Contract\Projector\Subscriptor;
 
 final readonly class StreamEventAcked
 {
-    public function __construct(public string $event)
-    {
-    }
+    public function __construct(public string $event) {}
 
     public function __invoke(Subscriptor $subscriptor): void
     {

@@ -29,8 +29,7 @@ final readonly class ProjectionStore implements ProjectionRepository
         private LockManager $lockManager,
         private SerializerInterface&EncoderInterface&DecoderInterface $serializer,
         private string $streamName
-    ) {
-    }
+    ) {}
 
     public function create(ProjectionStatus $status): void
     {

@@ -20,8 +20,7 @@ final readonly class ProjectReadModel implements ReadModelProjector
         protected ReadModelSubscriber $subscriber,
         protected ContextReader $context,
         protected string $streamName
-    ) {
-    }
+    ) {}
 
     public function run(bool $inBackground): void
     {

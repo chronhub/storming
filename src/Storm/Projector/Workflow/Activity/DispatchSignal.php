@@ -10,9 +10,7 @@ use function pcntl_signal_dispatch;
 
 final readonly class DispatchSignal
 {
-    public function __construct(private bool $dispatchSignal)
-    {
-    }
+    public function __construct(private bool $dispatchSignal) {}
 
     public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {

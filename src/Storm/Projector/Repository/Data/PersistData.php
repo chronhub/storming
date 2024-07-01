@@ -10,8 +10,7 @@ final readonly class PersistData extends ProjectionData
         public string $state,
         public string $checkpoint,
         public string $lockedUntil
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{'state': string, 'checkpoint': string, 'locked_until': string}

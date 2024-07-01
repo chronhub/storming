@@ -12,6 +12,5 @@ final readonly class ProjectionError
         public string $projectionName,
         public string $event,
         public Throwable $error
-    ) {
-    }
+    ) {}
 }

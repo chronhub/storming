@@ -28,9 +28,7 @@ final class StreamEvents implements Countable, IteratorAggregate
             {
                 private ArrayObject $cachedIterator;
 
-                public function __construct(public readonly Traversable $events)
-                {
-                }
+                public function __construct(public readonly Traversable $events) {}
 
                 public function getIterator(): Traversable
                 {

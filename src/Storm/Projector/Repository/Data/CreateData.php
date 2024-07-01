@@ -6,9 +6,7 @@ namespace Storm\Projector\Repository\Data;
 
 final readonly class CreateData extends ProjectionData
 {
-    public function __construct(public string $status)
-    {
-    }
+    public function __construct(public string $status) {}
 
     /**
      * @return array{'status': string}

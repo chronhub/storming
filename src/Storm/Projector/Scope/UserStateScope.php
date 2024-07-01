@@ -15,8 +15,7 @@ class UserStateScope implements ArrayAccess
 {
     public function __construct(
         protected array $state
-    ) {
-    }
+    ) {}
 
     public function upsert(string $field, mixed $value): self
     {

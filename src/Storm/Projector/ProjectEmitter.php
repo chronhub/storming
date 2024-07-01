@@ -20,8 +20,7 @@ final readonly class ProjectEmitter implements EmitterProjector
         protected EmitterSubscriber $subscriber,
         protected ContextReader $context,
         protected string $streamName
-    ) {
-    }
+    ) {}
 
     public function run(bool $inBackground): void
     {

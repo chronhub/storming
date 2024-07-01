@@ -19,8 +19,7 @@ final readonly class EventPublisherSubscriber
 {
     public function __construct(
         #[Reference('event.publisher.in_memory')] private EventPublisher $eventPublisher
-    ) {
-    }
+    ) {}
 
     #[AsStreamSubscriber(
         event: EventableChronicler::APPEND_STREAM_EVENT,

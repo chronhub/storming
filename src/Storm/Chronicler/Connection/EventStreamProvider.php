@@ -14,8 +14,7 @@ final readonly class EventStreamProvider implements Provider
     public function __construct(
         private Connection $connection,
         private string $tableName = 'event_stream'
-    ) {
-    }
+    ) {}
 
     public function createStream(string $streamName, ?string $streamTable, ?string $partition = null): bool
     {

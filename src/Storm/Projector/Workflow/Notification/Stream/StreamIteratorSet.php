@@ -9,9 +9,7 @@ use Storm\Projector\Iterator\MergeStreamIterator;
 
 final readonly class StreamIteratorSet
 {
-    public function __construct(public ?MergeStreamIterator $iterator)
-    {
-    }
+    public function __construct(public ?MergeStreamIterator $iterator) {}
 
     public function __invoke(Subscriptor $subscriptor): void
     {

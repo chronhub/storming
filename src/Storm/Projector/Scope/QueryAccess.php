@@ -15,8 +15,7 @@ final readonly class QueryAccess implements QueryProjectorScope
     public function __construct(
         private NotificationHub $hub,
         private SystemClock $clock
-    ) {
-    }
+    ) {}
 
     public function stop(): void
     {

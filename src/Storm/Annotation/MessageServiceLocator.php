@@ -15,9 +15,7 @@ class MessageServiceLocator
 {
     public const string UNPROCESSABLE_FOUND_MESSAGE = 'Message %s found but it belongs to %s reporter id and relay in %s reporter id';
 
-    public function __construct(protected KernelStorage $container)
-    {
-    }
+    public function __construct(protected KernelStorage $container) {}
 
     public function get(string $reporterId, string $messageName): ?array
     {

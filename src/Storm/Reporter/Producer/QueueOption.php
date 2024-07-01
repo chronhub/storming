@@ -16,8 +16,7 @@ class QueueOption implements JsonSerializable
         public null|int|string $delay = null,
         public ?int $timeout = null,
         public ?int $backoff = null,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{

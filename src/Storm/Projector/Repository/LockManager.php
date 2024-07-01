@@ -20,8 +20,7 @@ class LockManager
         protected readonly SystemClock $clock,
         public readonly int $lockTimeout,
         public readonly int $lockThreshold
-    ) {
-    }
+    ) {}
 
     /**
      * Acquires a lock and returns the new lock value.

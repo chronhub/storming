@@ -8,9 +8,7 @@ use Storm\Contract\Projector\Subscriptor;
 
 final readonly class StreamProcessed
 {
-    public function __construct(public string $streamName)
-    {
-    }
+    public function __construct(public string $streamName) {}
 
     public function __invoke(Subscriptor $subscriptor): void
     {

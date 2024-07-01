@@ -8,9 +8,7 @@ use Storm\Contract\Projector\Subscriptor;
 
 final readonly class BatchLoaded
 {
-    public function __construct(public bool $hasBatchStreams)
-    {
-    }
+    public function __construct(public bool $hasBatchStreams) {}
 
     public function __invoke(Subscriptor $subscriptor): void
     {

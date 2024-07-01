@@ -9,9 +9,7 @@ use Storm\Message\DomainType;
 use Storm\Tests\Stubs\Double\Message\SomeCommand;
 
 dataset('domain command', [
-    'construct' => fn (): AbstractDomainCommand => new class(['foo' => 'bar']) extends AbstractDomainCommand
-    {
-    },
+    'construct' => fn (): AbstractDomainCommand => new class(['foo' => 'bar']) extends AbstractDomainCommand {},
     'static' => fn (): SomeCommand => SomeCommand::fromContent(['foo' => 'bar']),
 ]);
 

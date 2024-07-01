@@ -6,7 +6,5 @@ namespace Storm\Projector\Repository\Events;
 
 final readonly class ProjectionStarted
 {
-    public function __construct(public string $projectionName)
-    {
-    }
+    public function __construct(public string $projectionName) {}
 }

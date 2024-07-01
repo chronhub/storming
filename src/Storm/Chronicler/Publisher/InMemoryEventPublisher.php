@@ -12,9 +12,7 @@ final class InMemoryEventPublisher implements EventPublisher
 {
     private array $pendingEvents = [];
 
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function publish(DomainEvent ...$events): void
     {

@@ -20,8 +20,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
         protected NotificationHub $hub,
         protected ProjectionRepository $projectionRepository,
         private ReadModel $readModel,
-    ) {
-    }
+    ) {}
 
     public function rise(): void
     {

@@ -16,9 +16,7 @@ use function is_string;
  */
 class ReferenceBuilder
 {
-    public function __construct(protected Container $container)
-    {
-    }
+    public function __construct(protected Container $container) {}
 
     /**
      * Find references in reflection class constructor

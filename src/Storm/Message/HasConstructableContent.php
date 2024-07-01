@@ -6,9 +6,7 @@ namespace Storm\Message;
 
 trait HasConstructableContent
 {
-    public function __construct(public readonly array $content)
-    {
-    }
+    public function __construct(public readonly array $content) {}
 
     public function toContent(): array
     {

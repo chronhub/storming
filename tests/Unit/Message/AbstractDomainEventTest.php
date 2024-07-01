@@ -9,9 +9,7 @@ use Storm\Message\AbstractDomainEvent;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 
 dataset('domainEvent', [
-    'construct' => fn (): AbstractDomainEvent => new class(['foo' => 'bar']) extends AbstractDomainEvent
-    {
-    },
+    'construct' => fn (): AbstractDomainEvent => new class(['foo' => 'bar']) extends AbstractDomainEvent {},
     'static' => fn (): SomeEvent => SomeEvent::fromContent(['foo' => 'bar']),
 ]);
 

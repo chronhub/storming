@@ -149,9 +149,7 @@ test('raise no stream event return on retrieve filtered', function () {
 test('retrieve filtered stream events', function (string $streamName, Direction $direction) {
     $queryFilter = new readonly class($direction) implements InMemoryQueryFilter
     {
-        public function __construct(private Direction $direction)
-        {
-        }
+        public function __construct(private Direction $direction) {}
 
         public function orderBy(): Direction
         {

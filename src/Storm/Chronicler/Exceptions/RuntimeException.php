@@ -6,6 +6,4 @@ namespace Storm\Chronicler\Exceptions;
 
 use Storm\Contract\Chronicler\ChroniclerFailed;
 
-class RuntimeException extends \RuntimeException implements ChroniclerFailed
-{
-}
+class RuntimeException extends \RuntimeException implements ChroniclerFailed {}

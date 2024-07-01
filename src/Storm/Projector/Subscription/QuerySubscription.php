@@ -23,8 +23,7 @@ final readonly class QuerySubscription implements QuerySubscriber
         private QueryManagement $management,
         private ActivityFactory $activities,
         private QueryProjectorScope $scope
-    ) {
-    }
+    ) {}
 
     public function start(ContextReader $context, bool $keepRunning): void
     {

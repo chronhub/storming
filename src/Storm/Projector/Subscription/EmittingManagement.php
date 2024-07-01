@@ -32,8 +32,7 @@ final readonly class EmittingManagement implements EmitterManagement
         private EmittedStreamCache $streamCache,
         private EmittedStream $emittedStream,
         private int $sleepOnFirstCommit,
-    ) {
-    }
+    ) {}
 
     public function emit(DomainEvent $event): void
     {

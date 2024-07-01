@@ -21,9 +21,7 @@ final class PgsqlTransactionalChronicler implements TransactionalChronicler
 
     private Connection $connection;
 
-    public function __construct(protected readonly Chronicler $chronicler)
-    {
-    }
+    public function __construct(protected readonly Chronicler $chronicler) {}
 
     public function setConnection(Connection $connection): void
     {

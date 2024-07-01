@@ -17,8 +17,7 @@ final readonly class ReadModelAccess implements ReadModelScope
         private NotificationHub $hub,
         private ReadModel $readModel,
         private SystemClock $clock
-    ) {
-    }
+    ) {}
 
     public function stop(): void
     {

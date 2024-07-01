@@ -29,8 +29,7 @@ readonly class StreamEventReactor
         protected Closure $reactors,
         protected ProjectorScope $projector,
         protected bool $dispatchSignal
-    ) {
-    }
+    ) {}
 
     /**
      * @param positive-int $expectedPosition

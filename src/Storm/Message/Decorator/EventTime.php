@@ -11,9 +11,7 @@ use Storm\Message\Message;
 
 final readonly class EventTime implements MessageDecorator
 {
-    public function __construct(private SystemClock $clock)
-    {
-    }
+    public function __construct(private SystemClock $clock) {}
 
     public function decorate(Message $message): Message
     {

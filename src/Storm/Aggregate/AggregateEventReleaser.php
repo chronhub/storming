@@ -16,9 +16,7 @@ use function reset;
 
 final readonly class AggregateEventReleaser
 {
-    public function __construct(private MessageDecorator $messageDecorator)
-    {
-    }
+    public function __construct(private MessageDecorator $messageDecorator) {}
 
     /**
      * @return array<DomainEvent>|array

@@ -25,8 +25,7 @@ final readonly class RouteMessage
     public function __construct(
         private Routable $router,
         private IlluminateQueue $queueDispatcher,
-    ) {
-    }
+    ) {}
 
     public function __invoke(): Closure
     {

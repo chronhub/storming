@@ -8,9 +8,7 @@ use Storm\Projector\Workflow\Timer;
 
 class TimeWatcher
 {
-    public function __construct(protected readonly Timer $timer)
-    {
-    }
+    public function __construct(protected readonly Timer $timer) {}
 
     public function start(): void
     {

@@ -32,8 +32,7 @@ final class SubscriptionManager implements Subscriptor
         private readonly SystemClock $clock,
         private readonly ProjectionOption $option,
         private readonly WatcherManager $watcher,
-    ) {
-    }
+    ) {}
 
     public function setContext(ContextReader $context, bool $allowRerun): void
     {

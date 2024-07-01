@@ -15,6 +15,5 @@ class AsStreamSubscriber
         public ?string $method = null,
         public bool $autowire = true,
         public int $priority = 0
-    ) {
-    }
+    ) {}
 }

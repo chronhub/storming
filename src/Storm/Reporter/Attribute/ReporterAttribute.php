@@ -14,8 +14,7 @@ class ReporterAttribute
         public array $listeners,
         public ?string $defaultQueue,
         public ?string $tracker,
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{

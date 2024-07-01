@@ -12,9 +12,7 @@ use function method_exists;
 
 class ChroniclerConnectionFactory extends AbstractChroniclerFactory
 {
-    public function __construct(protected Application $app)
-    {
-    }
+    public function __construct(protected Application $app) {}
 
     public function fromAttribute(ChroniclerAttribute $attribute): Chronicler
     {

@@ -110,10 +110,6 @@ test('link event to a new stream', function (string $eventStoreStreamName) {
         );
 })->with('event store stream name');
 
-test('emit with many streams', function () {
+test('emit with many streams', function () {})->todo();
 
-})->todo();
-
-test('link with many streams', function () {
-
-})->todo();
+test('link with many streams', function () {})->todo();

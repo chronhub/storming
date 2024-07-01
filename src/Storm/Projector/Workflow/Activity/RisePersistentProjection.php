@@ -12,8 +12,7 @@ final readonly class RisePersistentProjection
 {
     public function __construct(
         private DiscoverRemoteStatus $discoverRemoteStatus
-    ) {
-    }
+    ) {}
 
     public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {

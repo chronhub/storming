@@ -10,9 +10,7 @@ use Storm\Reporter\Exception\MessageNotFound;
 
 final readonly class MessageRouter implements Routable
 {
-    public function __construct(private MessageServiceLocator $container)
-    {
-    }
+    public function __construct(private MessageServiceLocator $container) {}
 
     public function route(string $reporterId, string $message): ?array
     {

@@ -11,9 +11,7 @@ use function is_array;
 
 final readonly class GenericMessageFactory implements MessageFactory
 {
-    public function __construct(private MessageSerializer $messageSerializer)
-    {
-    }
+    public function __construct(private MessageSerializer $messageSerializer) {}
 
     public function createMessageFrom(object|array $message): Message
     {

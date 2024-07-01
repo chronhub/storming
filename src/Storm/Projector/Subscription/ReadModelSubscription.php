@@ -19,6 +19,5 @@ final readonly class ReadModelSubscription implements ReadModelSubscriber
         protected ReadModelManagement $management,
         protected ActivityFactory $activities,
         protected ReadModelScope $scope
-    ) {
-    }
+    ) {}
 }

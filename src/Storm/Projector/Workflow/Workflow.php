@@ -21,8 +21,7 @@ class Workflow
     public function __construct(
         protected readonly NotificationHub $hub,
         protected readonly array $activities
-    ) {
-    }
+    ) {}
 
     public function process(Closure $destination): void
     {

@@ -7,6 +7,4 @@ namespace Storm\Chronicler\Exceptions;
 use Storm\Contract\Chronicler\ChroniclerFailed;
 use UnexpectedValueException;
 
-class UnexpectedCallback extends UnexpectedValueException implements ChroniclerFailed
-{
-}
+class UnexpectedCallback extends UnexpectedValueException implements ChroniclerFailed {}

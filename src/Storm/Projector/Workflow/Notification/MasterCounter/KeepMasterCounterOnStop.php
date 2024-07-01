@@ -8,9 +8,7 @@ use Storm\Contract\Projector\Subscriptor;
 
 final readonly class KeepMasterCounterOnStop
 {
-    public function __construct(public bool $keepMasterCounterOnStop = true)
-    {
-    }
+    public function __construct(public bool $keepMasterCounterOnStop = true) {}
 
     public function __invoke(Subscriptor $subscriptor): void
     {

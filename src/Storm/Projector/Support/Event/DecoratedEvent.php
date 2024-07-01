@@ -10,9 +10,7 @@ use Storm\Contract\Message\EventHeader;
 
 abstract class DecoratedEvent
 {
-    protected function __construct(public readonly DomainEvent $event)
-    {
-    }
+    protected function __construct(public readonly DomainEvent $event) {}
 
     abstract public static function fromEvent(DomainEvent $event): self;
 

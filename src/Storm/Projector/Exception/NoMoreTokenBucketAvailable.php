@@ -4,6 +4,4 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Exception;
 
-class NoMoreTokenBucketAvailable extends RuntimeException
-{
-}
+class NoMoreTokenBucketAvailable extends RuntimeException {}

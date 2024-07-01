@@ -13,9 +13,7 @@ use Symfony\Component\Serializer\Serializer;
 
 final readonly class MessagingSerializer implements MessageSerializer
 {
-    public function __construct(private Serializer $serializer)
-    {
-    }
+    public function __construct(private Serializer $serializer) {}
 
     /**
      * Serialize a message to payload.

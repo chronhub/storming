@@ -29,8 +29,7 @@ class InMemoryKernelStorage implements KernelStorage
         protected ChroniclerMap $chroniclers,
         protected StreamSubscriberMap $streamSubscribers,
         protected Application $app
-    ) {
-    }
+    ) {}
 
     public function findMessage(string $messageName): iterable
     {

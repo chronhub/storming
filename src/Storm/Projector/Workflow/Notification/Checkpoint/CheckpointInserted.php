@@ -15,8 +15,7 @@ final readonly class CheckpointInserted
         public string $streamName,
         public int $streamPosition,
         public string|DateTimeImmutable $eventTime,
-    ) {
-    }
+    ) {}
 
     public function __invoke(Subscriptor $subscriptor): Checkpoint
     {

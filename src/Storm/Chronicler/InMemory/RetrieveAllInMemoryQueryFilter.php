@@ -15,8 +15,7 @@ final readonly class RetrieveAllInMemoryQueryFilter implements InMemoryQueryFilt
     public function __construct(
         private AggregateIdentity $aggregateId,
         private Direction $direction
-    ) {
-    }
+    ) {}
 
     public function apply(): callable
     {

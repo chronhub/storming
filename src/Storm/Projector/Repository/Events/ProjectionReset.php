@@ -11,6 +11,5 @@ final readonly class ProjectionReset
     public function __construct(
         public string $projectionName,
         public ProjectionResult $projectionResult
-    ) {
-    }
+    ) {}
 }

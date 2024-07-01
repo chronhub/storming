@@ -11,8 +11,7 @@ final readonly class StopData extends ProjectionData
         public string $state,
         public string $checkpoint,
         public string $lockedUntil
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{'status': string, 'state': string, 'checkpoint': string, 'locked_until': string}

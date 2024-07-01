@@ -21,8 +21,7 @@ final readonly class MessageDecorators
 {
     public function __construct(
         #[Reference('message.decorator.chain.default')] private MessageDecorator $messageDecorator
-    ) {
-    }
+    ) {}
 
     public function __invoke(): Closure
     {

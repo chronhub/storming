@@ -19,8 +19,7 @@ final class EventScope
         private readonly DomainEvent $event,
         public readonly ProjectorScope $projector,
         public readonly ?UserStateScope $userState = null
-    ) {
-    }
+    ) {}
 
     /**
      * @param class-string $event

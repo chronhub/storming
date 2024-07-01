@@ -16,8 +16,7 @@ final readonly class Payload implements JsonSerializable
         /** @var T */ public string|array $header,
         /** @var T */ public string|array $content,
         /** @var S */ public ?int $position = null
-    ) {
-    }
+    ) {}
 
     /**
      * @return array{header:T, content:T, position:S}

@@ -26,8 +26,7 @@ class DeclaredQueue
     public function __construct(
         protected array $queues,
         protected Container $container
-    ) {
-    }
+    ) {}
 
     public function mergeIfNeeded(string $reporterId, null|string|array|object $queue): ?array
     {

@@ -9,9 +9,7 @@ use Storm\Reporter\Exception\MessageNotFound;
 
 final readonly class Routing
 {
-    public function __construct(private Router $router)
-    {
-    }
+    public function __construct(private Router $router) {}
 
     /**
      * @throws MessageNotFound

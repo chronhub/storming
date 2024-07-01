@@ -21,8 +21,7 @@ final readonly class GenericAggregateRepository implements AggregateRepository
         protected Chronicler $chronicler,
         protected StreamName $streamName,
         protected AggregateEventReleaser $eventReleaser,
-    ) {
-    }
+    ) {}
 
     public function retrieve(AggregateIdentity $aggregateId): ?AggregateRoot
     {

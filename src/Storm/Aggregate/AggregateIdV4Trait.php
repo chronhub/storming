@@ -12,9 +12,7 @@ use Symfony\Component\Uid\Uuid;
  */
 trait AggregateIdV4Trait
 {
-    public function __construct(public readonly Uuid $id)
-    {
-    }
+    public function __construct(public readonly Uuid $id) {}
 
     public static function fromString(string $aggregateId): static
     {

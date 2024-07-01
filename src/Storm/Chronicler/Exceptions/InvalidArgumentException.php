@@ -6,6 +6,4 @@ namespace Storm\Chronicler\Exceptions;
 
 use Storm\Contract\Chronicler\ChroniclerFailed;
 
-class InvalidArgumentException extends \InvalidArgumentException implements ChroniclerFailed
-{
-}
+class InvalidArgumentException extends \InvalidArgumentException implements ChroniclerFailed {}

@@ -15,8 +15,7 @@ class SubscriberHandler
         public array $reporters,
         public Listener $listener,
         public bool $autowire,
-    ) {
-    }
+    ) {}
 
     public function match(string $name): bool
     {

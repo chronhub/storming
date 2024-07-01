@@ -6,7 +6,5 @@ namespace Storm\Projector\Controller\Projector;
 
 class CreateProjectionController
 {
-    public function __invoke(string $streamName)
-    {
-    }
+    public function __invoke(string $streamName) {}
 }

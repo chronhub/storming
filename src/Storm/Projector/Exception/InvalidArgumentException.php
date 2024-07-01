@@ -6,6 +6,4 @@ namespace Storm\Projector\Exception;
 
 use Storm\Contract\Projector\ProjectorFailed;
 
-class InvalidArgumentException extends \InvalidArgumentException implements ProjectorFailed
-{
-}
+class InvalidArgumentException extends \InvalidArgumentException implements ProjectorFailed {}

@@ -12,9 +12,7 @@ use function get_class;
 
 final readonly class ProjectionOptionResolver
 {
-    public function __construct(private ProjectionOption|array $options = [])
-    {
-    }
+    public function __construct(private ProjectionOption|array $options = []) {}
 
     public function __invoke(array $options = []): ProjectionOption
     {

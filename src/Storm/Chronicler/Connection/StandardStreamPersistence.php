@@ -16,9 +16,7 @@ final readonly class StandardStreamPersistence implements StreamPersistence
 {
     public const string STRATEGY_NAME = 'standard';
 
-    public function __construct(private Serializer $serializer)
-    {
-    }
+    public function __construct(private Serializer $serializer) {}
 
     public function normalize(Stream $stream): array
     {

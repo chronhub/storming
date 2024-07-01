@@ -6,9 +6,7 @@ namespace Storm\Projector\Repository\Data;
 
 final readonly class UpdateLockData extends ProjectionData
 {
-    public function __construct(public string $lockedUntil)
-    {
-    }
+    public function __construct(public string $lockedUntil) {}
 
     /**
      * @return array{'locked_until': string}

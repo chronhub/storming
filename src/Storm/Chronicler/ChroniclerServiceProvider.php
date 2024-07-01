@@ -21,9 +21,7 @@ use Storm\Serializer\StreamingSerializer;
 
 class ChroniclerServiceProvider extends ServiceProvider implements DeferrableProvider
 {
-    public function boot(): void
-    {
-    }
+    public function boot(): void {}
 
     public function register(): void
     {

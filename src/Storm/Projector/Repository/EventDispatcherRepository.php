@@ -23,8 +23,7 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
     public function __construct(
         private ProjectionRepository $repository,
         private Dispatcher $eventDispatcher
-    ) {
-    }
+    ) {}
 
     public function create(ProjectionStatus $status): void
     {

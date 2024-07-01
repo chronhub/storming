@@ -14,8 +14,7 @@ class IlluminateQueue
     public function __construct(
         protected QueueingDispatcher $dispatcher,
         protected MessageSerializer $messageSerializer
-    ) {
-    }
+    ) {}
 
     public function toQueue(Message $message, array $currentQueue): void
     {

@@ -14,6 +14,5 @@ final readonly class ProjectionResult
     public function __construct(
         public array $checkpoints,
         public array $userState,
-    ) {
-    }
+    ) {}
 }

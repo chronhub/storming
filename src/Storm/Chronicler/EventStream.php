@@ -10,8 +10,7 @@ final readonly class EventStream
         private string $streamName,
         private string $tableName,
         private ?string $partition = null
-    ) {
-    }
+    ) {}
 
     public function realStreamName(): string
     {

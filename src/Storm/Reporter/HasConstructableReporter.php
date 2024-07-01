@@ -24,8 +24,7 @@ trait HasConstructableReporter
 
     public function __construct(
         protected readonly ?MessageTracker $tracker = new TrackMessage()
-    ) {
-    }
+    ) {}
 
     public function subscribe(object|string ...$messageSubscribers): void
     {

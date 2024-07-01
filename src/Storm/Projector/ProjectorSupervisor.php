@@ -20,8 +20,7 @@ final readonly class ProjectorSupervisor implements ProjectorSupervisorInterface
     public function __construct(
         private ProjectionProvider $projectionProvider,
         private SerializerInterface&EncoderInterface&DecoderInterface $serializer,
-    ) {
-    }
+    ) {}
 
     public function markAsStop(string $projectionName): void
     {

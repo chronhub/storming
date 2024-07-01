@@ -16,9 +16,7 @@ use function array_map;
 
 abstract readonly class AbstractActivityFactory implements ActivityFactory
 {
-    public function __construct(protected Chronicler $chronicler)
-    {
-    }
+    public function __construct(protected Chronicler $chronicler) {}
 
     public function __invoke(Subscriptor $subscriptor, ProjectorScope $projectorScope): array
     {

@@ -11,9 +11,7 @@ use Storm\Contract\Projector\StreamNameAwareQueryFilter;
 
 readonly class QueryFilterResolver
 {
-    public function __construct(private QueryFilter $queryFilter)
-    {
-    }
+    public function __construct(private QueryFilter $queryFilter) {}
 
     public function __invoke(string $streamName, int $nextPosition, int $limit): QueryFilter
     {

@@ -6,6 +6,4 @@ namespace Storm\Tests\Stubs\Double\Message;
 
 use Storm\Message\AbstractDomainQuery;
 
-final class SomeQuery extends AbstractDomainQuery
-{
-}
+final class SomeQuery extends AbstractDomainQuery {}

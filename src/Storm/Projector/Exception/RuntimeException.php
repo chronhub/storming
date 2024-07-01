@@ -6,6 +6,4 @@ namespace Storm\Projector\Exception;
 
 use Storm\Contract\Projector\ProjectorFailed;
 
-class RuntimeException extends \RuntimeException implements ProjectorFailed
-{
-}
+class RuntimeException extends \RuntimeException implements ProjectorFailed {}

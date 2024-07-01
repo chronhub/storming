@@ -12,9 +12,7 @@ abstract class ReadModelConnection implements ReadModel
 {
     use InteractWithStack;
 
-    public function __construct(protected readonly Connection $connection)
-    {
-    }
+    public function __construct(protected readonly Connection $connection) {}
 
     public function initialize(): void
     {

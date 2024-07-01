@@ -8,7 +8,5 @@ use Storm\Contract\Message\DomainEvent;
 
 final readonly class EventEmitted
 {
-    public function __construct(public DomainEvent $event)
-    {
-    }
+    public function __construct(public DomainEvent $event) {}
 }

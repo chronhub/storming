@@ -8,9 +8,7 @@ use Storm\Contract\Projector\Subscriptor;
 
 final readonly class UserStateChanged
 {
-    public function __construct(public array $userState)
-    {
-    }
+    public function __construct(public array $userState) {}
 
     public function __invoke(Subscriptor $subscriptor): void
     {

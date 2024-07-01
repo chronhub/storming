@@ -17,8 +17,7 @@ class QueueData implements JsonSerializable
         public ?array $queue,
         public bool $dispatched,
         public bool $handled
-    ) {
-    }
+    ) {}
 
     public static function fromArray(array $data): self
     {

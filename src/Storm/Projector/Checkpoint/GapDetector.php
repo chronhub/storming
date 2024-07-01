@@ -22,8 +22,7 @@ final class GapDetector implements GapRecognition
      */
     public function __construct(
         public readonly array $retriesInMs
-    ) {
-    }
+    ) {}
 
     public function isRecoverable(): bool
     {

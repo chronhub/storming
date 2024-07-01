@@ -11,9 +11,7 @@ use Symfony\Component\Serializer\Serializer;
 
 final readonly class StreamingSerializer implements StreamEventSerializer
 {
-    public function __construct(private Serializer $serializer)
-    {
-    }
+    public function __construct(private Serializer $serializer) {}
 
     public function serialize(DomainEvent $event): Payload
     {

@@ -12,8 +12,7 @@ final readonly class RefreshProjection
     public function __construct(
         private RefreshRemoteStatus $remoteStatus,
         private bool $onlyOnceDiscovery
-    ) {
-    }
+    ) {}
 
     public function __invoke(NotificationHub $hub, callable $next): callable|bool
     {
