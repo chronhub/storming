@@ -9,3 +9,8 @@ use Storm\Projector\ProjectionStatus;
 dataset('projection status', ProjectionStatus::cases());
 
 dataset('projection status as strings', ProjectionStatus::strings());
+
+dataset('keep projection running', [
+    'keep running' => [true],
+    'run once' => [false],
+]);

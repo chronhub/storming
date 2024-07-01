@@ -7,15 +7,13 @@ namespace Storm\Tests\Feature\Projector;
 use Storm\Chronicler\Direction;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Projector\QueryProjectorScope;
-use Storm\Projector\Scope\EventScope;
-use Storm\Projector\Scope\UserStateScope;
 use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Domain\BalanceEventStore;
+use Storm\Tests\Domain\ProjectionBalanceReactor;
 use Storm\Tests\Feature\InMemoryTestingFactory;
 
 beforeEach(function () {
@@ -35,32 +33,17 @@ test('query projection', function () {
         ->withBalanceSubtracted(4, 50);
 
     $projector = $manager->newQueryProjector();
-
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-            ->then(function (DomainEvent $event, QueryProjectorScope $scope, UserStateScope $userState): void {
-                if ($event instanceof BalanceCreated || $event instanceof BalanceAdded) {
-                    $userState->increment('balance', $event->amount());
-                }
-
-                if ($event instanceof BalanceSubtracted) {
-                    $userState->decrement('balance', $event->amount());
-                }
-
-                $userState->merge('events', [$event::class]);
-            });
-    };
+    $reactors = ProjectionBalanceReactor::getQueryReactors(false, false);
 
     $projector
-        ->initialize(fn (): array => ['balance' => 0])
+        ->initialize(fn (): array => [])
         ->subscribeToStream('balance')
         ->when($reactors)
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(false);
 
     expect($projector->getState())->toBe([
-        'balance' => 100,
+        $balanceId->toString() => 100,
         'events' => [
             BalanceCreated::class,
             BalanceAdded::class,
@@ -90,26 +73,7 @@ test('query projection with two streams', function () {
         ->withBalanceSubtracted(4, 25);
 
     $projector = $manager->newQueryProjector();
-
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-            ->then(function (DomainEvent $event, QueryProjectorScope $scope, UserStateScope $userState): void {
-                $balanceId = $event->toContent()['id'];
-
-                if ($event instanceof BalanceCreated) {
-                    $userState[$balanceId] = $event->amount();
-                }
-
-                if ($event instanceof BalanceAdded) {
-                    $userState[$balanceId] += $event->amount();
-                }
-
-                if ($event instanceof BalanceSubtracted) {
-                    $userState[$balanceId] -= $event->amount();
-                }
-            });
-    };
+    $reactors = ProjectionBalanceReactor::getQueryReactors(false, false);
 
     $projector
         ->initialize(fn (): array => [])
@@ -118,10 +82,8 @@ test('query projection with two streams', function () {
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(false);
 
-    expect($projector->getState())->toBe([
-        $balanceIdOne->toString() => 100,
-        $balanceIdTwo->toString() => 25,
-    ]);
+    expect($projector->getState()[$balanceIdOne->toString()])->toBe(100)
+        ->and($projector->getState()[$balanceIdTwo->toString()])->toBe(25);
 });
 
 test('query projection with category', function () {
@@ -145,23 +107,7 @@ test('query projection with category', function () {
 
     $projector = $manager->newQueryProjector();
 
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-            ->then(function (DomainEvent $event, QueryProjectorScope $scope, UserStateScope $userState): void {
-                if ($event instanceof BalanceCreated) {
-                    $userState[$scope->streamName()] = $event->amount();
-                }
-
-                if ($event instanceof BalanceAdded) {
-                    $userState[$scope->streamName()] += $event->amount();
-                }
-
-                if ($event instanceof BalanceSubtracted) {
-                    $userState[$scope->streamName()] -= $event->amount();
-                }
-            });
-    };
+    $reactors = ProjectionBalanceReactor::getQueryReactors(false, false);
 
     $projector
         ->initialize(fn (): array => [])
@@ -170,10 +116,8 @@ test('query projection with category', function () {
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(false);
 
-    expect($projector->getState())->toBe([
-        'balance-one' => 100,
-        'balance-two' => 25,
-    ]);
+    expect($projector->getState()[$balanceIdOne->toString()])->toBe(100)
+        ->and($projector->getState()[$balanceIdTwo->toString()])->toBe(25);
 });
 
 test('stop query projection', function () {
@@ -189,37 +133,19 @@ test('stop query projection', function () {
         ->withBalanceSubtracted(4, 50);
 
     $projector = $manager->newQueryProjector();
-
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-            ->then(function (DomainEvent $event, QueryProjectorScope $scope, UserStateScope $userState): void {
-                $userState
-                    ->increment()
-                    ->increment('balance', $event->toContent()['amount'])
-                    ->merge('events', [$event::class]);
-            });
-
-        if ($scope->userState['count'] === 2) {
-            $scope->projector->stop();
-        }
-    };
+    $reactors = ProjectionBalanceReactor::getQueryReactors(true, 2);
 
     $projector
-        ->initialize(fn (): array => ['count' => 0, 'balance' => 0])
+        ->initialize(fn (): array => [])
         ->subscribeToStream('balance')
         ->when($reactors)
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(true);
 
-    expect($projector->getState())->toBe([
-        'count' => 2,
-        'balance' => 300,
-        'events' => [
-            BalanceCreated::class,
-            BalanceAdded::class,
-        ],
-    ]);
+    expect($projector->getState()['events'])->toBe([
+        BalanceCreated::class,
+        BalanceAdded::class,
+    ])->and($projector->getState()[$balanceId->toString()])->toBe(300);
 });
 
 test('query projection with query filter and induce gap', function () {
@@ -249,30 +175,18 @@ test('query projection with query filter and induce gap', function () {
         ->withBalanceSubtracted(5, 10);
 
     $projector = $manager->newQueryProjector();
-
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ack(BalanceSubtracted::class)
-            ?->then(function (DomainEvent $event, QueryProjectorScope $scope, UserStateScope $userState): void {
-                $userState
-                    ->increment()
-                    ->merge('events', [$event::class]);
-            });
-    };
+    $reactors = ProjectionBalanceReactor::getQueryReactors(false, false);
 
     $projector
-        ->initialize(fn (): array => ['count' => 0])
+        ->initialize(fn (): array => [])
         ->subscribeToStream('balance')
         ->when($reactors)
         ->filter($queryFilter)
         ->run(false);
 
-    expect($projector->getState())->toBe([
-        'count' => 3,
-        'events' => [
-            BalanceSubtracted::class,
-            BalanceSubtracted::class,
-            BalanceSubtracted::class,
-        ],
-    ]);
+    expect($projector->getState()['events'])->toBe([
+        BalanceSubtracted::class,
+        BalanceSubtracted::class,
+        BalanceSubtracted::class,
+    ])->and($projector->getState()[$balanceId->toString()])->toBe(-210);
 });

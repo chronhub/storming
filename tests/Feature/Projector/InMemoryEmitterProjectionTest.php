@@ -4,30 +4,31 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector;
 
-use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Projector\EmitterScope;
-use Storm\Projector\Scope\EventScope;
-use Storm\Projector\Scope\UserStateScope;
+use Storm\Projector\ProjectionStatus;
 use Storm\Stream\StreamName;
-use Storm\Tests\Domain\Balance\BalanceAdded;
-use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
-use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Domain\BalanceEventStore;
+use Storm\Tests\Domain\ProjectionBalanceReactor;
 use Storm\Tests\Feature\InMemoryTestingFactory;
 
 beforeEach(function () {
     $this->factory = new InMemoryTestingFactory();
 });
 
-test('emit event', function () {
+dataset('event store stream name', [
+    'balance',
+    'another_balance',
+]);
+
+test('emit event', function (string $eventStoreStreamName) {
     $manager = $this->factory->createProjectorManager();
 
-    expect($this->factory->projectionProvider->exists('projection_balance'))->toBeFalse()
-        ->and($this->factory->chronicler->hasStream(new StreamName('projection_balance')))->toBeFalse();
+    $this->factory
+        ->assertProjectionExists('operation', false)
+        ->assertStreamExists('operation', false);
 
     $balanceId = BalanceId::create();
-    $streamName = new StreamName('balance');
+    $streamName = new StreamName($eventStoreStreamName);
     $store = new BalanceEventStore($this->factory->chronicler, $streamName, $balanceId);
     $store
         ->withBalanceCreated(1, 100)
@@ -35,44 +36,44 @@ test('emit event', function () {
         ->withBalanceSubtracted(3, 150)
         ->withBalanceSubtracted(4, 50);
 
-    $projector = $manager->newEmitterProjector('projection_balance');
-
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-            ->then(function (DomainEvent $event, EmitterScope $scope, UserStateScope $userState): void {
-                if ($event instanceof BalanceCreated || $event instanceof BalanceAdded) {
-                    $userState->increment('balance', $event->amount());
-                }
-
-                if ($event instanceof BalanceSubtracted) {
-                    $userState->decrement('balance', $event->amount());
-                }
-
-                $scope->emit($event);
-            });
-    };
+    $projector = $manager->newEmitterProjector('operation');
+    $reactors = ProjectionBalanceReactor::getEmitReactor(null);
 
     $projector
         ->initialize(fn (): array => ['balance' => 0])
-        ->subscribeToStream('balance')
+        ->subscribeToStream($eventStoreStreamName)
         ->when($reactors)
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(false);
 
-    expect($this->factory->projectionProvider->exists('projection_balance'))->toBeTrue()
-        ->and($this->factory->chronicler->hasStream(new StreamName('projection_balance')))->toBeTrue();
-});
+    $this->factory
+        ->assertProjectionExists('operation', true)
+        ->assertStreamExists('operation', true)
+        ->assertProjectionModel(
+            streamName: 'operation',
+            state: $this->factory->serializer->encode($projector->getState(), 'json'),
+            status: ProjectionStatus::IDLE->value,
+            lockedUntil: null
+        )
+        ->assertEmittedProjectionModelCheckpoint(
+            streamName: 'operation',
+            fromStreamName: $eventStoreStreamName,
+            position: 4,
+            gaps: [],
+            gapType: null
+        );
+})->with('event store stream name');
 
-test('link event to new stream', function () {
+test('link event to a new stream', function (string $eventStoreStreamName) {
     $manager = $this->factory->createProjectorManager();
 
-    expect($this->factory->projectionProvider->exists('projection_balance'))->toBeFalse()
-        ->and($this->factory->chronicler->hasStream(new StreamName('projection_balance')))->toBeFalse()
-        ->and($this->factory->chronicler->hasStream(new StreamName('linked_balance')))->toBeFalse();
+    $this->factory
+        ->assertProjectionExists('operation', false)
+        ->assertStreamExists('operation', false)
+        ->assertStreamExists('new_stream', false);
 
     $balanceId = BalanceId::create();
-    $streamName = new StreamName('balance');
+    $streamName = new StreamName($eventStoreStreamName);
     $store = new BalanceEventStore($this->factory->chronicler, $streamName, $balanceId);
     $store
         ->withBalanceCreated(1, 100)
@@ -80,32 +81,39 @@ test('link event to new stream', function () {
         ->withBalanceSubtracted(3, 150)
         ->withBalanceSubtracted(4, 50);
 
-    $projector = $manager->newEmitterProjector('projection_balance');
-
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-            ->then(function (DomainEvent $event, EmitterScope $scope, UserStateScope $userState): void {
-                if ($event instanceof BalanceCreated || $event instanceof BalanceAdded) {
-                    $userState->increment('balance', $event->amount());
-                }
-
-                if ($event instanceof BalanceSubtracted) {
-                    $userState->decrement('balance', $event->amount());
-                }
-
-                $scope->linkTo('linked_projection', $event);
-            });
-    };
+    $projector = $manager->newEmitterProjector('operation');
+    $reactors = ProjectionBalanceReactor::getEmitReactor('new_stream');
 
     $projector
         ->initialize(fn (): array => ['balance' => 0])
-        ->subscribeToStream('balance')
+        ->subscribeToStream($eventStoreStreamName)
         ->when($reactors)
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(false);
 
-    expect($this->factory->projectionProvider->exists('projection_balance'))->toBeTrue()
-        ->and($this->factory->chronicler->hasStream(new StreamName('projection_balance')))->toBeFalse()
-        ->and($this->factory->chronicler->hasStream(new StreamName('linked_projection')))->toBeTrue();
-});
+    $this->factory
+        ->assertProjectionExists('operation', true)
+        ->assertStreamExists('operation', false)
+        ->assertStreamExists('new_stream', true)
+        ->assertProjectionModel(
+            streamName: 'operation',
+            state: $this->factory->serializer->encode($projector->getState(), 'json'),
+            status: ProjectionStatus::IDLE->value,
+            lockedUntil: null
+        )
+        ->assertEmittedProjectionModelCheckpoint(
+            streamName: 'operation',
+            fromStreamName: $eventStoreStreamName,
+            position: 4,
+            gaps: [],
+            gapType: null
+        );
+})->with('event store stream name');
+
+test('emit with many streams', function () {
+
+})->todo();
+
+test('link with many streams', function () {
+
+})->todo();

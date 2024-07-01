@@ -4,20 +4,16 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector;
 
-use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Projector\ProjectionModel;
-use Storm\Contract\Projector\ReadModelScope;
+use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Scope\EventScope;
-use Storm\Projector\Scope\UserStateScope;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
-use Storm\Projector\Workflow\Notification\Checkpoint\GapDetected;
 use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Domain\BalanceEventStore;
+use Storm\Tests\Domain\ProjectionBalanceReactor;
 use Storm\Tests\Feature\InMemoryTestingFactory;
 
 use function count;
@@ -25,7 +21,19 @@ use function count;
 beforeEach(function () {
     $this->factory = new InMemoryTestingFactory();
     $this->readModel = new InMemoryReadModel();
+    $this->expectedStateEvents = [
+        BalanceCreated::class,
+        BalanceAdded::class,
+        BalanceSubtracted::class,
+        BalanceSubtracted::class,
+    ];
 });
+
+dataset('retries', [
+    'one retry' => [[1]],
+    'two retries' => [[1, 2]],
+    'three retries' => [[1, 2, 3]],
+]);
 
 test('read model projection', function () {
     $manager = $this->factory->createProjectorManager();
@@ -40,31 +48,7 @@ test('read model projection', function () {
         ->withBalanceSubtracted(4, 50);
 
     $projector = $manager->newReadModelProjector($streamName->name, $this->readModel);
-
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-            ->then(function (DomainEvent $event, ReadModelScope $scope, UserStateScope $userState): void {
-                $id = $event->toContent()['id'];
-
-                if ($event instanceof BalanceCreated) {
-                    $userState->increment('balance', $event->amount());
-                    $scope->stack('insert', $id, ['balance' => $event->amount()]);
-                }
-
-                if ($event instanceof BalanceAdded) {
-                    $userState->increment('balance', $event->amount());
-                    $scope->stack('increment', $id, 'balance', $event->amount());
-                }
-
-                if ($event instanceof BalanceSubtracted) {
-                    $userState->decrement('balance', $event->amount());
-                    $scope->stack('decrement', $id, 'balance', $event->amount());
-                }
-
-                $userState->merge('events', [$event::class]);
-            });
-    };
+    $reactors = ProjectionBalanceReactor::getReadModelReactors(keepRunning: false, stopAt: false);
 
     $projector
         ->initialize(fn (): array => ['balance' => 0])
@@ -73,49 +57,29 @@ test('read model projection', function () {
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(false);
 
-    $state = $projector->getState();
-
     // assert projection state
-    expect($state)->toBe([
+    expect($projector->getState())->toBe([
         'balance' => 100,
-        'events' => [
-            BalanceCreated::class,
-            BalanceAdded::class,
-            BalanceSubtracted::class,
-            BalanceSubtracted::class,
-        ],
+        'events' => $this->expectedStateEvents,
     ]);
 
-    // assert projection provider
-    $projectionProvider = $this->factory->projectionProvider;
-
-    expect($projectionProvider->exists('balance'))->toBeTrue();
-
-    $projection = $projectionProvider->retrieve('balance');
-
-    expect($projection)->toBeInstanceOf(ProjectionModel::class)
-        ->and($projection->name())->toBe('balance')
-        ->and($projection->state())->toBe($this->factory->serializer->encode($state, 'json'))
-        ->and($projection->status())->toBe(ProjectionStatus::IDLE->value)
-        ->and($projection->lockedUntil())->toBeNull();
-
-    // assert checkpoint
-    $checkpoint = $this->factory->serializer->decode($projection->checkpoint(), 'json');
-    $balanceCheckpoint = $checkpoint['balance'];
-
-    expect($balanceCheckpoint['stream_name'])->toBe('balance')
-        ->and($balanceCheckpoint['position'])->toBe(4)
-        ->and($balanceCheckpoint['event_time'])->toBeString()
-        ->and($balanceCheckpoint['created_at'])->toBeString()
-        ->and($balanceCheckpoint['gaps'])->toBeArray()
-        ->and($balanceCheckpoint['gaps'])->toBeEmpty()
-        ->and($balanceCheckpoint['gap_type'])->toBeNull();
+    // assert projection model
+    $this->factory
+        ->assertProjectionModel(
+            streamName: 'balance',
+            state: $this->factory->serializer->encode($projector->getState(), 'json'),
+            status: ProjectionStatus::IDLE->value,
+            lockedUntil: null
+        )
+        ->assertProjectionModelCheckpoint(
+            streamName: 'balance',
+            position: 4,
+            gaps: [],
+            gapType: null
+        );
 
     // assert the read model
-    $readModel = $this->readModel;
-    expect($readModel->getContainer())->toBe([
-        $balanceId->toString() => ['balance' => 100],
-    ]);
+    expect($this->readModel->getContainer())->toBe([$balanceId->toString() => ['balance' => 100]]);
 
     // assert the projector report
     $report = $projector->getReport();
@@ -138,37 +102,7 @@ test('detect gaps with running in background or once and no retry', function (bo
         ->withBalanceSubtracted(7, 50);
 
     $projector = $manager->newReadModelProjector($streamName->name, $this->readModel, ['retries' => []]);
-
-    $reactors = function (EventScope $scope) use ($keepRunning): void {
-        $scope
-            ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-            ->then(function (DomainEvent $event, ReadModelScope $scope, UserStateScope $userState) use ($keepRunning): void {
-                $id = $event->toContent()['id'];
-
-                if ($event instanceof BalanceCreated) {
-                    $userState->increment('balance', $event->amount());
-                    $scope->stack('insert', $id, ['balance' => $event->amount()]);
-                }
-
-                if ($event instanceof BalanceAdded) {
-                    $userState->increment('balance', $event->amount());
-                    $scope->stack('increment', $id, 'balance', $event->amount());
-                }
-
-                if ($event instanceof BalanceSubtracted) {
-                    $userState->decrement('balance', $event->amount());
-                    $scope->stack('decrement', $id, 'balance', $event->amount());
-                }
-
-                $userState->merge('events', [$event::class]);
-
-                if ($keepRunning) {
-                    if (count($userState['events']) === 4) {
-                        $scope->stop();
-                    }
-                }
-            });
-    };
+    $reactors = ProjectionBalanceReactor::getReadModelReactors($keepRunning, 4);
 
     $projector
         ->initialize(fn (): array => ['balance' => 0])
@@ -177,56 +111,37 @@ test('detect gaps with running in background or once and no retry', function (bo
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run($keepRunning);
 
-    $state = $projector->getState();
-
     // assert projection state
-    expect($state)->toBe([
+    expect($projector->getState())->toBe([
         'balance' => 100,
-        'events' => [
-            BalanceCreated::class,
-            BalanceAdded::class,
-            BalanceSubtracted::class,
-            BalanceSubtracted::class,
-        ],
+        'events' => $this->expectedStateEvents,
     ]);
 
-    // assert projection provider
-    $projectionProvider = $this->factory->projectionProvider;
-
-    expect($projectionProvider->exists('balance'))->toBeTrue();
-
-    $projection = $projectionProvider->retrieve('balance');
-
-    expect($projection)->toBeInstanceOf(ProjectionModel::class)
-        ->and($projection->name())->toBe('balance')
-        ->and($projection->state())->toBe($this->factory->serializer->encode($state, 'json'))
-        ->and($projection->status())->toBe(ProjectionStatus::IDLE->value)
-        ->and($projection->lockedUntil())->toBeNull();
-
-    // assert checkpoint
-    $checkpoint = $this->factory->serializer->decode($projection->checkpoint(), 'json');
-    $balanceCheckpoint = $checkpoint['balance'];
-
-    expect($balanceCheckpoint['stream_name'])->toBe('balance')
-        ->and($balanceCheckpoint['position'])->toBe(7)
-        ->and($balanceCheckpoint['event_time'])->toBeString()
-        ->and($balanceCheckpoint['created_at'])->toBeString()
-        ->and($balanceCheckpoint['gaps'])->toBeArray()
-        ->and($balanceCheckpoint['gaps'])->toBe([2, 4, 6])
-        ->and($balanceCheckpoint['gap_type'])->toBe(GapDetected::class);
+    // assert projection model
+    $this->factory
+        ->assertProjectionModel(
+            streamName: 'balance',
+            state: $this->factory->serializer->encode($projector->getState(), 'json'),
+            status: ProjectionStatus::IDLE->value,
+            lockedUntil: null
+        )
+        ->assertProjectionModelCheckpoint(
+            streamName: 'balance',
+            position: 7,
+            gaps: [2, 4, 6],
+            gapType: GapType::IN_GAP
+        );
 
     // assert the read model
-    $readModel = $this->readModel;
-    expect($readModel->getContainer())->toBe([
-        $balanceId->toString() => ['balance' => 100],
-    ]);
+    expect($this->readModel->getContainer())->toBe([$balanceId->toString() => ['balance' => 100]]);
 
+    // assert the projector report
     $report = $projector->getReport();
 
     expect($report['cycle'])->toBe(1)
         ->and($report['acked_event'])->toBe(4)
         ->and($report['total_event'])->toBe(4);
-})->with([['keep running' => true], ['run once' => false]]);
+})->with('keep projection running');
 
 test('detect gaps with running in background and setup retries', function (array $retries) {
     $manager = $this->factory->createProjectorManager();
@@ -241,35 +156,7 @@ test('detect gaps with running in background and setup retries', function (array
         ->withBalanceSubtracted(7, 50);
 
     $projector = $manager->newReadModelProjector($streamName->name, $this->readModel, ['retries' => $retries]);
-
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-            ->then(function (DomainEvent $event, ReadModelScope $scope, UserStateScope $userState): void {
-                $id = $event->toContent()['id'];
-
-                if ($event instanceof BalanceCreated) {
-                    $userState->increment('balance', $event->amount());
-                    $scope->stack('insert', $id, ['balance' => $event->amount()]);
-                }
-
-                if ($event instanceof BalanceAdded) {
-                    $userState->increment('balance', $event->amount());
-                    $scope->stack('increment', $id, 'balance', $event->amount());
-                }
-
-                if ($event instanceof BalanceSubtracted) {
-                    $userState->decrement('balance', $event->amount());
-                    $scope->stack('decrement', $id, 'balance', $event->amount());
-                }
-
-                $userState->merge('events', [$event::class]);
-
-                if (count($userState['events']) === 4) {
-                    $scope->stop();
-                }
-            });
-    };
+    $reactors = ProjectionBalanceReactor::getReadModelReactors(keepRunning: true, stopAt: 4);
 
     $projector
         ->initialize(fn (): array => ['balance' => 0])
@@ -278,49 +165,92 @@ test('detect gaps with running in background and setup retries', function (array
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(true);
 
-    $state = $projector->getState();
-
     // assert projection state
-    expect($state)->toBe([
+    expect($projector->getState())->toBe([
         'balance' => 100,
-        'events' => [
-            BalanceCreated::class,
-            BalanceAdded::class,
-            BalanceSubtracted::class,
-            BalanceSubtracted::class,
-        ],
+        'events' => $this->expectedStateEvents,
     ]);
 
-    // assert projection provider
-    $projectionProvider = $this->factory->projectionProvider;
-
-    expect($projectionProvider->exists('balance'))->toBeTrue();
-
-    $projection = $projectionProvider->retrieve('balance');
-
-    expect($projection)->toBeInstanceOf(ProjectionModel::class)
-        ->and($projection->name())->toBe('balance')
-        ->and($projection->state())->toBe($this->factory->serializer->encode($state, 'json'))
-        ->and($projection->status())->toBe(ProjectionStatus::IDLE->value)
-        ->and($projection->lockedUntil())->toBeNull();
-
-    // assert checkpoint
-    $checkpoint = $this->factory->serializer->decode($projection->checkpoint(), 'json');
-    $balanceCheckpoint = $checkpoint['balance'];
-
-    expect($balanceCheckpoint['stream_name'])->toBe('balance')
-        ->and($balanceCheckpoint['position'])->toBe(7)
-        ->and($balanceCheckpoint['event_time'])->toBeString()
-        ->and($balanceCheckpoint['created_at'])->toBeString()
-        ->and($balanceCheckpoint['gaps'])->toBeArray()
-        ->and($balanceCheckpoint['gaps'])->toBe([2, 4, 6])
-        ->and($balanceCheckpoint['gap_type'])->toBe(GapDetected::class);
+    // assert projection model
+    $this->factory
+        ->assertProjectionModel(
+            streamName: 'balance',
+            state: $this->factory->serializer->encode($projector->getState(), 'json'),
+            status: ProjectionStatus::IDLE->value,
+            lockedUntil: null
+        )
+        ->assertProjectionModelCheckpoint(
+            streamName: 'balance',
+            position: 7,
+            gaps: [2, 4, 6],
+            gapType: GapType::IN_GAP
+        );
 
     // assert the read model
-    $readModel = $this->readModel;
-    expect($readModel->getContainer())->toBe([
-        $balanceId->toString() => ['balance' => 100],
+    expect($this->readModel->getContainer())->toBe([$balanceId->toString() => ['balance' => 100]]);
+
+    // assert the projector report
+    $report = $projector->getReport();
+
+    // first cycle + number of retries * number of events which have gaps
+    // we only expect one gap between each event
+    $expectedCycles = 1 + count($retries) * 3;
+
+    expect($report['cycle'])->toBe($expectedCycles)
+        ->and($report['acked_event'])->toBe(4)
+        ->and($report['total_event'])->toBe(4);
+})->with('retries');
+
+/**
+ * checkMe
+ * when retry is set, the projector will retry the gap detection on the next run.
+ * a range of gaps are considered as a single gap, and the attempt to fill the gap is considered as a single retry.
+ */
+test('detect larger gaps with running in background and setup retries', function (array $retries) {
+    $manager = $this->factory->createProjectorManager();
+
+    $balanceId = BalanceId::create();
+    $streamName = new StreamName('balance');
+    $store = new BalanceEventStore($this->factory->chronicler, $streamName, $balanceId);
+    $store
+        ->withBalanceCreated(1, 100)
+        ->withBalanceAdded(5, 200)
+        ->withBalanceSubtracted(8, 150)
+        ->withBalanceSubtracted(12, 50);
+
+    $projector = $manager->newReadModelProjector($streamName->name, $this->readModel, ['retries' => $retries]);
+    $reactors = ProjectionBalanceReactor::getReadModelReactors(keepRunning: true, stopAt: 4);
+
+    $projector
+        ->initialize(fn (): array => ['balance' => 0])
+        ->subscribeToStream('balance')
+        ->when($reactors)
+        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->run(true);
+
+    // assert projection state
+    expect($projector->getState())->toBe([
+        'balance' => 100,
+        'events' => $this->expectedStateEvents,
     ]);
+
+    // assert projection model
+    $this->factory
+        ->assertProjectionModel(
+            streamName: 'balance',
+            state: $this->factory->serializer->encode($projector->getState(), 'json'),
+            status: ProjectionStatus::IDLE->value,
+            lockedUntil: null
+        )
+        ->assertProjectionModelCheckpoint(
+            streamName: 'balance',
+            position: 12,
+            gaps: [2, 3, 4, 6, 7, 9, 10, 11],
+            gapType: GapType::IN_GAP
+        );
+
+    // assert the read model
+    expect($this->readModel->getContainer())->toBe([$balanceId->toString() => ['balance' => 100]]);
 
     // assert the projector report
     $report = $projector->getReport();
@@ -331,8 +261,7 @@ test('detect gaps with running in background and setup retries', function (array
     expect($report['cycle'])->toBe($expectedCycles)
         ->and($report['acked_event'])->toBe(4)
         ->and($report['total_event'])->toBe(4);
-})
-    ->with([['one retry' => [1]], ['two retries' => [1, 2]], ['three retries' => [1, 2, 3]]]);
+})->with('retries');
 
 /**
  * when retry is set, the projector will retry the gap detection on the next run.
@@ -351,31 +280,7 @@ test('fails detect gaps with running once and setup retries', function (array $r
         ->withBalanceSubtracted(7, 50);
 
     $projector = $manager->newReadModelProjector($streamName->name, $this->readModel, ['retries' => $retries]);
-
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-            ->then(function (DomainEvent $event, ReadModelScope $scope, UserStateScope $userState): void {
-                $id = $event->toContent()['id'];
-
-                if ($event instanceof BalanceCreated) {
-                    $userState->increment('balance', $event->amount());
-                    $scope->stack('insert', $id, ['balance' => $event->amount()]);
-                }
-
-                if ($event instanceof BalanceAdded) {
-                    $userState->increment('balance', $event->amount());
-                    $scope->stack('increment', $id, 'balance', $event->amount());
-                }
-
-                if ($event instanceof BalanceSubtracted) {
-                    $userState->decrement('balance', $event->amount());
-                    $scope->stack('decrement', $id, 'balance', $event->amount());
-                }
-
-                $userState->merge('events', [$event::class]);
-            });
-    };
+    $reactors = ProjectionBalanceReactor::getReadModelReactors(keepRunning: false, stopAt: false);
 
     $projector
         ->initialize(fn (): array => ['balance' => 0])
@@ -384,20 +289,12 @@ test('fails detect gaps with running once and setup retries', function (array $r
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(false);
 
-    $state = $projector->getState();
-
-    expect($state)->toBe([
-        'balance' => 100,
-        'events' => [BalanceCreated::class], // version 1
-    ]);
+    expect($projector->getState())->toBe(['balance' => 100, 'events' => [BalanceCreated::class]]);
 
     // assert projection report
     $report = $projector->getReport();
 
     expect($report['cycle'])->toBe(1)
         ->and($report['acked_event'])->toBe(1)
-        //fixMe: its confusing, total_event should be the number of events loaded from streams
-        // not the number of events that have been acked
         ->and($report['total_event'])->toBe(1);
-
-})->with([['one retry' => [1]], ['two retries' => [1, 2]], ['three retries' => [1, 2, 3]]]);
+})->with('retries');
