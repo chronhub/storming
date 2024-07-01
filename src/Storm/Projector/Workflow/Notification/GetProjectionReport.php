@@ -6,7 +6,7 @@ namespace Storm\Projector\Workflow\Notification;
 
 use Storm\Contract\Projector\Subscriptor;
 
-final class GetReport
+final class GetProjectionReport
 {
     public function __invoke(Subscriptor $subscriptor): array
     {
