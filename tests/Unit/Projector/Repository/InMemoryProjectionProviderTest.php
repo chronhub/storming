@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Repository;
 
 use Closure;
+use Mockery\MockInterface;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Projector\Exception\InMemoryProjectionFailed;
@@ -40,13 +41,13 @@ dataset('projection data', [
 
 function createProjection(string $stream, string $status): Closure
 {
-    return function ($test) use ($stream, $status) {
-        expect($test->provider->exists($stream))->toBeFalse();
+    return function (ProjectionProvider|MockInterface $provider) use ($stream, $status) {
+        expect($provider->exists($stream))->toBeFalse();
 
         $data = new CreateData($status);
-        $test->provider->createProjection($stream, $data);
+        $provider->createProjection($stream, $data);
 
-        expect($test->provider->exists($stream))->toBeTrue();
+        expect($provider->exists($stream))->toBeTrue();
     };
 }
 
@@ -57,7 +58,7 @@ test('default instance', function () {
 });
 
 test('create projection', function () {
-    createProjection('stream1', 'run')($this);
+    createProjection('stream1', 'run')($this->provider);
 
     $projection = $this->provider->retrieve('stream1');
 
@@ -69,7 +70,7 @@ test('create projection', function () {
 });
 
 test('raise exception when projection already exists', function () {
-    createProjection('stream1', 'idle')($this);
+    createProjection('stream1', 'idle')($this->provider);
 
     $this->provider->createProjection('stream1', new CreateData('run'));
 })->throws(ProjectionAlreadyExists::class);
@@ -77,7 +78,7 @@ test('raise exception when projection already exists', function () {
 test('acquire lock for existing projection with null lock', function () {
     $this->clock->shouldNotReceive('isGreaterThanNow');
 
-    createProjection('stream1', 'run')($this);
+    createProjection('stream1', 'run')($this->provider);
 
     expect($this->provider->retrieve('stream1')->lockedUntil())->toBeNull();
 
@@ -113,7 +114,7 @@ test('acquire lock for existing projection when now is greater than lock', funct
 test('raise projection already running exception when it can not acquired lock', function () {
     $this->clock->shouldReceive('isGreaterThanNow')->andReturn(false)->once();
 
-    createProjection('stream1', 'run')($this);
+    createProjection('stream1', 'run')($this->provider);
 
     $startProjection = new StartData('run', '2024-01-01 00:00:00');
     $this->provider->updateProjection('stream1', $startProjection);
@@ -127,7 +128,7 @@ test('raise projection already running exception when it can not acquired lock',
 test('update projection', function (ProjectionData $data) {
     $this->clock->shouldNotReceive('isGreaterThanNow');
 
-    createProjection('stream1', 'run')($this);
+    createProjection('stream1', 'run')($this->provider);
 
     $this->provider->updateProjection('stream1', $data);
 
@@ -142,7 +143,7 @@ test('update projection', function (ProjectionData $data) {
 })->with('projection data');
 
 test('raise exception when updating projection with empty data', function () {
-    createProjection('stream1', 'run')($this);
+    createProjection('stream1', 'run')($this->provider);
 
     $data = new readonly class extends ProjectionData
     {
@@ -163,7 +164,7 @@ test('raise projection not found exception when update projection for non existi
 
 test('delete projection by name', function (array $streams) {
     foreach ($streams as $stream) {
-        createProjection($stream, 'run')($this);
+        createProjection($stream, 'run')($this->provider);
     }
 
     expect($this->provider->exists($streams[0]))->toBeTrue()
@@ -188,7 +189,7 @@ test('raise exception when delete non existing projection', function () {
 
 test('filter projection by names', function (array $streams) {
     foreach ($streams as $stream) {
-        createProjection($stream, 'run')($this);
+        createProjection($stream, 'run')($this->provider);
     }
 
     expect($this->provider->filterByNames('stream1', 'foo', 'bar'))->toBe(['stream1'])

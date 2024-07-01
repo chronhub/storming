@@ -5,45 +5,31 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Iterator;
 
 use Countable;
-use Generator;
 use Iterator;
 use Storm\Chronicler\Exceptions\StreamNotFound;
 use Storm\Contract\Message\EventHeader;
 use Storm\Projector\Iterator\StreamIterator;
-use Storm\Stream\StreamName;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
+use Storm\Tests\Stubs\StreamEventsGeneratorStub;
 
-function emptyEvents(): Generator
-{
-    yield from [];
-}
+beforeEach(function () {
+    $this->stub = new StreamEventsGeneratorStub();
+});
 
-function generateEvents(int $count = 1): Generator
-{
-    $num = 1;
-
-    while ($num <= $count) {
-        yield SomeEvent::fromContent([])->withHeader(EventHeader::INTERNAL_POSITION, $num);
-
-        $num++;
-    }
-}
-
-function generateStreamNotFound(): Generator
-{
-    yield throw StreamNotFound::withStreamName(new StreamName('stream-1'));
-}
-
-it('test instance', function () {
-    $streamIterator = new StreamIterator(emptyEvents());
+test('default instance', function () {
+    $streamIterator = new StreamIterator(
+        $this->stub->generateEventsWithInternalPosition()
+    );
 
     expect($streamIterator)
         ->toBeInstanceOf(Iterator::class)
         ->and($streamIterator)->toBeInstanceOf(Countable::class);
 });
 
-it('test empty stream iterator', function () {
-    $streamIterator = new StreamIterator(emptyEvents());
+test('empty stream iterator', function () {
+    $streamIterator = new StreamIterator(
+        $this->stub->generateFromEmpty()
+    );
 
     expect($streamIterator->current())->toBeNull()
         ->and($streamIterator->key())->toBeNull()
@@ -51,8 +37,10 @@ it('test empty stream iterator', function () {
         ->and($streamIterator->count())->toBe(0);
 });
 
-it('move cursor to the first event on construct', function () {
-    $streamIterator = new StreamIterator(generateEvents());
+test('move cursor to the first event on construct', function () {
+    $streamIterator = new StreamIterator(
+        $this->stub->generateEventsWithInternalPosition()
+    );
 
     expect($streamIterator->current())->toBeInstanceOf(SomeEvent::class)
         ->and($streamIterator->key())->toBe(1)
@@ -61,8 +49,10 @@ it('move cursor to the first event on construct', function () {
         ->and($streamIterator->count())->toBe(1);
 });
 
-it('move cursor to next event', function () {
-    $streamIterator = new StreamIterator(generateEvents(3));
+test('move cursor to next event', function () {
+    $streamIterator = new StreamIterator(
+        $this->stub->generateEventsWithInternalPosition(3)
+    );
 
     $count = 0;
 
@@ -82,8 +72,10 @@ it('move cursor to next event', function () {
         ->and($streamIterator->valid())->toBeFalse();
 });
 
-it('rewind cursor', function () {
-    $streamIterator = new StreamIterator(generateEvents(5));
+test('rewind cursor', function () {
+    $streamIterator = new StreamIterator(
+        $this->stub->generateEventsWithInternalPosition(5)
+    );
 
     $streamIterator->next();
     $streamIterator->next();
@@ -101,8 +93,10 @@ it('rewind cursor', function () {
         ->and($streamIterator->valid())->toBeTrue();
 });
 
-it('iterate over events', function () {
-    $streamIterator = new StreamIterator(generateEvents(3));
+test('iterate over events', function () {
+    $streamIterator = new StreamIterator(
+        $this->stub->generateEventsWithInternalPosition(3)
+    );
 
     foreach ($streamIterator as $position => $event) {
         expect($event)->toBeInstanceOf(SomeEvent::class)
@@ -110,6 +104,8 @@ it('iterate over events', function () {
     }
 });
 
-it('does not hold stream not found exception while iterating', function () {
-    new StreamIterator(generateStreamNotFound());
-})->throws(StreamNotFound::class, 'Stream stream-1 not found');
+test('does not hold stream not found exception while iterating', function () {
+    new StreamIterator(
+        $this->stub->generateStreamNotFound('stream1')
+    );
+})->throws(StreamNotFound::class, 'Stream stream1 not found');

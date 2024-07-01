@@ -12,7 +12,7 @@ beforeEach(function () {
     $this->provider = mock(EventStreamProvider::class);
 });
 
-it('return streams by names', function () {
+test('return streams by names', function () {
     $this->provider
         ->shouldReceive('filterByStreams')
         ->with(['stream1', 'stream2'])
@@ -25,11 +25,11 @@ it('return streams by names', function () {
     expect($streams)->toBe(['stream1', 'stream2']);
 });
 
-it('raise exception if streams is empty', function () {
+test('raise exception if streams is empty', function () {
     new DiscoverStream([]);
 })->throws(InvalidArgumentException::class, 'Streams cannot be empty');
 
-it('raise exception if streams contain duplicate', function (array $streams) {
+test('raise exception if streams contain duplicate', function (array $streams) {
     new DiscoverStream(...$streams);
 })
     ->with([

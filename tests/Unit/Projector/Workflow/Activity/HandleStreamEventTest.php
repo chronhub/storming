@@ -19,6 +19,7 @@ use Storm\Projector\Workflow\Notification\Stream\PullStreamIterator;
 use Storm\Projector\Workflow\Notification\Stream\StreamProcessed;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 
+// todo ue the merge stream iterator stub
 beforeEach(function () {
     $this->hub = mock(NotificationHub::class);
 });
@@ -58,10 +59,10 @@ test('iterate over all streams', function () {
 
     expect($streams->count())->toBe(5);
 
-    $this->hub->shouldReceive('expect')->with(PullStreamIterator::class)->once()->andReturn($streams);
-    $this->hub->shouldReceive('notify')->with(StreamProcessed::class, 'stream-1')->times(2);
-    $this->hub->shouldReceive('notify')->with(StreamProcessed::class, 'stream-2')->times(3);
-    $this->hub->shouldReceive('expect')->with(IsSprintRunning::class)->times(5)->andReturn(true);
+    $this->hub->expects('expect')->with(PullStreamIterator::class)->andReturn($streams);
+    $this->hub->expects('notify')->with(StreamProcessed::class, 'stream-1')->times(2);
+    $this->hub->expects('notify')->with(StreamProcessed::class, 'stream-2')->times(3);
+    $this->hub->expects('expect')->with(IsSprintRunning::class)->times(5)->andReturn(true);
 
     $expectedPositions = [];
     $eventProcessor = eventProcessor($expectedPositions);
@@ -80,10 +81,10 @@ test('stop iterating when stream processor detect gap', function () {
 
     expect($streams->count())->toBe(5);
 
-    $this->hub->shouldReceive('expect')->with(PullStreamIterator::class)->once()->andReturn($streams);
-    $this->hub->shouldReceive('notify')->with(StreamProcessed::class, 'stream-1')->times(2);
-    $this->hub->shouldReceive('notify')->with(StreamProcessed::class, 'stream-2')->times(2);
-    $this->hub->shouldReceive('expect')->with(IsSprintRunning::class)->times(3)->andReturn(true);
+    $this->hub->expects('expect')->with(PullStreamIterator::class)->andReturn($streams);
+    $this->hub->expects('notify')->with(StreamProcessed::class, 'stream-1')->times(2);
+    $this->hub->expects('notify')->with(StreamProcessed::class, 'stream-2')->times(2);
+    $this->hub->expects('expect')->with(IsSprintRunning::class)->times(3)->andReturn(true);
 
     $expectedPositions = [];
     $eventProcessor = eventProcessor($expectedPositions, 6);
@@ -102,10 +103,10 @@ test('stop iterating when is sprint running return false', function () {
 
     expect($streams->count())->toBe(5);
 
-    $this->hub->shouldReceive('expect')->with(PullStreamIterator::class)->once()->andReturn($streams);
-    $this->hub->shouldReceive('notify')->with(StreamProcessed::class, 'stream-1')->never();
-    $this->hub->shouldReceive('notify')->with(StreamProcessed::class, 'stream-2')->times(1);
-    $this->hub->shouldReceive('expect')->with(IsSprintRunning::class)->times(1)->andReturn(false);
+    $this->hub->expects('expect')->with(PullStreamIterator::class)->andReturn($streams);
+    $this->hub->expects('notify')->with(StreamProcessed::class, 'stream-1')->never();
+    $this->hub->expects('notify')->with(StreamProcessed::class, 'stream-2')->once();
+    $this->hub->expects('expect')->with(IsSprintRunning::class)->once()->andReturn(false);
 
     $expectedPositions = [];
     $eventProcessor = eventProcessor($expectedPositions);

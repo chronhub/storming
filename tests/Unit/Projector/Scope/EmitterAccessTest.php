@@ -26,7 +26,7 @@ test('default instance', function () {
     expect($this->access)->toBeInstanceOf(EmitterScope::class);
 });
 
-it('emit event', function () {
+test('emit event', function () {
     $event = mock(DomainEvent::class);
 
     $this->hub->expects('trigger')
@@ -35,7 +35,7 @@ it('emit event', function () {
     $this->access->emit($event);
 });
 
-it('link event to stream', function (string $streamName) {
+test('link event to stream', function (string $streamName) {
     $event = mock(DomainEvent::class);
 
     $this->hub->expects('trigger')
@@ -50,14 +50,14 @@ it('link event to stream', function (string $streamName) {
     $this->access->linkTo($streamName, $event);
 })->with('stream names');
 
-it('stop projection', function () {
+test('stop projection', function () {
     $this->hub->expects('trigger')
         ->withArgs(fn (object $trigger) => $trigger instanceof ProjectionClosed);
 
     $this->access->stop();
 });
 
-it('get current processed stream name', function (string $streamName) {
+test('get current processed stream name', function (string $streamName) {
     $this->hub->expects('expect')
         ->withArgs(fn (string $notification) => $notification === CurrentProcessedStream::class)
         ->andReturn($streamName);
@@ -65,6 +65,6 @@ it('get current processed stream name', function (string $streamName) {
     expect($this->access->streamName())->toBe($streamName);
 })->with('stream names');
 
-it('get clock', function () {
+test('get clock', function () {
     expect($this->access->clock())->toBe($this->clock);
 });

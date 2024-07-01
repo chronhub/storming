@@ -12,7 +12,7 @@ beforeEach(function () {
     $this->provider = mock(EventStreamProvider::class);
 });
 
-it('return streams by categories', function () {
+test('return streams by categories', function () {
     $this->provider
         ->shouldReceive('filterByCategories')
         ->with(['category-1', 'category-2'])
@@ -24,10 +24,10 @@ it('return streams by categories', function () {
     expect($streams)->toBe(['category-1', 'category-2']);
 });
 
-it('raise exception if categories is empty', function () {
+test('raise exception if categories is empty', function () {
     new DiscoverCategories([]);
 })->throws(InvalidArgumentException::class, 'Categories cannot be empty');
 
-it('raise exception if categories contain duplicate', function () {
+test('raise exception if categories contain duplicate', function () {
     new DiscoverCategories(['category-1', 'category-1']);
 })->throws(InvalidArgumentException::class, 'Categories cannot contain duplicate');

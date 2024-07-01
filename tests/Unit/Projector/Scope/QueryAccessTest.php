@@ -21,14 +21,14 @@ test('default instance', function () {
     expect($this->access)->toBeInstanceOf(QueryProjectorScope::class);
 });
 
-it('stop projection', function () {
+test('stop projection', function () {
     $this->hub->expects('notify')
         ->withArgs(fn (string $e) => $e === SprintStopped::class);
 
     $this->access->stop();
 });
 
-it('get current processed stream name', function (string $streamName) {
+test('get current processed stream name', function (string $streamName) {
     $this->hub->expects('expect')
         ->withArgs(fn (string $type) => $type === CurrentProcessedStream::class)
         ->andReturn($streamName);
@@ -36,6 +36,6 @@ it('get current processed stream name', function (string $streamName) {
     expect($this->access->streamName())->toBe($streamName);
 })->with(['stream names' => ['stream-1', 'stream-2', 'stream-3']]);
 
-it('get clock', function () {
+test('get clock', function () {
     expect($this->access->clock())->toBe($this->clock);
 });

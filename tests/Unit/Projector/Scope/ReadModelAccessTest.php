@@ -23,18 +23,18 @@ test('default instance', function () {
     expect($this->access)->toBeInstanceOf(ReadModelScope::class);
 });
 
-it('stop projection', function () {
+test('stop projection', function () {
     $this->hub->expects('trigger')
         ->withArgs(fn (object $e) => $e instanceof ProjectionClosed);
 
     $this->access->stop();
 });
 
-it('get read model', function () {
+test('get read model', function () {
     expect($this->access->readModel())->toBe($this->readModel);
 });
 
-it('stack operation', function (string $operation, ...$arguments) {
+test('stack operation', function (string $operation, ...$arguments) {
     $this->readModel->expects('stack')->once()
         ->with($operation, ...$arguments);
 
@@ -47,7 +47,7 @@ it('stack operation', function (string $operation, ...$arguments) {
     ]
 );
 
-it('get current processed stream name', function (string $streamName) {
+test('get current processed stream name', function (string $streamName) {
     $this->hub->expects('expect')
         ->withArgs(fn (string $notification) => $notification === CurrentProcessedStream::class)
         ->andReturn($streamName);
@@ -55,6 +55,6 @@ it('get current processed stream name', function (string $streamName) {
     expect($this->access->streamName())->toBe($streamName);
 })->with(['stream names' => ['stream-1', 'stream-2', 'stream-3']]);
 
-it('get clock', function () {
+test('get clock', function () {
     expect($this->access->clock())->toBe($this->clock);
 });

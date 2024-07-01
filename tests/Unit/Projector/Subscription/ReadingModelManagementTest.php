@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Closure;
+use Mockery\MockInterface;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionRepository;
 use Storm\Contract\Projector\ReadModel;
@@ -23,6 +24,7 @@ use Storm\Projector\Workflow\Notification\Stream\EventStreamDiscovered;
 use Storm\Projector\Workflow\Notification\UserState\CurrentUserState;
 use Storm\Projector\Workflow\Notification\UserState\UserStateChanged;
 use Storm\Projector\Workflow\Notification\UserState\UserStateRestored;
+use Storm\Tests\Stubs\ProjectionResultStub;
 
 beforeEach(function () {
     $this->hub = mock(NotificationHub::class);
@@ -38,49 +40,45 @@ dataset('should init read model', [[false], [true]]);
 
 function assertCreateProjection(bool $alreadyCreated, ProjectionStatus $currentStatus): Closure
 {
-    return function ($that) use ($alreadyCreated, $currentStatus) {
-        $that->hub->shouldReceive('notify')->with(SprintContinue::class)->once();
+    return function (ProjectionRepository&MockInterface $repository, NotificationHub&MockInterface $hub) use ($alreadyCreated, $currentStatus) {
+        $hub->expects('notify')->with(SprintContinue::class);
 
         $newStatus = ProjectionStatus::RUNNING;
-        $that->hub->shouldReceive('expect')->with(CurrentStatus::class)->andReturn($currentStatus);
+        $hub->expects('expect')->with(CurrentStatus::class)->andReturn($currentStatus);
 
-        $that->repository->shouldReceive('exists')->once()->andReturn($alreadyCreated);
+        $repository->expects('exists')->andReturn($alreadyCreated);
 
         ! $alreadyCreated
-            ? $that->repository->shouldReceive('create')->with($currentStatus)->once()
-            : $that->repository->shouldNotReceive('create');
+            ? $repository->expects('create')->with($currentStatus)
+            : $repository->shouldNotReceive('create');
 
-        $that->repository->shouldReceive('start')->withArgs(
-            fn (object $status) => $status === $newStatus
-        );
-
-        $that->hub->shouldReceive('notify')->with(StatusChanged::class, $newStatus, $currentStatus)->once();
+        $repository->expects('start')->withArgs(fn (ProjectionStatus $status) => $status === $newStatus);
+        $hub->expects('notify')->with(StatusChanged::class, $newStatus, $currentStatus);
     };
 }
 
 function assertSynchronize(): Closure
 {
-    return function ($that) {
-        $result = new ProjectionResult([1, 5, 20], ['foo']);
+    return function (ProjectionRepository&MockInterface $repository, NotificationHub&MockInterface $hub) {
+        $result = (new ProjectionResultStub())->fromDefault();
 
-        $that->repository->shouldReceive('loadDetail')->andReturn($result)->once();
+        $repository->expects('loadDetail')->andReturn($result);
+        $hub->expects('notify')->with(CheckpointUpdated::class, $result->checkpoints);
+        $hub->expects('notify')->with(UserStateChanged::class, $result->userState);
+        $hub->expects('notifyWhen')
+            ->withArgs(function (bool $userStateNotEmpty, Closure $callback) use ($hub) {
+                $callback($hub);
 
-        $that->hub->shouldReceive('notify')->with(CheckpointUpdated::class, $result->checkpoints)->once();
-
-        $that->hub->shouldReceive('notify')->with(UserStateChanged::class, $result->userState)->once();
-        $that->hub->shouldReceive('notifyWhen')->withArgs(function (bool $userStateNotEmpty, Closure $callback) use ($that) {
-            $callback($that->hub);
-
-            return $userStateNotEmpty === true;
-        });
+                return $userStateNotEmpty === true;
+            });
     };
 }
 
 function assertProjectionResult(array $checkpoint, array $state): Closure
 {
-    return function ($that) use ($checkpoint, $state) {
-        $that->hub->shouldReceive('expect')->with(CurrentCheckpoint::class)->andReturn($checkpoint);
-        $that->hub->shouldReceive('expect')->with(CurrentUserState::class)->andReturn($state);
+    return function (NotificationHub&MockInterface $hub) use ($checkpoint, $state) {
+        $hub->expects('expect')->with(CurrentCheckpoint::class)->andReturn($checkpoint);
+        $hub->expects('expect')->with(CurrentUserState::class)->andReturn($state);
     };
 }
 
@@ -89,17 +87,17 @@ test('default instance', function () {
 });
 
 test('rise projection', function (bool $alreadyCreated, bool $initReadModel, ProjectionStatus $currentStatus) {
-    assertCreateProjection($alreadyCreated, $currentStatus)($this);
+    assertCreateProjection($alreadyCreated, $currentStatus)($this->repository, $this->hub);
 
-    $this->readModel->shouldReceive('isInitialized')->andReturn($initReadModel);
+    $this->readModel->expects('isInitialized')->andReturn($initReadModel);
 
     $initReadModel
         ? $this->readModel->shouldNotReceive('initialize')
-        : $this->readModel->shouldReceive('initialize')->once();
+        : $this->readModel->expects('initialize');
 
-    $this->hub->shouldReceive('notify')->with(EventStreamDiscovered::class);
+    $this->hub->expects('notify')->with(EventStreamDiscovered::class);
 
-    assertSynchronize()($this);
+    assertSynchronize()($this->repository, $this->hub);
 
     $this->management->rise();
 })
@@ -108,13 +106,16 @@ test('rise projection', function (bool $alreadyCreated, bool $initReadModel, Pro
     ->with('projection status');
 
 test('store projection result', function (array $checkpoint, array $state) {
-    assertProjectionResult($checkpoint, $state)($this);
+    assertProjectionResult($checkpoint, $state)($this->hub);
 
-    $this->repository->shouldReceive('persist')->withArgs(
-        fn (ProjectionResult $result) => $result->checkpoints === $checkpoint && $result->userState === $state
-    )->once();
+    $this->repository
+        ->expects('persist')
+        ->withArgs(
+            fn (ProjectionResult $result) => $result->checkpoints === $checkpoint
+                && $result->userState === $state
+        );
 
-    $this->readModel->shouldReceive('persist')->once();
+    $this->readModel->expects('persist');
 
     $this->management->store();
 })
@@ -122,17 +123,21 @@ test('store projection result', function (array $checkpoint, array $state) {
     ->with('states');
 
 test('revise projection', function (array $checkpoint, array $state, ProjectionStatus $currentStatus) {
-    $this->hub->shouldReceive('notifyMany')->with(CheckpointReset::class, UserStateRestored::class)->once();
+    $this->hub->expects('notifyMany')
+        ->with(CheckpointReset::class, UserStateRestored::class);
 
-    assertProjectionResult($checkpoint, $state)($this);
+    assertProjectionResult($checkpoint, $state)($this->hub);
 
-    $this->hub->shouldReceive('expect')->with(CurrentStatus::class)->andReturn($currentStatus);
+    $this->hub->expects('expect')->with(CurrentStatus::class)->andReturn($currentStatus);
 
-    $this->repository->shouldReceive('reset')->withArgs(
-        fn (ProjectionResult $result, object $status) => $result->checkpoints === $checkpoint && $status === $currentStatus
-    )->once();
+    $this->repository
+        ->expects('reset')
+        ->withArgs(
+            fn (ProjectionResult $result, ProjectionStatus $status) => $result->checkpoints === $checkpoint
+                && $status === $currentStatus
+        );
 
-    $this->readModel->shouldReceive('reset')->once();
+    $this->readModel->expects('reset');
 
     $this->management->revise();
 })
@@ -141,21 +146,17 @@ test('revise projection', function (array $checkpoint, array $state, ProjectionS
     ->with('projection status');
 
 test('discard projection', function (bool $withEmittedEvents) {
-    $this->repository->shouldReceive('delete')->with($withEmittedEvents)->once();
+    $this->repository->expects('delete')->with($withEmittedEvents);
 
     $withEmittedEvents
-        ? $this->readModel->shouldReceive('down')->once()
+        ? $this->readModel->expects('down')
         : $this->readModel->shouldNotReceive('down');
 
-    $this->hub->shouldReceive('notify')->with(SprintStopped::class)->once();
-
-    $this->hub->shouldReceive('notifyMany')->with(CheckpointReset::class, UserStateRestored::class)->once();
+    $this->hub->expects('notify')->with(SprintStopped::class);
+    $this->hub->expects('notifyMany')->with(CheckpointReset::class, UserStateRestored::class);
 
     $this->management->discard($withEmittedEvents);
-})->with([
-    'with emitted events' => [true],
-    'without emitted events' => [false],
-]);
+})->with('delete projection with emitted events');
 
 test('get read model', function () {
     expect($this->management->getReadModel())->toBe($this->readModel);

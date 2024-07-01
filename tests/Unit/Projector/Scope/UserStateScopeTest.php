@@ -48,8 +48,9 @@ test('update if key exist', function (mixed $value) {
 })
     ->with([
         'null value' => [null],
-        'boolean value' => [true, false],
-        'integer value' => [0, 5, 10],
+        'true value' => [true],
+        'false value' => [false],
+        'integer value' => [5],
         'string value' => ['some_value'],
         'array value' => [['some_value']],
         'object value' => [new stdClass()],

@@ -65,13 +65,13 @@ test('set null on stream iterator set with unique checkpoint which raise stream 
 
     $checkpoint = CheckpointFactory::fromEmpty('stream-1', 'created_at');
 
-    $this->hub->expects('expect')->once()->with(CurrentCheckpoint::class)->andReturn([
+    $this->hub->expects('expect')->with(CurrentCheckpoint::class)->andReturn([
         'stream-1' => $checkpoint,
     ]);
 
     $this->hub->expects('notify')->with(StreamIteratorSet::class, null);
 
-    $this->chronicler->expects('retrieveFiltered')->once()
+    $this->chronicler->expects('retrieveFiltered')
         ->withArgs(function (StreamName $streamName, QueryFilter $filter) use ($queryFilter) {
             expect($streamName->name)->toBe('stream-1')
                 ->and($filter)->toBe($queryFilter);
@@ -157,7 +157,7 @@ test('set stream iterator with merge streams and keep iterating if stream not fo
 
     $this->hub->expects('expect')->once()->with(CurrentCheckpoint::class)->andReturn(getCheckpoints());
 
-    $this->chronicler->expects('retrieveFiltered')->once()
+    $this->chronicler->expects('retrieveFiltered')
         ->withArgs(function (StreamName $streamName, QueryFilter $filter) use ($queryFilter) {
             expect($streamName->name)->toBe('stream-1')
                 ->and($filter)->toBe($queryFilter);
@@ -165,7 +165,7 @@ test('set stream iterator with merge streams and keep iterating if stream not fo
             return true;
         })->andThrow(new StreamNotFound('stream not found'));
 
-    $this->chronicler->expects('retrieveFiltered')->once()
+    $this->chronicler->expects('retrieveFiltered')
         ->withArgs(function (StreamName $streamName, QueryFilter $filter) use ($queryFilter) {
             expect($streamName->name)->toBe('stream-2')
                 ->and($filter)->toBe($queryFilter);

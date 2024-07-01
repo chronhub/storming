@@ -17,16 +17,16 @@ beforeEach(function () {
 test('refresh projection and conditionally discover new streams', function (bool $onlyOnceDiscovery) {
     $activity = new RefreshProjection($this->discovery, $onlyOnceDiscovery);
 
-    $this->discovery->shouldReceive('refresh')->with($this->hub)->once();
+    $this->discovery->expects('refresh')->with($this->hub);
 
     $onlyOnceDiscovery
-        ? $this->hub->shouldNotReceive('notify')
-        : $this->hub->shouldReceive('notify')->with(EventStreamDiscovered::class)->once();
+        ? $this->hub->expects('notify')->never()
+        : $this->hub->expects('notify')->with(EventStreamDiscovered::class);
 
     $return = $activity($this->hub, fn ($hub) => true);
 
     expect($return)->toBeTrue();
 })->with([
     'only once discovery' => fn () => true,
-    'discover new streams' => fn () => false,
+    'discover on every cycle' => fn () => false,
 ]);

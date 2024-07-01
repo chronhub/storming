@@ -19,11 +19,9 @@ beforeEach(function () {
 test('rise projection on first cycle', function () {
     $next = fn ($hub) => true;
 
-    $this->hub->shouldReceive('expect')->with(IsFirstCycle::class)->once()->andReturn(true);
-    $this->discovery->shouldReceive('onlyOnce')->with($this->hub)->once()->andReturn(false);
-    $this->hub->shouldReceive('trigger')->withArgs(function (object $trigger) {
-        return $trigger instanceof ProjectionRise;
-    })->once();
+    $this->hub->expects('expect')->with(IsFirstCycle::class)->andReturn(true);
+    $this->discovery->expects('onlyOnce')->with($this->hub)->andReturn(false);
+    $this->hub->expects('trigger')->withArgs(fn (ProjectionRise $trigger) => true);
 
     $this->assertTrue(($this->activity)($this->hub, $next));
 });
@@ -31,9 +29,9 @@ test('rise projection on first cycle', function () {
 test('return early when remote status is stopping or deleting', function () {
     $next = fn ($hub) => true;
 
-    $this->hub->shouldReceive('expect')->with(IsFirstCycle::class)->once()->andReturn(true);
-    $this->discovery->shouldReceive('onlyOnce')->with($this->hub)->once()->andReturn(true);
-    $this->hub->shouldNotReceive('trigger');
+    $this->hub->expects('expect')->with(IsFirstCycle::class)->andReturn(true);
+    $this->discovery->expects('onlyOnce')->with($this->hub)->andReturn(true);
+    $this->hub->expects('trigger')->never();
 
     $this->assertFalse(($this->activity)($this->hub, $next));
 });
@@ -41,9 +39,9 @@ test('return early when remote status is stopping or deleting', function () {
 test('skip activity when not on first cycle', function () {
     $next = fn ($hub) => true;
 
-    $this->hub->shouldReceive('expect')->with(IsFirstCycle::class)->once()->andReturn(false);
-    $this->discovery->shouldNotReceive('onlyOnce');
-    $this->hub->shouldNotReceive('trigger');
+    $this->hub->expects('expect')->with(IsFirstCycle::class)->andReturn(false);
+    $this->discovery->expects('onlyOnce')->never();
+    $this->hub->expects('trigger')->never();
 
     $this->assertTrue(($this->activity)($this->hub, $next));
 });

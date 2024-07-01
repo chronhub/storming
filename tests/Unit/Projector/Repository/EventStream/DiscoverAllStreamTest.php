@@ -12,7 +12,7 @@ beforeEach(function () {
     $this->query = new DiscoverAllStream();
 });
 
-it('return all streams without internal', function () {
+test('return all streams without internal', function () {
     $this->provider
         ->shouldReceive('allWithoutInternal')
         ->andReturn(['stream-1', 'stream-2'])
@@ -23,7 +23,7 @@ it('return all streams without internal', function () {
     expect($streams)->toBe(['stream-1', 'stream-2']);
 });
 
-it('return empty array if no streams', function () {
+test('return empty array if no streams', function () {
     $this->provider
         ->shouldReceive('allWithoutInternal')
         ->andReturn([])

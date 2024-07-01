@@ -16,7 +16,7 @@ dataset('state', [null, '{}', '{"1"}']);
 dataset('checkpoint', [null, '{}', '{"1"}']);
 dataset('locked until', [null, '2022-01-01 00:00:00', 'datetime']);
 
-it('test instance', function (
+test('default instance', function (
     string $stream,
     string $status,
     ?string $state,
@@ -33,7 +33,7 @@ it('test instance', function (
         ->and($projection->lockedUntil())->toBe($lockedUntil);
 })->with('streams', 'statuses', 'state', 'checkpoint', 'locked until');
 
-it('serialize to json', function (
+test('serialize to json', function (
     string $stream,
     string $status,
     ?string $state,

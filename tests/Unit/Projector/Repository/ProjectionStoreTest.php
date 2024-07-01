@@ -16,16 +16,17 @@ use Storm\Projector\Repository\Data\StopData;
 use Storm\Projector\Repository\Data\UpdateLockData;
 use Storm\Projector\Repository\LockManager;
 use Storm\Projector\Repository\Projection;
-use Storm\Projector\Repository\ProjectionResult;
 use Storm\Projector\Repository\ProjectionStore;
+use Storm\Tests\Stubs\ProjectionResultStub;
 use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\JsonSerializableNormalizer;
 use Symfony\Component\Serializer\Serializer;
 
 beforeEach(function () {
     $this->provider = mock(ProjectionProvider::class);
     $this->lockManager = mock(LockManager::class);
-    $this->serializer = new Serializer([], [new JsonEncoder()]); // fixme: json serializer
-    $this->streamName = 'stream-1';
+    $this->serializer = new Serializer([new JsonSerializableNormalizer()], [new JsonEncoder()]); // fixme: json serializer
+    $this->streamName = 'stream1';
 
     $this->projectionStore = new ProjectionStore(
         $this->provider,
@@ -33,114 +34,103 @@ beforeEach(function () {
         $this->serializer,
         $this->streamName
     );
+
+    $this->projectionResultStub = new ProjectionResultStub();
 });
 
-it('create projection with status', function (ProjectionStatus $status) {
+test('create projection with status', function (ProjectionStatus $status) {
     $this->provider
-        ->shouldReceive('createProjection')
-        ->withArgs(fn (string $streamName, CreateData $data) => $this->streamName === $streamName && $data->status === $status->value)
-        ->once();
+        ->expects('createProjection')
+        ->withArgs(fn (string $streamName, CreateData $data) => $this->streamName === $streamName && $data->status === $status->value);
 
     $this->projectionStore->create($status);
 })->with([ProjectionStatus::cases()]);
 
-it('start projection with any status', function (ProjectionStatus $status) {
+test('start projection with any status', function (ProjectionStatus $status) {
     $this->lockManager->shouldReceive('acquire')->andReturn('lock-1')->once();
 
     $this->provider
-        ->shouldReceive('acquireLock')
-        ->withArgs(fn (string $streamName, StartData $data) => $this->streamName === $streamName && $data->status === $status->value && $data->lockedUntil === 'lock-1')
-        ->once();
+        ->expects('acquireLock')
+        ->withArgs(fn (string $streamName, StartData $data) => $this->streamName === $streamName && $data->status === $status->value && $data->lockedUntil === 'lock-1');
 
     $this->projectionStore->start($status);
 })->with([ProjectionStatus::cases()]);
 
-it('stop projection with result and status', function (ProjectionStatus $status) {
-    $projectionResult = new ProjectionResult(
-        checkpoints: ['checkpoint' => 'value'],
-        userState: ['user' => 'state']
-    );
+test('stop projection with result and status', function (ProjectionStatus $status) {
+    $projectionResult = $this->projectionResultStub->fromDefault();
 
-    $this->lockManager->shouldReceive('refresh')->andReturn('lock-2')->once();
+    $this->lockManager->expects('refresh')->andReturn('lock-2');
 
-    $this->provider->shouldReceive('updateProjection')
-        ->withArgs(function (string $streamName, StopData $data) use ($status) {
-            return $streamName === $this->streamName
-                && $data->status === $status->value
-                && $data->state === '{"user":"state"}'
-                && $data->checkpoint === '{"checkpoint":"value"}'
-                && $data->lockedUntil === 'lock-2';
-        })->once();
+    $this->provider->expects('updateProjection')
+        ->withArgs(fn (string $streamName, StopData $data) => $streamName === $this->streamName
+            && $data->status === $status->value
+            && $data->state === $this->serializer->serialize($projectionResult->userState, 'json')
+            && $data->checkpoint === $this->serializer->serialize($projectionResult->checkpoints, 'json')
+            && $data->lockedUntil === 'lock-2');
 
     $this->projectionStore->stop($projectionResult, $status);
 })->with([ProjectionStatus::cases()]);
 
-it('release projection', function () {
+test('release projection', function () {
     $this->provider
-        ->shouldReceive('updateProjection')
-        ->withArgs(fn (string $streamName, ReleaseData $data) => $streamName === $this->streamName && $data->status === ProjectionStatus::IDLE->value)
-        ->once();
+        ->expects('updateProjection')
+        ->withArgs(fn (string $streamName, ReleaseData $data) => $streamName === $this->streamName
+            && $data->status === ProjectionStatus::IDLE->value
+        );
 
     $this->projectionStore->release();
 });
 
-it('start again projection with status', function (ProjectionStatus $status) {
+test('start again projection with status', function (ProjectionStatus $status) {
     $this->lockManager->shouldReceive('acquire')->andReturn('lock-3')->once();
 
     $this->provider
-        ->shouldReceive('updateProjection')
-        ->withArgs(fn (string $streamName, StartAgainData $data) => $streamName === $this->streamName && $data->status === $status->value && $data->lockedUntil === 'lock-3')
-        ->once();
+        ->expects('updateProjection')
+        ->withArgs(fn (string $streamName, StartAgainData $data) => $streamName === $this->streamName
+            && $data->status === $status->value
+            && $data->lockedUntil === 'lock-3'
+        );
 
     $this->projectionStore->startAgain($status);
 })->with([ProjectionStatus::cases()]);
 
-it('persist projection with result', function () {
-    $projectionResult = new ProjectionResult(
-        checkpoints: ['checkpoint' => 'value'],
-        userState: ['user' => 'state']
-    );
+test('persist projection with result', function () {
+    $projectionResult = $this->projectionResultStub->fromDefault();
 
     $this->lockManager->shouldReceive('refresh')->andReturn('lock-4')->once();
 
-    $this->provider->shouldReceive('updateProjection')
-        ->withArgs(function (string $streamName, PersistData $data) {
-            return $streamName === $this->streamName
-                && $data->state === '{"user":"state"}'
-                && $data->checkpoint === '{"checkpoint":"value"}'
-                && $data->lockedUntil === 'lock-4';
-        })->once();
+    $this->provider
+        ->expects('updateProjection')
+        ->withArgs(fn (string $streamName, PersistData $data) => $streamName === $this->streamName
+            && $data->state === $this->serializer->serialize($projectionResult->userState, 'json')
+            && $data->checkpoint === $this->serializer->serialize($projectionResult->checkpoints, 'json')
+            && $data->lockedUntil === 'lock-4'
+        );
 
     $this->projectionStore->persist($projectionResult);
 });
 
-it('reset projection with result and status', function (ProjectionStatus $status) {
-    $projectionResult = new ProjectionResult(
-        checkpoints: ['checkpoint' => 'value'],
-        userState: ['user' => 'state']
-    );
+test('reset projection with result and status', function (ProjectionStatus $status) {
+    $projectionResult = $this->projectionResultStub->fromDefault();
 
-    $this->provider->shouldReceive('updateProjection')
-        ->withArgs(function (string $streamName, ResetData $data) use ($status) {
-            return $streamName === $this->streamName
-                && $data->status === $status->value
-                && $data->state === '{"user":"state"}'
-                && $data->checkpoint === '{"checkpoint":"value"}';
-        })->once();
+    $this->provider
+        ->expects('updateProjection')
+        ->withArgs(fn (string $streamName, ResetData $data) => $streamName === $this->streamName
+            && $data->status === $status->value
+            && $data->state === $this->serializer->serialize($projectionResult->userState, 'json')
+            && $data->checkpoint === $this->serializer->serialize($projectionResult->checkpoints, 'json')
+        );
 
     $this->projectionStore->reset($projectionResult, $status);
 })->with([ProjectionStatus::cases()]);
 
-it('delete projection', function (bool $withEmittedEvents) {
-    $this->provider
-        ->shouldReceive('deleteProjection')
-        ->with($this->streamName)
-        ->once();
+test('delete projection', function (bool $withEmittedEvents) {
+    $this->provider->expects('deleteProjection')->with($this->streamName);
 
     $this->projectionStore->delete($withEmittedEvents);
-})->with(['emitted events' => [true, false]]);
+})->with('delete projection with emitted events');
 
-it('load detail of projection', function (ProjectionStatus $status) {
+test('load detail of projection', function (ProjectionStatus $status) {
     $projection = new Projection(
         name: $this->streamName,
         status: $status->value,
@@ -149,10 +139,7 @@ it('load detail of projection', function (ProjectionStatus $status) {
         lockedUntil: 'lock-5'
     );
 
-    $this->provider->shouldReceive('retrieve')
-        ->with($this->streamName)
-        ->andReturn($projection)
-        ->once();
+    $this->provider->expects('retrieve')->with($this->streamName)->andReturn($projection);
 
     $result = $this->projectionStore->loadDetail();
 
@@ -160,27 +147,28 @@ it('load detail of projection', function (ProjectionStatus $status) {
         ->and($result->userState)->toBe(['user' => 'state']);
 })->with([ProjectionStatus::cases()]);
 
-it('update projection lock', function () {
-    $this->lockManager->shouldReceive('shouldRefresh')->andReturn(true)->once();
-    $this->lockManager->shouldReceive('refresh')->andReturn('lock-6')->once();
+test('update projection lock', function () {
+    $this->lockManager->expects('shouldRefresh')->andReturn(true);
+    $this->lockManager->expects('refresh')->andReturn('lock-6');
 
     $this->provider
-        ->shouldReceive('updateProjection')
-        ->withArgs(fn (string $streamName, UpdateLockData $data) => $streamName === $this->streamName && $data->lockedUntil === 'lock-6')
-        ->once();
+        ->expects('updateProjection')
+        ->withArgs(fn (string $streamName, UpdateLockData $data) => $streamName === $this->streamName
+            && $data->lockedUntil === 'lock-6'
+        );
 
     $this->projectionStore->updateLock();
 });
 
-it('does not update projection lock when should refresh return false', function () {
-    $this->lockManager->shouldReceive('shouldRefresh')->andReturn(false)->once();
+test('does not update projection lock when should refresh return false', function () {
+    $this->lockManager->expects('shouldRefresh')->andReturn(false);
     $this->lockManager->shouldNotReceive('refresh');
     $this->provider->shouldNotReceive('updateProjection');
 
     $this->projectionStore->updateLock();
 });
 
-it('load status of projection', function (ProjectionStatus $expectedStatus) {
+test('load status of projection', function (ProjectionStatus $expectedStatus) {
     $projection = new Projection(
         name: $this->streamName,
         status: $expectedStatus->value,
@@ -189,34 +177,29 @@ it('load status of projection', function (ProjectionStatus $expectedStatus) {
         lockedUntil: 'lock-7'
     );
 
-    $this->provider->shouldReceive('retrieve')->with($this->streamName)->andReturn($projection)->once();
+    $this->provider->expects('retrieve')->with($this->streamName)->andReturn($projection);
 
     $loadedStatus = $this->projectionStore->loadStatus();
 
     expect($loadedStatus)->toBe($expectedStatus);
 })->with([ProjectionStatus::cases()]);
 
-it('return projection running status when projection not found', function () {
-    $this->provider->shouldReceive('retrieve')
-        ->with($this->streamName)
-        ->andReturn(null)
-        ->once();
+test('return projection running status when projection not found', function () {
+    $this->provider->expects('retrieve')->with($this->streamName)->andReturn(null);
 
     $loadedStatus = $this->projectionStore->loadStatus();
 
     expect($loadedStatus)->toBe(ProjectionStatus::RUNNING);
 });
 
-it('check if projection exists', function (bool $exists) {
-    $this->provider->shouldReceive('exists')
-        ->with($this->streamName)
-        ->andReturn($exists);
+test('check if projection exists', function (bool $exists) {
+    $this->provider->expects('exists')->with($this->streamName)->andReturn($exists);
 
     $result = $this->projectionStore->exists();
 
     expect($result)->toBe($exists);
 })->with(['exists' => [true, false]]);
 
-it('return current projection name', function () {
+test('return current projection name', function () {
     expect($this->projectionStore->projectionName())->toBe($this->streamName);
 });

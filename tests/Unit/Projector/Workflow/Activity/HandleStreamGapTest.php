@@ -15,45 +15,38 @@ use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
 test('sleep on gap and store projection depends on batch is reset', function (bool $resetBatch) {
     $hub = mock(NotificationHub::class);
 
-    $hub->shouldReceive('notifyWhen')
+    $hub->expects('notifyWhen')
         ->withArgs(function (bool $hasGap, Closure $callback) use ($hub) {
             $callback($hub);
 
             return $hasGap === true;
-        })->once();
+        });
 
-    $hub->shouldReceive('expect')->once()->with(HasGap::class)->andReturn(true);
-    $hub->shouldReceive('notify')->once()->with(SleepOnGap::class);
-    $hub->shouldReceive('expect')->once()->with(IsBatchReset::class)->andReturn($resetBatch);
+    $hub->expects('expect')->with(HasGap::class)->andReturn(true);
+    $hub->expects('notify')->with(SleepOnGap::class);
+    $hub->expects('expect')->with(IsBatchReset::class)->andReturn($resetBatch);
 
-    if ($resetBatch) {
-        $hub->shouldReceive('trigger')->never();
-    } else {
-        $hub->shouldReceive('trigger')->once()->withArgs(
-            fn (object $trigger) => $trigger instanceof ProjectionStored
-        );
-    }
+    $resetBatch
+        ? $hub->shouldNotReceive('trigger')
+        : $hub->expects('trigger')->withArgs(fn (ProjectionStored $trigger) => true);
 
     $next = fn ($hub) => true;
 
     $handleStreamGap = new HandleStreamGap();
     $handleStreamGap($hub, $next);
 })->with([
-    'batch reset' => fn () => true,
-    'batch not reset' => fn () => false,
+    'reset batch' => fn () => true,
+    'do not reset batch' => fn () => false,
 ]);
 
 test('skip activity when no gap has been detected', function () {
     $hub = mock(NotificationHub::class);
 
-    $hub->shouldReceive('notifyWhen')->once()->withArgs(
-        fn (bool $hasGap) => $hasGap === false
-    );
-
-    $hub->shouldReceive('expect')->once()->with(HasGap::class)->andReturn(false);
-    $hub->shouldReceive('notify')->never()->with(IsBatchReset::class);
-    $hub->shouldReceive('notify')->never()->with(SleepOnGap::class);
-    $hub->shouldReceive('trigger')->never();
+    $hub->expects('notifyWhen')->withArgs(fn (bool $hasGap) => $hasGap === false);
+    $hub->expects('expect')->with(HasGap::class)->andReturn(false);
+    $hub->expects('notify')->never()->with(IsBatchReset::class);
+    $hub->expects('notify')->never()->with(SleepOnGap::class);
+    $hub->expects('trigger')->never();
 
     $next = fn ($hub) => true;
 

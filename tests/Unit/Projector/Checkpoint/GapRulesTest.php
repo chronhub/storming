@@ -4,46 +4,31 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Checkpoint;
 
-use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Checkpoint\GapRules;
 use Storm\Projector\Exception\CheckpointViolation;
+use Storm\Tests\Stubs\CheckpointStub;
 
 beforeEach(function () {
     $this->rules = new GapRules();
+    $this->checkpointStub = new CheckpointStub();
 });
 
-function getCheckpointStub(int $lastPosition, array $gaps): Checkpoint
-{
-    return new Checkpoint('stream-1', $lastPosition, null, '2024-01-01 00:00:00', $gaps);
-}
-
-it('validate current gap', function (int $lastPosition, int $currentPosition) {
-    $checkpoint = getCheckpointStub($lastPosition, []);
+test('validate current gap', function (int $lastPosition, int $currentPosition) {
+    $checkpoint = $this->checkpointStub->with(position: $lastPosition);
     $instance = $this->rules->mustBeGap($checkpoint, $currentPosition);
 
     expect($instance)->toBe($this->rules);
-})
-    ->with([
-        [0, 1],
-        [1, 2],
-        [2, 3],
-        [3, 4],
-    ]);
+})->with([[0, 1], [1, 2], [2, 3], [3, 4]]);
 
-it('raise exception if current position is not a gap', function (int $lastPosition, int $currentPosition) {
-    $checkpoint = getCheckpointStub($lastPosition, []);
+test('raise exception if current position is not a gap', function (int $lastPosition, int $currentPosition) {
+    $checkpoint = $this->checkpointStub->with(position: $lastPosition);
     $this->rules->mustBeGap($checkpoint, $currentPosition);
 })
-    ->with([
-        [1, 0],
-        [1, 1],
-        [2, 2],
-        [4, 3],
-    ])
+    ->with([[1, 0], [1, 1], [2, 2], [4, 3], [10, 3]])
     ->throws(CheckpointViolation::class, 'Invalid gap position: no gap or checkpoints are outdated');
 
-it('validate if gap is not already recorded', function (array $gaps, int $lastPosition) {
-    $checkpoint = getCheckpointStub($lastPosition, []);
+test('validate if gap is not already recorded', function (array $gaps, int $lastPosition) {
+    $checkpoint = $this->checkpointStub->with(position: $lastPosition);
     $instance = $this->rules->shouldNotAlreadyBeRecorded($checkpoint, $gaps);
 
     expect($instance)->toBe($this->rules);
@@ -55,36 +40,40 @@ it('validate if gap is not already recorded', function (array $gaps, int $lastPo
         [[1, 2], 3],
     ]);
 
-it('raise exception if gap is already recorded', function (array $gaps, int $lastPosition) {
-    $checkpoint = getCheckpointStub($lastPosition, [1]);
+test('raise exception if gap is already recorded', function (array $gaps, int $lastPosition) {
+    $checkpoint = $this->checkpointStub->with(position: $lastPosition, gaps: [1]);
 
-    $this->rules->shouldNotAlreadyBeRecorded($checkpoint, $gaps);
+    try {
+        $this->rules->shouldNotAlreadyBeRecorded($checkpoint, $gaps);
+    } catch (CheckpointViolation $e) {
+        expect($e->getMessage())->toBe("Gap at position 1 already recorded for stream $checkpoint->streamName");
+    }
 })
     ->with([
         [[1], 1],
         [[1, 2], 1],
         [[1, 2], 2],
         [[1, 2], 3],
-    ])
-    //fixMe partial exception message
-    ->throws(CheckpointViolation::class, 'already recorded');
+    ]);
 
-it('validate when previous gap is empty', function () {
-    $checkpoint = getCheckpointStub(0, []);
+test('validate when previous gap is empty', function () {
+    $checkpoint = $this->checkpointStub->with(position: 0);
+
     $instance = $this->rules->mustBeGreaterThanPreviousGaps($checkpoint, [1]);
 
     expect($instance)->toBe($this->rules);
 });
 
-it('validate gap is greater than previous recorded gaps', function () {
-    $checkpoint = getCheckpointStub(0, [1, 2]);
+test('validate gap is greater than previous recorded gaps', function () {
+    $checkpoint = $this->checkpointStub->with(position: 0, gaps: [1, 2]);
+
     $instance = $this->rules->mustBeGreaterThanPreviousGaps($checkpoint, [3]);
 
     expect($instance)->toBe($this->rules);
 });
 
-it('raise exception if gap is lower than previous recorded gaps', function (array $gaps, int $lastPosition) {
-    $checkpoint = getCheckpointStub($lastPosition, [1, 2]);
+test('raise exception if gap is lower than previous recorded gaps', function (array $gaps, int $lastPosition) {
+    $checkpoint = $this->checkpointStub->with(position: $lastPosition, gaps: [1, 2]);
 
     $this->rules->mustBeGreaterThanPreviousGaps($checkpoint, $gaps);
 })
