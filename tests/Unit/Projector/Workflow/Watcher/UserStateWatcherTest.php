@@ -10,17 +10,17 @@ beforeEach(function () {
     $this->watcher = new UserStateWatcher();
 });
 
-it('test new instance', function () {
+test('default instance', function () {
     expect($this->watcher->get())->toBeEmpty();
 });
 
-it('test put state', function () {
+test('put state', function () {
     $this->watcher->put(['foo' => 'bar']);
 
     expect($this->watcher->get())->toBe(['foo' => 'bar']);
 });
 
-it('test reset state', function () {
+test('reset state', function () {
     $this->watcher->put(['foo' => 'bar']);
     expect($this->watcher->get())->toBe(['foo' => 'bar']);
 
@@ -28,7 +28,7 @@ it('test reset state', function () {
     expect($this->watcher->get())->toBeEmpty();
 });
 
-it('override state', function () {
+test('override state', function () {
     $this->watcher->put(['foo' => 'bar']);
     expect($this->watcher->get())->toBe(['foo' => 'bar']);
 
@@ -36,7 +36,7 @@ it('override state', function () {
     expect($this->watcher->get())->toBe(['bar' => 'baz']);
 });
 
-it('test put empty', function () {
+test('put empty state', function () {
     $this->watcher->put(['foo' => 'bar']);
     expect($this->watcher->get())->toBe(['foo' => 'bar']);
 

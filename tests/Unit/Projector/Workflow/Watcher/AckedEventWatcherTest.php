@@ -21,20 +21,20 @@ function assertAckedStreamEmpty(AckedEventWatcher $watcher, string ...$eventClas
         ->and($watcher->count())->toBe(0);
 }
 
-it('test new instance', function () {
+test('default instance', function () {
     assertAckedStreamEmpty($this->watcher, 'event-1');
 
     expect(method_exists($this->watcher, 'subscribe'))->toBeFalse();
 });
 
-it('ack event', function () {
+test('ack event', function () {
     $this->watcher->ack('event-1');
 
     expect($this->watcher->hasEvents())->toBeTrue()
         ->and($this->watcher->events())->toBe(['event-1']);
 });
 
-it('ack many events', function () {
+test('ack many events', function () {
     $this->watcher->ack('event-1');
     $this->watcher->ack('event-2');
 
@@ -44,7 +44,7 @@ it('ack many events', function () {
         ->and($this->watcher->count())->toBe(2);
 });
 
-it('does not duplicate acked events', function () {
+test('does not duplicate acked events', function () {
     $this->watcher->ack('event-1');
     $this->watcher->ack('event-1');
 
@@ -54,7 +54,7 @@ it('does not duplicate acked events', function () {
         ->and($this->watcher->count())->toBe(2);
 });
 
-it('reset acked events', function () {
+test('reset acked events', function () {
     $this->watcher->ack('event-1');
     $this->watcher->ack('event-2');
 

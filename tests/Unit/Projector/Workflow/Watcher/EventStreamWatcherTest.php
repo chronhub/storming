@@ -22,26 +22,26 @@ function eventStreams(): array
     return ['foo', 'bar', 'baz'];
 }
 
-it('test new instance', function () {
+test('default instance', function () {
     expect($this->watcher->hasEventStreams())->toBeFalse()
         ->and($this->watcher->newEventStreams())->toBeEmpty();
 });
 
-it('test discover empty event streams', function () {
+test('discover empty event streams', function () {
     $this->watcher->discover(fn (EventStreamProvider $provider): array => emptyEventStreams());
 
     expect($this->watcher->hasEventStreams())->toBeFalse()
         ->and($this->watcher->newEventStreams())->toBeEmpty();
 });
 
-it('test discover event streams', function () {
+test('discover event streams', function () {
     $this->watcher->discover(fn (EventStreamProvider $provider): array => eventStreams());
 
     expect($this->watcher->hasEventStreams())->toBeTrue()
         ->and($this->watcher->newEventStreams())->toBe(eventStreams());
 });
 
-it('test discover new event streams', function () {
+test('discover new event streams', function () {
     $this->watcher->discover(fn (EventStreamProvider $provider): array => eventStreams());
 
     expect($this->watcher->hasEventStreams())->toBeTrue()
@@ -53,7 +53,7 @@ it('test discover new event streams', function () {
         ->and($this->watcher->newEventStreams())->toBeEmpty();
 });
 
-it('test reset new event streams', function () {
+test('reset new event streams', function () {
     $this->watcher->discover(fn (EventStreamProvider $provider) => eventStreams());
 
     expect($this->watcher->hasEventStreams())->toBeTrue()

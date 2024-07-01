@@ -19,17 +19,14 @@ beforeEach(function () {
 test('start projection', function (bool $runInBackground) {
     $this->context->shouldReceive('id')->andReturn('projection-id')->once();
     $this->subscriber->shouldReceive('start')->with($this->context, $runInBackground)->once();
-    $this->projection->run($runInBackground);
-})->with([
-    'keep running' => [true],
-    'run once' => [false],
-]);
 
-test('set filter', function (QueryFilter $queryFilter) {
+    $this->projection->run($runInBackground);
+})->with('keep projection running');
+
+test('set query filter', function (QueryFilter $queryFilter) {
     $this->context->shouldReceive('withQueryFilter')->with($queryFilter)->once();
 
     $return = $this->projection->filter($queryFilter);
-
     expect($return)->toBe($this->projection);
 })->with([
     'query filter' => fn () => mock(QueryFilter::class),
@@ -39,7 +36,5 @@ test('set filter', function (QueryFilter $queryFilter) {
 test('keep state', function () {
     $this->context->shouldReceive('withKeepState')->once();
 
-    $return = $this->projection->keepState();
-
-    expect($return)->toBe($this->projection);
+    expect($this->projection->keepState())->toBe($this->projection);
 });

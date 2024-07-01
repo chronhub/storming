@@ -23,10 +23,7 @@ test('start projection', function (bool $runInBackground) {
     $this->context->shouldReceive('id')->andReturn('projection-id')->once();
     $this->subscriber->shouldReceive('start')->with($this->context, $runInBackground)->once();
     $this->projection->run($runInBackground);
-})->with([
-    'keep running' => [true],
-    'run once' => [false],
-]);
+})->with('keep projection running');
 
 test('reset projection', function () {
     $hub = mock(NotificationHub::class);
@@ -46,12 +43,12 @@ test('reset projection', function () {
     $this->projection->reset();
 });
 
-test('delete projection', function (bool $deleteEmittedEvents) {
+test('delete projection', function (bool $withEmittedEvents) {
     $hub = mock(NotificationHub::class);
 
-    $trigger = function (object $notification) use ($deleteEmittedEvents) {
+    $trigger = function (object $notification) use ($withEmittedEvents) {
         return $notification instanceof ProjectionDiscarded
-            && $notification->withEmittedEvents === $deleteEmittedEvents;
+            && $notification->withEmittedEvents === $withEmittedEvents;
     };
 
     $hub->shouldReceive('trigger')->withArgs($trigger)->once();
@@ -64,12 +61,9 @@ test('delete projection', function (bool $deleteEmittedEvents) {
 
     $this->subscriber->shouldReceive('interact')->once()->withArgs($callback);
 
-    $this->projection->delete($deleteEmittedEvents);
+    $this->projection->delete($withEmittedEvents);
 
-})->with([
-    'delete emitted events' => [true],
-    'keep emitted events' => [false],
-]);
+})->with('delete projection with emitted events');
 
 test('get stream name', function () {
     $streamName = $this->projection->getName();

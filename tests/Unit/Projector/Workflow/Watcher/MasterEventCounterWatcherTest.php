@@ -12,18 +12,18 @@ beforeEach(function () {
     $this->watcher = new MasterEventCounterWatcher();
 });
 
-it('test new instance', function () {
+test('default instance', function () {
     expect($this->watcher->current())->toBe(0)
         ->and($this->watcher->isDoNotReset())->toBeFalse()
         ->and(method_exists($this->watcher, 'subscribe'))->toBeFalse();
 });
 
-it('test increment', function () {
+test('increment counter', function () {
     $this->watcher->increment();
     expect($this->watcher->current())->toBe(1);
 });
 
-it('test reset', function () {
+test('reset counter', function () {
     expect($this->watcher->isDoNotReset())->toBeFalse();
 
     $this->watcher->increment();
@@ -32,7 +32,7 @@ it('test reset', function () {
     expect($this->watcher->current())->toBe(0);
 });
 
-it('test do not reset', function () {
+test('call do not reset', function () {
     $this->watcher->doNotReset(true);
     expect($this->watcher->isDoNotReset())->toBeTrue();
 

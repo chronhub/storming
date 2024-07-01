@@ -12,65 +12,90 @@ beforeEach(function () {
     $this->haltOn = new HaltOn();
 });
 
-it('test default instance', function () {
+dataset('integers', [
+    'one integer' => [1],
+    'two integers' => [5],
+    'three integers' => [10],
+]);
+
+dataset('array of integers', [
+    'one integer' => [[1]],
+    'two integers' => [[1, 2]],
+    'three integers' => [[1, 2, 3]],
+]);
+
+test('default instance', function () {
     expect($this->haltOn->callbacks())->toBeEmpty();
 });
 
-it('set when requested callback', function (bool $requested) {
+test('set requested callback', function (bool $requested) {
     $instance = $this->haltOn->whenRequested($requested);
     expect($instance)->toBeInstanceOf(HaltOn::class)
         ->and($instance->callbacks())->toHaveKey(StopWatcher::REQUESTED);
 
     $result = $instance->callbacks()[StopWatcher::REQUESTED]();
     expect($result)->toBe($requested);
-})->with(['boolean' => [true, false]]);
+})->with([
+    ['requested' => true],
+    ['not requested' => false],
+]);
 
-it('set when signal received callback', function (array $signals) {
+test('set signal received callback', function (array $signals) {
     $instance = $this->haltOn->whenSignalReceived($signals);
     expect($instance)->toBeInstanceOf(HaltOn::class)
         ->and($instance->callbacks())->toHaveKey(StopWatcher::SIGNAL_RECEIVED);
 
     $result = $instance->callbacks()[StopWatcher::SIGNAL_RECEIVED]();
     expect($result)->toBe($signals);
-})->with(['integers signals' => [[1, 2, 3], [4, 5, 6]]]);
+})->with('array of integers');
 
-it('set when empty event stream callback', function (int $expiredAt) {
+test('set empty event stream callback', function (int $expiredAt) {
     $instance = $this->haltOn->whenEmptyEventStream($expiredAt);
     expect($instance)->toBeInstanceOf(HaltOn::class)
         ->and($instance->callbacks())->toHaveKey(StopWatcher::EMPTY_EVENT_STREAM);
 
     $result = $instance->callbacks()[StopWatcher::EMPTY_EVENT_STREAM]();
     expect($result)->toBe($expiredAt);
-})->with(['integer' => [1, 2, 3]]);
+})->with('integers');
 
-it('set when cycle reached callback', function (int $cycle) {
+test('set cycle reached callback', function (int $cycle) {
     $instance = $this->haltOn->whenCycleReached($cycle);
     expect($instance)->toBeInstanceOf(HaltOn::class)
         ->and($instance->callbacks())->toHaveKey(StopWatcher::CYCLE_REACHED);
 
     $result = $instance->callbacks()[StopWatcher::CYCLE_REACHED]();
     expect($result)->toBe($cycle);
-})->with(['integer' => [1, 2, 3]]);
+})->with('integers');
 
-it('set when stream event limit reached callback', function (bool $resetOnHalt) {
-    $instance = $this->haltOn->whenStreamEventLimitReached(10);
+test('set stream event limit reached callback', function (int $limit, bool $resetOnHalt) {
+    $instance = $this->haltOn->whenStreamEventLimitReached($limit, $resetOnHalt);
     expect($instance)->toBeInstanceOf(HaltOn::class)
         ->and($instance->callbacks())->toHaveKey(StopWatcher::COUNTER_REACHED);
 
     $result = $instance->callbacks()[StopWatcher::COUNTER_REACHED]();
-    expect($result)->toBe([10, $resetOnHalt]);
-})->with(['reset on halt' => [true, false]]);
 
-it('set when time expired callback', function (int $expiredAt) {
-    $instance = $this->haltOn->whenTimeExpired($expiredAt);
+    expect($result)->toBe([$limit, $resetOnHalt]);
+})
+    ->with([
+        ['limit of 10' => 10],
+        ['limit of 100' => 100],
+        ['limit of 1000' => 1000],
+    ])
+    ->with([
+        ['reset on halt' => true],
+        ['do not reset on halt' => false],
+    ]);
+
+test('set time expired callback', function (int $timestamp) {
+    $instance = $this->haltOn->whenTimeExpired($timestamp);
     expect($instance)->toBeInstanceOf(HaltOn::class)
         ->and($instance->callbacks())->toHaveKey(StopWatcher::TIME_EXPIRED);
 
     $result = $instance->callbacks()[StopWatcher::TIME_EXPIRED]();
-    expect($result)->toBe($expiredAt);
-})->with(['timestamps' => [1, 2, 3]]);
+    expect($result)->toBe($timestamp);
+})->with('integers');
 
-it('set when gap detected callback', function (GapType $gap) {
+it('set gap detected callback', function (GapType $gap) {
     $instance = $this->haltOn->whenGapDetected($gap);
     expect($instance)->toBeInstanceOf(HaltOn::class)
         ->and($instance->callbacks())->toHaveKey(StopWatcher::GAP_DETECTED);

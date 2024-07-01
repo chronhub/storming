@@ -16,61 +16,32 @@ beforeEach(function () {
     $this->context = new DefaultContext();
 });
 
-it('initialize the context', function () {
+test('initialize context', function () {
     $this->context->initialize(fn () => []);
 
     expect($this->context->userState())->toBeInstanceOf(Closure::class);
 });
 
-it('raise exception when context is already initialized', function () {
-    $this->context->initialize(fn () => []);
-
-    $this->expectExceptionMessage('Projection already initialized');
-    $this->context->initialize(fn () => []);
-});
-
-it('initialize the context with query filter', function () {
+test('initialize the context with query filter', function () {
     $queryFilter = mock(QueryFilter::class);
     $this->context->withQueryFilter($queryFilter);
 
     expect($this->context->queryFilter())->toBe($queryFilter);
 });
 
-it('raise exception when query filter is already set', function () {
-    $queryFilter = mock(QueryFilter::class);
-    $this->context->withQueryFilter($queryFilter);
-
-    $this->expectExceptionMessage('Projection query filter already set');
-    $this->context->withQueryFilter($queryFilter);
-});
-
-it('initialize the context with keep state', function () {
+test('initialize the context with keep state', function () {
     $this->context->withKeepState();
 
     expect($this->context->keepState())->toBeTrue();
 });
 
-it('raise exception when keep state is already set', function () {
-    $this->context->withKeepState();
-
-    $this->expectExceptionMessage('Projection keep state already set');
-    $this->context->withKeepState();
-});
-
-it('set id', function () {
+test('set id', function () {
     $this->context->withId('id');
 
     expect($this->context->id())->toBe('id');
 });
 
-it('raise exception when id is already set', function () {
-    $this->context->withId('id');
-
-    $this->expectExceptionMessage('Projection id already set');
-    $this->context->withId('id');
-});
-
-it('subscribe to stream', function () {
+test('subscribe to stream', function () {
     $this->context->subscribeToStream('stream-1');
 
     $query = $this->context->queries();
@@ -78,7 +49,7 @@ it('subscribe to stream', function () {
         ->and($query->streams)->toBe(['stream-1']);
 });
 
-it('subscribe to category', function () {
+test('subscribe to category', function () {
     $this->context->subscribeToCategory('category-1');
 
     $query = $this->context->queries();
@@ -86,112 +57,163 @@ it('subscribe to category', function () {
         ->and($query->categories)->toBe(['category-1']);
 });
 
-it('subscribe to all stream', function () {
+test('subscribe to all stream', function () {
     $this->context->subscribeToAll();
 
     $query = $this->context->queries();
     expect($query)->toBeInstanceOf(DiscoverAllStream::class);
 });
 
-it('raise exception when query stream is already set', function () {
-    $this->context->subscribeToStream('stream-1');
-
-    $this->expectExceptionMessage('Projection query already set');
-    $this->context->subscribeToStream('stream-2');
-});
-
-it('raise exception when query categories is already set', function () {
-    $this->context->subscribeToCategory('category-1');
-
-    $this->expectExceptionMessage('Projection query already set');
-    $this->context->subscribeToCategory('category-2');
-});
-
-it('raise exception when query all stream is already set', function () {
-    $this->context->subscribeToAll();
-
-    $this->expectExceptionMessage('Projection query already set');
-    $this->context->subscribeToAll();
-});
-
-it('raise exception when query not set', function () {
-    $this->expectExceptionMessage('Projection query not set');
-    $this->context->queries();
-});
-
-it('set reactors', function () {
+test('set reactors', function () {
     $reactors = fn () => [];
     $this->context->when($reactors);
 
     expect($this->context->reactors())->toBe($reactors);
 });
 
-it('raise exception when reactors is already set', function () {
-    $reactors = fn () => [];
-    $this->context->when($reactors);
-
-    $this->expectExceptionMessage('Projection reactors already set');
-    $this->context->when($reactors);
-});
-
-it('raise exception when reactors not set', function () {
-    $this->expectExceptionMessage('Projection reactors not set');
-    $this->context->reactors();
-});
-
-it('get empty array halt on callbacks', function () {
+test('get empty array halt on callbacks with default instance', function () {
     expect($this->context->haltOnCallback())->toBe([]);
 });
 
-it('set halt on when requested', function (bool $requested) {
-    $haltOn = fn (HaltOn $haltOn) => $haltOn->whenRequested($requested);
-    $this->context->haltOn($haltOn);
+describe('raise exception when', function () {
+    test('context is already initialized', function () {
+        $this->context->initialize(fn () => []);
 
-    expect($this->context->haltOnCallback())->toHaveKey('requested');
+        $this->expectExceptionMessage('Projection already initialized');
+        $this->context->initialize(fn () => []);
+    });
 
-    $callback = $this->context->haltOnCallback()['requested'];
-    expect($callback())->toBe($requested);
-})->with([
-    'requested' => [true],
-    'not requested' => [false],
-]);
+    test('when query filter is already set', function () {
+        $queryFilter = mock(QueryFilter::class);
+        $this->context->withQueryFilter($queryFilter);
 
-it('set halt on when signal received', function (array $signals) {
-    $haltOn = fn (HaltOn $haltOn) => $haltOn->whenSignalReceived($signals);
-    $this->context->haltOn($haltOn);
+        $this->expectExceptionMessage('Projection query filter already set');
+        $this->context->withQueryFilter($queryFilter);
+    });
 
-    expect($this->context->haltOnCallback())->toHaveKey('signalReceived');
+    test('keep state is already set', function () {
+        $this->context->withKeepState();
 
-    $callback = $this->context->haltOnCallback()['signalReceived'];
-    expect($callback())->toBe($signals);
-})->with(['signals' => [[1, 2, 3]]]);
+        $this->expectExceptionMessage('Projection keep state already set');
+        $this->context->withKeepState();
+    });
 
-it('set halt on when empty event stream', function (?int $expiredAt) {
-    $haltOn = fn (HaltOn $haltOn) => $haltOn->whenEmptyEventStream($expiredAt);
-    $this->context->haltOn($haltOn);
+    test('id is already set', function () {
+        $this->context->withId('id');
 
-    expect($this->context->haltOnCallback())->toHaveKey('emptyEventStream');
+        $this->expectExceptionMessage('Projection id already set');
+        $this->context->withId('id');
+    });
 
-    $callback = $this->context->haltOnCallback()['emptyEventStream'];
-    expect($callback())->toBe($expiredAt);
-})->with(['expired at' => [null, 1, 2, 3]]);
+    test('query stream is already set', function () {
+        $this->context->subscribeToStream('stream-1');
 
-it('set halt on when cycle reached', function (int $cycle) {
-    $haltOn = fn (HaltOn $haltOn) => $haltOn->whenCycleReached($cycle);
-    $this->context->haltOn($haltOn);
+        $this->expectExceptionMessage('Projection query already set');
+        $this->context->subscribeToStream('stream-2');
+    });
 
-    expect($this->context->haltOnCallback())->toHaveKey('cycleReached');
+    test('query categories is already set', function () {
+        $this->context->subscribeToCategory('category-1');
 
-    $callback = $this->context->haltOnCallback()['cycleReached'];
-    expect($callback())->toBe($cycle);
-})->with(['cycle' => [1, 2, 3]]);
+        $this->expectExceptionMessage('Projection query already set');
+        $this->context->subscribeToCategory('category-2');
+    });
 
-it('set halt on when stream event limit reached', function () {
-    $haltOn = fn (HaltOn $haltOn) => $haltOn->whenStreamEventLimitReached(5, false);
-    $this->context->haltOn($haltOn);
+    test('query all stream is already set', function () {
+        $this->context->subscribeToAll();
 
-    expect($this->context->haltOnCallback())->toHaveKey('counterReached');
+        $this->expectExceptionMessage('Projection query already set');
+        $this->context->subscribeToAll();
+    });
 
-    $callback = $this->context->haltOnCallback()['counterReached'];
-    expect($callback())->toBe([5, false]);
+    test('query not set', function () {
+        $this->expectExceptionMessage('Projection query not set');
+        $this->context->queries();
+    });
+
+    test('reactors is already set', function () {
+        $reactors = fn () => [];
+        $this->context->when($reactors);
+
+        $this->expectExceptionMessage('Projection reactors already set');
+        $this->context->when($reactors);
+    });
+
+    test('reactors not set', function () {
+        $this->expectExceptionMessage('Projection reactors not set');
+        $this->context->reactors();
+    });
+});
+
+describe('set halt on when', function () {
+    test('requested', function (bool $requested) {
+        $haltOn = fn (HaltOn $haltOn) => $haltOn->whenRequested($requested);
+        $this->context->haltOn($haltOn);
+
+        expect($this->context->haltOnCallback())->toHaveKey('requested');
+
+        $callback = $this->context->haltOnCallback()['requested'];
+        expect($callback())->toBe($requested);
+    })->with([
+        'requested' => [true],
+        'not requested' => [false],
+    ]);
+
+    test('signal received', function (array $signals) {
+        $haltOn = fn (HaltOn $haltOn) => $haltOn->whenSignalReceived($signals);
+        $this->context->haltOn($haltOn);
+
+        expect($this->context->haltOnCallback())->toHaveKey('signalReceived');
+
+        $callback = $this->context->haltOnCallback()['signalReceived'];
+        expect($callback())->toBe($signals);
+    })->with([
+        'one signal' => [['SIGINT']],
+        'many signals' => [['SIGINT', 'SIGTERM']],
+    ]);
+
+    test('empty event stream', function (?int $expiredAt) {
+        $haltOn = fn (HaltOn $haltOn) => $haltOn->whenEmptyEventStream($expiredAt);
+        $this->context->haltOn($haltOn);
+
+        expect($this->context->haltOnCallback())->toHaveKey('emptyEventStream');
+
+        $callback = $this->context->haltOnCallback()['emptyEventStream'];
+        expect($callback())->toBe($expiredAt);
+    })->with([
+        ['null expired' => null],
+        ['expired at 1' => 1],
+        ['expired at 10' => 10],
+    ]);
+
+    test('cycle reached', function (int $cycle) {
+        $haltOn = fn (HaltOn $haltOn) => $haltOn->whenCycleReached($cycle);
+        $this->context->haltOn($haltOn);
+
+        expect($this->context->haltOnCallback())->toHaveKey('cycleReached');
+
+        $callback = $this->context->haltOnCallback()['cycleReached'];
+        expect($callback())->toBe($cycle);
+    })->with([
+        ['one cycle' => 1],
+        ['two cycles' => 2],
+        ['three cycles' => 3],
+    ]);
+
+    test('stream event limit reached', function (int $limit, bool $resetCounterOnStop) {
+        $haltOn = fn (HaltOn $haltOn) => $haltOn->whenStreamEventLimitReached($limit, $resetCounterOnStop);
+        $this->context->haltOn($haltOn);
+
+        expect($this->context->haltOnCallback())->toHaveKey('counterReached');
+
+        $callback = $this->context->haltOnCallback()['counterReached'];
+        expect($callback())->toBe([$limit, $resetCounterOnStop]);
+    })->with([
+        ['limit of 1' => 1],
+        ['limit of 10' => 10],
+        ['limit of 50' => 50],
+    ])->with([
+        'reset counter on stop' => [true],
+        'do not reset counter on stop' => [false],
+    ]);
 });

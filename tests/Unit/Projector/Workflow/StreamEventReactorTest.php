@@ -71,7 +71,7 @@ function shouldInitUserState(?array $state): Closure
     };
 }
 
-it('react on event acked', function (bool $stillRunning, ?GapType $gapType) {
+test('react on event acked', function (bool $stillRunning, ?GapType $gapType) {
     $this->event->expects('header')->with(Header::EVENT_TIME)->andReturn($this->eventTime);
 
     $streamName = 'stream-1';
@@ -115,7 +115,7 @@ it('react on event acked', function (bool $stillRunning, ?GapType $gapType) {
     ->with('projection running')
     ->with('no gap');
 
-it('does not react when gap is found', function (GapType $gapType) {
+test('does not react when gap is found', function (GapType $gapType) {
     $this->event->expects('header')->with(Header::EVENT_TIME)->andReturn($this->eventTime);
 
     $streamName = 'stream-1';
@@ -139,7 +139,7 @@ it('does not react when gap is found', function (GapType $gapType) {
     expect($continue)->toBeFalse();
 })->with('has gap');
 
-it('react on event but does notify of non acked event', function (bool $stillRunning, ?GapType $gapType) {
+test('react on event but does notify of non acked event', function (bool $stillRunning, ?GapType $gapType) {
     $this->event->expects('header')->with(Header::EVENT_TIME)->andReturn($this->eventTime);
 
     $streamName = 'stream-1';
@@ -181,7 +181,7 @@ it('react on event but does notify of non acked event', function (bool $stillRun
     ->with('projection running')
     ->with('no gap');
 
-it('react on acked event but does not notify null user state', function (bool $stillRunning, ?GapType $gapType) {
+test('react on acked event but does not notify null user state', function (bool $stillRunning, ?GapType $gapType) {
     $this->event->expects('header')->with(Header::EVENT_TIME)->andReturn($this->eventTime);
 
     $streamName = 'stream-1';
@@ -224,6 +224,4 @@ it('react on acked event but does not notify null user state', function (bool $s
     ->with('projection running')
     ->with('no gap');
 
-test('dispatch signal', function () {
-
-})->todo();
+test('dispatch signal', function () {})->todo();

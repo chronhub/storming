@@ -22,8 +22,7 @@ beforeEach(function () {
         public function __construct(
             protected ContextReader $context,
             protected Subscriber $subscriber
-        ) {
-        }
+        ) {}
     };
 });
 
@@ -54,19 +53,19 @@ test('subscribe to all', function () {
     $this->projector->subscribeToAll();
 });
 
-test('when', function () {
+test('set when', function () {
     $reactors = fn () => ['foo' => 'bar'];
     $this->context->shouldReceive('when')->with($reactors)->once();
     $this->projector->when($reactors);
 });
 
-test('halt on', function () {
+test('set halt on', function () {
     $haltOn = fn () => ['foo' => 'bar'];
     $this->context->shouldReceive('haltOn')->with($haltOn)->once();
     $this->projector->haltOn($haltOn);
 });
 
-test('describe', function () {
+test('set describe', function () {
     $id = 'projection-id';
     $this->context->shouldReceive('withId')->with($id)->once();
     $this->projector->describe($id);

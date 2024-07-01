@@ -14,12 +14,12 @@ beforeEach(function () {
     $this->instance = new Timer($this->clock);
 });
 
-it('test instance', function () {
+test('default instance', function () {
     expect($this->instance)->toBeInstanceOf(Timer::class)
         ->and($this->instance->isStarted())->toBeFalse();
 });
 
-it('test start', function () {
+test('test start', function () {
     $this->clock->expects('now')->andReturn(new DateTimeImmutable('2021-01-01 00:00:00'))->once();
 
     $this->instance->start();
@@ -27,8 +27,9 @@ it('test start', function () {
         ->and($this->instance->getStartedTimestamp())->toBe(1609459200);
 });
 
-it('test reset', function () {
+test('reset timer', function () {
     $this->clock->shouldIgnoreMissing();
+
     $this->instance->start();
     expect($this->instance->isStarted())->toBeTrue();
 
@@ -36,18 +37,21 @@ it('test reset', function () {
     expect($this->instance->isStarted())->toBeFalse();
 });
 
-it('test get timestamp', function () {
+test('reset timer does not throw exception when not started', function () {
+    $this->instance->reset();
+
+    expect($this->instance->isStarted())->toBeFalse();
+});
+
+test('get started timestamp', function () {
     $this->clock->expects('now')->andReturn(new DateTimeImmutable('2021-01-01 00:00:00'))->once();
 
     $this->instance->start();
+
     expect($this->instance->getStartedTimestamp())->toBe(1609459200);
 });
 
-it('test get timestamp without start', function () {
-    expect(fn () => $this->instance->getStartedTimestamp())->toThrow(new RuntimeException('Timer is not started'));
-});
-
-it('test get elapsed time', function () {
+test('get elapsed time', function () {
     $this->clock->expects('now')
         ->andReturn(
             new DateTimeImmutable('2021-01-01 00:00:00'),
@@ -58,10 +62,22 @@ it('test get elapsed time', function () {
     expect($this->instance->getElapsedTime())->toBe(10);
 });
 
-it('test get elapsed time without start', function () {
-    expect(fn () => $this->instance->getElapsedTime())->toThrow(new RuntimeException('Timer is not started'));
-});
+describe('raise exception', function () {
+    test('when get elapsed time not started', function () {
+        $this->instance->getElapsedTime();
+    })->throws(RuntimeException::class, 'Timer is not started');
 
-it('test get elapsed time with reset', function () {
-    expect(fn () => $this->instance->getElapsedTime())->toThrow(new RuntimeException('Timer is not started'));
+    test('raise exception when get started time without started', function () {
+        $this->instance->getStartedTimestamp();
+    })->throws(RuntimeException::class, 'Timer is not started');
+
+    test('when start again', function () {
+        $this->clock->expects('now')->andReturn(new DateTimeImmutable('2021-01-01 00:00:00'))->once();
+
+        $this->instance->start();
+        expect($this->instance->isStarted())->toBeTrue()
+            ->and($this->instance->getStartedTimestamp())->toBe(1609459200);
+
+        $this->instance->start();
+    })->throws(RuntimeException::class, 'Timer is already started');
 });

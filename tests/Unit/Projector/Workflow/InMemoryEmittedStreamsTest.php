@@ -8,7 +8,7 @@ use InvalidArgumentException;
 use JsonSerializable;
 use Storm\Projector\Workflow\InMemoryEmittedStreams;
 
-it('test instance', function () {
+test('default instance', function () {
     $instance = new InMemoryEmittedStreams(3);
 
     expect($instance)->toBeInstanceOf(InMemoryEmittedStreams::class)
@@ -18,13 +18,13 @@ it('test instance', function () {
         ->and($instance->jsonSerialize())->toBe([0 => null, 1 => null, 2 => null]);
 });
 
-it('raise exception when cache size is less than 1', function (int $cacheSize) {
+test('raise exception when cache size is less than 1', function (int $cacheSize) {
     new InMemoryEmittedStreams($cacheSize);
 })
     ->with(['invalid cache size' => [-10, -1, 0]])
     ->throws(InvalidArgumentException::class, 'Stream cache size must be greater than 0');
 
-it('push three streams to cache and hit limit of three', function () {
+test('push three streams to cache and hit limit of three', function () {
     $instance = new InMemoryEmittedStreams(3);
 
     $instance->push('stream-1');
@@ -43,7 +43,7 @@ it('push three streams to cache and hit limit of three', function () {
         ->and($instance->jsonSerialize())->toBe([0 => 'stream-1', 1 => 'stream-2', 2 => 'stream-3']);
 });
 
-it('push four streams and exceed limit of three', function () {
+test('push four streams and exceed limit of three', function () {
     $instance = new InMemoryEmittedStreams(3);
 
     $instance->push('stream-1');

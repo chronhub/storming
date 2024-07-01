@@ -34,7 +34,7 @@ function getDestination(bool $keepRunning): Closure
     return fn (NotificationHub $hub) => $keepRunning;
 }
 
-it('process and release projection', function () {
+test('process and release projection', function () {
     $this->hub->expects('trigger')->withArgs(fn (ProjectionFreed $notification) => true);
 
     $called = 0;
@@ -48,7 +48,7 @@ it('process and release projection', function () {
     expect($called)->toBe(2);
 });
 
-it('process can be run again', function () {
+test('process can be run again', function () {
     $this->hub->expects('trigger')->withArgs(fn (ProjectionFreed $notification) => true)->twice();
 
     $called = 0;
@@ -63,7 +63,7 @@ it('process can be run again', function () {
     expect($called)->toBe(4);
 });
 
-it('process and raise original exception and ignore exception raise while releasing projection', function () {
+test('process and raise original exception and ignore exception raise while releasing projection', function () {
     $exceptionIgnored = new RuntimeException('exception will be ignored');
 
     $this->hub->expects('trigger')
@@ -87,7 +87,7 @@ it('process and raise original exception and ignore exception raise while releas
     expect($called)->toBe(1);
 });
 
-it('raise exception and release projection', function () {
+test('raise exception and release projection', function () {
     $this->hub->expects('trigger')->withArgs(fn (ProjectionFreed $notification) => true);
 
     $exception = new RuntimeException('foo');
@@ -107,7 +107,7 @@ it('raise exception and release projection', function () {
     expect($called)->toBe(0);
 });
 
-it('raise exception and does not release projection when exception is a projection already running instance', function () {
+test('raise original exception and does not release projection when exception is a projection already running instance', function () {
     $this->hub->shouldNotReceive('trigger');
 
     $exception = new ProjectionAlreadyRunning('foo');
@@ -127,7 +127,7 @@ it('raise exception and does not release projection when exception is a projecti
     expect($called)->toBe(0);
 });
 
-it('return false early and release projection', function () {
+test('return false early and release projection', function () {
     $this->hub->expects('trigger')->withArgs(fn (ProjectionFreed $notification) => true);
 
     $called = 0;
@@ -138,7 +138,7 @@ it('return false early and release projection', function () {
     expect($called)->toBe(0);
 });
 
-it('keep running when destination return true', function () {
+test('keep running when destination return true', function () {
     $this->hub->expects('trigger')->withArgs(fn (ProjectionFreed $notification) => true);
 
     $called = 0;

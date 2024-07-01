@@ -18,8 +18,7 @@ use Storm\Projector\Workflow\Notification\MasterCounter\KeepMasterCounterOnStop;
 use Storm\Projector\Workflow\Notification\Sprint\SprintStopped;
 use Storm\Projector\Workflow\Notification\Sprint\SprintTerminated;
 use Storm\Projector\Workflow\Notification\Stream\NoEventStreamDiscovered;
-use Storm\Projector\Workflow\Notification\Timer\GetElapsedTime;
-use Storm\Projector\Workflow\Notification\Timer\GetStartedTime;
+use Storm\Projector\Workflow\Notification\Timer\GetCurrentTime;
 
 use function method_exists;
 use function pcntl_signal;
@@ -177,10 +176,9 @@ class StopWatcher
     protected function expirationCallback(int $expiredAt): Closure
     {
         return function (NotificationHub $hub) use ($expiredAt): void {
-            $currentTime = (int) $hub->expect(GetStartedTime::class);
-            $elapsedTime = (int) $hub->expect(GetElapsedTime::class);
+            $currentTime = (int) $hub->expect(GetCurrentTime::class);
 
-            if ($expiredAt < $currentTime + $elapsedTime) {
+            if ($expiredAt < $currentTime) {
                 $this->notifySprintStopped($hub);
             }
         };

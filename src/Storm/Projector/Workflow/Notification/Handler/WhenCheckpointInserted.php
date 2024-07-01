@@ -9,7 +9,7 @@ use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointInserted;
 
-class WhenCheckpointInserted
+final class WhenCheckpointInserted
 {
     public function __invoke(NotificationHub $hub, CheckpointInserted $event, Checkpoint $checkpoint): void
     {

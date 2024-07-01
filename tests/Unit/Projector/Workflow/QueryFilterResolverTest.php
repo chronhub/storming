@@ -9,7 +9,7 @@ use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\StreamNameAwareQueryFilter;
 use Storm\Projector\Workflow\QueryFilterResolver;
 
-it('set projection query filter', function () {
+test('set projection query filter', function () {
     $queryFilter = mock(ProjectionQueryFilter::class);
     $queryFilter->expects('setStreamPosition')->with(1)->once();
 
@@ -19,7 +19,7 @@ it('set projection query filter', function () {
     expect($instance)->toBe($queryFilter);
 });
 
-it('set stream name aware query filter', function () {
+test('set stream name aware query filter', function () {
     $queryFilter = mock(StreamNameAwareQueryFilter::class);
     $queryFilter->expects('setStreamName')->with('stream')->once();
     $queryFilter->expects('setStreamPosition')->with(5)->once();
@@ -30,7 +30,7 @@ it('set stream name aware query filter', function () {
     expect($instance)->toBe($queryFilter);
 });
 
-it('set load limiter projection query filter', function () {
+test('set load limiter projection query filter', function () {
     $queryFilter = mock(LoadLimiterProjectionQueryFilter::class);
     $queryFilter->expects('setStreamPosition')->with(10)->once();
     $queryFilter->expects('setLoadLimiter')->with(100)->once();

@@ -10,7 +10,7 @@ use Storm\Projector\Workflow\Watcher\BatchCounterWatcher;
 
 use function method_exists;
 
-it('test new instance', function (int $limit) {
+test('default instance', function (int $limit) {
     $watcher = new BatchCounterWatcher($limit);
 
     expect($watcher)->toBeInstanceOf(Countable::class)
@@ -21,13 +21,13 @@ it('test new instance', function (int $limit) {
         ->and(method_exists($watcher, 'subscribe'))->toBeFalse();
 })->with(['valid limit' => [1, 10, 100]]);
 
-it('raise exception when limit is less than 1', function (int $limit) {
+test('raise exception when limit is less than 1', function (int $limit) {
     new BatchCounterWatcher($limit);
 })
     ->with(['invalid limit' => [-10, -1, 0]])
     ->throws(InvalidArgumentException::class, 'Batch counter limit must be greater than 0');
 
-it('test increment', function () {
+test('test increment', function () {
     $watcher = new BatchCounterWatcher(2);
     $watcher->increment();
 
@@ -36,7 +36,7 @@ it('test increment', function () {
         ->and($watcher->isReached())->toBeFalse();
 });
 
-it('assert limit is reached', function () {
+test('assert limit is reached', function () {
     $watcher = new BatchCounterWatcher(2);
     $watcher->increment();
     $watcher->increment();
@@ -46,7 +46,7 @@ it('assert limit is reached', function () {
         ->and($watcher->isReached())->toBeTrue();
 });
 
-it('test reset', function () {
+test('test reset', function () {
     $watcher = new BatchCounterWatcher(2);
     $watcher->increment();
     $watcher->reset();

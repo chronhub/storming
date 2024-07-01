@@ -51,11 +51,11 @@ dataset('watchers', [
     'report watcher' => ['report', ReportWatcher::class, true],
 ]);
 
-it('can access watcher property', function (string $property, string $className) {
+test('can access watcher property', function (string $property, string $className) {
     expect($this->watcherManager->{$property})->toBeInstanceOf($className);
 })->with('watchers');
 
-it('can subscribe to watchers', function (string $property, string $className, bool $hasSubscribeMethod) {
+test('can subscribe to watchers', function (string $property, string $className, bool $hasSubscribeMethod) {
     $hub = mock(NotificationHub::class)->shouldIgnoreMissing();
     $context = mock(ContextReader::class)->shouldIgnoreMissing();
 
@@ -66,7 +66,7 @@ it('can subscribe to watchers', function (string $property, string $className, b
     }
 })->with('watchers');
 
-it('raise exception when accessing non-existent watcher', function () {
+test('raise exception when accessing non-existent watcher', function () {
     /** @phpstan-ignore-next-line */
     $this->watcherManager->nonExistentWatcher;
 })->throws(InvalidArgumentException::class, 'Watcher nonExistentWatcher not found');

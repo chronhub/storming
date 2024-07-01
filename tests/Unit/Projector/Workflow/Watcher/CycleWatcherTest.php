@@ -10,13 +10,13 @@ beforeEach(function () {
     $this->watcher = new CycleWatcher();
 });
 
-it('test new instance', function () {
+test('default instance', function () {
     expect($this->watcher->current())->toBe(0)
         ->and($this->watcher->isFirst())->toBeFalse()
         ->and($this->watcher->hasStarted())->toBeFalse();
 });
 
-it('test start', function () {
+test('start cycle', function () {
     $this->watcher->start();
 
     expect($this->watcher->current())->toBe(1)
@@ -24,7 +24,7 @@ it('test start', function () {
         ->and($this->watcher->hasStarted())->toBeTrue();
 });
 
-it('test next', function () {
+test('next cycle', function () {
     $this->watcher->start();
     $this->watcher->next();
 
@@ -33,7 +33,7 @@ it('test next', function () {
         ->and($this->watcher->hasStarted())->toBeTrue();
 });
 
-it('test reset', function () {
+test('reset cycle', function () {
     $this->watcher->start();
     $this->watcher->next();
     $this->watcher->reset();
@@ -43,7 +43,7 @@ it('test reset', function () {
         ->and($this->watcher->hasStarted())->toBeFalse();
 });
 
-it('test multiple cycles', function () {
+test('increment cycles', function () {
     $this->watcher->start();
     $this->watcher->next();
     $this->watcher->next();
@@ -54,7 +54,7 @@ it('test multiple cycles', function () {
         ->and($this->watcher->hasStarted())->toBeTrue();
 });
 
-it('test reset after multiple cycles', function () {
+test('reset after many cycles', function () {
     $this->watcher->start();
     $this->watcher->next();
     $this->watcher->next();
@@ -66,7 +66,7 @@ it('test reset after multiple cycles', function () {
         ->and($this->watcher->hasStarted())->toBeFalse();
 });
 
-it('test start after reset', function () {
+test('start cycle after reset', function () {
     $this->watcher->start();
     $this->watcher->next();
     $this->watcher->next();
@@ -78,7 +78,7 @@ it('test start after reset', function () {
         ->and($this->watcher->hasStarted())->toBeTrue();
 });
 
-it('test next after reset', function () {
+test('next cycle after reset', function () {
     $this->watcher->start();
     $this->watcher->next();
     $this->watcher->next();
@@ -90,7 +90,7 @@ it('test next after reset', function () {
         ->and($this->watcher->hasStarted())->toBeTrue();
 });
 
-it('test reset after start', function () {
+test('reset cycle after start', function () {
     $this->watcher->start();
     $this->watcher->reset();
 
@@ -99,7 +99,7 @@ it('test reset after start', function () {
         ->and($this->watcher->hasStarted())->toBeFalse();
 });
 
-it('test reset after next', function () {
+test('reset cycle after next', function () {
     $this->watcher->start();
     $this->watcher->next();
     $this->watcher->reset();

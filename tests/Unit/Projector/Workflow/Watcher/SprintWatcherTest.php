@@ -12,27 +12,27 @@ beforeEach(function () {
     $this->watcher = new SprintWatcher();
 });
 
-it('test new instance', function () {
+test('default instance', function () {
     expect($this->watcher->inBackground())->toBeFalse()
         ->and($this->watcher->inProgress())->toBeFalse()
         ->and(method_exists($this->watcher, 'subscribe'))->toBeFalse();
 });
 
-it('test continue', function () {
+test('continue sprint', function () {
     $this->watcher->continue();
 
     expect($this->watcher->inProgress())->toBeTrue();
 });
 
-it('test halt', function () {
+test('halt sprint', function () {
     $this->watcher->continue();
     $this->watcher->halt();
 
     expect($this->watcher->inProgress())->toBeFalse();
 });
 
-it('test run in background', function () {
-    $this->watcher->runInBackground(true);
+test('run in background', function (bool $inBackground) {
+    $this->watcher->runInBackground($inBackground);
 
-    expect($this->watcher->inBackground())->toBeTrue();
-});
+    expect($this->watcher->inBackground())->toBe($inBackground);
+})->with('keep projection running');

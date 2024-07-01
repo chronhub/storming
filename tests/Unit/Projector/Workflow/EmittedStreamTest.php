@@ -10,17 +10,21 @@ beforeEach(function () {
     $this->emittedStream = new EmittedStream();
 });
 
-it('return false when not emitted', function () {
+test('default instance', function () {
     expect($this->emittedStream->wasEmitted())->toBeFalse();
 });
 
-it('return true when emitted', function () {
+test('return true when emitted', function () {
+    expect($this->emittedStream->wasEmitted())->toBeFalse();
+
     $this->emittedStream->emitted();
 
     expect($this->emittedStream->wasEmitted())->toBeTrue();
 });
 
-it('unlink emitted stream', function () {
+test('unlink emitted stream', function () {
+    expect($this->emittedStream->wasEmitted())->toBeFalse();
+
     $this->emittedStream->emitted();
     expect($this->emittedStream->wasEmitted())->toBeTrue();
 

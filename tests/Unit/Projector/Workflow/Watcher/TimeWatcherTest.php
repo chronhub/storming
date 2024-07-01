@@ -12,13 +12,13 @@ beforeEach(function () {
     $this->watcher = new TimeWatcher($this->timer);
 });
 
-it('test new instance', function () {
+test('default instance', function () {
     $this->timer->shouldReceive('isStarted')->andReturn(false);
 
     expect($this->watcher->isStarted())->toBeFalse();
 });
 
-it('test start', function () {
+test('start timer', function () {
     $this->timer->shouldReceive('start')->once();
 
     $this->watcher->start();
@@ -28,19 +28,19 @@ it('test start', function () {
     expect($this->watcher->isStarted())->toBeTrue();
 });
 
-it('test reset', function () {
+test('reset timer', function () {
     $this->timer->shouldReceive('reset')->once();
 
     $this->watcher->reset();
 });
 
-it('test get started time', function () {
+test('get started time', function () {
     $this->timer->shouldReceive('getStartedTimestamp')->andReturn(1234567890);
 
     expect($this->watcher->getStartedTime())->toBe(1234567890);
 });
 
-it('test get elapsed time', function () {
+test('get elapsed time', function () {
     $this->timer->shouldReceive('getElapsedTime')->andReturn(1234567890);
 
     expect($this->watcher->getElapsedTime())->toBe(1234567890);

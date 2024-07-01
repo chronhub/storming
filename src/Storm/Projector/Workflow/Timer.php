@@ -16,15 +16,15 @@ class Timer
 {
     protected ?DateTimeImmutable $startTime = null;
 
-    public function __construct(protected readonly SystemClock $clock)
-    {
-    }
+    public function __construct(protected readonly SystemClock $clock) {}
 
     public function start(): void
     {
-        if (! $this->startTime instanceof DateTimeImmutable) {
-            $this->startTime = $this->clock->now();
+        if ($this->isStarted()) {
+            throw new RuntimeException('Timer is already started');
         }
+
+        $this->startTime = $this->clock->now();
     }
 
     public function reset(): void

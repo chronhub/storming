@@ -11,32 +11,51 @@ use Storm\Projector\Workflow\Notification\Checkpoint\CheckpointInserted;
 use Storm\Projector\Workflow\Notification\Handler\WhenCheckpointInserted;
 
 beforeEach(function () {
-    $this->hub = $this->createMock(NotificationHub::class);
-    $this->event = new CheckpointInserted('stream-1', 2, 'createdAt');
+    $this->hub = mock(NotificationHub::class);
 });
 
-it('notify the listener when a checkpoint is inserted', function (GapType $gapType) {
-    $checkpoint = new Checkpoint('stream-1', 1, null, 'createdAt', [], $gapType);
+test('notify the listener when a checkpoint is inserted', function (int $streamPosition, GapType $gapType) {
+    $event = new CheckpointInserted('stream-1', $streamPosition, 'createdAt');
+
+    $checkpoint = new Checkpoint(
+        streamName: 'stream-1',
+        position: $streamPosition,
+        eventTime: null,
+        createdAt: 'createdAt',
+        gaps: [],
+        gapType: $gapType
+    );
 
     $handler = new WhenCheckpointInserted();
+    $this->hub->expects('notify')->with($gapType->value, 'stream-1', $streamPosition);
 
-    $this->hub->expects($this->once())
-        ->method('notify')
-        ->with($gapType->value, 'stream-1', 2);
+    $handler($this->hub, $event, $checkpoint);
+})
+    ->with([
+        ['stream position of 1' => 1],
+        ['stream position of 2' => 2],
+        ['stream position of 50' => 50],
+    ])
+    ->with([
+        'in gap' => [GapType::IN_GAP],
+        'recoverable gap' => [GapType::RECOVERABLE_GAP],
+        'unrecoverable gap' => [GapType::UNRECOVERABLE_GAP],
+    ]);
 
-    $handler($this->hub, $this->event, $checkpoint);
-})->with([
-    'in gap' => [GapType::IN_GAP],
-    'recoverable gap' => [GapType::RECOVERABLE_GAP],
-    'unrecoverable gap' => [GapType::UNRECOVERABLE_GAP],
-]);
+test('does not notify the listener when the checkpoint is not a gap', function () {
+    $event = new CheckpointInserted('stream-1', 2, 'createdAt');
 
-it('does not notify the listener when the checkpoint is not a gap', function () {
-    $checkpoint = new Checkpoint('stream-1', 1, null, 'createdAt', [], null);
+    $checkpoint = new Checkpoint(
+        streamName: 'stream-1',
+        position: 1,
+        eventTime: null,
+        createdAt: 'createdAt',
+        gaps: [],
+        gapType: null
+    );
 
     $handler = new WhenCheckpointInserted();
+    $this->hub->shouldNotReceive('notify');
 
-    $this->hub->expects($this->never())->method('notify');
-
-    $handler($this->hub, $this->event, $checkpoint);
+    $handler($this->hub, $event, $checkpoint);
 });
