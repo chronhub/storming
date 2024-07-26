@@ -1,0 +1,83 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Storm\Tests\Feature\Projector\InMemory\Concern;
+
+use Closure;
+use Storm\Contract\Message\DomainEvent;
+use Storm\Contract\Projector\EmitterProjector;
+use Storm\Contract\Projector\EmitterScope;
+use Storm\Projector\Scope\EventScope;
+use Storm\Projector\Scope\UserStateScope;
+use Storm\Stream\StreamName;
+use Storm\Tests\Domain\Balance\BalanceAdded;
+use Storm\Tests\Domain\Balance\BalanceCreated;
+use Storm\Tests\Domain\Balance\BalanceId;
+use Storm\Tests\Domain\Balance\BalanceSubtracted;
+use Storm\Tests\Domain\BalanceEventStore;
+use Storm\Tests\Feature\Projector\InMemory\InMemoryTestingFactory;
+
+use function is_string;
+
+trait InMemoryEmitterProjectionTestBaseTrait
+{
+    protected ?InMemoryTestingFactory $factory = null;
+
+    protected ?BalanceId $balanceId = null;
+
+    protected ?BalanceEventStore $balanceEventStore = null;
+
+    protected ?EmitterProjector $projector = null;
+
+    protected function setupProjection(
+        string $streamName,
+        string $projectionName,
+        ?string $descriptionId = null,
+        array $options = []
+    ): void {
+        $manager = $this->factory->createProjectorManager();
+
+        $this->balanceId = BalanceId::create();
+        $this->balanceEventStore = new BalanceEventStore($this->factory->chronicler, new StreamName($streamName), $this->balanceId);
+
+        $this->projector = $manager->newEmitterProjector($projectionName, $options);
+
+        if ($descriptionId) {
+            $this->projector->describe($descriptionId);
+        }
+    }
+
+    public function getEmitterReactor(?string $linkTo = null, bool $keepRunning = false, array $stopAt = []): Closure
+    {
+        return function (EventScope $scope) use ($linkTo, $keepRunning, $stopAt): void {
+            $callback = function (DomainEvent $event, EmitterScope $scope, UserStateScope $userState) use ($linkTo, $keepRunning, $stopAt): void {
+                $field = 'total';
+                if ($event instanceof BalanceCreated || $event instanceof BalanceAdded) {
+                    $userState->increment($field, $event->amount());
+                }
+
+                if ($event instanceof BalanceSubtracted) {
+                    $userState->decrement($field, $event->amount());
+                }
+
+                is_string($linkTo)
+                    ? $scope->linkTo($linkTo, $event)
+                    : $scope->emit($event);
+
+                if (! $keepRunning || $stopAt === []) {
+                    return;
+                }
+
+                [$field, $expected] = $stopAt;
+                if ($userState[$field] === $expected) {
+                    $scope->stop();
+                }
+            };
+
+            $scope
+                ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
+                ?->then($callback);
+        };
+    }
+}

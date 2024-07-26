@@ -1,0 +1,156 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Storm\Tests\Feature\Projector\InMemory\Concern;
+
+use Storm\Contract\Message\EventHeader;
+use Storm\Contract\Projector\ProjectionModel;
+use Storm\Contract\Projector\Projector;
+use Storm\Stream\StreamName;
+use Storm\Tests\Domain\Balance\BalanceId;
+use Storm\Tests\Feature\Projector\InMemory\InMemoryTestingFactory;
+
+use function is_string;
+use function iterator_to_array;
+
+/**
+ * @property InMemoryTestingFactory $factory
+ * @property Projector              $projector
+ */
+trait InMemoryProjectionExpectationTrait
+{
+    /**
+     * Assert stream exists in event store.
+     */
+    protected function assertStreamExists(StreamName|string $streamName, bool $exists): void
+    {
+        if (is_string($streamName)) {
+            $streamName = new StreamName($streamName);
+        }
+
+        expect($this->factory->chronicler->hasStream($streamName))->toBe($exists);
+    }
+
+    protected function assertInternalPositionsOfStream(string $streamName, BalanceId $balanceId, array $expectedPositions): void
+    {
+        $streamEvents = $this->factory->chronicler->retrieveAll(new StreamName($streamName), $balanceId);
+        $events = iterator_to_array($streamEvents);
+
+        $internalPositions = [];
+        foreach ($events as $event) {
+            $internalPositions[] = $event->header(EventHeader::INTERNAL_POSITION);
+        }
+
+        expect($expectedPositions)->toBe($internalPositions);
+    }
+
+    /**
+     * Assert projection exists.
+     */
+    protected function assertProjectionExists(string $projectionName, bool $exists): void
+    {
+        expect($this->factory->projectionProvider->exists($projectionName))->toBe($exists);
+    }
+
+    /**
+     * Assert projection user state.
+     */
+    protected function assertProjectionState(array $state): void
+    {
+        expect($this->projector->getState())->toBe($state);
+    }
+
+    /**
+     * Assert projection user state with a given field and value.
+     */
+    protected function assertPartialProjectionState(mixed $field, mixed $value): void
+    {
+        expect($this->projector->getState())->toHaveKey($field, $value);
+    }
+
+    /**
+     * Assert projection user state is empty.
+     */
+    protected function assertEmptyProjectionState(): void
+    {
+        expect($this->projector->getState())->toBe([]);
+    }
+
+    /**
+     * Assert projection model.
+     */
+    protected function assertProjectionModel(
+        string $projectionName,
+        string $status,
+        ?string $lockedUntil,
+    ): void {
+        $this->assertProjectionExists($projectionName, true);
+
+        $projection = $this->factory->projectionProvider->retrieve($projectionName);
+        expect($projection)->toBeInstanceOf(ProjectionModel::class);
+
+        $userState = $this->projector->getState();
+
+        // fixMe: encode empty array to json from a non initialized projection state
+        //  it also does not encode empty array to json from a non initialized projection state
+        if ($userState === []) {
+            expect($projection->state())->toBeIn(['{}', '[]']);
+        } else {
+            $encodedState = $this->factory->serializer->encode($this->projector->getState(), 'json');
+            expect($projection->state())->toBe($encodedState);
+        }
+
+        expect($projection->name())->toBe($projectionName)
+            ->and($projection->status())->toBe($status)
+            ->and($projection->lockedUntil())->toBe($lockedUntil);
+    }
+
+    /**
+     * Assert projection model checkpoint.
+     */
+    protected function assertProjectionModelCheckpoint(
+        string $projectionName,
+        string $streamName,
+        int $position,
+        array $gaps = []
+    ): void {
+        $this->assertProjectionExists($projectionName, true);
+
+        $projection = $this->factory->projectionProvider->retrieve($projectionName);
+        $checkpoint = $this->factory->serializer->decode($projection->checkpoint(), 'json');
+        $streamCheckpoint = $checkpoint[$streamName];
+
+        expect($streamCheckpoint)->toHaveKey('position', $position)
+            ->and($streamCheckpoint)->toHaveKey('gaps', $gaps)
+            ->and($streamCheckpoint)->toHaveKey('gap_type', null)
+            ->and($streamCheckpoint['event_time'])->toBeString()
+            ->and($streamCheckpoint['created_at'])->toBeString();
+    }
+
+    /**
+     * Assert the projection report.
+     */
+    protected function assertProjectionReport(
+        int $cycle,
+        int $ackedEvent,
+        int $totalEvent,
+        ?string $descriptionId = null
+    ): void {
+        $report = $this->projector->getReport();
+
+        expect($report['cycle'])->toBe($cycle)
+            ->and($report['acked_event'])->toBe($ackedEvent)
+            ->and($report['total_event'])->toBe($totalEvent)
+            ->and($report['projection_id'])->toBe($descriptionId ?? $this->projector::class);
+    }
+
+    protected function assertPartialProjectionReport(array $partialReport): void
+    {
+        $report = $this->projector->getReport();
+
+        foreach ($partialReport as $key => $value) {
+            expect($report)->toHaveKey($key, $value);
+        }
+    }
+}

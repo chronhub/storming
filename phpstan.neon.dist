@@ -1,0 +1,16 @@
+includes:
+    - ./vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - src
+        - tests
+
+    level: 5
+
+    ignoreErrors:
+        - '#Unsafe usage of new static#'
+        - '#Undefined variable#'
+        - '#Call to an undefined method Pest\\Mixins\\Expectation#'
+        - '#Call to an undefined method Pest\\Expectation#'
+        - '#Call to an undefined method Mockery\\ExpectationInterface|Mockery\\ExpectsHigherOrderMessage#'

@@ -1,0 +1,23 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Storm\Tests\Domain\Balance;
+
+use Storm\Message\AbstractDomainEvent;
+
+final class BalanceCreated extends AbstractDomainEvent
+{
+    public static function withBalance(BalanceId $balanceId, int $amount): self
+    {
+        return new self([
+            'id' => $balanceId->toString(),
+            'amount' => $amount,
+        ]);
+    }
+
+    public function amount(): int
+    {
+        return $this->content['amount'];
+    }
+}
