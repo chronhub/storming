@@ -15,7 +15,7 @@ use Storm\Projector\Scope\UserStateScope;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamIncrements;
 use Storm\Projector\Workflow\Notification\Command\StreamEventAcked;
 use Storm\Projector\Workflow\Notification\Command\UserStateChanged;
-use Storm\Projector\Workflow\Notification\Management\ProjectionPersistedWhenThresholdIsReached;
+use Storm\Projector\Workflow\Notification\Management\PerformWhenThresholdIsReached;
 use Storm\Projector\Workflow\Notification\Promise\CurrentUserState;
 use Storm\Projector\Workflow\Notification\Promise\IsSprintRunning;
 use Storm\Projector\Workflow\Notification\Promise\IsUserStateInitialized;
@@ -51,7 +51,7 @@ readonly class StreamEventReactor
 
         $this->reactOn($hub, $event);
 
-        $hub->emit(new ProjectionPersistedWhenThresholdIsReached());
+        $hub->emit(new PerformWhenThresholdIsReached());
 
         return $hub->await(IsSprintRunning::class);
     }

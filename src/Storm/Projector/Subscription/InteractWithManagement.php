@@ -84,7 +84,7 @@ trait InteractWithManagement
         );
     }
 
-    public function persistWhenThresholdIsReached(): void
+    public function performWhenThresholdIsReached(): void
     {
         if ($this->hub->await(IsBatchStreamLimitReached::class)) {
             $this->store();

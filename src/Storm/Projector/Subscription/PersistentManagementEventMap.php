@@ -11,11 +11,11 @@ use Storm\Contract\Projector\PersistentManagement;
 use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;
 use Storm\Projector\Workflow\Notification\Handler\WhenEventStreamDiscovered;
 use Storm\Projector\Workflow\Notification\Handler\WhenStreamEventProcessed;
+use Storm\Projector\Workflow\Notification\Management\PerformWhenThresholdIsReached;
 use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
 use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
 use Storm\Projector\Workflow\Notification\Management\ProjectionFreed;
 use Storm\Projector\Workflow\Notification\Management\ProjectionLockUpdated;
-use Storm\Projector\Workflow\Notification\Management\ProjectionPersistedWhenThresholdIsReached;
 use Storm\Projector\Workflow\Notification\Management\ProjectionRestarted;
 use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
 use Storm\Projector\Workflow\Notification\Management\ProjectionRise;
@@ -30,6 +30,10 @@ final class PersistentManagementEventMap
 {
     public function subscribeTo(Management $management): void
     {
+        $management->hub()->addEvents([
+            PerformWhenThresholdIsReached::class => fn () => $management->performWhenThresholdIsReached(),
+        ]);
+
         if ($management instanceof PersistentManagement) {
             $this->withListenerManagement($management);
         }
@@ -43,7 +47,6 @@ final class PersistentManagementEventMap
             ProjectionRise::class => fn () => $management->rise(),
             ProjectionLockUpdated::class => fn () => $management->shouldUpdateLock(),
             ProjectionStored::class => fn () => $management->store(),
-            ProjectionPersistedWhenThresholdIsReached::class => fn () => $management->persistWhenThresholdIsReached(),
             ProjectionClosed::class => fn () => $management->close(),
             ProjectionRevised::class => fn () => $management->revise(),
             ProjectionDiscarded::class => fn (NotificationHub $hub, ProjectionDiscarded $listener) => $management->discard($listener->withEmittedEvents),

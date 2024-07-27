@@ -42,13 +42,6 @@ interface PersistentManagement extends Management
     public function shouldUpdateLock(): void;
 
     /**
-     * Persist the current projection when the threshold is reached.
-     *
-     * @see ProjectionOption::BLOCK_SIZE
-     */
-    public function persistWhenThresholdIsReached(): void;
-
-    /**
      * Reset the projection.
      * Note it also deletes all snapshots taken for the current projection.
      *

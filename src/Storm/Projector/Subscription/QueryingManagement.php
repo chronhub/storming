@@ -6,6 +6,8 @@ namespace Storm\Projector\Subscription;
 
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\QueryManagement;
+use Storm\Projector\Workflow\Notification\Command\BatchStreamReset;
+use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamLimitReached;
 
 final readonly class QueryingManagement implements QueryManagement
 {
@@ -14,5 +16,13 @@ final readonly class QueryingManagement implements QueryManagement
     public function hub(): NotificationHub
     {
         return $this->hub;
+    }
+
+    public function performWhenThresholdIsReached(): void
+    {
+        if ($this->hub->await(IsBatchStreamLimitReached::class)) {
+            dump('performWhenThresholdIsReached: BatchStreamLimitReached');
+            $this->hub->emit(BatchStreamReset::class);
+        }
     }
 }
