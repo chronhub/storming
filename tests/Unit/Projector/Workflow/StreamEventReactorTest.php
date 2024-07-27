@@ -16,7 +16,7 @@ use Storm\Projector\Scope\UserStateScope;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamIncrements;
 use Storm\Projector\Workflow\Notification\Command\StreamEventAcked;
 use Storm\Projector\Workflow\Notification\Command\UserStateChanged;
-use Storm\Projector\Workflow\Notification\Management\ProjectionPersistedWhenThresholdIsReached;
+use Storm\Projector\Workflow\Notification\Management\PerformWhenThresholdIsReached;
 use Storm\Projector\Workflow\Notification\Promise\CurrentUserState;
 use Storm\Projector\Workflow\Notification\Promise\IsSprintRunning;
 use Storm\Projector\Workflow\Notification\Promise\IsUserStateInitialized;
@@ -101,7 +101,7 @@ test('react on event acked', function (bool $stillRunning, ?GapType $gapType) {
 
     $this->hub->expects('trigger')
         ->withArgs(function (object $notification) {
-            return $notification instanceof ProjectionPersistedWhenThresholdIsReached;
+            return $notification instanceof PerformWhenThresholdIsReached;
         });
 
     $this->hub->expects('await')->with(IsSprintRunning::class)->andReturn($stillRunning);
@@ -168,7 +168,7 @@ test('react on event but does notify of non acked event', function (bool $stillR
     $this->hub
         ->expects('trigger')
         ->withArgs(function (object $notification) {
-            return $notification instanceof ProjectionPersistedWhenThresholdIsReached;
+            return $notification instanceof PerformWhenThresholdIsReached;
         });
 
     $this->hub->expects('await')->with(IsSprintRunning::class)->andReturn($stillRunning);
@@ -210,7 +210,7 @@ test('react on acked event but does not notify null user state', function (bool 
             return true;
         });
 
-    $this->hub->expects('trigger')->withArgs(fn (object $notification) => $notification instanceof ProjectionPersistedWhenThresholdIsReached);
+    $this->hub->expects('trigger')->withArgs(fn (object $notification) => $notification instanceof PerformWhenThresholdIsReached);
     $this->hub->expects('await')->with(IsSprintRunning::class)->andReturn($stillRunning);
 
     //
