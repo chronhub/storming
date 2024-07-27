@@ -69,6 +69,11 @@ interface PersistentManagement extends Management
     public function freed(): void;
 
     /**
+     * Stop the running projection.
+     */
+    public function close(): void;
+
+    /**
      * Get the projection name.
      */
     public function getName(): string;

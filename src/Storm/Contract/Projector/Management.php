@@ -7,11 +7,6 @@ namespace Storm\Contract\Projector;
 interface Management
 {
     /**
-     * Stop the running projection.
-     */
-    public function close(): void;
-
-    /**
      * Get the notification hub.
      */
     public function hub(): NotificationHub;
