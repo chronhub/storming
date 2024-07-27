@@ -57,13 +57,9 @@ final class HubManager implements NotificationHub
 
     public function forgetEvent(string $event): void
     {
-        if (array_key_exists($event, $this->events)) {
-            unset($this->events[$event]);
-        }
+        unset($this->events[$event]);
 
-        if (array_key_exists($event, $this->once)) {
-            unset($this->once[$event]); // checkMe remove array key exists
-        }
+        unset($this->once[$event]);
     }
 
     public function hasEvent(string $event): bool
