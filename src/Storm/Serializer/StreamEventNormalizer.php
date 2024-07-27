@@ -85,6 +85,13 @@ final class StreamEventNormalizer implements DenormalizerInterface, NormalizerIn
         ];
     }
 
+    /**
+     * todo wip part of the serializer
+     * should be dependant of the strategy
+     * also, we do not generate time like created_at and delegate to storage
+     *
+     * @return array<string, mixed>
+     */
     protected function map(array $data, string $streamName): array
     {
         return [
@@ -94,7 +101,6 @@ final class StreamEventNormalizer implements DenormalizerInterface, NormalizerIn
             'version' => $data['header'][EventHeader::AGGREGATE_VERSION],
             'header' => $this->serializer()->serialize($data['header'], 'json'),
             'content' => $this->serializer()->serialize($data['content'], 'json'),
-            //'created_at' => $this->clock->generate(),
         ];
     }
 }
