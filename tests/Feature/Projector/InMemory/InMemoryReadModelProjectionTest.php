@@ -52,7 +52,7 @@ test('reads events from the beginning of the stream', function (?string $descrip
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor())
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(inBackground: false);
 
     $this->assertProjectionState(['total' => 100, 'events' => $this->expectedStateEvents]);
@@ -78,7 +78,7 @@ test('run projection again from last position kept in memory', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($reactors)
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(inBackground: false);
 
     $this->assertProjectionState(['total' => 100, 'events' => $this->expectedStateEvents]);
@@ -126,7 +126,7 @@ test('read model projection scope with one processed event', function () {
     $this->projector
         ->subscribeToStream($streamName)
         ->when($reactors)
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(inBackground: false);
 
     expect($this->projector->getName())->toBe($projectionName);
@@ -170,7 +170,7 @@ test('does not detect gaps with no retry', function (bool $keepRunning) {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($reactors)
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(inBackground: $keepRunning);
 
     $this->assertProjectionState(['total' => 125, 'events' => $this->expectedStateEvents]);
@@ -197,7 +197,7 @@ test('detect gaps with setup retries and record gap', function (array $retries, 
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($reactors)
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(inBackground: true);
 
     $this->assertProjectionState(['total' => 100, 'events' => $this->expectedStateEvents]);
@@ -236,7 +236,7 @@ test('fails detect gaps with running once and setup retries', function (array $r
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream('account')
         ->when($reactors)
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(inBackground: false);
 
     $this->assertProjectionState(['total' => 100, 'events' => [BalanceCreated::class]]);

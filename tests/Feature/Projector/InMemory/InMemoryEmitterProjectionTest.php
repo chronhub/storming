@@ -46,7 +46,7 @@ test('emit stream event to event store under the projection name', function (str
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($reactors)
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(false);
 
     $this->assertProjectionExists($projectionName, true);
@@ -83,7 +83,7 @@ test('emit stream event with retries and gaps', function (array $retries, bool $
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($reactors)
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(true);
 
     $this->assertProjectionExists($projectionName, true);
@@ -92,8 +92,13 @@ test('emit stream event with retries and gaps', function (array $retries, bool $
     $this->assertProjectionModel(projectionName: $projectionName, status: ProjectionStatus::IDLE->value, lockedUntil: null);
 
     $expectedGaps = $recordGap ? [2, 3, 5, 6, 8, 9] : [];
-    $expectedCycles = 1 + count($retries) * 3;
     $this->assertProjectionModelCheckpoint(projectionName: $projectionName, streamName: $eventStream, position: 10, gaps: $expectedGaps);
+
+    $expectedCycles = $this->calculateExpectedCycles(
+        numberOfEventWithNoGap: 1,
+        numberOfRetry: count($retries),
+        numberOfEventWithGap: 3
+    );
     $this->assertProjectionReport(cycle: $expectedCycles, ackedEvent: 4, totalEvent: 4);
 })->with('projection options with non empty retries', 'should record gaps');
 
@@ -121,7 +126,7 @@ test('link event to a new stream', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($reactors)
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(false);
 
     $this->assertStreamExists($emittedStream, true);
@@ -158,7 +163,7 @@ test('link event to a new stream with gaps', function (array $retries, bool $rec
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($reactors)
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(true);
 
     $this->assertStreamExists($emittedStream, true);
@@ -168,8 +173,13 @@ test('link event to a new stream with gaps', function (array $retries, bool $rec
     $this->assertProjectionModel(projectionName: $projectionName, status: ProjectionStatus::IDLE->value, lockedUntil: null);
 
     $expectedGaps = $recordGap ? [2, 3, 5, 6, 8, 9] : [];
-    $expectedCycles = 1 + count($retries) * 3;
     $this->assertProjectionModelCheckpoint(projectionName: $projectionName, streamName: $eventStream, position: 10, gaps: $expectedGaps);
+
+    $expectedCycles = $this->calculateExpectedCycles(
+        numberOfEventWithNoGap: 1,
+        numberOfRetry: count($retries),
+        numberOfEventWithGap: 3
+    );
     $this->assertProjectionReport(cycle: $expectedCycles, ackedEvent: 4, totalEvent: 4);
 })->with(
     'projection options with non empty retries',
@@ -213,7 +223,7 @@ test('internal position header of emitted event is position of original stream e
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($reactors)
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(false);
 
     $this->assertProjectionExists($projectionName, true);
@@ -252,7 +262,7 @@ test('internal position header of link_to event is position of original stream e
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($reactors)
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(true);
 
     $this->assertProjectionExists($projectionName, true);

@@ -6,6 +6,7 @@ namespace Storm\Tests\Feature\Projector\InMemory\Concern;
 
 use Closure;
 use Storm\Contract\Message\DomainEvent;
+use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\ReadModelProjector;
 use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\Scope\EventScope;
@@ -29,6 +30,8 @@ trait InMemoryReadModelProjectionTestBaseTrait
 
     protected ?ReadModelProjector $projector = null;
 
+    protected ?ProjectorManagerInterface $projectorManager = null;
+
     protected function setupProjection(
         string $streamName,
         string $projectionName,
@@ -36,8 +39,8 @@ trait InMemoryReadModelProjectionTestBaseTrait
         array $options = [],
         ?BalanceId $balanceId = null
     ): void {
-        $manager = $this->factory->createProjectorManager();
-        $this->projector = $manager->newReadModelProjector($projectionName, $this->readModel, $options);
+        $this->projectorManager = $this->factory->createProjectorManager();
+        $this->projector = $this->projectorManager->newReadModelProjector($projectionName, $this->readModel, $options);
 
         $this->makeEventStore($streamName, $balanceId);
 

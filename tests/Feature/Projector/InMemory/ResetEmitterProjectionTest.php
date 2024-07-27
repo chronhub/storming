@@ -35,7 +35,7 @@ test('resets the projection and deletes the emitted events in the event store', 
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getEmitterReactor())
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(inBackground: false);
 
     $this->assertStreamExists($streamName, true);
@@ -78,7 +78,7 @@ test('resets the projection and does not deletes the link to emitted events in t
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getEmitterReactor($emittedStream))
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(inBackground: false);
 
     $this->assertStreamExists($streamName, true);

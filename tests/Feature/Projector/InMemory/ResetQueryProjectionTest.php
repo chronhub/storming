@@ -38,7 +38,7 @@ test('resets query projection running once', function () {
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
         ->when($this->getQueryReactor())
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(false);
 
     $this->assertProjectionState(

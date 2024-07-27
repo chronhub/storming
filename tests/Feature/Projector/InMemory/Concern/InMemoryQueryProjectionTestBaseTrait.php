@@ -8,6 +8,7 @@ use Closure;
 use Storm\Chronicler\Direction;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Message\DomainEvent;
+use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Contract\Projector\QueryProjectorScope;
 use Storm\Projector\Scope\EventScope;
@@ -28,10 +29,12 @@ trait InMemoryQueryProjectionTestBaseTrait
 
     protected ?QueryProjector $projector = null;
 
+    protected ?ProjectorManagerInterface $projectorManager = null;
+
     protected function setupProjection(?string $descriptionId = null, array $options = []): void
     {
-        $manager = $this->factory->createProjectorManager();
-        $this->projector = $manager->newQueryProjector($options);
+        $this->projectorManager = $this->factory->createProjectorManager();
+        $this->projector = $this->projectorManager->newQueryProjector($options);
 
         if ($descriptionId) {
             $this->projector->describe($descriptionId);

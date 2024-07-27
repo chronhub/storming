@@ -34,7 +34,7 @@ test('deletes the projection and keeps the read model', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor())
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(inBackground: false);
 
     $this->assertPartialProjectionState('total', 100);
@@ -72,7 +72,7 @@ test('deletes the projection and the read model', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor())
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(inBackground: false);
 
     $this->assertPartialProjectionState('total', 100);

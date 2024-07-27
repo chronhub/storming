@@ -8,6 +8,7 @@ use Closure;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\EmitterScope;
+use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Scope\UserStateScope;
 use Storm\Tests\Domain\Balance\BalanceAdded;
@@ -26,6 +27,8 @@ trait InMemoryEmitterProjectionTestBaseTrait
 
     protected ?EmitterProjector $projector = null;
 
+    protected ?ProjectorManagerInterface $projectorManager = null;
+
     protected function setupProjection(
         string $streamName,
         string $projectionName,
@@ -33,8 +36,8 @@ trait InMemoryEmitterProjectionTestBaseTrait
         array $options = [],
         ?BalanceId $balanceId = null
     ): void {
-        $manager = $this->factory->createProjectorManager();
-        $this->projector = $manager->newEmitterProjector($projectionName, $options);
+        $this->projectorManager = $this->factory->createProjectorManager();
+        $this->projector = $this->projectorManager->newEmitterProjector($projectionName, $options);
 
         $this->makeEventStore($streamName, $balanceId);
 
