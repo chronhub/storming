@@ -12,12 +12,9 @@ use Storm\Contract\Projector\QueryProjector;
 use Storm\Contract\Projector\QueryProjectorScope;
 use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Scope\UserStateScope;
-use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
-use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
-use Storm\Tests\Domain\BalanceEventStore;
 use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
 use function count;
@@ -25,39 +22,20 @@ use function in_array;
 
 trait InMemoryQueryProjectionTestBaseTrait
 {
+    use BalanceEventStoreSetupTrait;
+
     protected ?InMemoryTestingFactory $factory = null;
-
-    protected ?BalanceId $balanceOne = null;
-
-    protected ?BalanceId $balanceTwo = null;
-
-    protected ?BalanceEventStore $balanceOneEventStore = null;
-
-    protected ?BalanceEventStore $balanceTwoEventStore = null;
 
     protected ?QueryProjector $projector = null;
 
     protected function setupProjection(?string $descriptionId = null, array $options = []): void
     {
         $manager = $this->factory->createProjectorManager();
-
         $this->projector = $manager->newQueryProjector($options);
 
         if ($descriptionId) {
             $this->projector->describe($descriptionId);
         }
-    }
-
-    protected function setupBalanceOne(string $streamName): void
-    {
-        $this->balanceOne = BalanceId::create();
-        $this->balanceOneEventStore = new BalanceEventStore($this->factory->chronicler, new StreamName($streamName), $this->balanceOne);
-    }
-
-    protected function setupBalanceTwo(string $streamName): void
-    {
-        $this->balanceTwo = BalanceId::create();
-        $this->balanceTwoEventStore = new BalanceEventStore($this->factory->chronicler, new StreamName($streamName), $this->balanceTwo);
     }
 
     protected function getQueryReactor(bool $keepRunning = false, array $stopAt = []): Closure

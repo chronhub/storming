@@ -12,16 +12,18 @@ use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Domain\BalanceEventStore;
 use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
+//fixme test is tied to the projection in memory factory
 test('append stream events', function () {
     $factory = new InMemoryTestingFactory();
 
     $streamName = new StreamName('balance');
     $chronicler = $factory->createEventStore();
+    $factory->setupClock();
 
     expect($chronicler->hasStream($streamName))->toBeFalse();
 
     $balanceId = BalanceId::create();
-    $store = new BalanceEventStore($chronicler, $streamName, $balanceId);
+    $store = new BalanceEventStore($chronicler, $factory->clock, $streamName, $balanceId);
     $store
         ->withBalanceCreated(1, 100)
         ->withBalanceAdded(2, 200)

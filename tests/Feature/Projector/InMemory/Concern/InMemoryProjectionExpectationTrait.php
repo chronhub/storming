@@ -146,4 +146,18 @@ trait InMemoryProjectionExpectationTrait
             expect($report)->toHaveKey($key, $value);
         }
     }
+
+    /**
+     * @param  int<0, max> $numberOfEventWithNoGap
+     * @param  int<0, max> $numberOfRetry
+     * @param  int<0, max> $numberOfEventWithGap
+     * @return int<0, max>
+     */
+    protected function calculateExpectedCycles(
+        int $numberOfEventWithNoGap,
+        int $numberOfRetry,
+        int $numberOfEventWithGap): int
+    {
+        return $numberOfEventWithNoGap + $numberOfRetry * $numberOfEventWithGap;
+    }
 }

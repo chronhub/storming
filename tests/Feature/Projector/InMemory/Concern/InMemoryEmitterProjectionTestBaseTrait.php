@@ -10,23 +10,19 @@ use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\EmitterScope;
 use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Scope\UserStateScope;
-use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
-use Storm\Tests\Domain\BalanceEventStore;
 use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
 use function is_string;
 
 trait InMemoryEmitterProjectionTestBaseTrait
 {
+    use BalanceEventStoreSetupTrait;
+
     protected ?InMemoryTestingFactory $factory = null;
-
-    protected ?BalanceId $balanceId = null;
-
-    protected ?BalanceEventStore $balanceEventStore = null;
 
     protected ?EmitterProjector $projector = null;
 
@@ -34,14 +30,13 @@ trait InMemoryEmitterProjectionTestBaseTrait
         string $streamName,
         string $projectionName,
         ?string $descriptionId = null,
-        array $options = []
+        array $options = [],
+        ?BalanceId $balanceId = null
     ): void {
         $manager = $this->factory->createProjectorManager();
-
-        $this->balanceId = BalanceId::create();
-        $this->balanceEventStore = new BalanceEventStore($this->factory->chronicler, new StreamName($streamName), $this->balanceId);
-
         $this->projector = $manager->newEmitterProjector($projectionName, $options);
+
+        $this->makeEventStore($streamName, $balanceId);
 
         if ($descriptionId) {
             $this->projector->describe($descriptionId);

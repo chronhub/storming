@@ -27,12 +27,6 @@ uses(
 beforeEach(function () {
     $this->factory = new InMemoryTestingFactory();
     $this->readModel = new InMemoryReadModel();
-
-    $this->assertReadModelBalance = function (int $total): void {
-        expect($this->readModel->getContainer())->toBe(
-            [$this->balanceId->toString() => ['total' => $total]]
-        );
-    };
 });
 
 test('resets the read model projection', function () {
@@ -41,7 +35,7 @@ test('resets the read model projection', function () {
         projectionName: $projectionName = 'balance',
     );
 
-    $this->balanceEventStore
+    $this->balanceEventStore($streamName)
         ->withBalanceCreated(version: 1, amount: 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
@@ -53,7 +47,7 @@ test('resets the read model projection', function () {
         ->run(inBackground: false);
 
     $this->assertPartialProjectionState('total', 100);
-    ($this->assertReadModelBalance)(100);
+    $this->assertReadModelBalance($streamName, 100);
     $this->assertProjectionModel(projectionName: $projectionName, status: ProjectionStatus::IDLE->value, lockedUntil: null);
     $this->assertProjectionModelCheckpoint(projectionName: $projectionName, streamName: $streamName, position: 4);
     $this->assertProjectionReport(cycle: 1, ackedEvent: 4, totalEvent: 4);
@@ -68,7 +62,7 @@ test('resets the read model projection', function () {
     // run again
     $this->projector->run(false);
 
-    ($this->assertReadModelBalance)(100);
+    $this->assertReadModelBalance(streamName: $streamName, total: 100);
     $this->assertProjectionExists($projectionName, true);
     $this->assertPartialProjectionState('total', 100);
 });
@@ -79,14 +73,14 @@ test('resets from monitoring within the projection instance', function () {
         projectionName: $projectionName = 'balance',
     );
 
-    $this->balanceEventStore
+    $this->balanceEventStore($streamName)
         ->withBalanceCreated(version: 1, amount: 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
     $monitor = $this->factory->monitor();
-    $hasReset = false;
+    $resetStatus = null;
 
-    $reactors = function (EventScope $scope) use ($monitor, &$hasReset): void {
+    $reactors = function (EventScope $scope) use ($monitor, &$resetStatus): void {
         $callback = function (DomainEvent $event, ReadModelScope $scope, UserStateScope $userState): void {
             $field = 'total';
             $id = $event->toContent()['id'];
@@ -113,10 +107,9 @@ test('resets from monitoring within the projection instance', function () {
             ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
             ->then($callback);
 
-        if (! $hasReset && count($scope->userState['events']) === 4) {
+        if ($resetStatus === null && count($scope->userState['events']) === 4) {
             $monitor->markAsReset('balance');
-            expect($monitor->statusOf('balance'))->toBe(ProjectionStatus::RESETTING->value);
-            $hasReset = true;
+            $resetStatus = $monitor->statusOf('balance');
         }
     };
 
@@ -127,7 +120,8 @@ test('resets from monitoring within the projection instance', function () {
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(inBackground: false);
 
-    expect($this->readModel->getContainer())->toBeEmpty();
+    expect($resetStatus)->toBe(ProjectionStatus::RESETTING->value);
+    $this->assertReadModelDown();
     $this->assertProjectionExists($projectionName, true);
     $this->assertProjectionState(['total' => 0]);
     $this->assertProjectionReport(cycle: 1, ackedEvent: 4, totalEvent: 4);
@@ -137,7 +131,7 @@ test('resets from monitoring within the projection instance', function () {
 
     $this->projector->run(false);
 
-    ($this->assertReadModelBalance)(100);
+    $this->assertReadModelBalance($streamName, 100);
     $this->assertProjectionExists($projectionName, true);
     $this->assertPartialProjectionState('total', 100);
     $this->assertProjectionReport(cycle: 1, ackedEvent: 4, totalEvent: 4);

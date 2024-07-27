@@ -36,7 +36,7 @@ test('stop projection when cycle reached', function (int $cycles) {
         projectionName: 'balance',
     );
 
-    $this->balanceEventStore
+    $this->balanceEventStore($streamName)
         ->withBalanceCreated(version: 1, amount: 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
@@ -57,7 +57,7 @@ test('stop projection with expiration', function (int $expiredAt) {
         projectionName: 'balance',
     );
 
-    $this->balanceEventStore
+    $this->balanceEventStore($streamName)
         ->withBalanceCreated(version: 1, amount: 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
@@ -81,7 +81,7 @@ test('stop projection when recoverable gap detected', function (array $retries) 
         options: ['retries' => $retries],
     );
 
-    $this->balanceEventStore
+    $this->balanceEventStore($streamName)
         ->withBalanceCreated(version: 1, amount: 100)
         ->withVersioningAmount([[3, 200]]);
 
@@ -95,11 +95,7 @@ test('stop projection when recoverable gap detected', function (array $retries) 
 
     $this->assertPartialProjectionState('total', 100);
     $this->assertProjectionReport(cycle: 1, ackedEvent: 1, totalEvent: 1);
-})->with([
-    [[1, 2]],
-    [[1, 5, 10]],
-    [[1, 5, 10, 20, 50, 100, 200, 500]],
-]);
+})->with('projection options with non empty retries');
 
 test('stop projection when unrecoverable gap detected', function (array $retries) {
     $this->setupProjection(
@@ -108,7 +104,7 @@ test('stop projection when unrecoverable gap detected', function (array $retries
         options: ['retries' => $retries],
     );
 
-    $this->balanceEventStore
+    $this->balanceEventStore($streamName)
         ->withBalanceCreated(version: 1, amount: 100)
         ->withVersioningAmount([[2, 200], [5, -150]]);
 
@@ -122,8 +118,4 @@ test('stop projection when unrecoverable gap detected', function (array $retries
 
     $this->assertPartialProjectionState('total', 300);
     $this->assertProjectionReport(cycle: count($retries), ackedEvent: 2, totalEvent: 2);
-})->with([
-    [[1, 2]],
-    [[1, 5, 10]],
-    [[1, 5, 10, 20, 50, 100, 200, 500]],
-]);
+})->with('projection options with non empty retries');

@@ -10,12 +10,14 @@ use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Scope\UserStateScope;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
+use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryQueryProjectionTestBaseTrait;
 use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
 use function array_merge;
+use function count;
 
 uses(
     InMemoryQueryProjectionTestBaseTrait::class,
@@ -32,15 +34,13 @@ beforeEach(function () {
     ];
 });
 
-dataset('description id', [null, 'describe the projection with a custom id']);
-
 test('query projection', function (?string $descriptionId) {
     $this->setupProjection(descriptionId: $descriptionId);
 
     $streamName = 'balance_one';
-    $this->setupBalanceOne($streamName);
+    $balanceId = BalanceId::create();
 
-    $this->balanceOneEventStore
+    $this->makeEventStore($streamName, $balanceId)
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
@@ -53,26 +53,24 @@ test('query projection', function (?string $descriptionId) {
 
     $this->assertProjectionState(
         [
-            'balances' => [$this->balanceOne->toString() => 100],
+            'balances' => [$balanceId->toString() => 100],
             'events' => $this->expectedStateEvents,
         ]
     );
 
     $this->assertProjectionReport(cycle: 1, ackedEvent: 4, totalEvent: 4, descriptionId: $descriptionId);
-})->with('description id');
+})->with('projection optional description id');
 
 test('query projection with many streams', function () {
     $this->setupProjection();
 
     $streamOne = 'balance_one';
-    $this->setupBalanceOne($streamOne);
-    $this->balanceOneEventStore
-        ->withBalanceCreated(1, 100)
+    $this->makeEventStore($streamOne, $balanceIdOne = BalanceId::create())
+        ->withBalanceCreated(1, 600)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
     $streamTwo = 'balance_two';
-    $this->setupBalanceTwo($streamTwo);
-    $this->balanceTwoEventStore
+    $this->makeEventStore($streamTwo, $balanceIdTwo = BalanceId::create())
         ->withBalanceCreated(1, 500)
         ->withVersioningAmount([[2, 100], [3, -50], [4, -25]]);
 
@@ -86,8 +84,8 @@ test('query projection with many streams', function () {
     $this->assertProjectionState(
         [
             'balances' => [
-                $this->balanceOne->toString() => 100,
-                $this->balanceTwo->toString() => 525,
+                $balanceIdOne->toString() => 600,
+                $balanceIdTwo->toString() => 525,
             ],
             'events' => array_merge($this->expectedStateEvents, $this->expectedStateEvents),
         ]
@@ -100,14 +98,12 @@ test('query projection from stream partition', function () {
     $this->setupProjection();
 
     $streamOne = 'balance-one';
-    $this->setupBalanceOne($streamOne);
-    $this->balanceOneEventStore
-        ->withBalanceCreated(1, 100)
-        ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
+    $this->makeEventStore($streamOne, $balanceIdOne = BalanceId::create())
+        ->withBalanceCreated(1, 1000)
+        ->withVersioningAmount([[2, 200], [3, -150], [4, -120]]);
 
     $streamTwo = 'balance-two';
-    $this->setupBalanceTwo($streamTwo);
-    $this->balanceTwoEventStore
+    $this->makeEventStore($streamTwo, $balanceIdTwo = BalanceId::create())
         ->withBalanceCreated(1, 500)
         ->withVersioningAmount([[2, 100], [3, -50], [4, -25]]);
 
@@ -124,8 +120,8 @@ test('query projection from stream partition', function () {
     $this->assertProjectionState(
         [
             'balances' => [
-                $this->balanceOne->toString() => 100,
-                $this->balanceTwo->toString() => 525,
+                $balanceIdOne->toString() => 930,
+                $balanceIdTwo->toString() => 525,
             ],
             'events' => array_merge($this->expectedStateEvents, $this->expectedStateEvents),
         ]
@@ -137,10 +133,8 @@ test('query projection from stream partition', function () {
 test('stop query projection from query scope', function () {
     $this->setupProjection();
 
-    $streamName = 'balance_one';
-    $this->setupBalanceOne($streamName);
-
-    $this->balanceOneEventStore
+    $streamName = 'account';
+    $this->makeEventStore($streamName, $balanceId = BalanceId::create())
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
@@ -153,7 +147,7 @@ test('stop query projection from query scope', function () {
 
     $this->assertProjectionState(
         [
-            'balances' => [$this->balanceOne->toString() => 300],
+            'balances' => [$balanceId->toString() => 300],
             'events' => [BalanceCreated::class, BalanceAdded::class],
         ]
     );
@@ -164,9 +158,8 @@ test('stop query projection from query scope', function () {
 test('query projection with a custom query filter', function () {
     $this->setupProjection();
 
-    $streamName = 'balance_one';
-    $this->setupBalanceOne($streamName);
-    $this->balanceOneEventStore
+    $streamName = 'account';
+    $this->makeEventStore($streamName, $balanceId = BalanceId::create())
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
@@ -181,7 +174,7 @@ test('query projection with a custom query filter', function () {
 
     $this->assertProjectionState(
         [
-            'balances' => [$this->balanceOne->toString() => -200],
+            'balances' => [$balanceId->toString() => -200],
             'events' => [BalanceSubtracted::class, BalanceSubtracted::class],
         ]
     );
@@ -192,10 +185,8 @@ test('query projection with a custom query filter', function () {
 test('query projection running in background and stop projection from event scope', function () {
     $this->setupProjection();
 
-    $streamName = 'balance_one';
-    $this->setupBalanceOne($streamName);
-
-    $this->balanceOneEventStore
+    $streamName = 'account';
+    $this->makeEventStore($streamName, $balanceId = BalanceId::create())
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
@@ -223,7 +214,7 @@ test('query projection running in background and stop projection from event scop
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(true);
 
-    $this->assertProjectionState(['balances' => [$this->balanceOne->toString() => 300]]);
+    $this->assertProjectionState(['balances' => [$balanceId->toString() => 300]]);
 
     $this->assertProjectionReport(cycle: 1, ackedEvent: 2, totalEvent: 3);
 });
@@ -235,10 +226,8 @@ test('query projection running in background and stop projection from event scop
 test('query projection running in background and stop projection from event scope 2', function () {
     $this->setupProjection();
 
-    $streamName = 'balance_one';
-    $this->setupBalanceOne($streamName);
-
-    $this->balanceOneEventStore
+    $streamName = 'balance';
+    $this->makeEventStore($streamName, $balanceId = BalanceId::create())
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
@@ -267,7 +256,7 @@ test('query projection running in background and stop projection from event scop
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(true);
 
-    $this->assertProjectionState(['balances' => [$this->balanceOne->toString() => 300]]);
+    $this->assertProjectionState(['balances' => [$balanceId->toString() => 300]]);
 
     $this->assertProjectionReport(cycle: 1, ackedEvent: 3, totalEvent: 3);
 });
@@ -276,9 +265,7 @@ test('query projection running once and does not stop on gap', function () {
     $this->setupProjection();
 
     $streamName = 'balance_one';
-    $this->setupBalanceOne($streamName);
-
-    $this->balanceOneEventStore
+    $this->makeEventStore($streamName, $balanceId = BalanceId::create())
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[5, 200], [20, -150], [50, -50]]);
 
@@ -291,7 +278,7 @@ test('query projection running once and does not stop on gap', function () {
 
     $this->assertProjectionState(
         [
-            'balances' => [$this->balanceOne->toString() => 100],
+            'balances' => [$balanceId->toString() => 100],
             'events' => $this->expectedStateEvents,
         ]
     );
@@ -302,10 +289,8 @@ test('query projection running once and does not stop on gap', function () {
 test('query projection running once and stop on gap when retries are configured', function () {
     $this->setupProjection(options: ['retries' => [1, 2, 3]]);
 
-    $streamName = 'balance_one';
-    $this->setupBalanceOne($streamName);
-
-    $this->balanceOneEventStore
+    $streamName = 'balance';
+    $this->makeEventStore($streamName, $balanceId = BalanceId::create())
         ->withBalanceCreated(1, 600)
         ->withBalanceAdded(3, 200);
 
@@ -318,7 +303,7 @@ test('query projection running once and stop on gap when retries are configured'
 
     $this->assertProjectionState(
         [
-            'balances' => [$this->balanceOne->toString() => 600],
+            'balances' => [$balanceId->toString() => 600],
             'events' => [BalanceCreated::class],
         ]
     );
@@ -326,15 +311,12 @@ test('query projection running once and stop on gap when retries are configured'
     $this->assertProjectionReport(cycle: 1, ackedEvent: 1, totalEvent: 1);
 });
 
-// fixMe issue with checkpoints, stuck at the first event
-// useful for live query projection
-test('query projection running in background and resolve gap when retries are configured', function () {
-    $this->setupProjection(options: ['retries' => [1, 2, 3]]);
+test('query projection running in background and resolve gap when retries are configured', function (array $retries) {
+    $this->setupProjection(options: ['retries' => $retries]);
 
-    $streamName = 'balance_one';
-    $this->setupBalanceOne($streamName);
+    $streamName = 'balance';
 
-    $this->balanceOneEventStore
+    $this->makeEventStore($streamName, $balanceId = BalanceId::create())
         ->withBalanceCreated(1, 600)
         ->withBalanceAdded(3, 200)
         ->withBalanceSubtracted(10, 50);
@@ -348,10 +330,16 @@ test('query projection running in background and resolve gap when retries are co
 
     $this->assertProjectionState(
         [
-            'balances' => [$this->balanceOne->toString() => 650],
+            'balances' => [$balanceId->toString() => 750],
             'events' => [BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class],
         ]
     );
 
-    $this->assertProjectionReport(cycle: 1, ackedEvent: 3, totalEvent: 3);
-})->todo();
+    $expectedCycles = $this->calculateExpectedCycles(
+        numberOfEventWithNoGap: 1,
+        numberOfRetry: count($retries),
+        numberOfEventWithGap: 2
+    );
+
+    $this->assertProjectionReport(cycle: $expectedCycles, ackedEvent: 3, totalEvent: 3);
+})->with('projection options with non empty retries');

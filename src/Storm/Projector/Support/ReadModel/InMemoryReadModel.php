@@ -18,15 +18,11 @@ final class InMemoryReadModel implements ReadModel
     /** @var Collection<string, array> */
     private Collection $container;
 
-    public function __construct()
-    {
-        $this->container = new Collection();
-    }
-
     public function initialize(): void
     {
-        //fixme: either set isInitialized to true per default or
-        // raise an exception if the read model is not initialized in next methods
+        // force read model to be initialized
+        $this->container = new Collection();
+
         $this->initialized = true;
     }
 

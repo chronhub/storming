@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Feature\Projector;
 
 use Storm\Projector\ProjectionStatus;
+use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryEmitterProjectionTestBaseTrait;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
 use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
@@ -20,7 +21,6 @@ beforeEach(function () {
     $this->factory = new InMemoryTestingFactory();
 });
 
-dataset('retries', [[[1, 2]], [[1, 5, 10]]]);
 dataset('event stream name', ['balance1', 'balance2']);
 dataset('should record gaps', [[true], [false]]);
 
@@ -33,7 +33,7 @@ test('emit stream event to event store under the projection name', function (str
     $this->assertProjectionExists($projectionName, false);
     $this->assertStreamExists($eventStream, false);
 
-    $this->balanceEventStore
+    $this->balanceEventStore($eventStream)
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
@@ -70,7 +70,7 @@ test('emit stream event with retries and gaps', function (array $retries, bool $
     $this->assertProjectionExists($projectionName, false);
     $this->assertStreamExists($eventStream, false);
 
-    $this->balanceEventStore
+    $this->balanceEventStore($eventStream)
         ->withBalanceCreated(1, 200)
         ->withVersioningAmount([[4, 200], [7, -150], [10, -70]]);
 
@@ -95,7 +95,7 @@ test('emit stream event with retries and gaps', function (array $retries, bool $
     $expectedCycles = 1 + count($retries) * 3;
     $this->assertProjectionModelCheckpoint(projectionName: $projectionName, streamName: $eventStream, position: 10, gaps: $expectedGaps);
     $this->assertProjectionReport(cycle: $expectedCycles, ackedEvent: 4, totalEvent: 4);
-})->with('retries', 'should record gaps');
+})->with('projection options with non empty retries', 'should record gaps');
 
 test('link event to a new stream', function () {
     $emittedStream = 'operation_emitted';
@@ -108,7 +108,7 @@ test('link event to a new stream', function () {
     $this->assertProjectionExists($projectionName, false);
     $this->assertStreamExists($eventStream, false);
 
-    $this->balanceEventStore
+    $this->balanceEventStore($eventStream)
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -149]]);
 
@@ -145,7 +145,7 @@ test('link event to a new stream with gaps', function (array $retries, bool $rec
     $this->assertProjectionExists($projectionName, false);
     $this->assertStreamExists($eventStream, false);
 
-    $this->balanceEventStore
+    $this->balanceEventStore($eventStream)
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[4, 200], [7, -150], [10, -149]]);
 
@@ -171,7 +171,10 @@ test('link event to a new stream with gaps', function (array $retries, bool $rec
     $expectedCycles = 1 + count($retries) * 3;
     $this->assertProjectionModelCheckpoint(projectionName: $projectionName, streamName: $eventStream, position: 10, gaps: $expectedGaps);
     $this->assertProjectionReport(cycle: $expectedCycles, ackedEvent: 4, totalEvent: 4);
-})->with('retries', 'should record gaps');
+})->with(
+    'projection options with non empty retries',
+    'projection options record gap'
+);
 
 /**
  * The purpose of the internal position is to track the original position of the original stream event
@@ -189,19 +192,20 @@ test('link event to a new stream with gaps', function (array $retries, bool $rec
 test('internal position header of emitted event is position of original stream event', function () {
     $this->setupProjection(
         streamName: $eventStream = 'balance',
-        projectionName: $projectionName = 'operation'
+        projectionName: $projectionName = 'operation',
+        balanceId: $balanceId = BalanceId::create()
     );
 
     $this->assertProjectionExists($projectionName, false);
     $this->assertStreamExists($eventStream, false);
 
-    $this->balanceEventStore
+    $this->balanceEventStore($eventStream)
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -149]]);
 
     $this->assertStreamExists($eventStream, true);
     $this->assertStreamExists($projectionName, false);
-    $this->assertInternalPositionsOfStream($eventStream, $this->balanceId, [1, 2, 3, 4]);
+    $this->assertInternalPositionsOfStream($eventStream, $balanceId, [1, 2, 3, 4]);
 
     $reactors = $this->getEmitterReactor();
 
@@ -216,7 +220,7 @@ test('internal position header of emitted event is position of original stream e
     $this->assertStreamExists($projectionName, true);
 
     $this->assertProjectionState(['total' => 1]);
-    $this->assertInternalPositionsOfStream($projectionName, $this->balanceId, [1, 2, 3, 4]);
+    $this->assertInternalPositionsOfStream($projectionName, $balanceId, [1, 2, 3, 4]);
 });
 
 test('internal position header of link_to event is position of original stream event', function (array $retries) {
@@ -225,18 +229,19 @@ test('internal position header of link_to event is position of original stream e
     $this->setupProjection(
         streamName: $eventStream = 'balance',
         projectionName: $projectionName = 'operation',
-        options: ['retries' => $retries]
+        options: ['retries' => $retries],
+        balanceId: $balanceId = BalanceId::create()
     );
 
     $this->assertStreamExists($eventStream, false);
     $this->assertStreamExists($emittedStream, false);
 
-    $this->balanceEventStore
+    $this->balanceEventStore($eventStream)
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[5, 200], [20, -150], [100, -149]]);
 
     $this->assertStreamExists($eventStream, true);
-    $this->assertInternalPositionsOfStream($eventStream, $this->balanceId, [1, 5, 20, 100]);
+    $this->assertInternalPositionsOfStream($eventStream, $balanceId, [1, 5, 20, 100]);
     $this->assertStreamExists($projectionName, false);
     $this->assertStreamExists($emittedStream, false);
     $this->assertProjectionExists($projectionName, false);
@@ -255,8 +260,8 @@ test('internal position header of link_to event is position of original stream e
     $this->assertStreamExists($projectionName, false);
 
     $this->assertProjectionState(['total' => 1]);
-    $this->assertInternalPositionsOfStream($emittedStream, $this->balanceId, [1, 5, 20, 100]);
-})->with('retries');
+    $this->assertInternalPositionsOfStream($emittedStream, $balanceId, [1, 5, 20, 100]);
+})->with('projection options with non empty retries');
 
 test('emit with many streams', function () {})->todo();
 

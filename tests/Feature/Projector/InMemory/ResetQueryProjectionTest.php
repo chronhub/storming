@@ -6,6 +6,7 @@ namespace Storm\Tests\Feature\Projector\Operations;
 
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
+use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryQueryProjectionTestBaseTrait;
@@ -29,10 +30,7 @@ beforeEach(function () {
 test('resets query projection running once', function () {
     $this->setupProjection();
 
-    $streamName = 'balance_one';
-    $this->setupBalanceOne($streamName);
-
-    $this->balanceOneEventStore
+    $this->makeEventStore($streamName = 'balance', $balanceId = BalanceId::create())
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
@@ -45,7 +43,7 @@ test('resets query projection running once', function () {
 
     $this->assertProjectionState(
         [
-            'balances' => [$this->balanceOne->toString() => 100],
+            'balances' => [$balanceId->toString() => 100],
             'events' => $this->expectedStateEvents,
         ]
     );
@@ -53,14 +51,14 @@ test('resets query projection running once', function () {
     $this->assertProjectionReport(cycle: 1, ackedEvent: 4, totalEvent: 4);
 
     $this->projector->reset();
-    $this->assertProjectionState([]);
+    $this->assertEmptyProjectionState();
 
     // run again
     $this->projector->run(false);
 
     $this->assertProjectionState(
         [
-            'balances' => [$this->balanceOne->toString() => 100],
+            'balances' => [$balanceId->toString() => 100],
             'events' => $this->expectedStateEvents,
         ]
     );

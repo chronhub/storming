@@ -11,8 +11,8 @@ dataset('projection status', ProjectionStatus::cases());
 dataset('projection status as strings', ProjectionStatus::strings());
 
 dataset('keep projection running', [
-    'keep running' => [true],
-    'do not keep running' => [false],
+    'should run in background' => [true],
+    'should run once' => [false],
 ]);
 
 dataset('delete projection with emitted events', [
@@ -21,6 +21,25 @@ dataset('delete projection with emitted events', [
 ]);
 
 dataset('projection exists', [
-    'projection exists' => [true],
-    'projection does not exist' => [false],
+    'should exists' => [true],
+    'should not exists' => [false],
+]);
+
+dataset('projection optional description id', [null, 'describe the projection with a custom id']);
+
+/**
+ * The retries are used to configure checkpoint recovery,
+ * a retry represents a sleep duration in milliseconds
+ *
+ * Max attempts: 10
+ */
+dataset('projection options with non empty retries', [
+    'two retries' => [[1, 2]],
+    'five retries' => [[1, 2, 3, 4, 5]],
+    'ten retries' => [[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]],
+]);
+
+dataset('projection options record gap', [
+    ['should record gap' => true],
+    ['should not record gap' => false],
 ]);

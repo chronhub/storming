@@ -11,25 +11,21 @@ use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Scope\UserStateScope;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
-use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
-use Storm\Tests\Domain\BalanceEventStore;
 use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
 use function count;
 
 trait InMemoryReadModelProjectionTestBaseTrait
 {
+    use BalanceEventStoreSetupTrait;
+
     protected ?InMemoryTestingFactory $factory = null;
 
     protected ?InMemoryReadModel $readModel = null;
-
-    protected ?BalanceId $balanceId = null;
-
-    protected ?BalanceEventStore $balanceEventStore = null;
 
     protected ?ReadModelProjector $projector = null;
 
@@ -37,14 +33,13 @@ trait InMemoryReadModelProjectionTestBaseTrait
         string $streamName,
         string $projectionName,
         ?string $descriptionId = null,
-        array $options = []
+        array $options = [],
+        ?BalanceId $balanceId = null
     ): void {
         $manager = $this->factory->createProjectorManager();
-
-        $this->balanceId = BalanceId::create();
-        $this->balanceEventStore = new BalanceEventStore($this->factory->chronicler, new StreamName($streamName), $this->balanceId);
-
         $this->projector = $manager->newReadModelProjector($projectionName, $this->readModel, $options);
+
+        $this->makeEventStore($streamName, $balanceId);
 
         if ($descriptionId) {
             $this->projector->describe($descriptionId);
@@ -102,5 +97,20 @@ trait InMemoryReadModelProjectionTestBaseTrait
                         : $userState->decrement('total', $event->toContent()['amount']);
                 });
         };
+    }
+
+    protected function assertReadModelBalance(string $streamName, int $total): void
+    {
+        expect($this->readModel->isInitialized())->toBeTrue()
+            ->and($this->readModel->getContainer())->toBe(
+                [$this->eventStore[$streamName]->balanceId->toString() => ['total' => $total]]
+            );
+    }
+
+    protected function assertReadModelDown(): void
+    {
+        expect($this->readModel->isInitialized())->toBeFalse()
+            ->and($this->readModel->getContainer())->toBeEmpty();
+
     }
 }

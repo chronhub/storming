@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Domain;
 
-use Storm\Clock\Clock;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
@@ -19,20 +18,12 @@ use Storm\Tests\Domain\Balance\BalanceSubtracted;
 
 class BalanceEventStore
 {
-    public SystemClock $clock;
-
     public function __construct(
         public Chronicler $chronicler,
+        public SystemClock $clock,
         public StreamName $streamName,
-        public BalanceId $balanceId
-    ) {
-        $this->clock = new Clock();
-    }
-
-    public function appendOnlyStream(): void
-    {
-        $this->chronicler->append(new Stream($this->streamName, []));
-    }
+        public BalanceId $balanceId,
+    ) {}
 
     public function appendEvent(DomainEvent $event): void
     {
