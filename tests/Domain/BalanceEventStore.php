@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Domain;
 
+use Storm\Chronicler\Exceptions\StreamNotFound;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
@@ -15,6 +16,8 @@ use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
+
+use function iterator_to_array;
 
 class BalanceEventStore
 {
@@ -83,6 +86,18 @@ class BalanceEventStore
         $this->appendEvent($event);
 
         return $this;
+    }
+
+    /**
+     * @return array<DomainEvent>
+     *
+     * @throws StreamNotFound
+     */
+    public function retrieveAll(): array
+    {
+        $streamEvents = $this->chronicler->retrieveAll($this->streamName, $this->balanceId);
+
+        return iterator_to_array($streamEvents);
     }
 
     protected function withHeaders(DomainEvent $event, int $version): DomainEvent
