@@ -18,7 +18,7 @@ use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Domain\BalanceEventStore;
-use Storm\Tests\Feature\Projector\InMemory\InMemoryTestingFactory;
+use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
 use function count;
 use function in_array;
@@ -36,11 +36,6 @@ trait InMemoryQueryProjectionTestBaseTrait
     protected ?BalanceEventStore $balanceTwoEventStore = null;
 
     protected ?QueryProjector $projector = null;
-
-    /**
-     * @var null|callable
-     */
-    protected $reactors = null;
 
     protected function setupProjection(?string $descriptionId = null, array $options = []): void
     {

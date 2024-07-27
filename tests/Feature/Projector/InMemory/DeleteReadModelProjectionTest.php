@@ -8,7 +8,7 @@ use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryReadModelProjectionTestBaseTrait;
-use Storm\Tests\Feature\Projector\InMemory\InMemoryTestingFactory;
+use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
 uses(
     InMemoryReadModelProjectionTestBaseTrait::class,

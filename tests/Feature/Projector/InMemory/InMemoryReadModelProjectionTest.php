@@ -16,7 +16,7 @@ use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryReadModelProjectionTestBaseTrait;
-use Storm\Tests\Feature\Projector\InMemory\InMemoryTestingFactory;
+use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
 use function array_merge;
 use function count;

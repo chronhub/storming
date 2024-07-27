@@ -7,7 +7,7 @@ namespace Storm\Tests\Feature\Projector;
 use Storm\Projector\ProjectionStatus;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryEmitterProjectionTestBaseTrait;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
-use Storm\Tests\Feature\Projector\InMemory\InMemoryTestingFactory;
+use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
 use function count;
 

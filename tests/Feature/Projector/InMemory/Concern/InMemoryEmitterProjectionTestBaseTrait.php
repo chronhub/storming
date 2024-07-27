@@ -16,7 +16,7 @@ use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Domain\BalanceEventStore;
-use Storm\Tests\Feature\Projector\InMemory\InMemoryTestingFactory;
+use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
 use function is_string;
 
