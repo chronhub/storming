@@ -130,7 +130,7 @@ test('read model projection scope with one processed event', function () {
         ->run(inBackground: false);
 
     expect($this->projector->getName())->toBe($projectionName);
-    $this->assertEmptyProjectionState();
+    $this->assertProjectionState([]);
     $this->assertProjectionModel(projectionName: $projectionName, status: ProjectionStatus::IDLE->value, lockedUntil: null);
 });
 
@@ -150,7 +150,7 @@ test('reactors should never been called when no event is processed', function ()
         ->filter($this->factory->queryScope->fromIncludedPosition())
         ->run(inBackground: false);
 
-    $this->assertEmptyProjectionState();
+    $this->assertProjectionState([]);
     $this->assertProjectionModel(projectionName: $projectionName, status: ProjectionStatus::IDLE->value, lockedUntil: null);
 });
 

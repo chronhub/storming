@@ -42,13 +42,13 @@ class InMemoryTestingFactory
 
     public ?ProjectionOption $projectionOption = null;
 
-    public ?SubscriptionFactory $subscriptionFactory = null;
-
     //fixme should be protected and called from the projector manager
     // it may be set before calling the projector manager
     public ?ProjectionQueryScope $queryScope = null;
 
     public ?ProjectorManagerInterface $projectorManager = null;
+
+    protected ?SubscriptionFactory $subscriptionFactory = null;
 
     protected ?ProjectorMonitorInterface $monitor = null;
 

@@ -117,7 +117,7 @@ test('persist when threshold is reached with read model', function (ProjectionSt
         ? $this->hub->expects('emit')->with(SprintStopped::class)
         : $this->hub->expects('emit')->with(SprintStopped::class)->never();
 
-    $this->management->persistWhenThresholdIsReached();
+    $this->management->performWhenThresholdIsReached();
 })
     ->with('projection status')
     ->with('projection status');
@@ -129,7 +129,7 @@ test('does not persist when threshold is not reached with read model', function 
     $this->hub->expects('emit')->with(BatchStreamReset::class)->never();
     $this->hub->expects('emit')->with(SprintStopped::class)->never();
 
-    $this->management->persistWhenThresholdIsReached();
+    $this->management->performWhenThresholdIsReached();
 });
 
 test('get read model', function () {

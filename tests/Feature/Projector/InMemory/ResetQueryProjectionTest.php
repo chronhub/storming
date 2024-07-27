@@ -51,7 +51,7 @@ test('resets query projection running once', function () {
     $this->assertProjectionReport(cycle: 1, ackedEvent: 4, totalEvent: 4);
 
     $this->projector->reset();
-    $this->assertEmptyProjectionState();
+    $this->assertProjectionState([]);
 
     // run again
     $this->projector->run(false);

@@ -70,14 +70,6 @@ trait InMemoryProjectionExpectationTrait
     }
 
     /**
-     * Assert projection user state is empty.
-     */
-    protected function assertEmptyProjectionState(): void
-    {
-        expect($this->projector->getState())->toBe([]);
-    }
-
-    /**
      * Assert projection model.
      */
     protected function assertProjectionModel(
