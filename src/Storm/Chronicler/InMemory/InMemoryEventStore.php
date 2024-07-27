@@ -7,6 +7,7 @@ namespace Storm\Chronicler\InMemory;
 use Generator;
 use Illuminate\Support\Collection;
 use Storm\Chronicler\Direction;
+use Storm\Chronicler\Exceptions\ConcurrencyException;
 use Storm\Chronicler\Exceptions\InvalidArgumentException;
 use Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Storm\Chronicler\Exceptions\StreamNotFound;
@@ -20,11 +21,14 @@ use Storm\Contract\Message\EventHeader;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
 
+use function array_diff;
+use function array_map;
 use function count;
 use function iterator_to_array;
 
 final class InMemoryEventStore implements InMemoryChronicler
 {
+    /** @var Collection<array<string, array<DomainEvent>>> */
     private Collection $streams;
 
     public function __construct(
@@ -93,6 +97,8 @@ final class InMemoryEventStore implements InMemoryChronicler
     {
         $streamEvents = $this->addInternalPositionIfNecessary(iterator_to_array($events));
 
+        $this->assertNoConcurrency($streamName, $streamEvents);
+
         $this->streams = $this->streams->mergeRecursive([$streamName->name => $streamEvents]);
     }
 
@@ -110,17 +116,20 @@ final class InMemoryEventStore implements InMemoryChronicler
         return count($events);
     }
 
-    private function addInternalPositionIfNecessary(array $events): array
+    private function addInternalPositionIfNecessary(array $streamEvents): array
     {
-        foreach ($events as &$event) {
+        foreach ($streamEvents as &$streamEvent) {
             $internalPosition = EventHeader::INTERNAL_POSITION;
 
-            if ($event->hasNot($internalPosition)) {
-                $event = $event->withHeader($internalPosition, $event->header(EventHeader::AGGREGATE_VERSION));
+            if ($streamEvent->hasNot($internalPosition)) {
+                $streamEvent = $streamEvent->withHeader(
+                    $internalPosition,
+                    $streamEvent->header(EventHeader::AGGREGATE_VERSION)
+                );
             }
         }
 
-        return $events;
+        return $streamEvents;
     }
 
     private function assertStreamExists(StreamName $streamName): void
@@ -128,5 +137,43 @@ final class InMemoryEventStore implements InMemoryChronicler
         if (! $this->hasStream($streamName)) {
             throw StreamNotFound::withStreamName($streamName);
         }
+    }
+
+    /**
+     * Simulates the concurrency detection.
+     *
+     * @throws ConcurrencyException
+     */
+    private function assertNoConcurrency(StreamName $streamName, iterable $streamEvents): void
+    {
+        $currentStream = $this->streams->get($streamName->name);
+
+        if (! $currentStream) {
+            return;
+        }
+
+        $positions = $this->extractAggregateVersion($currentStream);
+
+        $streamEvents = iterator_to_array($streamEvents);
+        $nextPositions = $this->extractAggregateVersion($streamEvents);
+
+        if (array_diff($nextPositions, $positions) === []) {
+            throw new ConcurrencyException(
+                "In memory concurrency detected for stream $streamName->name"
+            );
+        }
+    }
+
+    /**
+     * Extract the aggregate version from the stream event.
+     *
+     * @return array<int<0, max>>
+     */
+    private function extractAggregateVersion(array $streamEvents): array
+    {
+        return array_map(
+            fn (DomainEvent $event) => $event->header(EventHeader::AGGREGATE_VERSION),
+            $streamEvents
+        );
     }
 }
