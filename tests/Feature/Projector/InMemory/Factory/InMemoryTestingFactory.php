@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Tests\Feature\Projector\InMemory;
+namespace Storm\Tests\Feature\Projector\InMemory\Factory;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Events\Dispatcher as IlluminateEventDispatcher;
@@ -44,6 +44,8 @@ class InMemoryTestingFactory
 
     public ?SubscriptionFactory $subscriptionFactory = null;
 
+    //fixme should be protected and called from the projector manager
+    // it may be set before calling the projector manager
     public ?ProjectionQueryScope $queryScope = null;
 
     public ?ProjectorManagerInterface $projectorManager = null;
@@ -68,7 +70,8 @@ class InMemoryTestingFactory
 
         $this->projectorManager = new ProjectorManager(
             $this->createSubscriptionFactory(),
-            $this->projectionOption
+            $this->projectionOption,
+            $this->queryScope
         );
 
         return $this->projectorManager;
@@ -122,7 +125,11 @@ class InMemoryTestingFactory
             return;
         }
 
-        $this->serializer = (new JsonSerializerFactory())->create();
+        $factory = new ProjectionSerializerFactory(
+            new JsonSerializerFactory()
+        );
+
+        $this->serializer = $factory->make();
     }
 
     public function setupDispatcher(): void

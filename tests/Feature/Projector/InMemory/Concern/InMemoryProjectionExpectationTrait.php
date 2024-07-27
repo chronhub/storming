@@ -9,7 +9,7 @@ use Storm\Contract\Projector\ProjectionModel;
 use Storm\Contract\Projector\Projector;
 use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceId;
-use Storm\Tests\Feature\Projector\InMemory\InMemoryTestingFactory;
+use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
 use function is_string;
 use function iterator_to_array;
@@ -91,17 +91,10 @@ trait InMemoryProjectionExpectationTrait
         expect($projection)->toBeInstanceOf(ProjectionModel::class);
 
         $userState = $this->projector->getState();
+        $encodedState = $this->factory->serializer->encode($userState, 'json');
 
-        // fixMe: encode empty array to json from a non initialized projection state
-        //  it also does not encode empty array to json from a non initialized projection state
-        if ($userState === []) {
-            expect($projection->state())->toBeIn(['{}', '[]']);
-        } else {
-            $encodedState = $this->factory->serializer->encode($this->projector->getState(), 'json');
-            expect($projection->state())->toBe($encodedState);
-        }
-
-        expect($projection->name())->toBe($projectionName)
+        expect($projection->state())->toBe($encodedState)
+            ->and($projection->name())->toBe($projectionName)
             ->and($projection->status())->toBe($status)
             ->and($projection->lockedUntil())->toBe($lockedUntil);
     }
