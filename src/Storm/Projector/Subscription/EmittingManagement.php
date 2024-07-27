@@ -138,8 +138,9 @@ final readonly class EmittingManagement implements EmitterManagement
     /**
      * Delete the stream and unlink the emitted stream.
      *
-     * Note that we hold the stream not found for two main reasons:
+     * Note that we hold the stream not found for:
      *  1. Stream has already been deleted.
+     *  2. Stream that has emitted and deleted "without emitted event" must be deleted manually.
      *  2. Stream that has been emitted under another stream (e.g., linkTo)
      *     must be deleted manually.
      *

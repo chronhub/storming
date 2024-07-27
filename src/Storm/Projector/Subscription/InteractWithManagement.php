@@ -138,11 +138,13 @@ trait InteractWithManagement
 
     protected function resetSnapshot(): void
     {
+        // checkMe encapsulate in event
         $this->hub->emitMany(CheckpointReset::class, UserStateRestored::class);
     }
 
     protected function takeSnapshot(): ProjectionSnapshot
     {
+        // checkMe encapsulate in event
         return new ProjectionSnapshot(
             $this->hub->await(CurrentFilteredCheckpoint::class),
             $this->hub->await(CurrentUserState::class)
