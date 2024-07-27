@@ -140,6 +140,9 @@ final readonly class ProjectionRepositoryStore implements ProjectionRepository
         return $this->streamName;
     }
 
+    /**
+     * Update the projection with the given data.
+     */
     private function updateProjection(ProjectionData $data): void
     {
         $this->provider->updateProjection($this->streamName, $data);
