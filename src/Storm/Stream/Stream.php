@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace Storm\Stream;
 
+use Countable;
 use Generator;
 
 use function count;
 
-final class Stream
+final class Stream implements Countable
 {
     public readonly string $byName;
 
@@ -31,6 +32,11 @@ final class Stream
     {
         yield from $this->events->getIterator();
 
+        return count($this->events);
+    }
+
+    public function count(): int
+    {
         return count($this->events);
     }
 }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Stream;
 
 use ArrayIterator;
+use Countable;
 use Generator;
 use Illuminate\Support\Collection;
 use Iterator;
@@ -14,16 +15,16 @@ use Storm\Tests\Stubs\Double\Message\SomeEvent;
 
 use function iterator_to_array;
 
-it('create new stream instance with empty events', function (StreamName $streamName) {
+test('create new stream instance with empty events', function (StreamName $streamName) {
     $stream = new Stream($streamName);
 
-    expect($stream->name)->toBe($streamName)
+    expect($stream)->toBeInstanceOf(Countable::class)
+        ->and($stream->name)->toBe($streamName)
         ->and($stream->name())->toBe($streamName)
         ->and(iterator_to_array($stream->events()))->toBeEmpty();
-
 })->with('stream names');
 
-it('create new stream instance with iterable stream events', function (iterable $events) {
+test('create new stream instance with iterable stream events', function (iterable $events) {
     $stream = new Stream(new StreamName('stream_name'), $events);
 
     expect($stream->events())->toBeInstanceOf('Generator');
@@ -35,7 +36,21 @@ it('create new stream instance with iterable stream events', function (iterable 
 
 })->with('iterable');
 
-it('return number of events from generator', function (iterable $events) {
+test('can be counted', function (iterable $events) {
+    $stream = new Stream(new StreamName('stream_name'), $events);
+
+    expect($stream)->toBeInstanceOf(Countable::class)
+        ->and($stream->count())->toBe(3);
+
+    $streamEvents = $stream->events();
+    foreach ($streamEvents as $streamEvent) {
+        expect($streamEvent)->toBeInstanceOf(SomeEvent::class);
+    }
+
+    expect($streamEvents->getReturn())->toBe(3);
+})->with('iterable');
+
+test('return number of events from generator', function (iterable $events) {
     $stream = new Stream(new StreamName('stream_name'), $events);
 
     $streamEvents = $stream->events();
