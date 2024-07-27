@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector\Operations;
 
+use Storm\Chronicler\Exceptions\ConcurrencyException;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryEmitterProjectionTestBaseTrait;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
 use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
@@ -92,13 +93,15 @@ test('resets the projection and does not deletes the link to emitted events in t
     $this->assertStreamExists($emittedStream, true);
     $this->assertPartialProjectionState('total', 0);
 
-    // checkMe Running again only works in-memory
-    //  From a connection perspective, it should fail as event already exists
-    $this->projector->run(false);
+    // run again will fail
+    $exception = null;
 
-    $this->assertStreamExists($streamName, true);
-    $this->assertStreamExists($projectionName, false);
-    $this->assertStreamExists($emittedStream, true);
-    $this->assertPartialProjectionState('total', 100);
+    try {
+        $this->projector->run(false);
+    } catch (ConcurrencyException $e) {
+        $exception = $e;
+    }
 
+    expect($exception)->toBeInstanceOf(ConcurrencyException::class)
+        ->and($exception->getMessage())->toBe("In memory concurrency detected for stream $emittedStream");
 });
