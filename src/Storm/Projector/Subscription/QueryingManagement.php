@@ -21,7 +21,6 @@ final readonly class QueryingManagement implements QueryManagement
     public function performWhenThresholdIsReached(): void
     {
         if ($this->hub->await(IsBatchStreamLimitReached::class)) {
-            dump('performWhenThresholdIsReached: BatchStreamLimitReached');
             $this->hub->emit(BatchStreamReset::class);
         }
     }
