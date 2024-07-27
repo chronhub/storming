@@ -122,7 +122,7 @@ final readonly class EmittingManagement implements EmitterManagement
     /**
      * Check if the emitted stream is cached or exists.
      *
-     * checkMe we assume the cache is in memory
+     * fixMe we assume the cache is in memory
      */
     private function streamIsCachedOrExists(StreamName $streamName): bool
     {
@@ -137,6 +137,11 @@ final readonly class EmittingManagement implements EmitterManagement
 
     /**
      * Delete the stream and unlink the emitted stream.
+     *
+     * Note that we hold the stream not found for two main reasons:
+     *  1. Stream has already been deleted.
+     *  2. Stream that has been emitted under another stream (e.g., linkTo)
+     *     must be deleted manually.
      *
      * @throws Throwable
      */
