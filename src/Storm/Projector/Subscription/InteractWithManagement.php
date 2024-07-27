@@ -45,7 +45,7 @@ trait InteractWithManagement
 
         $this->onStatusChanged($idleStatus);
 
-        $this->hub->await(SprintStopped::class);
+        $this->hub->emit(SprintStopped::class);
     }
 
     public function restart(): void
