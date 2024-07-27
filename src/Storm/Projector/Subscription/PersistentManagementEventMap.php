@@ -10,7 +10,6 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\PersistentManagement;
 use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;
 use Storm\Projector\Workflow\Notification\Handler\WhenEventStreamDiscovered;
-use Storm\Projector\Workflow\Notification\Handler\WhenStreamEventProcessed;
 use Storm\Projector\Workflow\Notification\Management\PerformWhenThresholdIsReached;
 use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
 use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
@@ -24,7 +23,6 @@ use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
 use Storm\Projector\Workflow\Notification\Management\ProjectionSynchronized;
 use Storm\Projector\Workflow\Notification\Management\StreamEventEmitted;
 use Storm\Projector\Workflow\Notification\Management\StreamEventLinkedTo;
-use Storm\Projector\Workflow\Notification\Promise\StreamEventProcessed;
 
 final class PersistentManagementEventMap
 {
@@ -67,7 +65,6 @@ final class PersistentManagementEventMap
     private function withWorkflowListeners(NotificationHub $hub): void
     {
         $hub->addEvents([
-            //StreamEventProcessed::class => WhenStreamEventProcessed::class,
             EventStreamDiscovered::class => WhenEventStreamDiscovered::class,
         ]);
     }
