@@ -35,7 +35,7 @@ final class HubManager implements NotificationHub
 
     private ?AgentRegistry $agentRegistry = null;
 
-    public function __construct(private readonly RotationEventMap $rotationEventMap) {}
+    public function __construct() {}
 
     public function addEvent(string $event, string|callable|array $callback): void
     {
@@ -62,17 +62,11 @@ final class HubManager implements NotificationHub
 
     public function hasEvent(string $event): bool
     {
-        return array_key_exists($this->eventClassName($event), $this->events);
+        return array_key_exists($event, $this->events);
     }
 
     public function await(string|object $event, mixed ...$arguments): mixed
     {
-        if ($this->shouldBeRotated($event)) {
-            $this->shouldBeEmittedOnce($event);
-
-            return null;
-        }
-
         $this->shouldBeEmittedOnce($event);
 
         $notification = $this->makeEvent($event, ...$arguments);
@@ -89,6 +83,12 @@ final class HubManager implements NotificationHub
 
     public function emit(string|object $event, mixed ...$arguments): void
     {
+        $eventClass = $this->eventClass($event);
+
+        if (! $this->hasEvent($eventClass)) {
+            $this->addEvent($eventClass, fn () => null);
+        }
+
         $this->await($event, ...$arguments);
     }
 
@@ -159,7 +159,7 @@ final class HubManager implements NotificationHub
     private function shouldBeEmittedOnce(string|object $event): void
     {
         if (is_a($event, EmitOnce::class, true)) {
-            $eventClassName = $this->eventClassName($event);
+            $eventClassName = $this->eventClass($event);
 
             if (in_array($eventClassName, $this->once)) {
                 throw new RuntimeException("Event $eventClassName marked as once has already been emitted");
@@ -171,18 +171,13 @@ final class HubManager implements NotificationHub
         }
     }
 
-    private function shouldBeRotated(string|object $event): bool
-    {
-        return $this->rotationEventMap->handle($this->eventClassName($event), $this);
-    }
-
     /**
      * Return the event class name.
      *
      * @param  class-string|object $event
      * @return class-string
      */
-    private function eventClassName(string|object $event): string
+    private function eventClass(string|object $event): string
     {
         return is_object($event) ? $event::class : $event;
     }

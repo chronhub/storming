@@ -8,9 +8,10 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Subscription\InteractWithManagement;
 use Storm\Projector\Workflow\Notification\Command\SleepOnGap;
 use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
-use Storm\Projector\Workflow\Notification\Promise\CurrentGapType;
 use Storm\Projector\Workflow\Notification\Promise\HasGap;
 use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamReset;
+use Storm\Projector\Workflow\Stage\AfterHandleStreamGap;
+use Storm\Projector\Workflow\Stage\BeforeHandleStreamGap;
 
 final class HandleStreamGap
 {
@@ -22,29 +23,20 @@ final class HandleStreamGap
      *
      * @see InteractWithManagement@persistWhenThresholdIsReached
      */
-    public function __invoke(NotificationHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub): bool
     {
-        $hub->emitWhen(
-            $hub->await(HasGap::class),
-            function (NotificationHub $hub): void {
-                /**
-                 * Emit gap detected event before sleeping, as it may modify the gap type
-                 *
-                 * @todo more info on checkpoint, we could keep the last checkpoint in memory
-                 *   to be retrieved when the gap is detected
-                 */
-                $hub->addEvent($hub->await(CurrentGapType::class)->value, fn () => null);
+        $hub->emit(BeforeHandleStreamGap::class);
 
-                $hub->emit(SleepOnGap::class);
+        if ($hub->await(HasGap::class)) {
+            $hub->emit(SleepOnGap::class);
 
-                /**
-                 * todo tests
-                 */
-                if (! $hub->await(IsBatchStreamReset::class)) {
-                    $hub->emit(new ProjectionStored());
-                }
-            });
+            if (! $hub->await(IsBatchStreamReset::class)) {
+                $hub->emit(new ProjectionStored());
+            }
+        }
 
-        return $next($hub);
+        $hub->emit(AfterHandleStreamGap::class);
+
+        return true;
     }
 }

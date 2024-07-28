@@ -6,32 +6,54 @@ namespace Storm\Projector\Workflow;
 
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
+use Storm\Projector\Workflow\Notification\Command\BatchStreamReset;
+use Storm\Projector\Workflow\Notification\Command\MainCounterReset;
+use Storm\Projector\Workflow\Notification\Command\NewEventStreamReset;
 use Storm\Projector\Workflow\Notification\Command\SprintTerminated;
+use Storm\Projector\Workflow\Notification\Command\StreamEventAckedReset;
+use Storm\Projector\Workflow\Notification\Command\TimeReset;
 use Storm\Projector\Workflow\Notification\Command\WorkflowCycleIncremented;
+use Storm\Projector\Workflow\Notification\Command\WorkflowCycleReset;
 use Storm\Projector\Workflow\Notification\Command\WorkflowStarted;
-use Storm\Projector\Workflow\Notification\ForgetOnCycleRenewed;
-use Storm\Projector\Workflow\Notification\ForgetOnTermination;
 use Storm\Projector\Workflow\Notification\Promise\IsSprintTerminated;
 use Storm\Projector\Workflow\Notification\Promise\IsWorkflowStarted;
-use Storm\Projector\Workflow\Notification\ResetOnCycleRenewed;
+use Storm\Projector\Workflow\Notification\Promise\StreamEventProcessed;
+use Storm\Projector\Workflow\Notification\RecoverableGapDetected;
 use Storm\Projector\Workflow\Notification\ResetOnlyOnceEmittedEvent;
-use Storm\Projector\Workflow\Notification\ResetOnTermination;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
+use Storm\Projector\Workflow\Notification\UnrecoverableGapDetected;
 use Storm\Projector\Workflow\Notification\WorkflowRenewed;
 
 class Stage
 {
+    protected array $resetsOnCycleRenewed = [
+        BatchStreamReset::class,
+        NewEventStreamReset::class,
+    ];
+
+    protected array $resetsOnTermination = [
+        WorkflowCycleReset::class,
+        TimeReset::class,
+        MainCounterReset::class,
+        StreamEventAckedReset::class,
+    ];
+
+    protected array $forgetsOnCycleRenewed = [
+        StreamEventProcessed::class,
+        RecoverableGapDetected::class,
+        UnrecoverableGapDetected::class,
+    ];
+
+    protected array $forgetsOnTermination = [];
+
     /**
      * Starts the workflow.
      */
     public function beforeProcessing(NotificationHub $hub): void
     {
-        $hub->emitWhen(
-            ! $hub->await(IsWorkflowStarted::class),
-            function (NotificationHub $hub) {
-                $hub->emit(WorkflowStarted::class);
-            }
-        );
+        if (! $hub->await(IsWorkflowStarted::class)) {
+            $hub->emit(WorkflowStarted::class);
+        }
     }
 
     /**
@@ -66,18 +88,47 @@ class Stage
     protected function renew(NotificationHub $hub, bool $isSprintTerminated): void
     {
         $hub->emit(BeforeWorkflowRenewal::class);
-        $hub->emit(ResetOnCycleRenewed::class);
+
+        $this->resetOnCycleRenewed($hub);
 
         if ($isSprintTerminated) {
-            $hub->emit(ResetOnTermination::class);
-            $hub->emit(ForgetOnTermination::class);
+            $this->resetOnTermination($hub);
+            $this->forgetOnTermination($hub);
         } else {
             $hub->emit(WorkflowCycleIncremented::class);
-            $hub->emit(ForgetOnCycleRenewed::class);
+            $this->forgetOnCycleRenewed($hub);
         }
 
         $hub->emit(WorkflowRenewed::class);
 
         $hub->emit(ResetOnlyOnceEmittedEvent::class);
+    }
+
+    protected function resetOnCycleRenewed(NotificationHub $hub): void
+    {
+        foreach ($this->resetsOnCycleRenewed as $listener) {
+            $hub->emit($listener);
+        }
+    }
+
+    protected function resetOnTermination(NotificationHub $hub): void
+    {
+        foreach ($this->resetsOnTermination as $listener) {
+            $hub->emit($listener);
+        }
+    }
+
+    protected function forgetOnCycleRenewed(NotificationHub $hub): void
+    {
+        foreach ($this->forgetsOnCycleRenewed as $listener) {
+            $hub->forgetEvent($listener);
+        }
+    }
+
+    protected function forgetOnTermination(NotificationHub $hub): void
+    {
+        foreach ($this->forgetsOnTermination as $listener) {
+            $hub->forgetEvent($listener);
+        }
     }
 }

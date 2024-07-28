@@ -35,7 +35,7 @@ class SprintAgent
     }
 
     /**
-     * Set the sprint is running once or in background.
+     * Set the sprint is running once or in the background.
      */
     public function runInBackground(bool $runInBackground): void
     {
@@ -43,7 +43,7 @@ class SprintAgent
     }
 
     /**
-     * Check if the sprint is running once or in background.
+     * Check if the sprint is running once or in the background.
      */
     public function inBackground(): bool
     {

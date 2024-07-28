@@ -23,14 +23,14 @@ dataset('array of integers', [
 ]);
 
 test('default instance', function () {
-    expect($this->haltOn->callback())->toBeNull();
+    expect($this->haltOn->callbacks())->toBeNull();
 });
 
 test('set requested callback', function (bool $requested) {
     $instance = $this->haltOn->when(fn () => $requested);
     expect($instance)->toBeInstanceOf(HaltOn::class);
 
-    $callback = $instance->callback();
+    $callback = $instance->callbacks();
 
     expect($callback())->toBe($requested);
 })->with([

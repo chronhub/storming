@@ -15,24 +15,22 @@ final readonly class PersistOrUpdate
 {
     /**
      * When running blank, we either update the lock after sleeping,
-     * or, store the projection
+     * or, store the projection snapshot.
      */
-    public function __invoke(NotificationHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub): bool
     {
-        if ($hub->await(HasGap::class)) {
-            return $next($hub);
+        if (! $hub->await(HasGap::class)) {
+            $hub->emitWhen(
+                $hub->await(IsBatchStreamBlank::class),
+                function (NotificationHub $hub) {
+                    $hub->emit(BatchStreamSleep::class);
+
+                    $hub->emit(new ProjectionLockUpdated());
+                },
+                fn (NotificationHub $hub) => $hub->emit(new ProjectionStored()),
+            );
         }
 
-        $hub->emitWhen(
-            $hub->await(IsBatchStreamBlank::class),
-            function (NotificationHub $hub) {
-                $hub->emit(BatchStreamSleep::class);
-
-                $hub->emit(new ProjectionLockUpdated());
-            },
-            fn (NotificationHub $hub) => $hub->emit(new ProjectionStored()),
-        );
-
-        return $next($hub);
+        return true;
     }
 }

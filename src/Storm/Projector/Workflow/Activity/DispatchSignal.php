@@ -12,12 +12,12 @@ final readonly class DispatchSignal
 {
     public function __construct(private bool $dispatchSignal) {}
 
-    public function __invoke(NotificationHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub): bool
     {
         if ($this->dispatchSignal) {
             pcntl_signal_dispatch();
         }
 
-        return $next($hub);
+        return true;
     }
 }

@@ -4,48 +4,31 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow;
 
-use Closure;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\WorkflowInterface;
 use Storm\Projector\Exception\RuntimeException;
 use Storm\Projector\Workflow\Notification\Promise\IsSprintTerminated;
 use Throwable;
 
-use function array_reduce;
-use function array_reverse;
-use function in_array;
-
 final class Workflow implements WorkflowInterface
 {
     /**
      * @var callable(NotificationHub, ?Throwable): void|null
      */
-    protected $exceptionHandler = null;
+    private $exceptionHandler = null;
 
     /**
      * Prevent the same instance from running again,
      * after an exception has occurred.
      */
-    protected ?Throwable $exceptionOccurred = null;
+    private ?Throwable $exceptionOccurred = null;
 
-    /**
-     * List of ignored exceptions which allow the projection to run again.
-     *
-     * @var array|array<class-string>
-     *
-     * todo WorkflowBuilder
-     */
-    protected array $ignoredExceptions = [];
-
-    /** @param array<callable(NotificationHub, callable): bool|callable> $activities */
+    /** @param array<callable(NotificationHub): bool> $activities */
     protected function __construct(
-        protected NotificationHub $hub,
-        protected Stage $stage,
-        protected array $activities,
-        array $ignoredExceptions = []
-    ) {
-        $this->ignoredExceptions = $ignoredExceptions;
-    }
+        private readonly NotificationHub $hub,
+        private readonly Stage $stage,
+        private readonly array $activities,
+    ) {}
 
     /**
      * Creates a new workflow.
@@ -56,25 +39,15 @@ final class Workflow implements WorkflowInterface
     }
 
     /**
-     * Processes the workflow.
-     *
      * @throws RuntimeException when an exception has occurred in a previous run
      * @throws Throwable        when any other exception occurs
      */
-    public function process(?callable $destination = null): void
+    public function process(): void
     {
         $this->assertNoPreviousException();
 
-        $process = $this->prepareProcess();
-
         try {
-            do {
-                $this->stage->beforeProcessing($this->hub);
-
-                $process($this->hub);
-
-                $this->stage->afterProcessing($this->hub);
-            } while (! $this->hub->await(IsSprintTerminated::class));
+            $this->loop();
         } catch (Throwable $exception) {
             $this->exceptionOccurred = $exception;
         } finally {
@@ -82,9 +55,6 @@ final class Workflow implements WorkflowInterface
         }
     }
 
-    /**
-     * Sets the workflow exception handler.
-     */
     public function withExceptionHandler(callable $exceptionHandler): self
     {
         if (! $this->exceptionHandler) {
@@ -94,19 +64,25 @@ final class Workflow implements WorkflowInterface
         return $this;
     }
 
-    /**
-     * Prepares the process closure.
-     *
-     * Ignore return of the workflow process
-     * as it may have returned a boolean value early
-     */
-    protected function prepareProcess(): Closure
+    private function loop(): void
     {
-        return array_reduce(
-            array_reverse($this->activities),
-            fn (callable $stack, callable $activity) => fn (NotificationHub $hub) => $activity($hub, $stack),
-            fn () => false
-        );
+        do {
+            $this->stage->beforeProcessing($this->hub);
+
+            $this->run();
+
+            $this->stage->afterProcessing($this->hub);
+        } while (! $this->hub->await(IsSprintTerminated::class));
+    }
+
+    private function run(): void
+    {
+        foreach ($this->activities as $activity) {
+            // to avoid unexpected behavior, interface activity
+            if (! $activity($this->hub)) {
+                break;
+            }
+        }
     }
 
     /**
@@ -128,14 +104,12 @@ final class Workflow implements WorkflowInterface
      */
     private function assertNoPreviousException(): void
     {
-        if ($this->exceptionOccurred === null || in_array($this->exceptionOccurred::class, $this->ignoredExceptions)) {
-            return;
+        if ($this->exceptionOccurred !== null) {
+            $message = 'Running the projection again is not allowed ';
+            $message .= 'when an exception has occurred within a same workflow instance ';
+            $message .= 'in the previous run.';
+
+            throw new RuntimeException($message);
         }
-
-        $message = 'Running the projection again is not allowed ';
-        $message .= 'when an exception has occurred within a same workflow instance ';
-        $message .= 'in the previous run.';
-
-        throw new RuntimeException($message);
     }
 }

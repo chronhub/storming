@@ -11,6 +11,6 @@ final class WorkflowCycleReset implements EmitOnce
 {
     public function __invoke(AgentRegistry $agentRegistry): void
     {
-        $agentRegistry->report()->cycle()->reset();
+        $agentRegistry->stat()->cycle()->reset();
     }
 }

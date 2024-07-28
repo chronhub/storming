@@ -9,6 +9,7 @@ use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Projector\Context;
 use Storm\Contract\Projector\ContextReader;
+use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Repository\EventStream\DiscoverAllStream;
 use Storm\Projector\Repository\EventStream\DiscoverPartition;
@@ -29,7 +30,10 @@ final class DefaultContext implements ContextReader
 
     private ?string $id = null;
 
-    private ?Closure $haltOn = null;
+    /**
+     * @var array<Closure(NotificationHub): bool>|array
+     */
+    private array $haltOn = [];
 
     public function initialize(Closure $userState): self
     {
@@ -115,7 +119,7 @@ final class DefaultContext implements ContextReader
 
     public function haltOn(Closure $haltOn): self
     {
-        $this->haltOn = $haltOn;
+        $this->haltOn[] = $haltOn;
 
         return $this;
     }
@@ -169,14 +173,7 @@ final class DefaultContext implements ContextReader
 
     public function haltOnCallback(): array
     {
-        if ($this->haltOn === null) {
-            return [];
-        }
-
-        /** @var HaltOn $stopWhen */
-        $stopWhen = value($this->haltOn, new HaltOn());
-
-        return [$stopWhen->callback()];
+        return $this->haltOn;
     }
 
     private function assertQueryNotSet(): void

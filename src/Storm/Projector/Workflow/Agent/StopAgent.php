@@ -8,7 +8,6 @@ use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ShouldAgentSubscribe;
 use Storm\Projector\Workflow\Notification\Command\SprintStopped;
-use Storm\Projector\Workflow\Notification\Command\SprintTerminated;
 use Storm\Projector\Workflow\Notification\Promise\IsSprintTerminated;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
 
@@ -16,19 +15,9 @@ class StopAgent implements ShouldAgentSubscribe
 {
     public function subscribe(NotificationHub $hub, ContextReader $context): void
     {
-        $callbacks = $context->haltOnCallback();
-
-        if ($callbacks === []) {
-            return;
+        foreach ($context->haltOnCallback() as $callback) {
+            $this->stopWhen($hub, $callback);
         }
-
-        $callback = $callbacks[0];
-
-        $this->stopWhen($hub, $callback);
-
-        $hub->addEvent(SprintTerminated::class, function (NotificationHub $hub): void {
-            $hub->forgetEvent(ShouldTerminateWorkflow::class);
-        });
     }
 
     /**
@@ -36,11 +25,9 @@ class StopAgent implements ShouldAgentSubscribe
      *
      * @param callable(NotificationHub): bool $callback
      */
-    protected function stopWhen(NotificationHub $hub, callable $callback): string
+    protected function stopWhen(NotificationHub $hub, callable $callback): void
     {
-        $listener = ShouldTerminateWorkflow::class;
-
-        $hub->addEvent($listener, function (NotificationHub $hub) use ($callback): void {
+        $hub->addEvent(ShouldTerminateWorkflow::class, function (NotificationHub $hub) use ($callback): void {
             // prevents stopping the projector when the projection is already terminated
             $isTerminated = $hub->await(IsSprintTerminated::class);
 
@@ -48,7 +35,5 @@ class StopAgent implements ShouldAgentSubscribe
                 $hub->emit(SprintStopped::class);
             }
         });
-
-        return $listener;
     }
 }

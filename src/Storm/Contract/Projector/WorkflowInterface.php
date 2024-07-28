@@ -16,7 +16,7 @@ interface WorkflowInterface
      *
      * @throws Throwable
      */
-    public function process(?callable $destination = null): void;
+    public function process(): void;
 
     /**
      * Sets the exception handler.

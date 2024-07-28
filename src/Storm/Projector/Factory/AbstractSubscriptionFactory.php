@@ -32,12 +32,11 @@ use Storm\Projector\Subscription\AgentManager;
 use Storm\Projector\Subscription\EmitterSubscription;
 use Storm\Projector\Subscription\EmittingManagement;
 use Storm\Projector\Subscription\HubManager;
-use Storm\Projector\Subscription\PersistentManagementEventMap;
+use Storm\Projector\Subscription\ManagementEventMap;
 use Storm\Projector\Subscription\QueryingManagement;
 use Storm\Projector\Subscription\QuerySubscription;
 use Storm\Projector\Subscription\ReadingModelManagement;
 use Storm\Projector\Subscription\ReadModelSubscription;
-use Storm\Projector\Subscription\RotationEventMap;
 use Storm\Projector\Workflow\EmittedStream;
 use Storm\Projector\Workflow\InMemoryEmittedStreams;
 use Storm\Projector\Workflow\Stage;
@@ -174,12 +173,12 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     protected function createNotificationHub(): NotificationHub
     {
-        return new HubManager(new RotationEventMap());
+        return new HubManager();
     }
 
     protected function subscribeToMap(Management $management): void
     {
-        $map = new PersistentManagementEventMap();
+        $map = new ManagementEventMap();
 
         $map->subscribeTo($management);
     }

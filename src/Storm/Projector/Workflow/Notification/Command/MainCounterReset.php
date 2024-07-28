@@ -11,6 +11,6 @@ final class MainCounterReset implements EmitOnce
 {
     public function __invoke(AgentRegistry $agentRegistry): void
     {
-        $agentRegistry->report()->main()->reset();
+        $agentRegistry->stat()->main()->reset();
     }
 }

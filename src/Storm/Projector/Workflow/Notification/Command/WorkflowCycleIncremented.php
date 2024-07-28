@@ -11,6 +11,6 @@ final class WorkflowCycleIncremented implements EmitOnce
 {
     public function __invoke(AgentRegistry $agentRegistry): void
     {
-        $agentRegistry->report()->cycle()->next();
+        $agentRegistry->stat()->cycle()->next();
     }
 }

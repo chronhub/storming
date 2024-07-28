@@ -8,8 +8,11 @@ use Storm\Contract\Projector\EmitterManagement;
 use Storm\Contract\Projector\Management;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\PersistentManagement;
+use Storm\Projector\Checkpoint\Checkpoint;
+use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;
-use Storm\Projector\Workflow\Notification\Handler\WhenEventStreamDiscovered;
+use Storm\Projector\Workflow\Notification\Command\NewEventStreamDiscovered;
+use Storm\Projector\Workflow\Notification\Command\NoEventStreamDiscovered;
 use Storm\Projector\Workflow\Notification\Management\PerformWhenThresholdIsReached;
 use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
 use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
@@ -23,8 +26,14 @@ use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
 use Storm\Projector\Workflow\Notification\Management\ProjectionSynchronized;
 use Storm\Projector\Workflow\Notification\Management\StreamEventEmitted;
 use Storm\Projector\Workflow\Notification\Management\StreamEventLinkedTo;
+use Storm\Projector\Workflow\Notification\Promise\CurrentCheckpoint;
+use Storm\Projector\Workflow\Notification\Promise\CurrentGapType;
+use Storm\Projector\Workflow\Notification\Promise\CurrentNewEventStreams;
+use Storm\Projector\Workflow\Notification\Promise\HasEventStreamDiscovered;
+use Storm\Projector\Workflow\Notification\Promise\StreamEventProcessed;
+use Storm\Projector\Workflow\Stage\BeforeHandleStreamGap;
 
-final class PersistentManagementEventMap
+final class ManagementEventMap
 {
     public function subscribeTo(Management $management): void
     {
@@ -36,7 +45,7 @@ final class PersistentManagementEventMap
             $this->withListenerManagement($management);
         }
 
-        $this->withWorkflowListeners($management->hub());
+        $this->withListeners($management->hub());
     }
 
     private function withListenerManagement(PersistentManagement $management): void
@@ -62,10 +71,35 @@ final class PersistentManagementEventMap
         }
     }
 
-    private function withWorkflowListeners(NotificationHub $hub): void
+    private function withListeners(NotificationHub $hub): void
     {
-        $hub->addEvents([
-            EventStreamDiscovered::class => WhenEventStreamDiscovered::class,
-        ]);
+        /**
+         * @todo more info on checkpoint, we could keep the last checkpoint in memory
+         *   to be retrieved when the gap is detected
+         */
+        $hub->addEvent(BeforeHandleStreamGap::class, function (NotificationHub $hub) {
+            $currentGap = $hub->await(CurrentGapType::class);
+
+            if ($currentGap instanceof GapType) {
+                //dd($hub->await(CurrentCheckpoint::class));
+                $hub->emit($currentGap->value);
+            }
+        });
+
+        $hub->addEvent(StreamEventProcessed::class, function (NotificationHub $hub, StreamEventProcessed $capture, Checkpoint $checkpoint) {
+            // if gap it can only be a recoverable gap as gap handling is done after
+        });
+
+        $hub->addEvent(EventStreamDiscovered::class, function (NotificationHub $hub) {
+            if (! $hub->await(HasEventStreamDiscovered::class)) {
+                $hub->emit(NoEventStreamDiscovered::class);
+            } else {
+                $newEventStreams = $hub->await(CurrentNewEventStreams::class);
+
+                foreach ($newEventStreams as $newEventStream) {
+                    $hub->emit(NewEventStreamDiscovered::class, $newEventStream);
+                }
+            }
+        });
     }
 }

@@ -10,6 +10,6 @@ final class IsBatchStreamLimitReached
 {
     public function __invoke(AgentRegistry $agentRegistry): bool
     {
-        return $agentRegistry->report()->processed()->isLimitReached();
+        return $agentRegistry->stat()->processed()->isLimitReached();
     }
 }

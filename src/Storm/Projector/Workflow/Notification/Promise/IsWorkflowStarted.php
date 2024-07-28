@@ -10,6 +10,6 @@ final class IsWorkflowStarted
 {
     public function __invoke(AgentRegistry $agentRegistry): bool
     {
-        return $agentRegistry->report()->cycle()->hasStarted();
+        return $agentRegistry->stat()->cycle()->hasStarted();
     }
 }

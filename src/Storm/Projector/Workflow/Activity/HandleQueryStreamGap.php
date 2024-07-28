@@ -6,21 +6,22 @@ namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Notification\Command\SleepOnGap;
-use Storm\Projector\Workflow\Notification\Promise\CurrentGapType;
 use Storm\Projector\Workflow\Notification\Promise\HasGap;
+use Storm\Projector\Workflow\Stage\AfterHandleStreamGap;
+use Storm\Projector\Workflow\Stage\BeforeHandleStreamGap;
 
 final class HandleQueryStreamGap
 {
-    public function __invoke(NotificationHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub): bool
     {
-        $hub->emitWhen(
-            $hub->await(HasGap::class),
-            function (NotificationHub $hub): void {
-                $hub->addEvent($hub->await(CurrentGapType::class)->value, fn () => null);
+        $hub->emit(BeforeHandleStreamGap::class);
 
-                $hub->emit(SleepOnGap::class);
-            });
+        if ($hub->await(HasGap::class)) {
+            $hub->emit(SleepOnGap::class);
+        }
 
-        return $next($hub);
+        $hub->emit(AfterHandleStreamGap::class);
+
+        return true;
     }
 }

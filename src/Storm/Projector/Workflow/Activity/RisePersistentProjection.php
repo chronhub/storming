@@ -19,7 +19,7 @@ final readonly class RisePersistentProjection
         $this->onRise = true;
     }
 
-    public function __invoke(NotificationHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub): bool
     {
         if ($hub->await(IsFirstWorkflowCycle::class)) {
             if ($this->discloseRemoteStatus($hub)) {
@@ -29,6 +29,6 @@ final readonly class RisePersistentProjection
             $hub->emit(new ProjectionRise());
         }
 
-        return $next($hub);
+        return true;
     }
 }

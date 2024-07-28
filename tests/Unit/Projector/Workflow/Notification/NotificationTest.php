@@ -59,7 +59,7 @@ use Storm\Projector\Workflow\Notification\IsFirstWorkflowCycle;
 use Storm\Projector\Workflow\Notification\Promise\CurrentCheckpoint;
 use Storm\Projector\Workflow\Notification\Promise\CurrentElapsedTime;
 use Storm\Projector\Workflow\Notification\Promise\CurrentFilteredCheckpoint;
-use Storm\Projector\Workflow\Notification\Promise\CurrentMainCounter;
+use Storm\Projector\Workflow\Notification\Promise\CurrentMainCount;
 use Storm\Projector\Workflow\Notification\Promise\CurrentNewEventStreams;
 use Storm\Projector\Workflow\Notification\Promise\CurrentProcessedStream;
 use Storm\Projector\Workflow\Notification\Promise\CurrentStartedTime;
@@ -457,7 +457,7 @@ describe('notify main counter', function () {
             $mainCounter->increment();
         }
 
-        $notification = new CurrentMainCounter();
+        $notification = new CurrentMainCount();
         $result = $notification($this->subscriptor);
 
         expect($result)->toBe($currentMainCounter);

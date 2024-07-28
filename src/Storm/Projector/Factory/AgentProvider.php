@@ -28,6 +28,7 @@ use Storm\Projector\Workflow\Agent\ProcessedStreamAgent;
 use Storm\Projector\Workflow\Agent\ProjectionStatusAgent;
 use Storm\Projector\Workflow\Agent\ReportAgent;
 use Storm\Projector\Workflow\Agent\SprintAgent;
+use Storm\Projector\Workflow\Agent\StatAgent;
 use Storm\Projector\Workflow\Agent\StopAgent;
 use Storm\Projector\Workflow\Agent\StreamEventAgent;
 use Storm\Projector\Workflow\Agent\TimeAgent;
@@ -50,7 +51,8 @@ class AgentProvider
             'option' => $option,
             'processedStream' => new ProcessedStreamAgent(),
             'recognition' => $this->checkpointRecognitionWatcher($option),
-            'report' => new ReportAgent(
+            'report' => new ReportAgent(),
+            'stat' => new StatAgent(
                 new MainCounter(),
                 new ProcessedCounter($option->getBlockSize()),
                 new AckedCounter(),

@@ -33,7 +33,7 @@ final class LoadStreams
         $this->queryFilterResolver = $queryFilterResolver;
     }
 
-    public function __invoke(NotificationHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub): bool
     {
         $checkpoints = $hub->await(CurrentCheckpoint::class);
 
@@ -45,7 +45,7 @@ final class LoadStreams
 
         $hub->emit(BatchStreamSet::class, $streams);
 
-        return $next($hub);
+        return true;
     }
 
     /**

@@ -6,6 +6,7 @@ namespace Storm\Contract\Projector;
 
 use JsonSerializable;
 use Storm\Projector\Support\ExponentialSleep;
+use Storm\Projector\Workflow\StopWhen;
 
 interface ProjectionOption extends JsonSerializable
 {
@@ -114,7 +115,7 @@ interface ProjectionOption extends JsonSerializable
      * To disable gap detection, set an empty array
      *
      * @see StopAgent
-     * @see HaltOn
+     * @see StopWhen
      *
      * @return array<int<0, max>>
      */

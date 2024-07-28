@@ -10,8 +10,8 @@ final class BatchStreamIncrements
 {
     public function __invoke(AgentRegistry $agentRegistry): void
     {
-        $agentRegistry->report()->processed()->increment();
+        $agentRegistry->stat()->processed()->increment();
 
-        $agentRegistry->report()->main()->increment();
+        $agentRegistry->stat()->main()->increment();
     }
 }

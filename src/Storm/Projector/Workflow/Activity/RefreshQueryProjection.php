@@ -11,7 +11,7 @@ final readonly class RefreshQueryProjection
 {
     public function __construct(private bool $onlyOnceDiscovery) {}
 
-    public function __invoke(NotificationHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub): bool
     {
         /**
          * Watch again for event streams which may have changed
@@ -21,6 +21,6 @@ final readonly class RefreshQueryProjection
             $hub->emit(EventStreamDiscovered::class);
         }
 
-        return $next($hub);
+        return true;
     }
 }

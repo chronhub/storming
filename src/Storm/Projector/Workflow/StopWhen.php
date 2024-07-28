@@ -8,10 +8,12 @@ use Closure;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Workflow\Agent\StopAgent;
 use Storm\Projector\Workflow\Notification\GapDetected;
 use Storm\Projector\Workflow\Notification\Promise\CurrentTime;
 use Storm\Projector\Workflow\Notification\Promise\CurrentWorkflowCycle;
 use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamBlank;
+use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
 
 use function is_int;
 
@@ -19,13 +21,17 @@ use function is_int;
  * Stop the projection when a certain condition is met.
  * The stopping process can only occur after a cycle was completed.
  *
+ * @see StopAgent
+ * @see ShouldTerminateWorkflow
+ *
  * @example
  *   <code>
  *      $projector
- *          ->haltOn(StopWhen::cycleReached(10))
- *          ->haltOn(StopWhen::timeExpired(1672531200))
- *          ->haltOn(StopWhen::batchStreamBlank(10))
- *          ->haltOn(StopWhen::gapDetected(GapType::UNRECOVERABLE_GAP))
+ *          ->haltOn(StopWhen::cycleReached(10)): bool
+ *          ->haltOn(StopWhen::timeExpired(1672531200)): bool
+ *          ->haltOn(StopWhen::batchStreamBlank(10)): bool
+ *          ->haltOn(StopWhen::gapDetected(GapType::UNRECOVERABLE_GAP)): bool
+ *          ->haltOn(Closure(NotificationHub) $callback): bool
  *    </code>
  */
 class StopWhen
@@ -42,9 +48,7 @@ class StopWhen
             throw new InvalidArgumentException('"Stop when" cycle must be greater than 0');
         }
 
-        $callback = fn (NotificationHub $hub): bool => $hub->await(CurrentWorkflowCycle::class) === $cycle;
-
-        return self::halton($callback);
+        return fn (NotificationHub $hub): bool => $hub->await(CurrentWorkflowCycle::class) === $cycle;
     }
 
     /**
@@ -59,9 +63,8 @@ class StopWhen
             throw new InvalidArgumentException('"Stop when" time must be greater than 0');
         }
 
-        $callback = fn (NotificationHub $hub): bool => $hub->await(CurrentTime::class) >= $expiredAt;
+        return fn (NotificationHub $hub): bool => $hub->await(CurrentTime::class) >= $expiredAt;
 
-        return self::halton($callback);
     }
 
     /**
@@ -82,7 +85,7 @@ class StopWhen
             throw new InvalidArgumentException('"After cycle" must be greater than 0');
         }
 
-        $callback = function (NotificationHub $hub) use ($afterCycle): bool {
+        return function (NotificationHub $hub) use ($afterCycle): bool {
             if (is_int($afterCycle)) {
                 $currentCycle = $hub->await(CurrentWorkflowCycle::class);
 
@@ -93,8 +96,6 @@ class StopWhen
 
             return $hub->await(IsBatchStreamBlank::class);
         };
-
-        return self::halton($callback);
     }
 
     /**
@@ -107,21 +108,8 @@ class StopWhen
      */
     public static function gapDetected(GapType $gapType): Closure
     {
-        $callback = function (NotificationHub $hub) use ($gapType): bool {
+        return function (NotificationHub $hub) use ($gapType): bool {
             return $hub->hasEvent($gapType->value);
         };
-
-        return self::halton($callback);
-    }
-
-    /**
-     * Stop the projection when a condition is met.
-     *
-     * @param  Closure(NotificationHub): bool $callback
-     * @return Closure(HaltOn): HaltOn
-     */
-    public static function halton(Closure $callback): Closure
-    {
-        return fn (HaltOn $halton): HaltOn => $halton->when($callback);
     }
 }

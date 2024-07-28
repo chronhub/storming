@@ -18,7 +18,7 @@ final readonly class RefreshPersistentProjection
         $this->onRise = false;
     }
 
-    public function __invoke(NotificationHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub): bool
     {
         /**
          * Discover the remote status which may have changed during the projection
@@ -33,6 +33,6 @@ final readonly class RefreshPersistentProjection
             $hub->emit(EventStreamDiscovered::class);
         }
 
-        return $next($hub);
+        return true;
     }
 }

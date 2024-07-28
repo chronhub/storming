@@ -6,10 +6,10 @@ namespace Storm\Projector\Workflow\Notification\Promise;
 
 use Storm\Contract\Projector\AgentRegistry;
 
-final class CurrentWorkflowCycle
+final class CurrentMainCount
 {
     public function __invoke(AgentRegistry $agentRegistry): int
     {
-        return $agentRegistry->stat()->cycle()->current();
+        return $agentRegistry->stat()->main()->current();
     }
 }

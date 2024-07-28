@@ -11,6 +11,6 @@ final class StreamEventAckedReset implements EmitOnce
 {
     public function __invoke(AgentRegistry $agentRegistry): void
     {
-        $agentRegistry->report()->acked()->reset();
+        $agentRegistry->stat()->acked()->reset();
     }
 }

@@ -6,7 +6,7 @@ namespace Storm\Projector\Workflow\Notification\Command;
 
 use Storm\Contract\Projector\AgentRegistry;
 
-final readonly class EventStreamDiscovered
+final class EventStreamDiscovered
 {
     public function __invoke(AgentRegistry $agentRegistry): void
     {

@@ -10,6 +10,7 @@ use Storm\Projector\Workflow\Agent\ProcessedStreamAgent;
 use Storm\Projector\Workflow\Agent\ProjectionStatusAgent;
 use Storm\Projector\Workflow\Agent\ReportAgent;
 use Storm\Projector\Workflow\Agent\SprintAgent;
+use Storm\Projector\Workflow\Agent\StatAgent;
 use Storm\Projector\Workflow\Agent\StopAgent;
 use Storm\Projector\Workflow\Agent\StreamEventAgent;
 use Storm\Projector\Workflow\Agent\TimeAgent;
@@ -23,6 +24,7 @@ use Storm\Projector\Workflow\Agent\UserStateAgent;
  * @method CheckpointRecognition     recognition()
  * @method ReportAgent               report()
  * @method SprintAgent               sprint()
+ * @method StatAgent                 stat()
  * @method ProjectionStatusAgent     status()
  * @method StopAgent                 stop()
  * @method StreamEventAgent          streamEvent()

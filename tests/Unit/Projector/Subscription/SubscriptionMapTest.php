@@ -10,7 +10,7 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\PersistentManagement;
 use Storm\Contract\Projector\QueryManagement;
 use Storm\Contract\Projector\ReadModelManagement;
-use Storm\Projector\Subscription\PersistentManagementEventMap;
+use Storm\Projector\Subscription\ManagementEventMap;
 use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;
 use Storm\Projector\Workflow\Notification\Handler\WhenEventStreamDiscovered;
 use Storm\Projector\Workflow\Notification\Handler\WhenStreamEventProcessed;
@@ -35,7 +35,7 @@ use function array_keys;
 
 beforeEach(function () {
     $this->hub = mock(NotificationHub::class);
-    $this->map = new PersistentManagementEventMap();
+    $this->map = new ManagementEventMap();
     $this->defaultListeners = [
         WorkflowBegan::class => WhenWorkflowBegan::class,
         StreamEventProcessed::class => WhenStreamEventProcessed::class,

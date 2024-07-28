@@ -24,12 +24,12 @@ final class HandleStreamEvent
         $this->eventProcessor = $eventProcessor;
     }
 
-    public function __invoke(NotificationHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub): bool
     {
         $streams = $hub->await(PullBatchStream::class);
 
         if (! $streams instanceof MergeStreamIterator) {
-            return $next($hub);
+            return true;
         }
 
         while ($streams->valid()) {
@@ -47,6 +47,6 @@ final class HandleStreamEvent
 
         gc_collect_cycles();
 
-        return $next($hub);
+        return true;
     }
 }

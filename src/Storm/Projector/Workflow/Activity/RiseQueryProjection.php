@@ -10,13 +10,13 @@ use Storm\Projector\Workflow\Notification\IsFirstWorkflowCycle;
 
 final readonly class RiseQueryProjection
 {
-    public function __invoke(NotificationHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub): bool
     {
         $hub->emitWhen(
             $hub->await(IsFirstWorkflowCycle::class),
             fn (NotificationHub $hub) => $hub->emit(EventStreamDiscovered::class)
         );
 
-        return $next($hub);
+        return true;
     }
 }

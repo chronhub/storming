@@ -10,12 +10,12 @@ use Storm\Projector\Workflow\Notification\Promise\HasGap;
 
 final readonly class SleepForQuery
 {
-    public function __invoke(NotificationHub $hub, callable $next): callable|bool
+    public function __invoke(NotificationHub $hub): bool
     {
-        $hub->emitWhen(! $hub->await(HasGap::class), function (NotificationHub $hub) {
+        if (! $hub->await(HasGap::class)) {
             $hub->emit(BatchStreamSleep::class);
-        });
+        }
 
-        return $next($hub);
+        return true;
     }
 }

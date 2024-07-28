@@ -14,6 +14,6 @@ final readonly class KeepMainCounterOnStop
 
     public function __invoke(AgentRegistry $agentRegistry): void
     {
-        $agentRegistry->report()->main()->doNotReset($this->keepOnStop);
+        $agentRegistry->stat()->main()->doNotReset($this->keepOnStop);
     }
 }

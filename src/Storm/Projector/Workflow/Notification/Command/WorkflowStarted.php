@@ -10,7 +10,7 @@ final class WorkflowStarted
 {
     public function __invoke(AgentRegistry $agentRegistry): void
     {
-        $agentRegistry->report()->cycle()->next();
+        $agentRegistry->stat()->cycle()->next();
 
         $agentRegistry->time()->start();
     }

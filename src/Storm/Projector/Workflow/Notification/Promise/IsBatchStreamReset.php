@@ -10,6 +10,6 @@ final class IsBatchStreamReset
 {
     public function __invoke(AgentRegistry $agentRegistry): bool
     {
-        return $agentRegistry->report()->processed()->count() === 0;
+        return $agentRegistry->stat()->processed()->count() === 0;
     }
 }

@@ -10,6 +10,6 @@ final class IsFirstWorkflowCycle
 {
     public function __invoke(AgentRegistry $agentRegistry): bool
     {
-        return $agentRegistry->report()->cycle()->isFirst();
+        return $agentRegistry->stat()->cycle()->isFirst();
     }
 }

@@ -12,6 +12,6 @@ final readonly class StreamEventAcked
 
     public function __invoke(AgentRegistry $agentRegistry): void
     {
-        $agentRegistry->report()->acked()->merge($this->event);
+        $agentRegistry->stat()->acked()->merge($this->event);
     }
 }

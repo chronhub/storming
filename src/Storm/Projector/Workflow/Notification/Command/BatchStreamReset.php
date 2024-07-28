@@ -10,6 +10,6 @@ final class BatchStreamReset
 {
     public function __invoke(AgentRegistry $agentRegistry): void
     {
-        $agentRegistry->report()->processed()->reset();
+        $agentRegistry->stat()->processed()->reset();
     }
 }

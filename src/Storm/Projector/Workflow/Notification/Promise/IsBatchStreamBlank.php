@@ -10,10 +10,10 @@ final class IsBatchStreamBlank
 {
     public function __invoke(AgentRegistry $agentRegistry): bool
     {
-        if ($agentRegistry->report()->processed()->count() !== 0) {
+        if ($agentRegistry->stat()->processed()->count() !== 0) {
             return false;
         }
 
-        return $agentRegistry->report()->acked()->count() === 0;
+        return $agentRegistry->stat()->acked()->count() === 0;
     }
 }
