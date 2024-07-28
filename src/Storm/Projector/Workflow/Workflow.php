@@ -128,11 +128,7 @@ final class Workflow implements WorkflowInterface
      */
     private function assertNoPreviousException(): void
     {
-        if ($this->exceptionOccurred === null) {
-            return;
-        }
-
-        if (in_array($this->exceptionOccurred::class, $this->ignoredExceptions)) {
+        if ($this->exceptionOccurred === null || in_array($this->exceptionOccurred::class, $this->ignoredExceptions)) {
             return;
         }
 

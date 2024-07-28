@@ -41,11 +41,9 @@ final class HubManager implements NotificationHub
     {
         $callbacks = Arr::wrap($callback);
 
-        if (! array_key_exists($event, $this->events)) {
-            $this->events[$event] = $callbacks;
-        } else {
-            $this->events[$event] = array_merge($this->events[$event], $callbacks);
-        }
+        ! array_key_exists($event, $this->events)
+            ? $this->events[$event] = $callbacks
+            : $this->events[$event] = array_merge($this->events[$event], $callbacks);
     }
 
     public function addEvents(array $events): void

@@ -142,7 +142,7 @@ final readonly class EmittingManagement implements EmitterManagement
      *  1. Stream has already been deleted.
      *  2. Stream that has emitted and deleted "without emitted event" must be deleted manually.
      *  2. Stream that has been emitted under another stream (e.g., linkTo)
-     *     must be deleted manually.
+     *     with or without emitted events must be deleted manually.
      *
      * @throws Throwable
      */
