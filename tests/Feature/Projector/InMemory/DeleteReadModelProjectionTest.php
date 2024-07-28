@@ -43,7 +43,7 @@ test('deletes the projection and keeps the read model', function () {
     $this->assertProjectionModelCheckpoint(projectionName: $projectionName, streamName: $streamName, position: 4);
     $this->assertProjectionReport(cycle: 1, ackedEvent: 4, totalEvent: 4);
 
-    // delete the projection and reset user state
+    // delete without emitted events
     $this->projector->delete(false);
 
     $this->assertReadModelBalance($streamName, 100);

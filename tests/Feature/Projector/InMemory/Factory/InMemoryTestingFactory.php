@@ -42,8 +42,6 @@ class InMemoryTestingFactory
 
     public ?ProjectionOption $projectionOption = null;
 
-    //fixme should be protected and called from the projector manager
-    // it may be set before calling the projector manager
     public ?ProjectionQueryScope $queryScope = null;
 
     public ?ProjectorManagerInterface $projectorManager = null;
