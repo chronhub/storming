@@ -48,13 +48,15 @@ class StopWhen
             throw new InvalidArgumentException('"Stop when" cycle must be greater than 0');
         }
 
-        return fn (NotificationHub $hub): bool => $hub->await(CurrentWorkflowCycle::class) === $cycle;
+        return fn (NotificationHub $hub): bool => $hub->await(CurrentWorkflowCycle::class) >= $cycle;
     }
 
     /**
      * Stop the projection when the current expiration time is reached.
      *
      * @param positive-int $expiredAt unix timestamp
+     *
+     * fixMe use interval, running again will just stop the projection
      */
     public static function timeExpired(int $expiredAt): Closure
     {
@@ -64,7 +66,6 @@ class StopWhen
         }
 
         return fn (NotificationHub $hub): bool => $hub->await(CurrentTime::class) >= $expiredAt;
-
     }
 
     /**
@@ -73,7 +74,8 @@ class StopWhen
      *
      * A blank batch stream has no events to process or to store.
      *
-     * @see RotationEventMap todo reset acked event on cycle renewed
+     * todo reset acked event on cycle renewed
+     *
      * @see IsBatchStreamBlank
      *
      * @param positive-int|null $afterCycle

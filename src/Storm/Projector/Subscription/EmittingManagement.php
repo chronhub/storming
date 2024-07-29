@@ -70,7 +70,9 @@ final readonly class EmittingManagement implements EmitterManagement
 
     public function store(): void
     {
-        $this->projectionRepository->persist($this->takeSnapshot());
+        $this->projectionRepository->persist(
+            $this->takeSnapshot()
+        );
     }
 
     public function revise(): void

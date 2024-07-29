@@ -7,38 +7,40 @@ namespace Storm\Projector\Subscription;
 use Closure;
 use Storm\Contract\Projector\AgentRegistry;
 use Storm\Contract\Projector\ContextReader;
-use Storm\Contract\Projector\EmitterManagement;
 use Storm\Contract\Projector\EmitterSubscriber;
+use Storm\Contract\Projector\NotificationHub;
+use Storm\Projector\Factory\WorkflowBuilder;
 use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
 
 final readonly class EmitterSubscription implements EmitterSubscriber
 {
     public function __construct(
         protected AgentRegistry $registry,
-        protected EmitterManagement $management,
+        protected WorkflowBuilder $workflowBuilder,
+        protected NotificationHub $hub,
     ) {}
 
     public function start(ContextReader $context, bool $keepRunning): void
     {
         $this->initializeContext($context);
 
-        $this->registry->subscribe($this->management->hub(), $context);
+        $this->registry->subscribe($this->hub, $context);
         $this->registry->sprint()->runInBackground($keepRunning);
         $this->registry->sprint()->continue();
 
-        $workflow = $this->registry->newWorkflow();
+        $workflow = $this->workflowBuilder->create($this->registry);
         $workflow->process();
     }
 
     public function interact(Closure $callback): mixed
     {
-        return value($callback, $this->management->hub());
+        return value($callback, $this->hub);
     }
 
     protected function initializeContext(ContextReader $context): void
     {
         $this->registry->context()->set($context);
 
-        $this->management->hub()->emit(UserStateRestored::class);
+        $this->hub->emit(UserStateRestored::class);
     }
 }

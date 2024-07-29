@@ -7,9 +7,7 @@ namespace Storm\Projector\Subscription;
 use Storm\Contract\Projector\AgentRegistry;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\WorkflowInterface;
 use Storm\Projector\Factory\AgentProvider;
-use Storm\Projector\Factory\WorkflowBuilder;
 
 use function is_callable;
 
@@ -17,13 +15,7 @@ final readonly class AgentManager implements AgentRegistry
 {
     public function __construct(
         private AgentProvider $agentProvider,
-        private WorkflowBuilder $workflowBuilder,
     ) {}
-
-    public function newWorkflow(): WorkflowInterface
-    {
-        return $this->workflowBuilder->create($this);
-    }
 
     public function subscribe(NotificationHub $hub, ContextReader $context): void
     {

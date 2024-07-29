@@ -34,11 +34,6 @@ use Storm\Projector\Workflow\Agent\UserStateAgent;
 interface AgentRegistry
 {
     /**
-     * Create a new workflow.
-     */
-    public function newWorkflow(): WorkflowInterface;
-
-    /**
      * Capture event and return the result if it can apply.
      *
      * @param callable(self): mixed|object $event

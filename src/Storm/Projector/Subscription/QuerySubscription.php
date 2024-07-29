@@ -7,15 +7,17 @@ namespace Storm\Projector\Subscription;
 use Closure;
 use Storm\Contract\Projector\AgentRegistry;
 use Storm\Contract\Projector\ContextReader;
-use Storm\Contract\Projector\QueryManagement;
+use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\QuerySubscriber;
+use Storm\Projector\Factory\WorkflowBuilder;
 use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
 
 final readonly class QuerySubscription implements QuerySubscriber
 {
     public function __construct(
         protected AgentRegistry $registry,
-        protected QueryManagement $management,
+        protected WorkflowBuilder $workflowBuilder,
+        protected NotificationHub $hub,
     ) {}
 
     public function resets(): void
@@ -29,17 +31,18 @@ final readonly class QuerySubscription implements QuerySubscriber
     {
         $this->initializeContext($context);
 
-        $this->registry->subscribe($this->management->hub(), $context);
+        $this->registry->subscribe($this->hub, $context);
         $this->registry->sprint()->runInBackground($keepRunning);
         $this->registry->sprint()->continue();
 
-        $workflow = $this->registry->newWorkflow();
+        $workflow = $this->workflowBuilder->create($this->registry);
+
         $workflow->process();
     }
 
     public function interact(Closure $callback): mixed
     {
-        return value($callback, $this->management->hub());
+        return value($callback, $this->hub);
     }
 
     /**
@@ -62,6 +65,6 @@ final readonly class QuerySubscription implements QuerySubscriber
      */
     protected function restoreUserState(): void
     {
-        $this->management->hub()->emit(UserStateRestored::class);
+        $this->hub->emit(UserStateRestored::class);
     }
 }
