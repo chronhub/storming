@@ -14,12 +14,12 @@ interface ProjectionModel extends JsonSerializable
     public function name(): string;
 
     /**
-     * Get the projection position as json representation.
+     * Get the projection position as JSON representation.
      */
     public function checkpoint(): string;
 
     /**
-     * Get the projection state as json representation.
+     * Get the projection state as JSON representation.
      */
     public function state(): string;
 

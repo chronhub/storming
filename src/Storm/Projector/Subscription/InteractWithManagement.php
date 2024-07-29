@@ -8,18 +8,16 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Repository\ProjectionSnapshot;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamReset;
-use Storm\Projector\Workflow\Notification\Command\CheckpointReset;
 use Storm\Projector\Workflow\Notification\Command\CheckpointUpdated;
+use Storm\Projector\Workflow\Notification\Command\SnapshotReset;
 use Storm\Projector\Workflow\Notification\Command\SprintContinue;
 use Storm\Projector\Workflow\Notification\Command\SprintStopped;
 use Storm\Projector\Workflow\Notification\Command\StatusChanged;
 use Storm\Projector\Workflow\Notification\Command\StatusDisclosed;
 use Storm\Projector\Workflow\Notification\Command\UserStateChanged;
-use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
-use Storm\Projector\Workflow\Notification\Promise\CurrentFilteredCheckpoint;
 use Storm\Projector\Workflow\Notification\Promise\CurrentStatus;
-use Storm\Projector\Workflow\Notification\Promise\CurrentUserState;
 use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamLimitReached;
+use Storm\Projector\Workflow\Notification\Promise\SnapshotTaken;
 
 use function in_array;
 
@@ -138,16 +136,11 @@ trait InteractWithManagement
 
     protected function resetSnapshot(): void
     {
-        // checkMe encapsulate in event
-        $this->hub->emitMany(CheckpointReset::class, UserStateRestored::class);
+        $this->hub->emit(SnapshotReset::class);
     }
 
     protected function takeSnapshot(): ProjectionSnapshot
     {
-        // checkMe encapsulate in event
-        return new ProjectionSnapshot(
-            $this->hub->await(CurrentFilteredCheckpoint::class),
-            $this->hub->await(CurrentUserState::class)
-        );
+        return $this->hub->await(SnapshotTaken::class);
     }
 }

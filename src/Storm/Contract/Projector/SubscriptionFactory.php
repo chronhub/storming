@@ -11,17 +11,17 @@ interface SubscriptionFactory
     /**
      * Creates a query subscription.
      */
-    public function createQuerySubscription(ProjectionOption $option): QuerySubscriber;
+    public function createQuerySubscription(ProjectionOption $option): Subscriber;
 
     /**
      * Creates a read model projector subscription.
      */
-    public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber;
+    public function createEmitterSubscription(string $streamName, ProjectionOption $option): Subscriber;
 
     /**
      * Creates a read model subscription.
      */
-    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber;
+    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): Subscriber;
 
     /**
      * Get the projection provider.

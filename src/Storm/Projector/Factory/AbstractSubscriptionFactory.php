@@ -12,15 +12,13 @@ use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ActivityFactory;
 use Storm\Contract\Projector\AgentRegistry;
 use Storm\Contract\Projector\EmittedStreamCache;
-use Storm\Contract\Projector\EmitterSubscriber;
 use Storm\Contract\Projector\Management;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Projector\ProjectionRepository;
-use Storm\Contract\Projector\QuerySubscriber;
 use Storm\Contract\Projector\ReadModel;
-use Storm\Contract\Projector\ReadModelSubscriber;
+use Storm\Contract\Projector\Subscriber;
 use Storm\Contract\Projector\SubscriptionFactory;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Repository\EventDispatcherRepository;
@@ -29,14 +27,12 @@ use Storm\Projector\Scope\EmitterAccess;
 use Storm\Projector\Scope\QueryAccess;
 use Storm\Projector\Scope\ReadModelAccess;
 use Storm\Projector\Subscription\AgentManager;
-use Storm\Projector\Subscription\EmitterSubscription;
 use Storm\Projector\Subscription\EmittingManagement;
+use Storm\Projector\Subscription\GenericSubscription;
 use Storm\Projector\Subscription\HubManager;
 use Storm\Projector\Subscription\ManagementEventMap;
 use Storm\Projector\Subscription\QueryingManagement;
-use Storm\Projector\Subscription\QuerySubscription;
 use Storm\Projector\Subscription\ReadingModelManagement;
-use Storm\Projector\Subscription\ReadModelSubscription;
 use Storm\Projector\Workflow\EmittedStream;
 use Storm\Projector\Workflow\InMemoryEmittedStreams;
 use Storm\Projector\Workflow\Stage;
@@ -63,7 +59,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $this->chronicler = $chronicler;
     }
 
-    public function createQuerySubscription(ProjectionOption $option): QuerySubscriber
+    public function createQuerySubscription(ProjectionOption $option): Subscriber
     {
         $notificationHub = $this->createNotificationHub();
         $projectorScope = new QueryAccess($notificationHub, $this->clock);
@@ -77,10 +73,10 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $agentRegistry = $this->createAgentRegistry($notificationHub, $option);
         $workflowBuilder = $this->createWorkflowBuilder($agentRegistry, $activities, $notificationHub);
 
-        return new QuerySubscription($workflowBuilder, $notificationHub);
+        return new GenericSubscription($workflowBuilder, $notificationHub);
     }
 
-    public function createEmitterSubscription(string $streamName, ProjectionOption $option): EmitterSubscriber
+    public function createEmitterSubscription(string $streamName, ProjectionOption $option): Subscriber
     {
         $notificationHub = $this->createNotificationHub();
 
@@ -101,10 +97,10 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $agentRegistry = $this->createAgentRegistry($notificationHub, $option);
         $workflowBuilder = $this->createWorkflowBuilder($agentRegistry, $activities, $notificationHub);
 
-        return new EmitterSubscription($workflowBuilder, $notificationHub);
+        return new GenericSubscription($workflowBuilder, $notificationHub);
     }
 
-    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): ReadModelSubscriber
+    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): Subscriber
     {
         $notificationHub = $this->createNotificationHub();
 
@@ -118,7 +114,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $agentRegistry = $this->createAgentRegistry($notificationHub, $option);
         $workflowBuilder = $this->createWorkflowBuilder($agentRegistry, $activities, $notificationHub);
 
-        return new ReadModelSubscription($workflowBuilder, $notificationHub);
+        return new GenericSubscription($workflowBuilder, $notificationHub);
     }
 
     public function getProjectionProvider(): ProjectionProvider

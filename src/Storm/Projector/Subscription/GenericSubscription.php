@@ -7,10 +7,10 @@ namespace Storm\Projector\Subscription;
 use Closure;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\ReadModelSubscriber;
+use Storm\Contract\Projector\Subscriber;
 use Storm\Projector\Factory\WorkflowBuilder;
 
-final readonly class ReadModelSubscription implements ReadModelSubscriber
+final readonly class GenericSubscription implements Subscriber
 {
     public function __construct(
         protected WorkflowBuilder $workflowBuilder,

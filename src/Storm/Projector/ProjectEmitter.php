@@ -6,9 +6,9 @@ namespace Storm\Projector;
 
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmitterProjector;
-use Storm\Contract\Projector\EmitterSubscriber;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionQueryFilter;
+use Storm\Contract\Projector\Subscriber;
 use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
 use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
 
@@ -17,7 +17,7 @@ final readonly class ProjectEmitter implements EmitterProjector
     use InteractWithProjection;
 
     public function __construct(
-        protected EmitterSubscriber $subscriber,
+        protected Subscriber $subscriber,
         protected ContextReader $context,
         protected string $streamName
     ) {}
@@ -36,18 +36,18 @@ final readonly class ProjectEmitter implements EmitterProjector
         );
     }
 
-    public function filter(ProjectionQueryFilter $queryFilter): static
-    {
-        $this->context->withQueryFilter($queryFilter);
-
-        return $this;
-    }
-
     public function delete(bool $deleteEmittedEvents): void
     {
         $this->subscriber->interact(
             fn (NotificationHub $hub) => $hub->emit(new ProjectionDiscarded($deleteEmittedEvents))
         );
+    }
+
+    public function filter(ProjectionQueryFilter $queryFilter): static
+    {
+        $this->context->withQueryFilter($queryFilter);
+
+        return $this;
     }
 
     public function getName(): string

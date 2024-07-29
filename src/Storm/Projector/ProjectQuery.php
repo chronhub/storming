@@ -8,16 +8,15 @@ use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\QueryProjector;
-use Storm\Contract\Projector\QuerySubscriber;
-use Storm\Projector\Workflow\Notification\Command\CheckpointReset;
-use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
+use Storm\Contract\Projector\Subscriber;
+use Storm\Projector\Workflow\Notification\Command\SnapshotReset;
 
 final readonly class ProjectQuery implements QueryProjector
 {
     use InteractWithProjection;
 
     public function __construct(
-        protected QuerySubscriber $subscriber,
+        protected Subscriber $subscriber,
         protected ContextReader $context,
     ) {}
 
@@ -31,9 +30,7 @@ final readonly class ProjectQuery implements QueryProjector
     public function reset(): void
     {
         $this->subscriber->interact(function (NotificationHub $hub): void {
-            $hub->emit(CheckpointReset::class);
-
-            $hub->emit(UserStateRestored::class);
+            $hub->emit(SnapshotReset::class);
         });
     }
 

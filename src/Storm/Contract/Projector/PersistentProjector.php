@@ -7,13 +7,6 @@ namespace Storm\Contract\Projector;
 interface PersistentProjector extends PersistentProjectorFactory
 {
     /**
-     * Get the projection name.
-     *
-     * Projection name is a substitute for stream name
-     */
-    public function getName(): string;
-
-    /**
      * Reset the projection.
      */
     public function reset(): void;
@@ -22,4 +15,11 @@ interface PersistentProjector extends PersistentProjectorFactory
      * Delete the projection.
      */
     public function delete(bool $deleteEmittedEvents): void;
+
+    /**
+     * Get the projection name.
+     *
+     * Projection name is a substitute for stream name
+     */
+    public function getName(): string;
 }
