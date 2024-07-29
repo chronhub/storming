@@ -14,11 +14,4 @@ interface QueryProjectorFactory extends ProjectorFactory
      * @see Context::withQueryFilter()
      */
     public function filter(QueryFilter $queryFilter): static;
-
-    /**
-     * Proxy method to keep the user state in memory.
-     *
-     * @see Context::withKeepState()
-     */
-    public function keepState(): static;
 }

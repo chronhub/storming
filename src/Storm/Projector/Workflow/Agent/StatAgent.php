@@ -9,37 +9,13 @@ use Storm\Projector\Support\CycleCounter;
 use Storm\Projector\Support\MainCounter;
 use Storm\Projector\Support\ProcessedCounter;
 
-/**
- * @template TReport of array{
- *     projection_id: string,
- *     started_at: int<0, max>,
- *     elapsed_time: int<0, max>,
- *     ended_at: int<0, max>,
- *     cycle: int<0, max>,
- *     acked_event: int<0, max>,
- *     total_event: int<0, max>
- * }
- */
-class StatAgent
+readonly class StatAgent
 {
-    /**
-     * @param TReport $report
-     */
-    protected array $report = [
-        'projection_id' => '',
-        'started_at' => 0,
-        'elapsed_time' => 0,
-        'ended_at' => 0,
-        'cycle' => 0,
-        'acked_event' => 0,
-        'total_event' => 0,
-    ];
-
     public function __construct(
-        protected readonly MainCounter $mainCounter,
-        protected readonly ProcessedCounter $processedCounter,
-        protected readonly AckedCounter $ackedCounter,
-        protected readonly CycleCounter $cycleCounter,
+        protected MainCounter $mainCounter,
+        protected ProcessedCounter $processedCounter,
+        protected AckedCounter $ackedCounter,
+        protected CycleCounter $cycleCounter,
     ) {}
 
     /**

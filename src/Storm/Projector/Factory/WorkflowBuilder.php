@@ -6,10 +6,12 @@ namespace Storm\Projector\Factory;
 
 use Storm\Contract\Projector\ActivityFactory;
 use Storm\Contract\Projector\AgentRegistry;
+use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\PersistentActivityFactory;
 use Storm\Contract\Projector\WorkflowInterface;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
+use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
 use Storm\Projector\Workflow\Notification\Management\ProjectionFreed;
 use Storm\Projector\Workflow\Stage;
 use Storm\Projector\Workflow\Workflow;
@@ -18,12 +20,20 @@ use Throwable;
 class WorkflowBuilder
 {
     public function __construct(
-        protected NotificationHub $hub,
+        protected AgentRegistry $agents,
         protected ActivityFactory $activityFactory,
+        protected NotificationHub $hub,
         protected Stage $stage,
     ) {}
 
-    public function create(AgentRegistry $registry): WorkflowInterface
+    public function newWorkflow(ContextReader $context, bool $keepRunning): WorkflowInterface
+    {
+        $this->prepare($context, $keepRunning);
+
+        return $this->create($this->agents);
+    }
+
+    protected function create(AgentRegistry $registry): WorkflowInterface
     {
         $activities = ($this->activityFactory)($registry);
 
@@ -36,6 +46,17 @@ class WorkflowBuilder
         }
 
         return $workflow;
+    }
+
+    protected function prepare(ContextReader $context, bool $keepRunning): void
+    {
+        $this->agents->context()->set($context);
+        $this->hub->emit(UserStateRestored::class);
+
+        $this->agents->subscribe($this->hub, $context);
+
+        $this->agents->sprint()->runInBackground($keepRunning);
+        $this->agents->sprint()->continue();
     }
 
     /**

@@ -34,19 +34,7 @@ final class ExponentialSleep
          */
         public readonly int $max = 1000000,
     ) {
-        // @phpstan-ignore-next-line
-        if ($base < 1) {
-            throw new InvalidArgumentException('Base sleep time must be greater than 0');
-        }
-
-        if ($factor < 1) {
-            throw new InvalidArgumentException('Growth factor must be greater or equal than 1');
-        }
-
-        // @phpstan-ignore-next-line
-        if ($max < 1) {
-            throw new InvalidArgumentException('Max sleep time must be greater than 0');
-        }
+        $this->assertValidSleep();
 
         $this->reset();
     }
@@ -86,5 +74,25 @@ final class ExponentialSleep
     public function getSleepingTime(): int
     {
         return $this->currentSleepTime;
+    }
+
+    /**
+     * @throws InvalidArgumentException when constructed parameters are invalid
+     */
+    protected function assertValidSleep(): void
+    {
+        // @phpstan-ignore-next-line
+        if ($this->base < 1) {
+            throw new InvalidArgumentException('Base sleep time must be greater than 0');
+        }
+
+        if ($this->factor < 1) {
+            throw new InvalidArgumentException('Growth factor must be greater or equal than 1');
+        }
+
+        // @phpstan-ignore-next-line
+        if ($this->max < 1) {
+            throw new InvalidArgumentException('Max sleep time must be greater than 0');
+        }
     }
 }

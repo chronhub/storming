@@ -6,17 +6,8 @@ namespace Storm\Projector\Support;
 
 final class CycleCounter
 {
+    /** @var int<0, max> */
     protected int $cycle = 0;
-
-    /**
-     * Start the cycle.
-     *
-     * @deprecated use next() instead
-     */
-    public function start(): void
-    {
-        $this->cycle = 1;
-    }
 
     /**
      * Increment the cycle.

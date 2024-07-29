@@ -77,14 +77,6 @@ interface Context
     public function withQueryFilter(QueryFilter $queryFilter): self;
 
     /**
-     * Keep the state in memory for the next run.
-     *
-     * Only available for query projection.
-     * When not set, the state will be reset at each run.
-     */
-    public function withKeepState(): self;
-
-    /**
      * Set a projection id to identify it.
      *
      * Note that a default id will be provided with the projection class name

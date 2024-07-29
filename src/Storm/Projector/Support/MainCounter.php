@@ -9,8 +9,6 @@ final class MainCounter
     /** @var int<0, max> */
     protected int $count = 0;
 
-    protected bool $doNotReset = false;
-
     /**
      * Increment the main counter.
      */
@@ -24,9 +22,7 @@ final class MainCounter
      */
     public function reset(): void
     {
-        if (! $this->doNotReset) {
-            $this->count = 0;
-        }
+        $this->count = 0;
     }
 
     /**
@@ -35,21 +31,5 @@ final class MainCounter
     public function current(): int
     {
         return $this->count;
-    }
-
-    /**
-     * Set the doNotReset flag.
-     */
-    public function doNotReset(bool $doNotReset): void
-    {
-        $this->doNotReset = $doNotReset;
-    }
-
-    /**
-     * Check if the doNotReset flag is set.
-     */
-    public function isDoNotReset(): bool
-    {
-        return $this->doNotReset;
     }
 }
