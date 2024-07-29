@@ -6,7 +6,7 @@ namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;
-use Storm\Projector\Workflow\Notification\IsFirstWorkflowCycle;
+use Storm\Projector\Workflow\Notification\Promise\IsFirstWorkflowCycle;
 
 final readonly class RiseQueryProjection
 {

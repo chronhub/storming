@@ -7,8 +7,8 @@ namespace Storm\Tests\Unit\Projector\Workflow\Activity;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Activity\DiscoverRemoteStatus;
 use Storm\Projector\Workflow\Activity\RisePersistentProjection;
-use Storm\Projector\Workflow\Notification\IsFirstWorkflowCycle;
 use Storm\Projector\Workflow\Notification\Management\ProjectionRise;
+use Storm\Projector\Workflow\Notification\Promise\IsFirstWorkflowCycle;
 
 beforeEach(function () {
     $this->discovery = mock(DiscoverRemoteStatus::class);

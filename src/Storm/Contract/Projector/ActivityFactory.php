@@ -14,5 +14,5 @@ interface ActivityFactory
      *
      * @return array<Closure>
      */
-    public function __invoke(AgentRegistry $agentRegistry): array;
+    public function __invoke(AgentManager $agentRegistry): array;
 }

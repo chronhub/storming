@@ -87,7 +87,7 @@ final class ManagementEventMap
         });
 
         $hub->addEvent(StreamEventProcessed::class, function (NotificationHub $hub, StreamEventProcessed $capture, Checkpoint $checkpoint) {
-            // if gap it can only be a recoverable gap as gap handling is done after
+            // if gap it can only be a recoverable gap as gap handling is processed after
         });
 
         $hub->addEvent(EventStreamDiscovered::class, function (NotificationHub $hub) {

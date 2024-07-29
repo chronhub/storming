@@ -26,8 +26,6 @@ final class DefaultContext implements ContextReader
 
     private ?QueryFilter $queryFilter = null;
 
-    private bool $keepState = false;
-
     private ?string $id = null;
 
     /**
@@ -53,17 +51,6 @@ final class DefaultContext implements ContextReader
         }
 
         $this->queryFilter = $queryFilter;
-
-        return $this;
-    }
-
-    public function withKeepState(): self
-    {
-        if ($this->keepState === true) {
-            throw new InvalidArgumentException('Projection keep state already set');
-        }
-
-        $this->keepState = true;
 
         return $this;
     }
@@ -159,11 +146,6 @@ final class DefaultContext implements ContextReader
         }
 
         return $this->queryFilter;
-    }
-
-    public function keepState(): bool
-    {
-        return $this->keepState;
     }
 
     public function id(): ?string

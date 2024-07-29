@@ -6,7 +6,7 @@ namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Closure;
 use Storm\Contract\Projector\ActivityFactory;
-use Storm\Contract\Projector\AgentRegistry;
+use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ReadModel;
@@ -27,7 +27,7 @@ beforeEach(function () {
     $this->projectorScope = mock(ReadModelScope::class);
     $this->hub = mock(NotificationHub::class);
     $this->management = mock(ReadModelManagement::class);
-    $this->subscriptor = mock(AgentRegistry::class);
+    $this->subscriptor = mock(AgentManager::class);
     $this->readModel = mock(ReadModel::class);
 
     $this->subscription = new ReadModelSubscription(

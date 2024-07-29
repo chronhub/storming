@@ -7,14 +7,14 @@ namespace Storm\Tests\Testing;
 use Mockery\MockInterface;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\AgentRegistry;
+use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Projector\Factory\AgentProvider;
 use Storm\Projector\Factory\WatcherFactory;
 
 trait WatcherManagerTestingTrait
 {
-    protected AgentRegistry&MockInterface $subscriptor;
+    protected AgentManager&MockInterface $subscriptor;
 
     protected ProjectionOption&MockInterface $projectionOption;
 
@@ -31,7 +31,7 @@ trait WatcherManagerTestingTrait
         $this->projectionOption = mock(ProjectionOption::class);
         $this->eventStreamProvider = mock(EventStreamProvider::class);
         $this->clock = mock(SystemClock::class);
-        $this->subscriptor = mock(AgentRegistry::class);
+        $this->subscriptor = mock(AgentManager::class);
 
         // constructed projection option
         $this->projectionOption->shouldReceive('getBlockSize')->andReturn($batchCounterBlockSize);

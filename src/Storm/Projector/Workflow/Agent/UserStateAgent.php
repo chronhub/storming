@@ -33,12 +33,4 @@ class UserStateAgent
     {
         return $this->state;
     }
-
-    /**
-     * Reset the user state.
-     */
-    public function reset(): void
-    {
-        $this->state = [];
-    }
 }

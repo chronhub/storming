@@ -7,6 +7,7 @@ namespace Storm\Projector\Factory;
 use BadMethodCallException;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Clock\SystemClock;
+use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
@@ -35,7 +36,7 @@ use Storm\Projector\Workflow\Agent\TimeAgent;
 use Storm\Projector\Workflow\Agent\UserStateAgent;
 use Storm\Projector\Workflow\Timer;
 
-class AgentProvider
+final class AgentProvider implements AgentManager
 {
     /** @var array<string, object> */
     public array $agents;

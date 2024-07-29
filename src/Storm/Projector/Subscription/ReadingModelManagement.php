@@ -66,10 +66,4 @@ final readonly class ReadingModelManagement implements ReadModelManagement
 
         $this->resetSnapshot();
     }
-
-    // checkMe not necessary
-    public function getReadModel(): ReadModel
-    {
-        return $this->readModel;
-    }
 }

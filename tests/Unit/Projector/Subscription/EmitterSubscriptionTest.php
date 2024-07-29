@@ -6,7 +6,7 @@ namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Closure;
 use Storm\Contract\Projector\ActivityFactory;
-use Storm\Contract\Projector\AgentRegistry;
+use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmitterManagement;
 use Storm\Contract\Projector\NotificationHub;
@@ -24,7 +24,7 @@ beforeEach(function () {
     $this->activities = mock(ActivityFactory::class);
     $this->hub = mock(NotificationHub::class);
     $this->management = mock(EmitterManagement::class)->shouldIgnoreMissing();
-    $this->subscriptor = mock(AgentRegistry::class);
+    $this->subscriptor = mock(AgentManager::class);
 
     $this->subscription = new EmitterSubscription(
         $this->subscriptor,

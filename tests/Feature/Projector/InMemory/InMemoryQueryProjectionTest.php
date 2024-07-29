@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector;
 
+use Storm\Clock\Clock;
 use Storm\Contract\Message\DomainEvent;
+use Storm\Contract\Projector\ProjectorScope;
 use Storm\Contract\Projector\QueryProjectorScope;
 use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Scope\UserStateScope;
@@ -57,6 +59,30 @@ test('query projection', function (?string $descriptionId) {
 
     $this->assertProjectionReport(cycle: 1, ackedEvent: 4, totalEvent: 4, descriptionId: $descriptionId);
 })->with('projection optional description id');
+
+test('query event scope with one stream event', function () {
+    $this->setupProjection();
+
+    $this->makeEventStore($streamName = 'account', BalanceId::create())
+        ->withBalanceCreated(1, 100);
+
+    $reactors = function (EventScope $scope): void {
+        $scope
+            ->ackOneOf(BalanceCreated::class)
+            ->then(function (BalanceCreated $event, ProjectorScope $scope, ?UserStateScope $userState): void {
+                expect($userState)->toBeNull()
+                    ->and($scope)->toBeInstanceOf(QueryProjectorScope::class)
+                    ->and($scope->streamName())->toBe('account')
+                    ->and($scope->clock())->toBeInstanceOf(Clock::class);
+            });
+    };
+
+    $this->projector
+        ->subscribeToStream($streamName)
+        ->when($reactors)
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->run(false);
+});
 
 test('query projection with many streams', function () {
     $this->setupProjection();

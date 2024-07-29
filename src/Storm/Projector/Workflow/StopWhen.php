@@ -9,7 +9,6 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Workflow\Agent\StopAgent;
-use Storm\Projector\Workflow\Notification\GapDetected;
 use Storm\Projector\Workflow\Notification\Promise\CurrentTime;
 use Storm\Projector\Workflow\Notification\Promise\CurrentWorkflowCycle;
 use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamBlank;

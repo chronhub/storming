@@ -6,7 +6,7 @@ namespace Storm\Tests\Unit\Projector\Workflow\Notification;
 
 use stdClass;
 use Storm\Clock\PointInTime;
-use Storm\Contract\Projector\AgentRegistry;
+use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Projector\Checkpoint\CheckpointFactory;
@@ -55,7 +55,6 @@ use Storm\Projector\Workflow\Notification\Command\WorkflowCycleIncremented;
 use Storm\Projector\Workflow\Notification\Command\WorkflowCycleReset;
 use Storm\Projector\Workflow\Notification\Command\WorkflowStarted;
 use Storm\Projector\Workflow\Notification\GapDetected;
-use Storm\Projector\Workflow\Notification\IsFirstWorkflowCycle;
 use Storm\Projector\Workflow\Notification\Promise\CurrentCheckpoint;
 use Storm\Projector\Workflow\Notification\Promise\CurrentElapsedTime;
 use Storm\Projector\Workflow\Notification\Promise\CurrentFilteredCheckpoint;
@@ -73,6 +72,7 @@ use Storm\Projector\Workflow\Notification\Promise\HasGap;
 use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamBlank;
 use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamLimitReached;
 use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamReset;
+use Storm\Projector\Workflow\Notification\Promise\IsFirstWorkflowCycle;
 use Storm\Projector\Workflow\Notification\Promise\IsSprintDaemonize;
 use Storm\Projector\Workflow\Notification\Promise\IsSprintRunning;
 use Storm\Projector\Workflow\Notification\Promise\IsSprintTerminated;
@@ -91,7 +91,7 @@ use Storm\Tests\Stubs\MergeStreamIteratorStub;
 use function microtime;
 
 beforeEach(function () {
-    $this->subscriptor = mock(AgentRegistry::class);
+    $this->subscriptor = mock(AgentManager::class);
     $this->watcherManager = mock(AgentProvider::class);
 
     $this->streamEventWatcher = mock(StreamEventAgent::class);

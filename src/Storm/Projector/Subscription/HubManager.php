@@ -6,7 +6,7 @@ namespace Storm\Projector\Subscription;
 
 use Closure;
 use Illuminate\Support\Arr;
-use Storm\Contract\Projector\AgentRegistry;
+use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\EmitOnce;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Exception\RuntimeException;
@@ -16,6 +16,7 @@ use function array_key_exists;
 use function array_merge;
 use function in_array;
 use function is_a;
+use function is_callable;
 use function is_object;
 use function is_string;
 
@@ -33,9 +34,9 @@ final class HubManager implements NotificationHub
      */
     private array $once = [];
 
-    private ?AgentRegistry $agentRegistry = null;
-
-    public function __construct() {}
+    public function __construct(
+        private readonly AgentManager $agents
+    ) {}
 
     public function addEvent(string $event, string|callable|array $callback): void
     {
@@ -56,7 +57,6 @@ final class HubManager implements NotificationHub
     public function forgetEvent(string $event): void
     {
         unset($this->events[$event]);
-
         unset($this->once[$event]);
     }
 
@@ -65,20 +65,15 @@ final class HubManager implements NotificationHub
         return array_key_exists($event, $this->events);
     }
 
-    public function await(string|object $event, mixed ...$arguments): mixed
+    public function await(string|object $expectation, mixed ...$arguments): mixed
     {
-        $this->shouldBeEmittedOnce($event);
+        $notification = $this->buildNotification($expectation, ...$arguments);
 
-        $notification = $this->makeEvent($event, ...$arguments);
-        $result = $this->agentRegistry->capture($notification);
-
-        if ($result === $notification) {
-            $result = null;
+        if (is_callable($notification)) {
+            return ($notification)($this->agents);
         }
 
-        $this->handleEvent($notification, $result);
-
-        return $result;
+        throw new RuntimeException('Await expects only callable event: '.$notification::class);
     }
 
     public function emit(string|object $event, mixed ...$arguments): void
@@ -89,7 +84,15 @@ final class HubManager implements NotificationHub
             $this->addEvent($eventClass, fn () => null);
         }
 
-        $this->await($event, ...$arguments);
+        $this->shouldBeEmittedOnce($event);
+
+        $notification = $this->buildNotification($event, ...$arguments);
+
+        if (is_callable($notification)) {
+            $this->await($notification);
+        }
+
+        $this->callHandlers($notification);
     }
 
     public function emitMany(string|object ...$events): void
@@ -112,17 +115,9 @@ final class HubManager implements NotificationHub
     }
 
     /**
-     * @internal
-     */
-    public function setAgentRegistry(AgentRegistry $agentRegistry): void
-    {
-        $this->agentRegistry = $agentRegistry;
-    }
-
-    /**
      * Handle the event.
      */
-    private function handleEvent(object $event, mixed $result): void
+    private function callHandlers(object $event): void
     {
         $callbacks = $this->events[$event::class] ?? [];
 
@@ -131,7 +126,7 @@ final class HubManager implements NotificationHub
                 $callback = new $callback();
             }
 
-            $callback($this, $event, $result);
+            $callback($this, $event);
         }
     }
 
@@ -140,7 +135,7 @@ final class HubManager implements NotificationHub
      *
      * @param class-string|object $event
      */
-    private function makeEvent(string|object $event, mixed ...$arguments): object
+    private function buildNotification(string|object $event, mixed ...$arguments): object
     {
         if (is_object($event)) {
             return $event;

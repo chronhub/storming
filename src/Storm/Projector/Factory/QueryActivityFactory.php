@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Factory;
 
-use Storm\Contract\Projector\AgentRegistry;
+use Storm\Contract\Projector\AgentManager;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
 use Storm\Projector\Workflow\Activity\HandleQueryStreamGap;
 use Storm\Projector\Workflow\Activity\HandleStreamEvent;
@@ -14,7 +14,7 @@ use Storm\Projector\Workflow\Activity\SleepForQuery;
 
 final readonly class QueryActivityFactory extends AbstractActivityFactory
 {
-    protected function activities(AgentRegistry $agentRegistry): array
+    protected function activities(AgentManager $agentRegistry): array
     {
         $eventProcessor = $this->createStreamEventReactor($agentRegistry);
 

@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector\Factory;
 
 use Storm\Contract\Projector\ActivityFactory;
-use Storm\Contract\Projector\AgentRegistry;
+use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\PersistentActivityFactory;
@@ -20,7 +20,7 @@ use Throwable;
 class WorkflowBuilder
 {
     public function __construct(
-        protected AgentRegistry $agents,
+        protected AgentManager $agents,
         protected ActivityFactory $activityFactory,
         protected NotificationHub $hub,
         protected Stage $stage,
@@ -33,7 +33,7 @@ class WorkflowBuilder
         return $this->create($this->agents);
     }
 
-    protected function create(AgentRegistry $registry): WorkflowInterface
+    protected function create(AgentManager $registry): WorkflowInterface
     {
         $activities = ($this->activityFactory)($registry);
 

@@ -4,4 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Notification\Management;
 
-final class ProjectionRevised {}
+use Storm\Contract\Projector\EmitOnce;
+
+final class ProjectionRevised implements EmitOnce {}

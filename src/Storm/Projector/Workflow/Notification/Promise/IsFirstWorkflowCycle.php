@@ -6,10 +6,10 @@ namespace Storm\Projector\Workflow\Notification\Promise;
 
 use Storm\Contract\Projector\AgentManager;
 
-final class IsBatchStreamLimitReached
+final class IsFirstWorkflowCycle
 {
     public function __invoke(AgentManager $agentRegistry): bool
     {
-        return $agentRegistry->stat()->processed()->isLimitReached();
+        return $agentRegistry->stat()->cycle()->isFirst();
     }
 }

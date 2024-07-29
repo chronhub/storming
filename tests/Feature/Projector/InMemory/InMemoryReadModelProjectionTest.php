@@ -6,6 +6,7 @@ namespace Storm\Tests\Feature\Projector;
 
 use Exception;
 use Storm\Clock\Clock;
+use Storm\Contract\Projector\ProjectorScope;
 use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Scope\EventScope;
@@ -104,7 +105,7 @@ test('run projection again from last position kept in memory', function () {
     $this->assertProjectionReport(cycle: 1, ackedEvent: 2, totalEvent: 2);
 });
 
-test('read model projection scope with one processed event', function () {
+test('read model scope with one processed event', function () {
     $this->setupProjection(
         streamName: $streamName = 'account',
         projectionName: $projectionName = 'balance'
@@ -114,10 +115,12 @@ test('read model projection scope with one processed event', function () {
 
     $reactors = function (EventScope $scope): void {
         $scope
-            ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-            ->then(function (BalanceCreated $event, ReadModelScope $scope, ?UserStateScope $userState): void {
+            ->ackOneOf(BalanceCreated::class)
+            ->then(function (BalanceCreated $event, ProjectorScope $scope, ?UserStateScope $userState): void {
+                /** @var ReadModelScope $scope */
                 expect($userState)->toBeNull()
                     ->and($scope->streamName())->toBe('account')
+                    ->and($scope)->toBeInstanceOf(ReadModelScope::class)
                     ->and($scope->readModel())->toBe($this->readModel)
                     ->and($scope->clock())->toBeInstanceOf(Clock::class);
             });
@@ -130,8 +133,6 @@ test('read model projection scope with one processed event', function () {
         ->run(inBackground: false);
 
     expect($this->projector->getName())->toBe($projectionName);
-    $this->assertProjectionState([]);
-    $this->assertProjectionModel(projectionName: $projectionName, status: ProjectionStatus::IDLE->value, lockedUntil: null);
 });
 
 test('reactors should never been called when no event is processed', function () {

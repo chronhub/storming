@@ -4,7 +4,13 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector;
 
+use Storm\Clock\Clock;
+use Storm\Contract\Projector\EmitterScope;
+use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\ProjectionStatus;
+use Storm\Projector\Scope\EventScope;
+use Storm\Projector\Scope\UserStateScope;
+use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryEmitterProjectionTestBaseTrait;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
@@ -57,6 +63,34 @@ test('emit stream event to event store under the projection name', function (str
     $this->assertProjectionModelCheckpoint(projectionName: $projectionName, streamName: $eventStream, position: 4);
     $this->assertProjectionReport(cycle: 1, ackedEvent: 4, totalEvent: 4);
 })->with('event stream name');
+
+test('emitter scope with one processed event', function () {
+    $this->setupProjection(
+        streamName: $eventStream = 'account',
+        projectionName: $projectionName = 'operation'
+    );
+
+    $this->balanceEventStore($eventStream)->withBalanceCreated(1, 100);
+
+    $reactors = function (EventScope $scope): void {
+        $scope
+            ->ackOneOf(BalanceCreated::class)
+            ->then(function (BalanceCreated $event, ProjectorScope $scope, ?UserStateScope $userState): void {
+                expect($userState)->toBeNull()
+                    ->and($scope)->toBeInstanceOf(EmitterScope::class)
+                    ->and($scope->streamName())->toBe('account')
+                    ->and($scope->clock())->toBeInstanceOf(Clock::class);
+            });
+    };
+
+    $this->projector
+        ->subscribeToStream($eventStream)
+        ->when($reactors)
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->run(false);
+
+    expect($this->projector->getName())->toBe($projectionName);
+});
 
 test('emit stream event with retries and gaps', function (array $retries, bool $recordGap) {
     $options = ['retries' => $retries, 'recordGap' => $recordGap];

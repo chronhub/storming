@@ -50,16 +50,6 @@ interface ContextReader extends Context
     public function queryFilter(): QueryFilter;
 
     /**
-     * @deprecated
-     * Check if projection should keep state in memory.
-     * Only available for query projection.
-     * When not set, the state will be reset at each run.
-     *
-     * @throws InvalidArgumentException When user state is not initialized
-     */
-    public function keepState(): bool;
-
-    /**
      * Get the projection identifier.
      */
     public function id(): ?string;

@@ -9,7 +9,7 @@ use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ActivityFactory;
-use Storm\Contract\Projector\AgentRegistry;
+use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Filter\LoadLimiter;
@@ -29,7 +29,7 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
         protected SystemClock $clock
     ) {}
 
-    public function __invoke(AgentRegistry $agentRegistry): array
+    public function __invoke(AgentManager $agentRegistry): array
     {
         return array_map(
             fn (callable $activity): callable => $activity(),
@@ -42,7 +42,7 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
      *
      * @return callable(string $streamName, StreamPosition $streamPosition, LoadLimiter $loadLimiter): QueryFilter
      */
-    protected function createQueryFilterResolver(AgentRegistry $agentRegistry): callable
+    protected function createQueryFilterResolver(AgentManager $agentRegistry): callable
     {
         return new QueryFilterResolver($agentRegistry->context()->get()->queryFilter());
     }
@@ -50,7 +50,7 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
     /**
      * Create the stream event reactor.
      */
-    protected function createStreamEventReactor(AgentRegistry $agentRegistry): StreamEventReactor
+    protected function createStreamEventReactor(AgentManager $agentRegistry): StreamEventReactor
     {
         return new StreamEventReactor(
             $agentRegistry->context()->get()->reactors(),
@@ -62,7 +62,7 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
     /**
      * Create the stream event loader.
      */
-    protected function createStreamLoader(AgentRegistry $agentRegistry): LoadStreams
+    protected function createStreamLoader(AgentManager $agentRegistry): LoadStreams
     {
         return new LoadStreams(
             $this->chronicler,
@@ -77,5 +77,5 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
      *
      * @return array<Closure>
      */
-    abstract protected function activities(AgentRegistry $agentRegistry): array;
+    abstract protected function activities(AgentManager $agentRegistry): array;
 }

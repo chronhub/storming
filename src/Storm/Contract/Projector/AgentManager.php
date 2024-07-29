@@ -31,15 +31,8 @@ use Storm\Projector\Workflow\Agent\UserStateAgent;
  * @method TimeAgent                 time()
  * @method UserStateAgent            userState()
  */
-interface AgentRegistry
+interface AgentManager
 {
-    /**
-     * Capture event and return the result if it can apply.
-     *
-     * @param callable(self): mixed|object $event
-     */
-    public function capture(callable|object $event): mixed;
-
     /**
      * Subscribe to the notification hub.
      */

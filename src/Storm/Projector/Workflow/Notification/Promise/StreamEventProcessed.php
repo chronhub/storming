@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Notification\Promise;
 
 use Storm\Clock\PointInTime;
-use Storm\Contract\Projector\AgentRegistry;
+use Storm\Contract\Projector\AgentManager;
 use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Stream\StreamPosition;
@@ -18,7 +18,7 @@ final readonly class StreamEventProcessed
         public string|PointInTime $eventTime,
     ) {}
 
-    public function __invoke(AgentRegistry $agentRegistry): Checkpoint
+    public function __invoke(AgentManager $agentRegistry): Checkpoint
     {
         $streamPoint = new StreamPoint(
             $this->streamName,

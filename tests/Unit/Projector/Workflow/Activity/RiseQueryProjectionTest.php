@@ -8,7 +8,7 @@ use Closure;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Activity\RiseQueryProjection;
 use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;
-use Storm\Projector\Workflow\Notification\IsFirstWorkflowCycle;
+use Storm\Projector\Workflow\Notification\Promise\IsFirstWorkflowCycle;
 
 beforeEach(function () {
     $this->hub = mock(NotificationHub::class);

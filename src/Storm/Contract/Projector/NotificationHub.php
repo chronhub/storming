@@ -30,7 +30,7 @@ interface NotificationHub
     /**
      * Emit event and wait with expectation.
      */
-    public function await(string|object $event, mixed ...$arguments): mixed;
+    public function await(string|object $expectation, mixed ...$arguments): mixed;
 
     /**
      * Emit event and forget.

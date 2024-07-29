@@ -7,7 +7,7 @@ namespace Storm\Tests\Unit\Projector\Subscription;
 use BadMethodCallException;
 use stdClass;
 use Storm\Contract\Chronicler\EventStreamProvider;
-use Storm\Contract\Projector\AgentRegistry;
+use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Factory\AgentProvider;
@@ -22,7 +22,7 @@ beforeEach(function () {
 });
 
 test('default instance', function () {
-    expect($this->subscriptionManager)->toBeInstanceOf(AgentRegistry::class)
+    expect($this->subscriptionManager)->toBeInstanceOf(AgentManager::class)
         ->and($this->subscriptionManager->getContext())->toBeNull()
         ->and($this->subscriptionManager->currentStatus())->toBe(ProjectionStatus::IDLE);
 });
