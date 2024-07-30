@@ -7,19 +7,11 @@ namespace Storm\Projector\Workflow;
 use Closure;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\Header;
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectorScope;
-use Storm\Projector\Checkpoint\Checkpoint;
+use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Scope\UserStateScope;
-use Storm\Projector\Workflow\Notification\Command\BatchStreamIncrements;
-use Storm\Projector\Workflow\Notification\Command\StreamEventAcked;
-use Storm\Projector\Workflow\Notification\Command\UserStateChanged;
 use Storm\Projector\Workflow\Notification\Management\PerformWhenThresholdIsReached;
-use Storm\Projector\Workflow\Notification\Promise\CurrentUserState;
-use Storm\Projector\Workflow\Notification\Promise\IsSprintRunning;
-use Storm\Projector\Workflow\Notification\Promise\IsUserStateInitialized;
-use Storm\Projector\Workflow\Notification\Promise\StreamEventProcessed;
 use Storm\Stream\StreamPosition;
 
 use function pcntl_signal_dispatch;
@@ -32,68 +24,60 @@ readonly class StreamEventReactor
         protected bool $dispatchSignal
     ) {}
 
-    public function __invoke(NotificationHub $hub, string $streamName, DomainEvent $event, StreamPosition $expectedPosition): bool
+    public function __invoke(WorkflowContext $workflowContext, string $streamName, DomainEvent $event, StreamPosition $expectedPosition): bool
     {
         $this->dispatchSignalIfRequested();
 
-        $notification = new StreamEventProcessed($streamName, $expectedPosition, $event->header(Header::EVENT_TIME));
+        $streamPoint = new StreamPoint($streamName, $expectedPosition, $event->header(Header::EVENT_TIME));
 
-        if ($this->hasGap($hub, $notification)) {
+        if ($workflowContext->processStreamEvent($streamPoint)->isGap()) {
             return false;
         }
 
-        return $this->handleEvent($hub, $event);
+        return $this->handleEvent($workflowContext, $event);
     }
 
-    protected function handleEvent(NotificationHub $hub, DomainEvent $event): bool
+    protected function handleEvent(WorkflowContext $workflowContext, DomainEvent $event): bool
     {
-        $hub->emit(BatchStreamIncrements::class);
+        $workflowContext->incrementBatchStream();
 
-        $this->reactOn($hub, $event);
+        $this->reactOn($workflowContext, $event);
 
-        $hub->emit(new PerformWhenThresholdIsReached());
+        $workflowContext->emit(new PerformWhenThresholdIsReached());
 
-        return $hub->await(IsSprintRunning::class);
+        return $workflowContext->sprint()->inProgress();
     }
 
-    protected function reactOn(NotificationHub $hub, DomainEvent $event): void
+    protected function reactOn(WorkflowContext $workflowContext, DomainEvent $event): void
     {
-        $userState = $this->getUserState($hub);
+        $userState = $this->getUserState($workflowContext);
         $eventScope = new EventScope($event, $this->projector, $userState);
 
         ($this->reactors)($eventScope);
 
-        $this->updateUserStateIfInitialized($hub, $userState);
+        $this->updateUserStateIfInitialized($workflowContext, $userState);
 
-        $hub->emitWhen(
-            $eventScope->isAcked(),
-            fn (NotificationHub $hub) => $hub->emit(StreamEventAcked::class, $event::class)
-        );
+        if ($eventScope->isAcked()) {
+            $workflowContext->stat()->acked()->merge($event::class);
+        }
     }
 
-    protected function hasGap(NotificationHub $hub, StreamEventProcessed $notification): bool
+    protected function getUserState(WorkflowContext $workflowContext): ?UserStateScope
     {
-        /** @var Checkpoint $checkpoint */
-        $checkpoint = $hub->await($notification);
-
-        return $checkpoint->isGap();
-    }
-
-    protected function getUserState(NotificationHub $hub): ?UserStateScope
-    {
-        if (! $hub->await(IsUserStateInitialized::class)) {
+        if (! $workflowContext->isUserStateInitialized()) {
             return null;
         }
 
-        return new UserStateScope($hub->await(CurrentUserState::class));
+        $userState = $workflowContext->userState()->get();
+
+        return new UserStateScope($userState);
     }
 
-    protected function updateUserStateIfInitialized(NotificationHub $hub, ?UserStateScope $scope): void
+    protected function updateUserStateIfInitialized(WorkflowContext $workflowContext, ?UserStateScope $scope): void
     {
-        $hub->emitWhen(
-            $scope !== null,
-            fn (NotificationHub $hub) => $hub->emit(UserStateChanged::class, $scope->state())
-        );
+        if ($scope !== null) {
+            $workflowContext->userState()->put($scope->state());
+        }
     }
 
     protected function dispatchSignalIfRequested(): void

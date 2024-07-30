@@ -4,8 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;
+use Storm\Projector\Workflow\WorkflowContext;
 
 final readonly class RefreshPersistentProjection
 {
@@ -18,19 +17,19 @@ final readonly class RefreshPersistentProjection
         $this->onRise = false;
     }
 
-    public function __invoke(NotificationHub $hub): bool
+    public function __invoke(WorkflowContext $workflowContext): bool
     {
         /**
          * Discover the remote status which may have changed during the projection
          */
-        $this->discloseRemoteStatus($hub);
+        $this->discloseRemoteStatus($workflowContext);
 
         /**
          * Discover event stream again which may have changed
          * after the first discovery on rising projection
          */
         if (! $this->onlyOnceDiscovery) {
-            $hub->emit(EventStreamDiscovered::class);
+            $workflowContext->discoverEventStream();
         }
 
         return true;

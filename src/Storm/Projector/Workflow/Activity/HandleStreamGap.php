@@ -4,14 +4,11 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Subscription\InteractWithManagement;
-use Storm\Projector\Workflow\Notification\Command\SleepOnGap;
+use Storm\Projector\Workflow\Notification\AfterHandleStreamGap;
+use Storm\Projector\Workflow\Notification\BeforeHandleStreamGap;
 use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
-use Storm\Projector\Workflow\Notification\Promise\HasGap;
-use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamReset;
-use Storm\Projector\Workflow\Stage\AfterHandleStreamGap;
-use Storm\Projector\Workflow\Stage\BeforeHandleStreamGap;
+use Storm\Projector\Workflow\WorkflowContext;
 
 final class HandleStreamGap
 {
@@ -23,19 +20,23 @@ final class HandleStreamGap
      *
      * @see InteractWithManagement@persistWhenThresholdIsReached
      */
-    public function __invoke(NotificationHub $hub): bool
+    public function __invoke(WorkflowContext $workflowContext): bool
     {
-        $hub->emit(BeforeHandleStreamGap::class);
+        $workflowContext->emit(BeforeHandleStreamGap::class);
 
-        if ($hub->await(HasGap::class)) {
-            $hub->emit(SleepOnGap::class);
+        $hasGap = $workflowContext->recognition()->hasGap();
 
-            if (! $hub->await(IsBatchStreamReset::class)) {
-                $hub->emit(new ProjectionStored());
+        if ($hasGap) {
+            $workflowContext->recognition()->sleepOnGap();
+
+            $isBatchStreamReset = $workflowContext->stat()->processed()->count() === 0;
+
+            if (! $isBatchStreamReset) {
+                $workflowContext->emit(new ProjectionStored());
             }
         }
 
-        $hub->emit(AfterHandleStreamGap::class);
+        $workflowContext->emit(AfterHandleStreamGap::class);
 
         return true;
     }

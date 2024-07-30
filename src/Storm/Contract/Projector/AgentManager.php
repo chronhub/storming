@@ -15,6 +15,7 @@ use Storm\Projector\Workflow\Agent\StopAgent;
 use Storm\Projector\Workflow\Agent\StreamEventAgent;
 use Storm\Projector\Workflow\Agent\TimeAgent;
 use Storm\Projector\Workflow\Agent\UserStateAgent;
+use Storm\Projector\Workflow\WorkflowContext;
 
 /**
  * @method ContextReaderAgent        context()
@@ -36,5 +37,5 @@ interface AgentManager
     /**
      * Subscribe to the notification hub.
      */
-    public function subscribe(NotificationHub $hub, ContextReader $context): void;
+    public function subscribe(WorkflowContext $workflowContext, ContextReader $context): void;
 }

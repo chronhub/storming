@@ -138,12 +138,12 @@ test('persist projection', function (ProjectionStatus $status) {
 
     $this->repository->start($status);
 
-    $lockedUntil = retrieveProjection($this->projectionProvider, $this->repository->projectionName())->lockedUntil();
+    $lockedUntil = retrieveProjection($this->projectionProvider, $this->repository->getName())->lockedUntil();
 
     $snapshot = dummyProjectionSnapshot();
     $this->repository->persist($snapshot);
 
-    $projection = retrieveProjection($this->projectionProvider, $this->repository->projectionName());
+    $projection = retrieveProjection($this->projectionProvider, $this->repository->getName());
     expect($projection)->toBeInstanceOf(ProjectionModel::class)
         ->and($projection)->toBeInstanceOf(Projection::class)
         ->and($projection->state())->toBe($this->serializer->serialize($snapshot->userState, 'json'))
@@ -192,7 +192,7 @@ test('refresh lock', function () {
 
     $this->repository->updateLock();
 
-    $projection = retrieveProjection($this->projectionProvider, $this->repository->projectionName());
+    $projection = retrieveProjection($this->projectionProvider, $this->repository->getName());
 
     expect($projection->lockedUntil())->toBe($this->lock->current());
 

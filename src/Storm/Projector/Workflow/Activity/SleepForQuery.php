@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Workflow\Notification\Command\BatchStreamSleep;
-use Storm\Projector\Workflow\Notification\Promise\HasGap;
+use Storm\Projector\Workflow\WorkflowContext;
 
 final readonly class SleepForQuery
 {
-    public function __invoke(NotificationHub $hub): bool
+    public function __invoke(WorkflowContext $workflowContext): bool
     {
-        if (! $hub->await(HasGap::class)) {
-            $hub->emit(BatchStreamSleep::class);
+        $hasGap = $workflowContext->recognition()->hasGap();
+
+        if (! $hasGap) {
+            $workflowContext->streamEvent()->sleep();
         }
 
         return true;

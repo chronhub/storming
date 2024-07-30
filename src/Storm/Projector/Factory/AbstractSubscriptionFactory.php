@@ -9,11 +9,8 @@ use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\ChroniclerDecorator;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\ActivityFactory;
-use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\EmittedStreamCache;
 use Storm\Contract\Projector\Management;
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Projector\ProjectionRepository;
@@ -28,13 +25,13 @@ use Storm\Projector\Scope\QueryAccess;
 use Storm\Projector\Scope\ReadModelAccess;
 use Storm\Projector\Subscription\EmittingManagement;
 use Storm\Projector\Subscription\GenericSubscription;
-use Storm\Projector\Subscription\HubManager;
 use Storm\Projector\Subscription\ManagementEventMap;
 use Storm\Projector\Subscription\QueryingManagement;
 use Storm\Projector\Subscription\ReadingModelManagement;
 use Storm\Projector\Workflow\EmittedStream;
 use Storm\Projector\Workflow\InMemoryEmittedStreams;
 use Storm\Projector\Workflow\Stage;
+use Storm\Projector\Workflow\WorkflowContext;
 
 abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 {
@@ -58,29 +55,25 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
     public function createQuerySubscription(ProjectionOption $option): Subscriber
     {
-        $agentManager = $this->createAgentManager($option);
-        $notificationHub = $this->createNotificationHub($agentManager);
+        $workflowContext = $this->createWorkflowContext($option);
 
-        $projectorScope = new QueryAccess($notificationHub, $this->clock);
+        $projectorScope = new QueryAccess($workflowContext, $this->clock);
         $activities = new QueryActivityFactory(
             $this->chronicler, $projectorScope, $option, $this->clock
         );
 
-        $management = new QueryingManagement($notificationHub);
-        $this->subscribeToMap($management);
+        $management = new QueryingManagement($workflowContext);
+        $this->subscribeToMap($management, $workflowContext);
 
-        $workflowBuilder = $this->createWorkflowBuilder($agentManager, $activities, $notificationHub);
-
-        return new GenericSubscription($workflowBuilder, $notificationHub);
+        return new GenericSubscription($workflowContext, $activities, new Stage());
     }
 
     public function createEmitterSubscription(string $streamName, ProjectionOption $option): Subscriber
     {
-        $agentManager = $this->createAgentManager($option);
-        $notificationHub = $this->createNotificationHub($agentManager);
+        $workflowContext = $this->createWorkflowContext($option);
 
         $management = new EmittingManagement(
-            $notificationHub,
+            $workflowContext,
             $this->chronicler,
             $this->createProjectionRepository($streamName, $option),
             $this->createStreamCache($option),
@@ -88,31 +81,30 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $option->getSleepEmitterOnFirstCommit()
         );
 
-        $this->subscribeToMap($management);
+        $this->subscribeToMap($management, $workflowContext);
 
-        $projectorScope = new EmitterAccess($notificationHub, $this->clock);
+        $projectorScope = new EmitterAccess($workflowContext, $this->clock);
         $activities = new PersistentActivityFactory($this->chronicler, $projectorScope, $option, $this->clock);
 
-        $workflowBuilder = $this->createWorkflowBuilder($agentManager, $activities, $notificationHub);
-
-        return new GenericSubscription($workflowBuilder, $notificationHub);
+        return new GenericSubscription($workflowContext, $activities, new Stage());
     }
 
     public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): Subscriber
     {
-        $agentManager = $this->createAgentManager($option);
-        $notificationHub = $this->createNotificationHub($agentManager);
+        $workflowContext = $this->createWorkflowContext($option);
 
         $projectionRepository = $this->createProjectionRepository($streamName, $option);
-        $management = new ReadingModelManagement($notificationHub, $projectionRepository, $readModel);
-        $this->subscribeToMap($management);
+        $management = new ReadingModelManagement(
+            $workflowContext,
+            $projectionRepository,
+            $readModel
+        );
+        $this->subscribeToMap($management, $workflowContext);
 
-        $projectorScope = new ReadModelAccess($notificationHub, $readModel, $this->clock);
+        $projectorScope = new ReadModelAccess($workflowContext, $readModel, $this->clock);
         $activities = new PersistentActivityFactory($this->chronicler, $projectorScope, $option, $this->clock);
 
-        $workflowBuilder = $this->createWorkflowBuilder($agentManager, $activities, $notificationHub);
-
-        return new GenericSubscription($workflowBuilder, $notificationHub);
+        return new GenericSubscription($workflowContext, $activities, new Stage());
     }
 
     public function getProjectionProvider(): ProjectionProvider
@@ -135,19 +127,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
      */
     abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
 
-    protected function createAgentManager(ProjectionOption $option): AgentManager
+    protected function createWorkflowContext(ProjectionOption $option): WorkflowContext
     {
-        return new AgentProvider($option, $this->eventStreamProvider, $this->clock);
-    }
+        $agentManager = new AgentProvider($option, $this->eventStreamProvider, $this->clock);
 
-    protected function createWorkflowBuilder(AgentManager $agents, ActivityFactory $activityFactory, NotificationHub $hub): WorkflowBuilder
-    {
-        return new WorkflowBuilder(
-            $agents,
-            $activityFactory,
-            $hub,
-            new Stage()
-        );
+        return new WorkflowContext($agentManager);
     }
 
     protected function createLockManager(ProjectionOption $option): LockManager
@@ -165,15 +149,10 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
     }
 
-    protected function createNotificationHub(AgentManager $agents): NotificationHub
-    {
-        return new HubManager($agents);
-    }
-
-    protected function subscribeToMap(Management $management): void
+    protected function subscribeToMap(Management $management, WorkflowContext $workflowContext): void
     {
         $map = new ManagementEventMap();
 
-        $map->subscribeTo($management);
+        $map->subscribeTo($management, $workflowContext);
     }
 }

@@ -5,9 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector;
 
 use Closure;
-use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Workflow\Notification\Promise\CurrentUserState;
-use Storm\Projector\Workflow\Notification\Promise\GetProjectionReport;
+use Storm\Projector\Workflow\WorkflowContext;
 
 trait InteractWithProjection
 {
@@ -63,14 +61,14 @@ trait InteractWithProjection
     public function getState(): array
     {
         return $this->subscriber->interact(
-            fn (NotificationHub $hub): array => $hub->await(CurrentUserState::class)
+            fn (WorkflowContext $workflowContext): array => $workflowContext->userState()->get()
         );
     }
 
     public function getReport(): array
     {
         return $this->subscriber->interact(
-            fn (NotificationHub $hub) => $hub->await(GetProjectionReport::class)
+            fn (WorkflowContext $workflowContext) => $workflowContext->report()->getReport()
         );
     }
 

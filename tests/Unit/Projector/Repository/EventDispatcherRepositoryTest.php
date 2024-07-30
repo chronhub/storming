@@ -45,7 +45,7 @@ function assertErrorEventDispatched(string $projectionName, string $expectedEven
 }
 
 test('dispatch event when create projection', function (ProjectionStatus $status) {
-    $this->repository->expects('projectionName')->andReturn($this->projectionName);
+    $this->repository->expects('getName')->andReturn($this->projectionName);
     $this->repository->expects('create')->with($status);
 
     $this->eventDispatcher->expects('dispatch')->withArgs(
@@ -57,7 +57,7 @@ test('dispatch event when create projection', function (ProjectionStatus $status
 
 test('dispatch error event when create projection raise exception', function (Throwable $exception) {
     $status = ProjectionStatus::RUNNING;
-    $this->repository->expects('projectionName')->andReturn($this->projectionName);
+    $this->repository->expects('getName')->andReturn($this->projectionName);
     $this->repository->expects('create')->with($status)->andThrow($exception);
 
     assertErrorEventDispatched($this->projectionName, ProjectionCreated::class, $exception)($this->eventDispatcher);
@@ -70,7 +70,7 @@ test('dispatch error event when create projection raise exception', function (Th
 })->with('exceptions');
 
 test('dispatch event when start projection', function (ProjectionStatus $status) {
-    $this->repository->expects('projectionName')->andReturn($this->projectionName)->once();
+    $this->repository->expects('getName')->andReturn($this->projectionName)->once();
     $this->repository->expects('start')->with($status)->once();
 
     $this->eventDispatcher->expects('dispatch')->withArgs(
@@ -82,7 +82,7 @@ test('dispatch event when start projection', function (ProjectionStatus $status)
 
 test('dispatch error event when start projection raise exception', function (Throwable $exception) {
     $status = ProjectionStatus::RUNNING;
-    $this->repository->expects('projectionName')->andReturn($this->projectionName);
+    $this->repository->expects('getName')->andReturn($this->projectionName);
     $this->repository->expects('start')->with($status)->andThrow($exception);
 
     assertErrorEventDispatched($this->projectionName, ProjectionStarted::class, $exception)($this->eventDispatcher);
@@ -97,7 +97,7 @@ test('dispatch error event when start projection raise exception', function (Thr
 test('dispatch event when stop projection', function (ProjectionStatus $status) {
     $result = $this->projectionResultStub->fromDefault();
 
-    $this->repository->expects('projectionName')->andReturn($this->projectionName);
+    $this->repository->expects('getName')->andReturn($this->projectionName);
     $this->repository->expects('stop')->with($result, $status);
 
     $this->eventDispatcher
@@ -112,7 +112,7 @@ test('dispatch error event when stop projection raise exception', function (Thro
     $status = ProjectionStatus::RUNNING;
     $result = $this->projectionResultStub->fromDefault();
 
-    $this->repository->expects('projectionName')->andReturn($this->projectionName);
+    $this->repository->expects('getName')->andReturn($this->projectionName);
     $this->repository->expects('stop')->with($result, $status)->andThrow($exception);
 
     assertErrorEventDispatched($this->projectionName, ProjectionStopped::class, $exception)($this->eventDispatcher);
@@ -125,7 +125,7 @@ test('dispatch error event when stop projection raise exception', function (Thro
 })->with('exceptions');
 
 test('dispatch event when start again projection', function (ProjectionStatus $status) {
-    $this->repository->expects('projectionName')->andReturn($this->projectionName);
+    $this->repository->expects('getName')->andReturn($this->projectionName);
     $this->repository->expects('startAgain')->with($status);
 
     $this->eventDispatcher
@@ -138,7 +138,7 @@ test('dispatch event when start again projection', function (ProjectionStatus $s
 test('dispatch event when reset projection', function (ProjectionStatus $status) {
     $result = $this->projectionResultStub->fromDefault();
 
-    $this->repository->expects('projectionName')->andReturn($this->projectionName);
+    $this->repository->expects('getName')->andReturn($this->projectionName);
     $this->repository->expects('reset')->with($result, $status);
 
     $this->eventDispatcher->expects('dispatch')->withArgs(
@@ -154,7 +154,7 @@ test('dispatch error event when reset projection raise exception', function (Thr
     $status = ProjectionStatus::RUNNING;
     $result = $this->projectionResultStub->fromDefault();
 
-    $this->repository->expects('projectionName')->andReturn($this->projectionName);
+    $this->repository->expects('getName')->andReturn($this->projectionName);
     $this->repository->expects('reset')->with($result, $status)->andThrow($exception);
 
     assertErrorEventDispatched($this->projectionName, ProjectionReset::class, $exception)($this->eventDispatcher);
@@ -167,7 +167,7 @@ test('dispatch error event when reset projection raise exception', function (Thr
 })->with('exceptions');
 
 test('dispatch event when delete projection', function (bool $withEmittedEvents) {
-    $this->repository->expects('projectionName')->andReturn($this->projectionName);
+    $this->repository->expects('getName')->andReturn($this->projectionName);
     $this->repository->expects('delete')->with($withEmittedEvents);
 
     $expectedEvent = $withEmittedEvents ? ProjectionDeletedWithEvents::class : ProjectionDeleted::class;
@@ -181,7 +181,7 @@ test('dispatch event when delete projection', function (bool $withEmittedEvents)
 })->with('delete projection with emitted events');
 
 test('dispatch error event when delete projection without emitted events raise exception', function (Throwable $exception) {
-    $this->repository->expects('projectionName')->andReturn($this->projectionName);
+    $this->repository->expects('getName')->andReturn($this->projectionName);
     $this->repository->expects('delete')->with(false)->andThrow($exception);
 
     assertErrorEventDispatched($this->projectionName, ProjectionDeleted::class, $exception)($this->eventDispatcher);
@@ -194,7 +194,7 @@ test('dispatch error event when delete projection without emitted events raise e
 })->with('exceptions');
 
 test('dispatch error event when delete projection with emitted events raise exception', function (Throwable $exception) {
-    $this->repository->expects('projectionName')->andReturn($this->projectionName);
+    $this->repository->expects('getName')->andReturn($this->projectionName);
     $this->repository->expects('delete')->with(true)->andThrow($exception);
 
     assertErrorEventDispatched($this->projectionName, ProjectionDeletedWithEvents::class, $exception)($this->eventDispatcher);
@@ -207,7 +207,7 @@ test('dispatch error event when delete projection with emitted events raise exce
 })->with('exceptions');
 
 test('dispatch event when release projection', function () {
-    $this->repository->expects('projectionName')->andReturn($this->projectionName);
+    $this->repository->expects('getName')->andReturn($this->projectionName);
     $this->repository->expects('release');
 
     $this->eventDispatcher->expects('dispatch')->withArgs(

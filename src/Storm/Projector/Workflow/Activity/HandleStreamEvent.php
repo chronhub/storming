@@ -5,18 +5,15 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Iterator\MergeStreamIterator;
-use Storm\Projector\Workflow\Notification\Command\StreamProcessed;
-use Storm\Projector\Workflow\Notification\Promise\IsSprintRunning;
-use Storm\Projector\Workflow\Notification\Promise\PullBatchStream;
+use Storm\Projector\Workflow\WorkflowContext;
 use Storm\Stream\StreamPosition;
 
 use function gc_collect_cycles;
 
 final class HandleStreamEvent
 {
-    /** @var callable{NotificationHub, string, DomainEvent, StreamPosition} */
+    /** @var callable{WorkflowContext, string, DomainEvent, StreamPosition} */
     private $eventProcessor;
 
     public function __construct(callable $eventProcessor)
@@ -24,21 +21,20 @@ final class HandleStreamEvent
         $this->eventProcessor = $eventProcessor;
     }
 
-    public function __invoke(NotificationHub $hub): bool
+    public function __invoke(WorkflowContext $workflowContext): bool
     {
-        $streams = $hub->await(PullBatchStream::class);
+        $streams = $workflowContext->streamEvent()->pull();
 
         if (! $streams instanceof MergeStreamIterator) {
             return true;
         }
 
         while ($streams->valid()) {
-            $streamName = $streams->streamName();
-            $hub->emit(StreamProcessed::class, $streamName);
+            $workflowContext->processedStream()->set($streams->streamName());
 
-            $continue = ($this->eventProcessor)($hub, $streamName, $streams->current(), $streams->key());
+            $continue = ($this->eventProcessor)($workflowContext, $streams->streamName(), $streams->current(), $streams->key());
 
-            if (! $continue || ! $hub->await(IsSprintRunning::class)) {
+            if (! $continue || ! $workflowContext->sprint()->inProgress()) {
                 break;
             }
 

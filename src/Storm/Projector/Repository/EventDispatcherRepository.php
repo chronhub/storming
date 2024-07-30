@@ -110,9 +110,9 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
         return $this->repository->exists();
     }
 
-    public function projectionName(): string
+    public function getName(): string
     {
-        return $this->repository->projectionName();
+        return $this->repository->getName();
     }
 
     /**
@@ -128,9 +128,9 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
         try {
             $operation();
 
-            $this->eventDispatcher->dispatch(new $event($this->projectionName(), ...$arguments));
+            $this->eventDispatcher->dispatch(new $event($this->getName(), ...$arguments));
         } catch (Throwable $exception) {
-            $errorEvent = new ProjectionError($this->projectionName(), $event, $exception);
+            $errorEvent = new ProjectionError($this->getName(), $event, $exception);
 
             $this->eventDispatcher->dispatch($errorEvent);
 

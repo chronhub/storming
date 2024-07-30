@@ -6,10 +6,9 @@ namespace Storm\Projector;
 
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Projector\ContextReader;
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Contract\Projector\Subscriber;
-use Storm\Projector\Workflow\Notification\Command\SnapshotReset;
+use Storm\Projector\Workflow\WorkflowContext;
 
 final readonly class ProjectQuery implements QueryProjector
 {
@@ -29,9 +28,9 @@ final readonly class ProjectQuery implements QueryProjector
 
     public function reset(): void
     {
-        $this->subscriber->interact(function (NotificationHub $hub): void {
-            $hub->emit(SnapshotReset::class);
-        });
+        $this->subscriber->interact(
+            fn (WorkflowContext $workflowContext) => $workflowContext->resetSnapshot()
+        );
     }
 
     public function filter(QueryFilter $queryFilter): static

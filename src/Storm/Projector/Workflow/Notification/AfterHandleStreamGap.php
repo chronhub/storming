@@ -6,4 +6,4 @@ namespace Storm\Projector\Workflow\Notification;
 
 use Storm\Contract\Projector\EmitOnce;
 
-final class WorkflowBegan implements EmitOnce {}
+final class AfterHandleStreamGap implements EmitOnce {}

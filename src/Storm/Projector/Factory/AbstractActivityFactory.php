@@ -9,14 +9,14 @@ use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ActivityFactory;
-use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Filter\LoadLimiter;
+use Storm\Projector\Workflow\Activity\CollectStreams;
 use Storm\Projector\Workflow\Activity\LoadStreams;
 use Storm\Projector\Workflow\QueryFilterResolver;
 use Storm\Projector\Workflow\StreamEventReactor;
-use Storm\Stream\StreamPosition;
+use Storm\Projector\Workflow\WorkflowContext;
 
 use function array_map;
 
@@ -29,31 +29,21 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
         protected SystemClock $clock
     ) {}
 
-    public function __invoke(AgentManager $agentRegistry): array
+    public function __invoke(WorkflowContext $workflowContext): array
     {
         return array_map(
             fn (callable $activity): callable => $activity(),
-            $this->activities($agentRegistry)
+            $this->activities($workflowContext)
         );
-    }
-
-    /**
-     * Create the query filter resolver.
-     *
-     * @return callable(string $streamName, StreamPosition $streamPosition, LoadLimiter $loadLimiter): QueryFilter
-     */
-    protected function createQueryFilterResolver(AgentManager $agentRegistry): callable
-    {
-        return new QueryFilterResolver($agentRegistry->context()->get()->queryFilter());
     }
 
     /**
      * Create the stream event reactor.
      */
-    protected function createStreamEventReactor(AgentManager $agentRegistry): StreamEventReactor
+    protected function createStreamEventReactor(Closure $reactors): StreamEventReactor
     {
         return new StreamEventReactor(
-            $agentRegistry->context()->get()->reactors(),
+            $reactors,
             $this->projectorScope,
             $this->option->getSignal()
         );
@@ -62,14 +52,15 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
     /**
      * Create the stream event loader.
      */
-    protected function createStreamLoader(AgentManager $agentRegistry): LoadStreams
+    protected function createStreamLoader(QueryFilter $queryFilter): LoadStreams
     {
-        return new LoadStreams(
+        $collectStreams = new CollectStreams(
             $this->chronicler,
-            $this->clock,
             new LoadLimiter($this->option->getLoadLimiter()),
-            $this->createQueryFilterResolver($agentRegistry)
+            new QueryFilterResolver($queryFilter)
         );
+
+        return new LoadStreams($collectStreams, $this->clock);
     }
 
     /**
@@ -77,5 +68,5 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
      *
      * @return array<Closure>
      */
-    abstract protected function activities(AgentManager $agentRegistry): array;
+    abstract protected function activities(WorkflowContext $workflowContext): array;
 }

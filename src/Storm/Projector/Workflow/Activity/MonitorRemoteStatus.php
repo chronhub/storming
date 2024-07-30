@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
 use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
@@ -12,8 +11,7 @@ use Storm\Projector\Workflow\Notification\Management\ProjectionRestarted;
 use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
 use Storm\Projector\Workflow\Notification\Management\ProjectionStatusDisclosed;
 use Storm\Projector\Workflow\Notification\Management\ProjectionSynchronized;
-use Storm\Projector\Workflow\Notification\Promise\CurrentStatus;
-use Storm\Projector\Workflow\Notification\Promise\IsSprintDaemonize;
+use Storm\Projector\Workflow\WorkflowContext;
 
 /**
  * @property bool $onRise
@@ -25,15 +23,17 @@ trait MonitorRemoteStatus
      *
      * @return bool true if projection should stop on rise, false otherwise
      */
-    protected function discloseRemoteStatus(NotificationHub $hub): bool
+    protected function discloseRemoteStatus(WorkflowContext $workflowContext): bool
     {
-        $hub->emit(new ProjectionStatusDisclosed());
+        $workflowContext->emit(new ProjectionStatusDisclosed());
 
-        return match ($hub->await(CurrentStatus::class)->value) {
-            ProjectionStatus::STOPPING->value => $this->onStopping($hub),
-            ProjectionStatus::RESETTING->value => $this->onResetting($hub),
-            ProjectionStatus::DELETING->value => $this->onDeleting($hub, false),
-            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting($hub, true),
+        $currentStatus = $workflowContext->status()->get();
+
+        return match ($currentStatus->value) {
+            ProjectionStatus::STOPPING->value => $this->onStopping($workflowContext),
+            ProjectionStatus::RESETTING->value => $this->onResetting($workflowContext),
+            ProjectionStatus::DELETING->value => $this->onDeleting($workflowContext, false),
+            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting($workflowContext, true),
             default => false,
         };
     }
@@ -41,13 +41,13 @@ trait MonitorRemoteStatus
     /**
      * Stop the projection on rise when stopping status is discovered.
      */
-    protected function onStopping(NotificationHub $hub): bool
+    protected function onStopping(WorkflowContext $workflowContext): bool
     {
         if ($this->onRise) {
-            $hub->emit(new ProjectionSynchronized());
+            $workflowContext->emit(new ProjectionSynchronized());
         }
 
-        $hub->emit(new ProjectionClosed());
+        $workflowContext->emit(new ProjectionClosed());
 
         return $this->onRise;
     }
@@ -61,12 +61,12 @@ trait MonitorRemoteStatus
      * fixMe for emitter projector, unless it was emitted under the projection name
      *   we should not restart the projection, as emitted streams still exist
      */
-    protected function onResetting(NotificationHub $hub): false
+    protected function onResetting(WorkflowContext $workflowContext): false
     {
-        $hub->emit(new ProjectionRevised());
+        $workflowContext->emit(new ProjectionRevised());
 
-        if (! $this->onRise && $hub->await(IsSprintDaemonize::class)) {
-            $hub->emit(new ProjectionRestarted());
+        if (! $this->onRise && $workflowContext->sprint()->inBackground()) {
+            $workflowContext->emit(new ProjectionRestarted());
         }
 
         return false;
@@ -75,9 +75,9 @@ trait MonitorRemoteStatus
     /**
      * Stop the projection on rise when deleting.
      */
-    protected function onDeleting(NotificationHub $hub, bool $shouldDiscardEvents): bool
+    protected function onDeleting(WorkflowContext $workflowContext, bool $shouldDiscardEvents): bool
     {
-        $hub->emit(new ProjectionDiscarded($shouldDiscardEvents));
+        $workflowContext->emit(new ProjectionDiscarded($shouldDiscardEvents));
 
         return $this->onRise;
     }

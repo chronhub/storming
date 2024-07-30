@@ -219,7 +219,7 @@ test('emit event', function (bool $alreadyEmitted, bool $hasStream, bool $alread
 
 test('link to', function (bool $alreadyCached, bool $hasStream) {
     $projectionName = 'foo';
-    $this->repository->shouldNotReceive('projectionName')->with($projectionName)->never();
+    $this->repository->shouldNotReceive('getName')->with($projectionName)->never();
 
     $newStreamName = 'stream1';
     streamIsCachedOrExists($newStreamName, $alreadyCached, $hasStream)($this->chronicler, $this->streamCache);

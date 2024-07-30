@@ -5,14 +5,9 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Agent;
 
 use Storm\Contract\Projector\ContextReader;
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ShouldAgentSubscribe;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
-use Storm\Projector\Workflow\Notification\Promise\CurrentAckedCount;
-use Storm\Projector\Workflow\Notification\Promise\CurrentMainCount;
-use Storm\Projector\Workflow\Notification\Promise\CurrentStartedTime;
-use Storm\Projector\Workflow\Notification\Promise\CurrentTime;
-use Storm\Projector\Workflow\Notification\Promise\CurrentWorkflowCycle;
+use Storm\Projector\Workflow\WorkflowContext;
 
 /**
  * @template TReport of array{
@@ -40,16 +35,16 @@ class ReportAgent implements ShouldAgentSubscribe
         'total_event' => 0,
     ];
 
-    public function subscribe(NotificationHub $hub, ContextReader $context): void
+    public function subscribe(WorkflowContext $workflowContext, ContextReader $context): void
     {
-        $hub->addEvent(BeforeWorkflowRenewal::class, function (NotificationHub $hub) use ($context): void {
+        $workflowContext->listenTo(BeforeWorkflowRenewal::class, function () use ($workflowContext, $context): void {
             $this->report['projection_id'] = $context->id();
-            $this->report['cycle'] = $hub->await(CurrentWorkflowCycle::class);
-            $this->report['started_at'] = $hub->await(CurrentStartedTime::class);
-            $this->report['ended_at'] = $hub->await(CurrentTime::class);
+            $this->report['cycle'] = $workflowContext->stat()->cycle()->current();
+            $this->report['started_at'] = $workflowContext->time()->getStartedTime();
+            $this->report['ended_at'] = $workflowContext->time()->getCurrentTimestamp();
             $this->report['elapsed_time'] = $this->report['ended_at'] - $this->report['started_at'];
-            $this->report['acked_event'] = $hub->await(CurrentAckedCount::class);
-            $this->report['total_event'] = $hub->await(CurrentMainCount::class);
+            $this->report['acked_event'] = $workflowContext->stat()->acked()->count();
+            $this->report['total_event'] = $workflowContext->stat()->main()->current();
         });
     }
 

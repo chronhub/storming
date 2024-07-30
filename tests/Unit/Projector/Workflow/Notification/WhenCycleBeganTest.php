@@ -7,11 +7,11 @@ namespace Storm\Tests\Unit\Projector\Workflow\Notification;
 use Closure;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Notification\Command\TimeStarted;
-use Storm\Projector\Workflow\Notification\Command\WorkflowStarted;
 use Storm\Projector\Workflow\Notification\Handler\WhenWorkflowBegan;
 use Storm\Projector\Workflow\Notification\Promise\IsTimeStarted;
 use Storm\Projector\Workflow\Notification\Promise\IsWorkflowStarted;
 use Storm\Projector\Workflow\Notification\WorkflowBegan;
+use Storm\Projector\Workflow\Notification\WorkflowStarted;
 
 beforeEach(function () {
     $this->hub = mock(NotificationHub::class);

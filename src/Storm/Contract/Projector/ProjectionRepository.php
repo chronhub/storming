@@ -98,5 +98,5 @@ interface ProjectionRepository
      *
      * @return non-empty-string
      */
-    public function projectionName(): string;
+    public function getName(): string;
 }

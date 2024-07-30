@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Projector;
 
+use Storm\Projector\Workflow\WorkflowContext;
 use Throwable;
 
 /**
- * @phpstan-type ExceptionHandler callable(NotificationHub, ?Throwable): void
+ * @phpstan-type ExceptionHandler callable(WorkflowContext, ?Throwable): void
  */
 interface WorkflowInterface
 {

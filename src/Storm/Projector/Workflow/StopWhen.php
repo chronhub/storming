@@ -5,13 +5,9 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow;
 
 use Closure;
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Workflow\Agent\StopAgent;
-use Storm\Projector\Workflow\Notification\Promise\CurrentTime;
-use Storm\Projector\Workflow\Notification\Promise\CurrentWorkflowCycle;
-use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamBlank;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
 
 use function is_int;
@@ -47,7 +43,11 @@ class StopWhen
             throw new InvalidArgumentException('"Stop when" cycle must be greater than 0');
         }
 
-        return fn (NotificationHub $hub): bool => $hub->await(CurrentWorkflowCycle::class) >= $cycle;
+        return function (WorkflowContext $workflowContext) use ($cycle): bool {
+            $currentCycle = $workflowContext->stat()->cycle()->current();
+
+            return $currentCycle >= $cycle;
+        };
     }
 
     /**
@@ -64,7 +64,11 @@ class StopWhen
             throw new InvalidArgumentException('"Stop when" time must be greater than 0');
         }
 
-        return fn (NotificationHub $hub): bool => $hub->await(CurrentTime::class) >= $expiredAt;
+        return function (WorkflowContext $workflowContext) use ($expiredAt): bool {
+            $currentTime = $workflowContext->time()->getCurrentTimestamp();
+
+            return $currentTime >= $expiredAt;
+        };
     }
 
     /**
@@ -75,7 +79,7 @@ class StopWhen
      *
      * todo reset acked event on cycle renewed
      *
-     * @see IsBatchStreamBlank
+     * @see WorkflowContext::isBatchStreamBlank()
      *
      * @param positive-int|null $afterCycle
      */
@@ -86,31 +90,29 @@ class StopWhen
             throw new InvalidArgumentException('"After cycle" must be greater than 0');
         }
 
-        return function (NotificationHub $hub) use ($afterCycle): bool {
+        return function (WorkflowContext $workflowContext) use ($afterCycle): bool {
             if (is_int($afterCycle)) {
-                $currentCycle = $hub->await(CurrentWorkflowCycle::class);
+                $currentCycle = $workflowContext->stat()->cycle()->current();
 
                 if ($afterCycle < $currentCycle) {
                     return false;
                 }
             }
 
-            return $hub->await(IsBatchStreamBlank::class);
+            return $workflowContext->isBatchStreamBlank();
         };
     }
 
     /**
-     * Stop the projection when a gap is detected,
-     * before a checkpoint is saved.
-     *
+     * Stop the projection when a gap is detected before a checkpoint is saved.
      * Require a projection with retries configured.
      *
      * @see GapType
      */
     public static function gapDetected(GapType $gapType): Closure
     {
-        return function (NotificationHub $hub) use ($gapType): bool {
-            return $hub->hasEvent($gapType->value);
+        return function (WorkflowContext $workflowContext) use ($gapType): bool {
+            return $workflowContext->wasEmittedOnce($gapType->value);
         };
     }
 }

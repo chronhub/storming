@@ -9,12 +9,9 @@ use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\EmittedStreamCache;
 use Storm\Contract\Projector\EmitterManagement;
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionRepository;
 use Storm\Projector\Workflow\EmittedStream;
-use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;
-use Storm\Projector\Workflow\Notification\Command\SprintStopped;
-use Storm\Projector\Workflow\Notification\Promise\CurrentStatus;
+use Storm\Projector\Workflow\WorkflowContext;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
 use Throwable;
@@ -26,7 +23,7 @@ final readonly class EmittingManagement implements EmitterManagement
     use InteractWithManagement;
 
     public function __construct(
-        protected NotificationHub $hub,
+        protected WorkflowContext $workflowContext,
         protected Chronicler $chronicler,
         protected ProjectionRepository $projectionRepository,
         private EmittedStreamCache $streamCache,
@@ -51,7 +48,6 @@ final readonly class EmittingManagement implements EmitterManagement
     public function linkTo(string $streamName, DomainEvent $event): void
     {
         $newStreamName = new StreamName($streamName);
-
         $stream = new Stream($newStreamName, [$event]);
 
         $exists = $this->streamIsCachedOrExists($newStreamName);
@@ -63,25 +59,25 @@ final readonly class EmittingManagement implements EmitterManagement
     {
         $this->mountProjection();
 
-        $this->hub->emit(EventStreamDiscovered::class);
+        $this->workflowContext->discoverEventStream();
 
         $this->synchronise();
     }
 
     public function store(): void
     {
-        $this->projectionRepository->persist(
-            $this->takeSnapshot()
-        );
+        $snapshot = $this->workflowContext->takeSnapshot();
+
+        $this->projectionRepository->persist($snapshot);
     }
 
     public function revise(): void
     {
-        $this->resetSnapshot();
+        $this->workflowContext->resetSnapshot();
 
         $this->projectionRepository->reset(
-            $this->takeSnapshot(),
-            $this->hub->await(CurrentStatus::class)
+            $this->workflowContext->takeSnapshot(),
+            $this->workflowContext->status()->get()
         );
 
         $this->deleteStream();
@@ -95,9 +91,9 @@ final readonly class EmittingManagement implements EmitterManagement
             $this->deleteStream();
         }
 
-        $this->hub->emit(SprintStopped::class);
+        $this->workflowContext->sprint()->halt();
 
-        $this->resetSnapshot();
+        $this->workflowContext->resetSnapshot();
     }
 
     /**
@@ -151,7 +147,7 @@ final readonly class EmittingManagement implements EmitterManagement
     private function deleteStream(): void
     {
         try {
-            $streamName = new StreamName($this->projectionRepository->projectionName());
+            $streamName = new StreamName($this->projectionRepository->getName());
 
             $this->chronicler->delete($streamName);
         } catch (StreamNotFound) {

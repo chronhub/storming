@@ -70,6 +70,8 @@ final class ExponentialSleep
 
     /**
      * Get the current sleep time in milliseconds.
+     *
+     * todo exposed for testing purposes
      */
     public function getSleepingTime(): int
     {

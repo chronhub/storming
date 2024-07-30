@@ -20,14 +20,6 @@ class TimeAgent
     }
 
     /**
-     * Check if the timer is started.
-     */
-    public function isStarted(): bool
-    {
-        return $this->timer->isStarted();
-    }
-
-    /**
      * Reset the timer.
      */
     public function reset(): void

@@ -211,5 +211,5 @@ test('check if projection exists', function (bool $exists) {
 })->with('projection exists');
 
 test('return current projection name', function () {
-    expect($this->projectionStore->projectionName())->toBe($this->streamName);
+    expect($this->projectionStore->getName())->toBe($this->streamName);
 });

@@ -4,131 +4,78 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow;
 
-use Storm\Contract\Projector\NotificationHub;
+use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
-use Storm\Projector\Workflow\Notification\Command\BatchStreamReset;
-use Storm\Projector\Workflow\Notification\Command\MainCounterReset;
-use Storm\Projector\Workflow\Notification\Command\NewEventStreamReset;
-use Storm\Projector\Workflow\Notification\Command\SprintTerminated;
-use Storm\Projector\Workflow\Notification\Command\StreamEventAckedReset;
-use Storm\Projector\Workflow\Notification\Command\TimeReset;
-use Storm\Projector\Workflow\Notification\Command\WorkflowCycleIncremented;
-use Storm\Projector\Workflow\Notification\Command\WorkflowCycleReset;
-use Storm\Projector\Workflow\Notification\Command\WorkflowStarted;
-use Storm\Projector\Workflow\Notification\Promise\IsSprintTerminated;
-use Storm\Projector\Workflow\Notification\Promise\IsWorkflowStarted;
-use Storm\Projector\Workflow\Notification\Promise\StreamEventProcessed;
-use Storm\Projector\Workflow\Notification\RecoverableGapDetected;
 use Storm\Projector\Workflow\Notification\ResetOnlyOnceEmittedEvent;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
-use Storm\Projector\Workflow\Notification\UnrecoverableGapDetected;
 use Storm\Projector\Workflow\Notification\WorkflowRenewed;
 
 class Stage
 {
-    protected array $resetsOnCycleRenewed = [
-        BatchStreamReset::class,
-        NewEventStreamReset::class,
-    ];
-
-    protected array $resetsOnTermination = [
-        WorkflowCycleReset::class,
-        TimeReset::class,
-        MainCounterReset::class,
-        StreamEventAckedReset::class,
-    ];
-
-    protected array $forgetsOnCycleRenewed = [
-        StreamEventProcessed::class,
-        RecoverableGapDetected::class,
-        UnrecoverableGapDetected::class,
-    ];
-
-    protected array $forgetsOnTermination = [];
-
     /**
      * Starts the workflow.
      */
-    public function beforeProcessing(NotificationHub $hub): void
+    public function beforeProcessing(WorkflowContext $workflowContext): void
     {
-        if (! $hub->await(IsWorkflowStarted::class)) {
-            $hub->emit(WorkflowStarted::class);
-        }
+        $workflowContext->conditionallyStartWorkflow();
     }
 
     /**
      * After processing the workflow.
      */
-    public function afterProcessing(NotificationHub $hub): void
+    public function afterProcessing(WorkflowContext $workflowContext): void
     {
-        $shouldTerminate = $this->shouldTerminate($hub);
+        // all listeners who want to stop the workflow after one completion
+        // should react to this event
+        // @example StopWhen reacting to this event
+        $workflowContext->emit(ShouldTerminateWorkflow::class);
 
-        $this->renew($hub, $shouldTerminate);
-    }
-
-    /**
-     * Should terminate the workflow.
-     */
-    protected function shouldTerminate(NotificationHub $hub): bool
-    {
-        $hub->emit(ShouldTerminateWorkflow::class);
-
-        $isTerminated = $hub->await(IsSprintTerminated::class);
-
-        if ($isTerminated) {
-            $hub->emit(SprintTerminated::class);
-        }
-
-        return $hub->await(IsSprintTerminated::class);
+        $this->renew($workflowContext, $workflowContext->isSprintTerminated());
     }
 
     /**
      * Renews the workflow.
      */
-    protected function renew(NotificationHub $hub, bool $isSprintTerminated): void
+    protected function renew(WorkflowContext $workflowContext, bool $isSprintTerminated): void
     {
-        $hub->emit(BeforeWorkflowRenewal::class);
+        $workflowContext->emit(BeforeWorkflowRenewal::class);
 
-        $this->resetOnCycleRenewed($hub);
+        $this->resetOnCycleRenewed($workflowContext);
 
         if ($isSprintTerminated) {
-            $this->resetOnTermination($hub);
-            $this->forgetOnTermination($hub);
+            $this->resetOnTermination($workflowContext);
+            $this->forgetOnTermination($workflowContext);
         } else {
-            $hub->emit(WorkflowCycleIncremented::class);
-            $this->forgetOnCycleRenewed($hub);
+            $workflowContext->incrementWorkflowCycle();
+            $this->forgetOnCycleRenewed($workflowContext);
         }
 
-        $hub->emit(WorkflowRenewed::class);
+        $workflowContext->emit(WorkflowRenewed::class);
 
-        $hub->emit(ResetOnlyOnceEmittedEvent::class);
+        $workflowContext->emit(ResetOnlyOnceEmittedEvent::class);
     }
 
-    protected function resetOnCycleRenewed(NotificationHub $hub): void
+    protected function resetOnCycleRenewed(WorkflowContext $workflowContext): void
     {
-        foreach ($this->resetsOnCycleRenewed as $listener) {
-            $hub->emit($listener);
-        }
+        $workflowContext->stat()->processed()->reset();
     }
 
-    protected function resetOnTermination(NotificationHub $hub): void
+    protected function resetOnTermination(WorkflowContext $workflowContext): void
     {
-        foreach ($this->resetsOnTermination as $listener) {
-            $hub->emit($listener);
-        }
+        $workflowContext->stat()->cycle()->reset();
+        $workflowContext->time()->reset();
+        $workflowContext->stat()->main()->reset();
+        $workflowContext->stat()->acked()->reset();
     }
 
-    protected function forgetOnCycleRenewed(NotificationHub $hub): void
+    protected function forgetOnCycleRenewed(WorkflowContext $workflowContext): void
     {
-        foreach ($this->forgetsOnCycleRenewed as $listener) {
-            $hub->forgetEvent($listener);
-        }
+        $workflowContext->forgetListener(GapType::RECOVERABLE_GAP->value);
+        $workflowContext->forgetListener(GapType::UNRECOVERABLE_GAP->value);
     }
 
-    protected function forgetOnTermination(NotificationHub $hub): void
+    protected function forgetOnTermination(WorkflowContext $workflowContext): void
     {
-        foreach ($this->forgetsOnTermination as $listener) {
-            $hub->forgetEvent($listener);
-        }
+        //
     }
 }

@@ -9,9 +9,9 @@ use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Agent\StopAgent;
 use Storm\Projector\Workflow\Notification\Command\SprintStopped;
-use Storm\Projector\Workflow\Notification\Command\SprintTerminated;
-use Storm\Projector\Workflow\Notification\Promise\IsSprintTerminated;
+use Storm\Projector\Workflow\Notification\IsSprintTerminated;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
+use Storm\Projector\Workflow\Notification\SprintTerminated;
 
 beforeEach(function () {
     $this->hub = mock(NotificationHub::class);

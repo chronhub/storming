@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Contract\Projector;
 
 use Closure;
+use Storm\Projector\Workflow\WorkflowContext;
 
 interface ActivityFactory
 {
@@ -14,5 +15,5 @@ interface ActivityFactory
      *
      * @return array<Closure>
      */
-    public function __invoke(AgentManager $agentRegistry): array;
+    public function __invoke(WorkflowContext $workflowContext): array;
 }

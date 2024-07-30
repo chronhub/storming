@@ -4,18 +4,15 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;
-use Storm\Projector\Workflow\Notification\Promise\IsFirstWorkflowCycle;
+use Storm\Projector\Workflow\WorkflowContext;
 
 final readonly class RiseQueryProjection
 {
-    public function __invoke(NotificationHub $hub): bool
+    public function __invoke(WorkflowContext $workflowContext): bool
     {
-        $hub->emitWhen(
-            $hub->await(IsFirstWorkflowCycle::class),
-            fn (NotificationHub $hub) => $hub->emit(EventStreamDiscovered::class)
-        );
+        if ($workflowContext->isFirstWorkflowCycle()) {
+            $workflowContext->discoverEventStream();
+        }
 
         return true;
     }

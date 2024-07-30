@@ -4,12 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Workflow\Notification\Command\BatchStreamSleep;
 use Storm\Projector\Workflow\Notification\Management\ProjectionLockUpdated;
 use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
-use Storm\Projector\Workflow\Notification\Promise\HasGap;
-use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamBlank;
+use Storm\Projector\Workflow\WorkflowContext;
 
 final readonly class PersistOrUpdate
 {
@@ -17,18 +14,18 @@ final readonly class PersistOrUpdate
      * When running blank, we either update the lock after sleeping,
      * or, store the projection snapshot.
      */
-    public function __invoke(NotificationHub $hub): bool
+    public function __invoke(WorkflowContext $workflowContext): bool
     {
-        if (! $hub->await(HasGap::class)) {
-            $hub->emitWhen(
-                $hub->await(IsBatchStreamBlank::class),
-                function (NotificationHub $hub) {
-                    $hub->emit(BatchStreamSleep::class);
+        $hasGap = $workflowContext->recognition()->hasGap();
 
-                    $hub->emit(new ProjectionLockUpdated());
-                },
-                fn (NotificationHub $hub) => $hub->emit(new ProjectionStored()),
-            );
+        if (! $hasGap) {
+            if ($workflowContext->isBatchStreamBlank()) {
+                $workflowContext->streamEvent()->sleep();
+
+                $workflowContext->emit(new ProjectionLockUpdated());
+            } else {
+                $workflowContext->emit(new ProjectionStored());
+            }
         }
 
         return true;

@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Storm\Projector;
 
 use Storm\Contract\Projector\ContextReader;
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\ReadModelProjector;
 use Storm\Contract\Projector\Subscriber;
 use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
 use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
+use Storm\Projector\Workflow\WorkflowContext;
 
 final readonly class ProjectReadModel implements ReadModelProjector
 {
@@ -32,7 +32,9 @@ final readonly class ProjectReadModel implements ReadModelProjector
     public function reset(): void
     {
         $this->subscriber->interact(
-            fn (NotificationHub $hub) => $hub->emit(new ProjectionRevised())
+            fn (WorkflowContext $workflowContext) => $workflowContext->emit(
+                new ProjectionRevised()
+            )
         );
     }
 
@@ -46,7 +48,9 @@ final readonly class ProjectReadModel implements ReadModelProjector
     public function delete(bool $deleteEmittedEvents): void
     {
         $this->subscriber->interact(
-            fn (NotificationHub $hub) => $hub->emit(new ProjectionDiscarded($deleteEmittedEvents))
+            fn (WorkflowContext $workflowContext) => $workflowContext->emit(
+                new ProjectionDiscarded($deleteEmittedEvents)
+            )
         );
     }
 

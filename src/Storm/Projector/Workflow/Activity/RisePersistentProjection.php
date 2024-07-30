@@ -4,9 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Notification\Management\ProjectionRise;
-use Storm\Projector\Workflow\Notification\Promise\IsFirstWorkflowCycle;
+use Storm\Projector\Workflow\WorkflowContext;
 
 final readonly class RisePersistentProjection
 {
@@ -19,14 +18,14 @@ final readonly class RisePersistentProjection
         $this->onRise = true;
     }
 
-    public function __invoke(NotificationHub $hub): bool
+    public function __invoke(WorkflowContext $workflowContext): bool
     {
-        if ($hub->await(IsFirstWorkflowCycle::class)) {
-            if ($this->discloseRemoteStatus($hub)) {
+        if ($workflowContext->isFirstWorkflowCycle()) {
+            if ($this->discloseRemoteStatus($workflowContext)) {
                 return false;
             }
 
-            $hub->emit(new ProjectionRise());
+            $workflowContext->emit(new ProjectionRise());
         }
 
         return true;

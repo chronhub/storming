@@ -50,7 +50,9 @@ final class MergeStreamIterator implements Countable, Iterator
 
     public function valid(): bool
     {
-        return $this->iterators->contains(static fn (array $stream): bool => $stream[0]->valid());
+        return $this->iterators->contains(
+            static fn (array $stream): bool => $stream[0]->valid()
+        );
     }
 
     public function next(): void

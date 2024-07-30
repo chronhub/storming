@@ -134,6 +134,6 @@ class ManagementExpectation
 
     public function assertProjectionName(string $projectionName): void
     {
-        $this->repository->expects('projectionName')->andReturn($projectionName);
+        $this->repository->expects('getName')->andReturn($projectionName);
     }
 }

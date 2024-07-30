@@ -4,20 +4,17 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Subscription;
 
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionRepository;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelManagement;
-use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;
-use Storm\Projector\Workflow\Notification\Command\SprintStopped;
-use Storm\Projector\Workflow\Notification\Promise\CurrentStatus;
+use Storm\Projector\Workflow\WorkflowContext;
 
 final readonly class ReadingModelManagement implements ReadModelManagement
 {
     use InteractWithManagement;
 
     public function __construct(
-        protected NotificationHub $hub,
+        protected WorkflowContext $workflowContext,
         protected ProjectionRepository $projectionRepository,
         private ReadModel $readModel,
     ) {}
@@ -30,25 +27,27 @@ final readonly class ReadingModelManagement implements ReadModelManagement
             $this->readModel->initialize();
         }
 
-        $this->hub->emit(EventStreamDiscovered::class);
+        $this->workflowContext->discoverEventStream();
 
         $this->synchronise();
     }
 
     public function store(): void
     {
-        $this->projectionRepository->persist($this->takeSnapshot());
+        $snapshot = $this->workflowContext->takeSnapshot();
+
+        $this->projectionRepository->persist($snapshot);
 
         $this->readModel->persist();
     }
 
     public function revise(): void
     {
-        $this->resetSnapshot();
+        $this->workflowContext->resetSnapshot();
 
         $this->projectionRepository->reset(
-            $this->takeSnapshot(),
-            $this->hub->await(CurrentStatus::class)
+            $this->workflowContext->takeSnapshot(),
+            $this->workflowContext->status()->get()
         );
 
         $this->readModel->reset();
@@ -62,8 +61,8 @@ final readonly class ReadingModelManagement implements ReadModelManagement
             $this->readModel->down();
         }
 
-        $this->hub->emit(SprintStopped::class);
+        $this->workflowContext->sprint()->halt();
 
-        $this->resetSnapshot();
+        $this->workflowContext->resetSnapshot();
     }
 }

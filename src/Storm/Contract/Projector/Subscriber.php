@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Contract\Projector;
 
 use Closure;
+use Storm\Projector\Workflow\WorkflowContext;
 use Throwable;
 
 interface Subscriber
@@ -19,7 +20,7 @@ interface Subscriber
     /**
      * Interact with notification hub
      *
-     * @param Closure(NotificationHub): mixed $callback
+     * @param Closure(WorkflowContext): mixed $callback
      */
     public function interact(Closure $callback): mixed;
 }

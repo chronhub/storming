@@ -4,16 +4,14 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow;
 
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\WorkflowInterface;
 use Storm\Projector\Exception\RuntimeException;
-use Storm\Projector\Workflow\Notification\Promise\IsSprintTerminated;
 use Throwable;
 
 final class Workflow implements WorkflowInterface
 {
     /**
-     * @var callable(NotificationHub, ?Throwable): void|null
+     * @var callable(WorkflowContext, ?Throwable): void|null
      */
     private $exceptionHandler = null;
 
@@ -23,9 +21,9 @@ final class Workflow implements WorkflowInterface
      */
     private ?Throwable $exceptionOccurred = null;
 
-    /** @param array<callable(NotificationHub): bool> $activities */
+    /** @param array<callable(WorkflowContext): bool> $activities */
     protected function __construct(
-        private readonly NotificationHub $hub,
+        private readonly WorkflowContext $workflowContext,
         private readonly Stage $stage,
         private readonly array $activities,
     ) {}
@@ -33,9 +31,9 @@ final class Workflow implements WorkflowInterface
     /**
      * Creates a new workflow.
      */
-    public static function create(NotificationHub $hub, Stage $stage, array $activities): self
+    public static function create(WorkflowContext $workflowContext, Stage $stage, array $activities): self
     {
-        return new self($hub, $stage, $activities);
+        return new self($workflowContext, $stage, $activities);
     }
 
     /**
@@ -67,19 +65,19 @@ final class Workflow implements WorkflowInterface
     private function loop(): void
     {
         do {
-            $this->stage->beforeProcessing($this->hub);
+            $this->stage->beforeProcessing($this->workflowContext);
 
             $this->run();
 
-            $this->stage->afterProcessing($this->hub);
-        } while (! $this->hub->await(IsSprintTerminated::class));
+            $this->stage->afterProcessing($this->workflowContext);
+        } while (! $this->workflowContext->isSprintTerminated());
     }
 
     private function run(): void
     {
         foreach ($this->activities as $activity) {
             // to avoid unexpected behavior, interface activity
-            if (! $activity($this->hub)) {
+            if (! $activity($this->workflowContext)) {
                 break;
             }
         }
@@ -93,7 +91,7 @@ final class Workflow implements WorkflowInterface
     private function handleException(?Throwable $exception): void
     {
         if ($this->exceptionHandler) {
-            ($this->exceptionHandler)($this->hub, $exception);
+            ($this->exceptionHandler)($this->workflowContext, $exception);
         } elseif ($exception) {
             throw $exception;
         }

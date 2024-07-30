@@ -6,11 +6,11 @@ namespace Storm\Projector;
 
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmitterProjector;
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\Subscriber;
 use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
 use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
+use Storm\Projector\Workflow\WorkflowContext;
 
 final readonly class ProjectEmitter implements EmitterProjector
 {
@@ -32,14 +32,18 @@ final readonly class ProjectEmitter implements EmitterProjector
     public function reset(): void
     {
         $this->subscriber->interact(
-            fn (NotificationHub $hub) => $hub->emit(new ProjectionRevised())
+            fn (WorkflowContext $workflowContext) => $workflowContext->emit(
+                new ProjectionRevised()
+            )
         );
     }
 
     public function delete(bool $deleteEmittedEvents): void
     {
         $this->subscriber->interact(
-            fn (NotificationHub $hub) => $hub->emit(new ProjectionDiscarded($deleteEmittedEvents))
+            fn (WorkflowContext $workflowContext) => $workflowContext->emit(
+                new ProjectionDiscarded($deleteEmittedEvents)
+            )
         );
     }
 

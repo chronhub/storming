@@ -5,23 +5,22 @@ declare(strict_types=1);
 namespace Storm\Projector\Scope;
 
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
-use Storm\Projector\Workflow\Notification\Promise\CurrentProcessedStream;
+use Storm\Projector\Workflow\WorkflowContext;
 
 final readonly class ReadModelAccess implements ReadModelScope
 {
     public function __construct(
-        private NotificationHub $hub,
+        private WorkflowContext $workflowContext,
         private ReadModel $readModel,
         private SystemClock $clock
     ) {}
 
     public function stop(): void
     {
-        $this->hub->emit(new ProjectionClosed());
+        $this->workflowContext->emit(new ProjectionClosed());
     }
 
     public function readModel(): ReadModel
@@ -38,7 +37,7 @@ final readonly class ReadModelAccess implements ReadModelScope
 
     public function streamName(): string
     {
-        return $this->hub->await(CurrentProcessedStream::class);
+        return $this->workflowContext->processedStream()->get();
     }
 
     public function clock(): SystemClock

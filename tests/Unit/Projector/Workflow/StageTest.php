@@ -10,15 +10,15 @@ use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamReset;
 use Storm\Projector\Workflow\Notification\Command\MainCounterReset;
 use Storm\Projector\Workflow\Notification\Command\NewEventStreamReset;
-use Storm\Projector\Workflow\Notification\Command\SprintTerminated;
 use Storm\Projector\Workflow\Notification\Command\StreamEventAckedReset;
 use Storm\Projector\Workflow\Notification\Command\TimeReset;
-use Storm\Projector\Workflow\Notification\Command\WorkflowCycleIncremented;
 use Storm\Projector\Workflow\Notification\Command\WorkflowCycleReset;
-use Storm\Projector\Workflow\Notification\Promise\IsSprintTerminated;
+use Storm\Projector\Workflow\Notification\IsSprintTerminated;
 use Storm\Projector\Workflow\Notification\Promise\StreamEventProcessed;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
+use Storm\Projector\Workflow\Notification\SprintTerminated;
 use Storm\Projector\Workflow\Notification\WorkflowBegan;
+use Storm\Projector\Workflow\Notification\WorkflowCycleIncremented;
 use Storm\Projector\Workflow\Notification\WorkflowRenewed;
 use Storm\Projector\Workflow\Stage;
 

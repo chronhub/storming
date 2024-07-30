@@ -10,7 +10,6 @@ use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Contract\Projector\ContextReader;
-use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ShouldAgentSubscribe;
 use Storm\Projector\Checkpoint\Checkpoints;
@@ -35,6 +34,7 @@ use Storm\Projector\Workflow\Agent\StreamEventAgent;
 use Storm\Projector\Workflow\Agent\TimeAgent;
 use Storm\Projector\Workflow\Agent\UserStateAgent;
 use Storm\Projector\Workflow\Timer;
+use Storm\Projector\Workflow\WorkflowContext;
 
 final class AgentProvider implements AgentManager
 {
@@ -68,11 +68,11 @@ final class AgentProvider implements AgentManager
         ];
     }
 
-    public function subscribe(NotificationHub $hub, ContextReader $context): void
+    public function subscribe(WorkflowContext $workflowContext, ContextReader $context): void
     {
         foreach ($this->agents as $agent) {
             if ($agent instanceof ShouldAgentSubscribe) {
-                $agent->subscribe($hub, $context);
+                $agent->subscribe($workflowContext, $context);
             }
         }
     }

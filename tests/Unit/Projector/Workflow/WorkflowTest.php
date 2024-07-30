@@ -9,7 +9,7 @@ use Exception;
 use InvalidArgumentException;
 use RuntimeException;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Workflow\Notification\Promise\IsSprintTerminated;
+use Storm\Projector\Workflow\Notification\IsSprintTerminated;
 use Storm\Projector\Workflow\Stage;
 use Storm\Projector\Workflow\Workflow;
 use Throwable;

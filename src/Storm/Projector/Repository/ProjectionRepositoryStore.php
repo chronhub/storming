@@ -26,21 +26,21 @@ final readonly class ProjectionRepositoryStore implements ProjectionRepository
         private ProjectionProvider $provider,
         private LockManager $lockManager,
         private SymfonySerializer $serializer,
-        private string $streamName
+        private string $name
     ) {}
 
     public function create(ProjectionStatus $projectionStatus): void
     {
         $data = new CreateData($projectionStatus->value);
 
-        $this->provider->createProjection($this->projectionName(), $data);
+        $this->provider->createProjection($this->name, $data);
     }
 
     public function start(ProjectionStatus $projectionStatus): void
     {
         $data = new StartData($projectionStatus->value, $this->lockManager->acquire());
 
-        $this->provider->acquireLock($this->projectionName(), $data);
+        $this->provider->acquireLock($this->name, $data);
     }
 
     public function stop(ProjectionSnapshot $projectionSnapshot, ProjectionStatus $projectionStatus): void
@@ -93,15 +93,15 @@ final readonly class ProjectionRepositoryStore implements ProjectionRepository
 
     public function delete(bool $withEmittedEvents): void
     {
-        $this->provider->deleteProjection($this->streamName);
+        $this->provider->deleteProjection($this->name);
     }
 
     public function loadSnapshot(): ProjectionSnapshot
     {
-        $projection = $this->provider->retrieve($this->streamName);
+        $projection = $this->provider->retrieve($this->name);
 
         if (! $projection instanceof ProjectionModel) {
-            throw ProjectionNotFound::withName($this->streamName);
+            throw ProjectionNotFound::withName($this->name);
         }
 
         return new ProjectionSnapshot(
@@ -121,7 +121,7 @@ final readonly class ProjectionRepositoryStore implements ProjectionRepository
 
     public function loadStatus(): ProjectionStatus
     {
-        $projection = $this->provider->retrieve($this->streamName);
+        $projection = $this->provider->retrieve($this->name);
 
         if (! $projection instanceof ProjectionModel) {
             return ProjectionStatus::RUNNING;
@@ -132,12 +132,12 @@ final readonly class ProjectionRepositoryStore implements ProjectionRepository
 
     public function exists(): bool
     {
-        return $this->provider->exists($this->streamName);
+        return $this->provider->exists($this->name);
     }
 
-    public function projectionName(): string
+    public function getName(): string
     {
-        return $this->streamName;
+        return $this->name;
     }
 
     /**
@@ -145,6 +145,6 @@ final readonly class ProjectionRepositoryStore implements ProjectionRepository
      */
     private function updateProjection(ProjectionData $data): void
     {
-        $this->provider->updateProjection($this->streamName, $data);
+        $this->provider->updateProjection($this->name, $data);
     }
 }

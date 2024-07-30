@@ -15,10 +15,10 @@ use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\Subscription\ReadModelSubscription;
 use Storm\Projector\Workflow\Agent\SprintAgent;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
-use Storm\Projector\Workflow\Notification\Command\SprintTerminated;
 use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
-use Storm\Projector\Workflow\Notification\Promise\IsSprintTerminated;
+use Storm\Projector\Workflow\Notification\IsSprintTerminated;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
+use Storm\Projector\Workflow\Notification\SprintTerminated;
 use Storm\Projector\Workflow\Notification\WorkflowBegan;
 use Storm\Projector\Workflow\Notification\WorkflowRenewed;
 

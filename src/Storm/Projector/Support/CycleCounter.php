@@ -18,14 +18,6 @@ final class CycleCounter
     }
 
     /**
-     * Get the current cycle.
-     */
-    public function current(): int
-    {
-        return $this->cycle;
-    }
-
-    /**
      * Reset the cycle.
      */
     public function reset(): void
@@ -39,6 +31,14 @@ final class CycleCounter
     public function isFirst(): bool
     {
         return $this->cycle === 1;
+    }
+
+    /**
+     * Get the current cycle.
+     */
+    public function current(): int
+    {
+        return $this->cycle;
     }
 
     /**

@@ -20,7 +20,8 @@ interface CheckpointRecognition extends JsonSerializable
     public function track(string ...$streamNames): void;
 
     /**
-     * Record stream checkpoint.
+     * Record stream checkpoint when gap is detected and unrecoverable.
+     * Otherwise, return checkpoint.
      */
     public function record(StreamPoint $streamPoint): Checkpoint;
 
