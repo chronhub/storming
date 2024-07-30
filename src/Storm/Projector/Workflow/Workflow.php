@@ -15,12 +15,6 @@ final class Workflow implements WorkflowInterface
      */
     private $exceptionHandler = null;
 
-    /**
-     * Prevent the same instance from running again,
-     * after an exception has occurred.
-     */
-    private ?Throwable $exceptionOccurred = null;
-
     /** @param array<callable(WorkflowContext): bool> $activities */
     protected function __construct(
         private readonly WorkflowContext $workflowContext,
@@ -42,14 +36,14 @@ final class Workflow implements WorkflowInterface
      */
     public function process(): void
     {
-        $this->assertNoPreviousException();
+        $exceptionOccurred = null;
 
         try {
             $this->loop();
         } catch (Throwable $exception) {
-            $this->exceptionOccurred = $exception;
+            $exceptionOccurred = $exception;
         } finally {
-            $this->handleException($this->exceptionOccurred);
+            $this->handleException($exceptionOccurred);
         }
     }
 
@@ -76,8 +70,7 @@ final class Workflow implements WorkflowInterface
     private function run(): void
     {
         foreach ($this->activities as $activity) {
-            // to avoid unexpected behavior, interface activity
-            if (! $activity($this->workflowContext)) {
+            if ($activity($this->workflowContext) === false) {
                 break;
             }
         }
@@ -94,20 +87,6 @@ final class Workflow implements WorkflowInterface
             ($this->exceptionHandler)($this->workflowContext, $exception);
         } elseif ($exception) {
             throw $exception;
-        }
-    }
-
-    /**
-     * Asserts that the projection is not running again when an exception has occurred.
-     */
-    private function assertNoPreviousException(): void
-    {
-        if ($this->exceptionOccurred !== null) {
-            $message = 'Running the projection again is not allowed ';
-            $message .= 'when an exception has occurred within a same workflow instance ';
-            $message .= 'in the previous run.';
-
-            throw new RuntimeException($message);
         }
     }
 }
