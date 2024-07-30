@@ -34,6 +34,8 @@ trait InteractWithManagement
 
     public function restart(): void
     {
+
+        // fixme emitter should not restart depends on it was emitted
         $this->workflowContext->sprint()->continue();
 
         $runningStatus = ProjectionStatus::RUNNING;

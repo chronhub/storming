@@ -9,18 +9,25 @@ use Storm\Contract\Projector\ProjectorScope;
 
 use function in_array;
 
+// fixme phpstan
+/**
+ * @template TAcked of DomainEvent
+ */
 final class EventScope
 {
     private bool $isAcked = false;
 
     public function __construct(
+        /**
+         * @var TAcked
+         */
         private readonly DomainEvent $event,
         public readonly ProjectorScope $projector,
         public readonly ?UserStateScope $userState = null
     ) {}
 
     /**
-     * @param class-string $event
+     * @param class-string<TAcked> $event
      */
     public function ack(string $event): ?self
     {
@@ -38,7 +45,7 @@ final class EventScope
     }
 
     /**
-     * @param class-string ...$events
+     * @param class-string<TAcked> ...$events
      */
     public function ackOneOf(string ...$events): ?self
     {
@@ -50,7 +57,9 @@ final class EventScope
     }
 
     /**
-     * @param class-string $event
+     * @param class-string<TAcked> $event
+     *
+     * @phpstan-assert-if-true TAcked $this->event
      */
     public function match(string $event): bool
     {
@@ -69,17 +78,17 @@ final class EventScope
 
     /**
      * @template TEvent of DomainEvent
-     * @template TProjector of ProjectorScope
-     * @template TUserState of UserStateScope|null
+     * @template TProjectorScope of ProjectorScope
+     * @template TUserStateScope of UserStateScope|null
      * @template TReturn of mixed
      *
-     * @param  callable(TEvent, TProjector, TUserState): TReturn $callback
-     * @return static|TReturn
+     * @param  callable(TEvent, TProjectorScope, TUserStateScope): TReturn $callback
+     * @return null|TReturn
      */
     public function then(callable $callback): mixed
     {
         if (! $this->isAcked) {
-            return $this;
+            return null;
         }
 
         return $callback($this->event, $this->projector, $this->userState);

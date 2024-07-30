@@ -6,6 +6,7 @@ namespace Storm\Tests\Feature\Projector;
 
 use Exception;
 use Storm\Clock\Clock;
+use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\ProjectorScope;
 use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\ProjectionStatus;
@@ -115,8 +116,8 @@ test('read model scope with one processed event', function () {
 
     $reactors = function (EventScope $scope): void {
         $scope
-            ->ackOneOf(BalanceCreated::class)
-            ->then(function (BalanceCreated $event, ProjectorScope $scope, ?UserStateScope $userState): void {
+            ->ack(BalanceCreated::class)
+            ->then(function (DomainEvent $event, ProjectorScope $scope, ?UserStateScope $userState): void {
                 /** @var ReadModelScope $scope */
                 expect($userState)->toBeNull()
                     ->and($scope->streamName())->toBe('account')

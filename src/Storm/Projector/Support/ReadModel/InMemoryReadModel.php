@@ -20,7 +20,6 @@ final class InMemoryReadModel implements ReadModel
 
     public function initialize(): void
     {
-        // force read model to be initialized
         $this->container = new Collection();
 
         $this->initialized = true;
