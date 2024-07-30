@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Workflow;
+namespace Storm\Projector\Workflow\Concern;
 
 use Illuminate\Support\Arr;
 use Storm\Contract\Projector\EmitOnce;
