@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Workflow\Concern;
+namespace Storm\Projector\Workflow;
 
 use Illuminate\Support\Arr;
 use Storm\Contract\Projector\EmitOnce;
@@ -20,11 +20,8 @@ use function is_string;
 /**
  * @template TListener of class-string|callable-string
  * @template THandler of class-string|callable|array{callable-string|callable}
- *
- * @param TListener $event
- * @param THandler  $callback
  */
-trait ProvideListenerHandler
+trait ProvideEmitter
 {
     final public const string RESET_ONCE_EMITTED_LISTENER = ResetOnlyOnceEmittedEvent::class;
 
@@ -101,7 +98,7 @@ trait ProvideListenerHandler
      */
     public function has(string $listener): bool
     {
-        return array_key_exists($listener, $this->listeners) || in_array($listener, $this->once);
+        return array_key_exists($listener, $this->listeners);
     }
 
     public function wasEmittedOnce(string $event): bool
