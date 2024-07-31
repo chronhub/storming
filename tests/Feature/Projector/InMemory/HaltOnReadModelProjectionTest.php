@@ -6,7 +6,7 @@ namespace Storm\Tests\Feature\Projector\HaltOn;
 
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
-use Storm\Projector\Workflow\StopWhen;
+use Storm\Projector\Support\StopWhen;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryReadModelProjectionTestBaseTrait;
 use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;

@@ -6,12 +6,12 @@ namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Closure;
 use Storm\Contract\Projector\ActivityFactory;
-use Storm\Contract\Projector\AgentManager;
+use Storm\Contract\Projector\Component;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmitterManagement;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Subscription\EmitterSubscription;
-use Storm\Projector\Workflow\Agent\SprintAgent;
+use Storm\Projector\Workflow\Component\Runner;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
 use Storm\Projector\Workflow\Notification\IsSprintTerminated;
@@ -24,7 +24,7 @@ beforeEach(function () {
     $this->activities = mock(ActivityFactory::class);
     $this->hub = mock(NotificationHub::class);
     $this->management = mock(EmitterManagement::class)->shouldIgnoreMissing();
-    $this->subscriptor = mock(AgentManager::class);
+    $this->subscriptor = mock(Component::class);
 
     $this->subscription = new EmitterSubscription(
         $this->subscriptor,
@@ -55,7 +55,7 @@ test('start projection once', function (bool $keepRunning) {
     $this->hub->expects('emit')->with(UserStateRestored::class);
 
     // setup watchers
-    $sprintWatcher = mock(SprintAgent::class);
+    $sprintWatcher = mock(Runner::class);
     $this->subscriptor->expects('sprint')->andReturn($sprintWatcher)->twice();
     $sprintWatcher->expects('runInBackground')->with($keepRunning);
     $sprintWatcher->expects('continue');

@@ -6,12 +6,12 @@ namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 
 use Storm\Projector\Iterator\MergeStreamIterator;
 use Storm\Projector\Support\ExponentialSleep;
-use Storm\Projector\Workflow\Agent\StreamEventAgent;
+use Storm\Projector\Workflow\Component\StreamEventBatch;
 use Storm\Tests\Stubs\MergeStreamIteratorStub;
 
 beforeEach(function () {
     $this->sleep = new ExponentialSleep(1000, 2, 4000);
-    $this->watcher = new StreamEventAgent($this->sleep);
+    $this->watcher = new StreamEventBatch($this->sleep);
 });
 
 test('test new instance', function () {

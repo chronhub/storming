@@ -7,36 +7,36 @@ namespace Storm\Projector\Scope;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\EmitterScope;
-use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
-use Storm\Projector\Workflow\Notification\Management\StreamEventEmitted;
-use Storm\Projector\Workflow\Notification\Management\StreamEventLinkedTo;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Management\ProjectionClosed;
+use Storm\Projector\Workflow\Management\StreamEventEmitted;
+use Storm\Projector\Workflow\Management\StreamEventLinkedTo;
+use Storm\Projector\Workflow\Process;
 
 final readonly class EmitterAccess implements EmitterScope
 {
     public function __construct(
-        private WorkflowContext $workflowContext,
+        private Process $process,
         private SystemClock $clock
     ) {}
 
     public function emit(DomainEvent $event): void
     {
-        $this->workflowContext->emit(new StreamEventEmitted($event));
+        $this->process->dispatch(new StreamEventEmitted($event));
     }
 
     public function linkTo(string $streamName, DomainEvent $event): void
     {
-        $this->workflowContext->emit(new StreamEventLinkedTo($streamName, $event));
+        $this->process->dispatch(new StreamEventLinkedTo($streamName, $event));
     }
 
     public function stop(): void
     {
-        $this->workflowContext->emit(new ProjectionClosed());
+        $this->process->dispatch(new ProjectionClosed());
     }
 
     public function streamName(): string
     {
-        return $this->workflowContext->processedStream()->get();
+        return $this->process->stream()->get();
     }
 
     public function clock(): SystemClock

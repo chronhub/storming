@@ -8,8 +8,8 @@ use Closure;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Scope\EventScope;
-use Storm\Projector\Workflow\StopWhen;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Support\StopWhen;
+use Storm\Projector\Workflow\Process;
 
 interface Context
 {
@@ -63,10 +63,10 @@ interface Context
      * Stop the projection when a condition is met.
      * Method can be chained.
      *
-     * @see StopWhen for some examples
-     *
-     * @param  Closure(WorkflowContext): bool $haltOn
+     * @param  Closure(Process): bool $haltOn
      * @return $this
+     *
+     * @see StopWhen for some examples
      */
     public function haltOn(Closure $haltOn): self;
 

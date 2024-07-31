@@ -6,35 +6,35 @@ namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Contract\Message\DomainEvent;
 use Storm\Projector\Iterator\MergeStreamIterator;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Process;
 use Storm\Stream\StreamPosition;
 
 use function gc_collect_cycles;
 
 final class HandleStreamEvent
 {
-    /** @var callable{WorkflowContext, string, DomainEvent, StreamPosition} */
-    private $eventProcessor;
+    /** @var callable(Process, string, DomainEvent, StreamPosition): bool */
+    private $eventReactor;
 
-    public function __construct(callable $eventProcessor)
+    public function __construct(callable $eventReactor)
     {
-        $this->eventProcessor = $eventProcessor;
+        $this->eventReactor = $eventReactor;
     }
 
-    public function __invoke(WorkflowContext $workflowContext): bool
+    public function __invoke(Process $process): void
     {
-        $streams = $workflowContext->streamEvent()->pull();
+        $streams = $process->batch()->pull();
 
         if (! $streams instanceof MergeStreamIterator) {
-            return true;
+            return;
         }
 
         while ($streams->valid()) {
-            $workflowContext->processedStream()->set($streams->streamName());
+            $process->stream()->set($streams->streamName());
 
-            $continue = ($this->eventProcessor)($workflowContext, $streams->streamName(), $streams->current(), $streams->key());
+            $continue = ($this->eventReactor)($process, $streams->streamName(), $streams->current(), $streams->key());
 
-            if (! $continue || ! $workflowContext->sprint()->inProgress()) {
+            if (! $continue || ! $process->sprint()->inProgress()) {
                 break;
             }
 
@@ -42,7 +42,5 @@ final class HandleStreamEvent
         }
 
         gc_collect_cycles();
-
-        return true;
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Subscription;
 
-use Storm\Contract\Projector\AgentManager;
+use Storm\Contract\Projector\Component;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Subscription\HubManager;
 use Storm\Tests\Stubs\CallableNotificationStub;
@@ -13,7 +13,7 @@ use Storm\Tests\Stubs\NonCallableNotificationStub;
 use function get_class;
 
 beforeEach(function () {
-    $this->subscriptor = mock(AgentManager::class);
+    $this->subscriptor = mock(Component::class);
     $this->hub = new HubManager($this->subscriptor);
 });
 

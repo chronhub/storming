@@ -30,7 +30,7 @@ test('create workflow and run once', function () {
 
     $workflow = Workflow::create($this->hub, $this->stage, $activities);
 
-    $workflow->process();
+    $workflow->execute();
 })->with([[false], [true]]);
 
 test('create workflow and run once with early return', function (bool $booleanActivityReturn) {
@@ -42,7 +42,7 @@ test('create workflow and run once with early return', function (bool $booleanAc
 
     $workflow = Workflow::create($this->hub, $this->stage, $activities);
 
-    $workflow->process();
+    $workflow->execute();
 })->with([[false], [true]]);
 
 test('create workflow and keep running', function () {
@@ -58,7 +58,7 @@ test('create workflow and keep running', function () {
 
     $workflow = Workflow::create($this->hub, $this->stage, $activities);
 
-    $workflow->process();
+    $workflow->execute();
 });
 
 test('raise exception with no exception handler set', function () {
@@ -73,7 +73,7 @@ test('raise exception with no exception handler set', function () {
 
     $workflow = Workflow::create($this->hub, $this->stage, $activities);
 
-    $workflow->process();
+    $workflow->execute();
 })->throws(RuntimeException::class, 'foo');
 
 test('raise exception with exception handler set', function () {
@@ -94,7 +94,7 @@ test('raise exception with exception handler set', function () {
         $exception
     ));
 
-    $workflow->process();
+    $workflow->execute();
 })->throws(Exception::class, 'foo');
 
 test('prevent running the same instance again when an exception occurred', function () {
@@ -110,10 +110,10 @@ test('prevent running the same instance again when an exception occurred', funct
     $workflow = Workflow::create($this->hub, $this->stage, $activities);
 
     try {
-        $workflow->process();
+        $workflow->execute();
     } catch (InvalidArgumentException) {
         // ignore
     }
 
-    $workflow->process();
+    $workflow->execute();
 })->throws(\Storm\Projector\Exception\RuntimeException::class, 'Running the projection again is not allowed after an exception has occurred.');

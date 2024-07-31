@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Projector;
 
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Process;
 use Throwable;
 
 /**
- * @phpstan-type ExceptionHandler callable(WorkflowContext, ?Throwable): void
+ * @phpstan-type TExceptionHandler callable(Process, ?Throwable): void
  */
 interface WorkflowInterface
 {
@@ -17,12 +17,12 @@ interface WorkflowInterface
      *
      * @throws Throwable
      */
-    public function process(): void;
+    public function execute(): void;
 
     /**
      * Sets the exception handler.
      *
-     * @param ExceptionHandler $exceptionHandler
+     * @param TExceptionHandler $exceptionHandler
      */
     public function withExceptionHandler(callable $exceptionHandler): WorkflowInterface;
 }

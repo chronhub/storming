@@ -6,11 +6,11 @@ namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 
 use Closure;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Support\AckedCounter;
-use Storm\Projector\Support\CycleCounter;
-use Storm\Projector\Support\MainCounter;
-use Storm\Projector\Support\ProcessedCounter;
-use Storm\Projector\Workflow\Agent\ReportAgent;
+use Storm\Projector\Support\Metrics\AckedMetric;
+use Storm\Projector\Support\Metrics\CycleMetric;
+use Storm\Projector\Support\Metrics\MainMetric;
+use Storm\Projector\Support\Metrics\ProcessedMetric;
+use Storm\Projector\Workflow\Component\Computation;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\Promise\CurrentElapsedTime;
 use Storm\Projector\Workflow\Notification\Promise\CurrentStartedTime;
@@ -18,12 +18,12 @@ use Storm\Projector\Workflow\Notification\Promise\CurrentTime;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 
 beforeEach(function () {
-    $this->mainCounter = new MainCounter();
-    $this->processedCounter = new ProcessedCounter(1000);
-    $this->ackedCounter = new AckedCounter();
-    $this->cycleCounter = new CycleCounter();
+    $this->mainCounter = new MainMetric();
+    $this->processedCounter = new ProcessedMetric(1000);
+    $this->ackedCounter = new AckedMetric();
+    $this->cycleCounter = new CycleMetric();
 
-    $this->watcher = new ReportAgent(
+    $this->watcher = new Computation(
         $this->mainCounter,
         $this->processedCounter,
         $this->ackedCounter,
@@ -35,7 +35,7 @@ beforeEach(function () {
 dataset('should reset main event counter', [[true], [false]]);
 
 test('default instance', function () {
-    expect($this->watcher->getReport())->toBe([
+    expect($this->watcher->report())->toBe([
         'started_at' => 0,
         'elapsed_time' => 0,
         'ended_at' => 0,
@@ -86,7 +86,7 @@ test('report', function (bool $doNotReset) {
 
     $this->watcher->subscribe($this->hub);
 
-    expect($this->watcher->getReport())->toBe([
+    expect($this->watcher->report())->toBe([
         'started_at' => 100000000,
         'elapsed_time' => 1,
         'ended_at' => 100000001,

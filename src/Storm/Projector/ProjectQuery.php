@@ -7,15 +7,16 @@ namespace Storm\Projector;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\QueryProjector;
-use Storm\Contract\Projector\Subscriber;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Contract\Projector\Subscriptor;
+use Storm\Projector\Workflow\Input\ResetSnapshot;
+use Storm\Projector\Workflow\Process;
 
 final readonly class ProjectQuery implements QueryProjector
 {
     use InteractWithProjection;
 
     public function __construct(
-        protected Subscriber $subscriber,
+        protected Subscriptor $subscriber,
         protected ContextReader $context,
     ) {}
 
@@ -28,8 +29,8 @@ final readonly class ProjectQuery implements QueryProjector
 
     public function reset(): void
     {
-        $this->subscriber->interact(
-            fn (WorkflowContext $workflowContext) => $workflowContext->resetSnapshot()
+        $this->subscriber->call(
+            fn (Process $process) => $process->call(new ResetSnapshot())
         );
     }
 

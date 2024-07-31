@@ -7,7 +7,7 @@ namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 use Closure;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Workflow\Agent\StopAgent;
+use Storm\Projector\Workflow\Component\HaltOn;
 use Storm\Projector\Workflow\Notification\Command\SprintStopped;
 use Storm\Projector\Workflow\Notification\IsSprintTerminated;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
@@ -16,7 +16,7 @@ use Storm\Projector\Workflow\Notification\SprintTerminated;
 beforeEach(function () {
     $this->hub = mock(NotificationHub::class);
     $this->context = mock(ContextReader::class);
-    $this->watcher = new StopAgent();
+    $this->watcher = new HaltOn();
 });
 
 test('stop when callback returns boolean', function (bool $shouldStop, bool $alreadyStopped): void {

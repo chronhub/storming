@@ -11,15 +11,15 @@ use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionOption;
-use Storm\Projector\Factory\AgentProvider;
 use Storm\Projector\Factory\WatcherFactory;
-use Storm\Projector\Workflow\Agent\EventStreamDiscoveryAgent;
-use Storm\Projector\Workflow\Agent\ReportAgent;
-use Storm\Projector\Workflow\Agent\SprintAgent;
-use Storm\Projector\Workflow\Agent\StopAgent;
-use Storm\Projector\Workflow\Agent\StreamEventAgent;
-use Storm\Projector\Workflow\Agent\TimeAgent;
-use Storm\Projector\Workflow\Agent\UserStateAgent;
+use Storm\Projector\Workflow\Component;
+use Storm\Projector\Workflow\Component\Computation;
+use Storm\Projector\Workflow\Component\EventStreamDiscovery;
+use Storm\Projector\Workflow\Component\HaltOn;
+use Storm\Projector\Workflow\Component\Runner;
+use Storm\Projector\Workflow\Component\StreamEventBatch;
+use Storm\Projector\Workflow\Component\Timing;
+use Storm\Projector\Workflow\Component\UserState;
 
 use function method_exists;
 
@@ -36,21 +36,21 @@ beforeEach(function () {
 
     $watcherFactory = new WatcherFactory($this->option, $this->eventStreamProvider, $this->clock);
 
-    $this->watcherManager = new AgentProvider($watcherFactory->watchers);
+    $this->watcherManager = new Component($watcherFactory->watchers);
 });
 
 /**
  * property watcher, class name, has "subscribe" method name
  */
 dataset('watchers', [
-    'batch stream watcher' => ['streamEvent', StreamEventAgent::class, false],
-    'sprint watcher' => ['sprint', SprintAgent::class, false],
-    'stop watcher' => ['stop', StopAgent::class, true],
-    'event stream watcher' => ['discovery', EventStreamDiscoveryAgent::class, false],
-    'time watcher' => ['time', TimeAgent::class, false],
-    'user state watcher' => ['userState', UserStateAgent::class, false],
+    'batch stream watcher' => ['streamEvent', StreamEventBatch::class, false],
+    'sprint watcher' => ['sprint', Runner::class, false],
+    'stop watcher' => ['stop', HaltOn::class, true],
+    'event stream watcher' => ['discovery', EventStreamDiscovery::class, false],
+    'time watcher' => ['time', Timing::class, false],
+    'user state watcher' => ['userState', UserState::class, false],
     'checkpoint recognition watcher' => ['recognition', CheckpointRecognition::class, false],
-    'report watcher' => ['report', ReportAgent::class, true],
+    'report watcher' => ['report', Computation::class, true],
 ]);
 
 test('can access watcher property', function (string $method, string $className) {

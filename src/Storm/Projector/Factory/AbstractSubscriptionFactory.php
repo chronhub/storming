@@ -15,8 +15,8 @@ use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Projector\ProjectionRepository;
 use Storm\Contract\Projector\ReadModel;
-use Storm\Contract\Projector\Subscriber;
 use Storm\Contract\Projector\SubscriptionFactory;
+use Storm\Contract\Projector\Subscriptor;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Repository\EventDispatcherRepository;
 use Storm\Projector\Repository\LockManager;
@@ -28,10 +28,10 @@ use Storm\Projector\Subscription\GenericSubscription;
 use Storm\Projector\Subscription\ManagementEventMap;
 use Storm\Projector\Subscription\QueryingManagement;
 use Storm\Projector\Subscription\ReadingModelManagement;
+use Storm\Projector\Workflow\Component;
 use Storm\Projector\Workflow\EmittedStream;
 use Storm\Projector\Workflow\InMemoryEmittedStreams;
-use Storm\Projector\Workflow\Stage;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Process;
 
 abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 {
@@ -53,27 +53,27 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $this->chronicler = $chronicler;
     }
 
-    public function createQuerySubscription(ProjectionOption $option): Subscriber
+    public function createQuerySubscription(ProjectionOption $option): Subscriptor
     {
-        $workflowContext = $this->createWorkflowContext($option);
+        $projection = $this->createProcessManager($option);
 
-        $projectorScope = new QueryAccess($workflowContext, $this->clock);
+        $projectorScope = new QueryAccess($projection, $this->clock);
         $activities = new QueryActivityFactory(
             $this->chronicler, $projectorScope, $option, $this->clock
         );
 
-        $management = new QueryingManagement($workflowContext);
-        $this->subscribeToMap($management, $workflowContext);
+        $management = new QueryingManagement($projection);
+        $this->subscribeToMap($management, $projection);
 
-        return new GenericSubscription($workflowContext, $activities, new Stage());
+        return new GenericSubscription($projection, $activities);
     }
 
-    public function createEmitterSubscription(string $streamName, ProjectionOption $option): Subscriber
+    public function createEmitterSubscription(string $streamName, ProjectionOption $option): Subscriptor
     {
-        $workflowContext = $this->createWorkflowContext($option);
+        $projection = $this->createProcessManager($option);
 
         $management = new EmittingManagement(
-            $workflowContext,
+            $projection,
             $this->chronicler,
             $this->createProjectionRepository($streamName, $option),
             $this->createStreamCache($option),
@@ -81,30 +81,27 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
             $option->getSleepEmitterOnFirstCommit()
         );
 
-        $this->subscribeToMap($management, $workflowContext);
+        $this->subscribeToMap($management, $projection);
 
-        $projectorScope = new EmitterAccess($workflowContext, $this->clock);
+        $projectorScope = new EmitterAccess($projection, $this->clock);
         $activities = new PersistentActivityFactory($this->chronicler, $projectorScope, $option, $this->clock);
 
-        return new GenericSubscription($workflowContext, $activities, new Stage());
+        return new GenericSubscription($projection, $activities);
     }
 
-    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): Subscriber
+    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): Subscriptor
     {
-        $workflowContext = $this->createWorkflowContext($option);
+        $process = $this->createProcessManager($option);
 
         $projectionRepository = $this->createProjectionRepository($streamName, $option);
-        $management = new ReadingModelManagement(
-            $workflowContext,
-            $projectionRepository,
-            $readModel
-        );
-        $this->subscribeToMap($management, $workflowContext);
 
-        $projectorScope = new ReadModelAccess($workflowContext, $readModel, $this->clock);
+        $management = new ReadingModelManagement($process, $projectionRepository, $readModel);
+        $this->subscribeToMap($management, $process);
+
+        $projectorScope = new ReadModelAccess($process, $readModel, $this->clock);
         $activities = new PersistentActivityFactory($this->chronicler, $projectorScope, $option, $this->clock);
 
-        return new GenericSubscription($workflowContext, $activities, new Stage());
+        return new GenericSubscription($process, $activities);
     }
 
     public function getProjectionProvider(): ProjectionProvider
@@ -127,11 +124,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
      */
     abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
 
-    protected function createWorkflowContext(ProjectionOption $option): WorkflowContext
+    protected function createProcessManager(ProjectionOption $option): Process
     {
-        $agentManager = new AgentProvider($option, $this->eventStreamProvider, $this->clock);
+        $component = new Component($option, $this->eventStreamProvider, $this->clock);
 
-        return new WorkflowContext($agentManager);
+        return new Process($component);
     }
 
     protected function createLockManager(ProjectionOption $option): LockManager
@@ -149,10 +146,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
     }
 
-    protected function subscribeToMap(Management $management, WorkflowContext $workflowContext): void
+    // fixMe
+    protected function subscribeToMap(Management $management, Process $process): void
     {
         $map = new ManagementEventMap();
 
-        $map->subscribeTo($management, $workflowContext);
+        $map->subscribeTo($management, $process);
     }
 }

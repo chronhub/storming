@@ -10,8 +10,8 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\ReadModelSubscriber;
 use Storm\Projector\ProjectReadModel;
-use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
-use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
+use Storm\Projector\Workflow\Management\ProjectionDiscarded;
+use Storm\Projector\Workflow\Management\ProjectionRevised;
 
 beforeEach(function () {
     $this->subscriber = mock(ReadModelSubscriber::class);

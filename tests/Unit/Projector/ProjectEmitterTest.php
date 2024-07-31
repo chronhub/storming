@@ -10,8 +10,8 @@ use Storm\Contract\Projector\EmitterSubscriber;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Projector\ProjectEmitter;
-use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
-use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
+use Storm\Projector\Workflow\Management\ProjectionDiscarded;
+use Storm\Projector\Workflow\Management\ProjectionRevised;
 
 beforeEach(function () {
     $this->subscriber = mock(EmitterSubscriber::class);

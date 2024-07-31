@@ -9,7 +9,7 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\Scope\ReadModelAccess;
-use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
+use Storm\Projector\Workflow\Management\ProjectionClosed;
 use Storm\Projector\Workflow\Notification\Promise\CurrentProcessedStream;
 
 beforeEach(function () {

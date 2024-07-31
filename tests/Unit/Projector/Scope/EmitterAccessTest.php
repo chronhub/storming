@@ -9,9 +9,9 @@ use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\EmitterScope;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Scope\EmitterAccess;
-use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
-use Storm\Projector\Workflow\Notification\Management\StreamEventEmitted;
-use Storm\Projector\Workflow\Notification\Management\StreamEventLinkedTo;
+use Storm\Projector\Workflow\Management\ProjectionClosed;
+use Storm\Projector\Workflow\Management\StreamEventEmitted;
+use Storm\Projector\Workflow\Management\StreamEventLinkedTo;
 use Storm\Projector\Workflow\Notification\Promise\CurrentProcessedStream;
 
 beforeEach(function () {

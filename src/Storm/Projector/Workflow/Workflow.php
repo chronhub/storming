@@ -6,35 +6,39 @@ namespace Storm\Projector\Workflow;
 
 use Storm\Contract\Projector\WorkflowInterface;
 use Storm\Projector\Exception\RuntimeException;
+use Storm\Projector\Workflow\Input\IsSprintTerminated;
 use Throwable;
 
+/**
+ * @phpstan-import-type TExceptionHandler from WorkflowInterface
+ */
 final class Workflow implements WorkflowInterface
 {
-    /**
-     * @var callable(WorkflowContext, ?Throwable): void|null
-     */
+    /** @var TExceptionHandler|callable|null */
     private $exceptionHandler = null;
 
-    /** @param array<callable(WorkflowContext): bool> $activities */
+    /** @param array<callable(Process): mixed> $activities */
     protected function __construct(
-        private readonly WorkflowContext $workflowContext,
-        private readonly Stage $stage,
+        private Process $process,
         private readonly array $activities,
+        private readonly Stage $stage,
     ) {}
 
     /**
      * Creates a new workflow.
      */
-    public static function create(WorkflowContext $workflowContext, Stage $stage, array $activities): self
+    public static function create(Process $process, array $activities): self
     {
-        return new self($workflowContext, $stage, $activities);
+        $stage = new Stage($process);
+
+        return new self($process, $activities, $stage);
     }
 
     /**
      * @throws RuntimeException when an exception has occurred in a previous run
      * @throws Throwable        when any other exception occurs
      */
-    public function process(): void
+    public function execute(): void
     {
         $exceptionOccurred = null;
 
@@ -59,18 +63,20 @@ final class Workflow implements WorkflowInterface
     private function loop(): void
     {
         do {
-            $this->stage->beforeProcessing($this->workflowContext);
+            $this->stage->beforeProcessing();
 
             $this->run();
 
-            $this->stage->afterProcessing($this->workflowContext);
-        } while (! $this->workflowContext->isSprintTerminated());
+            $this->stage->afterProcessing();
+        } while (! $this->process->call(new IsSprintTerminated()));
     }
 
     private function run(): void
     {
         foreach ($this->activities as $activity) {
-            if ($activity($this->workflowContext) === false) {
+            $result = $activity($this->process);
+
+            if ($result === false) {
                 break;
             }
         }
@@ -84,7 +90,7 @@ final class Workflow implements WorkflowInterface
     private function handleException(?Throwable $exception): void
     {
         if ($this->exceptionHandler) {
-            ($this->exceptionHandler)($this->workflowContext, $exception);
+            ($this->exceptionHandler)($this->process, $exception);
         } elseif ($exception) {
             throw $exception;
         }

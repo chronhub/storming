@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
-use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
-use Storm\Projector\Workflow\Notification\Management\ProjectionRestarted;
-use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
-use Storm\Projector\Workflow\Notification\Management\ProjectionStatusDisclosed;
-use Storm\Projector\Workflow\Notification\Management\ProjectionSynchronized;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Management\ProjectionClosed;
+use Storm\Projector\Workflow\Management\ProjectionDiscarded;
+use Storm\Projector\Workflow\Management\ProjectionRestarted;
+use Storm\Projector\Workflow\Management\ProjectionRevised;
+use Storm\Projector\Workflow\Management\ProjectionStatusDisclosed;
+use Storm\Projector\Workflow\Management\ProjectionSynchronized;
+use Storm\Projector\Workflow\Process;
 
 /**
  * @property bool $onRise
@@ -23,17 +23,17 @@ trait MonitorRemoteStatus
      *
      * @return bool true if projection should stop on rise, false otherwise
      */
-    protected function discloseRemoteStatus(WorkflowContext $workflowContext): bool
+    protected function discloseRemoteStatus(Process $process): bool
     {
-        $workflowContext->emit(new ProjectionStatusDisclosed());
+        $process->dispatch(new ProjectionStatusDisclosed());
 
-        $currentStatus = $workflowContext->status()->get();
+        $currentStatus = $process->status()->get();
 
         return match ($currentStatus->value) {
-            ProjectionStatus::STOPPING->value => $this->onStopping($workflowContext),
-            ProjectionStatus::RESETTING->value => $this->onResetting($workflowContext),
-            ProjectionStatus::DELETING->value => $this->onDeleting($workflowContext, false),
-            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting($workflowContext, true),
+            ProjectionStatus::STOPPING->value => $this->onStopping($process),
+            ProjectionStatus::RESETTING->value => $this->onResetting($process),
+            ProjectionStatus::DELETING->value => $this->onDeleting($process, false),
+            ProjectionStatus::DELETING_WITH_EMITTED_EVENTS->value => $this->onDeleting($process, true),
             default => false,
         };
     }
@@ -41,13 +41,13 @@ trait MonitorRemoteStatus
     /**
      * Stop the projection on rise when stopping status is discovered.
      */
-    protected function onStopping(WorkflowContext $workflowContext): bool
+    protected function onStopping(Process $process): bool
     {
         if ($this->onRise) {
-            $workflowContext->emit(new ProjectionSynchronized());
+            $process->dispatch(new ProjectionSynchronized());
         }
 
-        $workflowContext->emit(new ProjectionClosed());
+        $process->dispatch(new ProjectionClosed());
 
         return $this->onRise;
     }
@@ -61,12 +61,12 @@ trait MonitorRemoteStatus
      * fixMe for emitter projector, unless it was emitted under the projection name
      *   we should not restart the projection, as emitted streams still exist
      */
-    protected function onResetting(WorkflowContext $workflowContext): false
+    protected function onResetting(Process $process): false
     {
-        $workflowContext->emit(new ProjectionRevised());
+        $process->dispatch(new ProjectionRevised());
 
-        if (! $this->onRise && $workflowContext->sprint()->inBackground()) {
-            $workflowContext->emit(new ProjectionRestarted());
+        if (! $this->onRise && $process->sprint()->inBackground()) {
+            $process->dispatch(new ProjectionRestarted());
         }
 
         return false;
@@ -75,9 +75,9 @@ trait MonitorRemoteStatus
     /**
      * Stop the projection on rise when deleting.
      */
-    protected function onDeleting(WorkflowContext $workflowContext, bool $shouldDiscardEvents): bool
+    protected function onDeleting(Process $process, bool $shouldDiscardEvents): bool
     {
-        $workflowContext->emit(new ProjectionDiscarded($shouldDiscardEvents));
+        $process->dispatch(new ProjectionDiscarded($shouldDiscardEvents));
 
         return $this->onRise;
     }

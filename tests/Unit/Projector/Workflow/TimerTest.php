@@ -8,7 +8,7 @@ use Carbon\CarbonImmutable;
 use Storm\Clock\PointInTime;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Projector\Exception\RuntimeException;
-use Storm\Projector\Workflow\Timer;
+use Storm\Projector\Support\Timer;
 
 beforeEach(function () {
     $this->pointInTime = PointInTime::fromString('2024-07-06T14:42:29.000000');

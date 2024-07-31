@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Support;
 
-use Storm\Projector\Support\CycleCounter;
+use Storm\Projector\Support\Metrics\CycleMetric;
 
 beforeEach(function () {
-    $this->cycleCounter = new CycleCounter();
+    $this->cycleCounter = new CycleMetric();
 });
 
 test('can be instantiated', function () {
-    expect($this->cycleCounter)->toBeInstanceOf(CycleCounter::class)
+    expect($this->cycleCounter)->toBeInstanceOf(CycleMetric::class)
         ->and($this->cycleCounter->current())->toBe(0)
         ->and($this->cycleCounter->hasStarted())->toBeFalse();
 });

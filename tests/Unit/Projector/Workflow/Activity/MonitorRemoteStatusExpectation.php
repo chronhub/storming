@@ -7,12 +7,12 @@ namespace Storm\Tests\Unit\Projector\Workflow\Activity;
 use Mockery\MockInterface;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Workflow\Notification\Management\ProjectionClosed;
-use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
-use Storm\Projector\Workflow\Notification\Management\ProjectionRestarted;
-use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
-use Storm\Projector\Workflow\Notification\Management\ProjectionStatusDisclosed;
-use Storm\Projector\Workflow\Notification\Management\ProjectionSynchronized;
+use Storm\Projector\Workflow\Management\ProjectionClosed;
+use Storm\Projector\Workflow\Management\ProjectionDiscarded;
+use Storm\Projector\Workflow\Management\ProjectionRestarted;
+use Storm\Projector\Workflow\Management\ProjectionRevised;
+use Storm\Projector\Workflow\Management\ProjectionStatusDisclosed;
+use Storm\Projector\Workflow\Management\ProjectionSynchronized;
 use Storm\Projector\Workflow\Notification\Promise\CurrentStatus;
 use Storm\Projector\Workflow\Notification\Promise\IsSprintDaemonize;
 

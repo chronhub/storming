@@ -11,18 +11,18 @@ use Storm\Projector\Workflow\Activity\HandleStreamGap;
 use Storm\Projector\Workflow\Activity\PersistOrUpdate;
 use Storm\Projector\Workflow\Activity\RefreshPersistentProjection;
 use Storm\Projector\Workflow\Activity\RisePersistentProjection;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Process;
 
 final readonly class PersistentActivityFactory extends AbstractActivityFactory implements PersistentActivity
 {
-    protected function activities(WorkflowContext $workflowContext): array
+    protected function activities(Process $process): array
     {
         $eventProcessor = $this->createStreamEventReactor(
-            $workflowContext->context()->get()->reactors(),
+            $process->context()->get()->reactors(),
         );
 
         $streamEventLoader = $this->createStreamLoader(
-            $workflowContext->context()->get()->queryFilter(),
+            $process->context()->get()->queryFilter(),
         );
 
         return [
@@ -31,7 +31,7 @@ final readonly class PersistentActivityFactory extends AbstractActivityFactory i
             fn (): callable => new HandleStreamEvent($eventProcessor),
             fn (): callable => new HandleStreamGap(),
             fn (): callable => new PersistOrUpdate(),
-            fn (): callable => new DispatchSignal($this->option->getSignal()),
+            fn (): callable => new DispatchSignal(),
             fn (): callable => new RefreshPersistentProjection($this->option->getOnlyOnceDiscovery()),
         ];
     }

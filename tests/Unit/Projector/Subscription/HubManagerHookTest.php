@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Subscription;
 
 use stdClass;
-use Storm\Contract\Projector\AgentManager;
+use Storm\Contract\Projector\Component;
 use Storm\Projector\Subscription\HubManager;
 
 use function get_class;
 use function in_array;
 
 beforeEach(function () {
-    $this->subscriptor = mock(AgentManager::class);
+    $this->subscriptor = mock(Component::class);
     $this->hub = new HubManager($this->subscriptor);
 });
 

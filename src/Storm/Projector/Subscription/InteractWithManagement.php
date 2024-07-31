@@ -5,101 +5,118 @@ declare(strict_types=1);
 namespace Storm\Projector\Subscription;
 
 use Storm\Projector\ProjectionStatus;
+use Storm\Projector\Repository\ProjectionSnapshot;
+use Storm\Projector\Workflow\Input\ResetSnapshot;
+use Storm\Projector\Workflow\Input\TakeSnapshot;
+use Storm\Projector\Workflow\Process;
 
 use function in_array;
 
+/**
+ * @property-read Process $process
+ */
 trait InteractWithManagement
 {
     public function shouldUpdateLock(): void
     {
-        $this->projectionRepository->updateLock();
+        $this->store->updateLock();
     }
 
     public function freed(): void
     {
-        $this->projectionRepository->release();
+        $this->store->release();
 
-        $this->workflowContext->status()->set(ProjectionStatus::IDLE);
+        $this->process->status()->set(ProjectionStatus::IDLE);
     }
 
     public function close(): void
     {
         $idleStatus = ProjectionStatus::IDLE;
-        $snapshot = $this->workflowContext->takeSnapshot();
+        $snapshot = $this->takeSnapshot();
 
-        $this->projectionRepository->stop($snapshot, $idleStatus);
-        $this->workflowContext->status()->set($idleStatus);
-        $this->workflowContext->sprint()->halt();
+        $this->store->stop($snapshot, $idleStatus);
+
+        $this->process->status()->set($idleStatus);
+        $this->process->sprint()->halt();
     }
 
     public function restart(): void
     {
-
         // fixme emitter should not restart depends on it was emitted
-        $this->workflowContext->sprint()->continue();
+        $this->process->sprint()->continue();
 
         $runningStatus = ProjectionStatus::RUNNING;
 
-        $this->projectionRepository->startAgain($runningStatus);
-        $this->workflowContext->status()->set($runningStatus);
+        $this->store->startAgain($runningStatus);
+        $this->process->status()->set($runningStatus);
     }
 
     public function disclose(): void
     {
-        $disclosedStatus = $this->projectionRepository->loadStatus();
+        $disclosedStatus = $this->store->loadStatus();
 
-        $this->workflowContext->status()->set($disclosedStatus);
+        $this->process->status()->set($disclosedStatus);
     }
 
     public function synchronise(): void
     {
-        $snapshot = $this->projectionRepository->loadSnapshot();
+        $snapshot = $this->store->loadSnapshot();
 
-        $this->workflowContext->recognition()->update($snapshot->checkpoints);
+        $this->process->recognition()->update($snapshot->checkpoints);
 
-        $state = $snapshot->userState;
+        $userState = $snapshot->userState;
 
-        if ($state !== []) {
-            $this->workflowContext->userState()->put($state);
+        if ($userState !== []) {
+            $this->process->userState()->put($userState);
         }
     }
 
     public function performWhenThresholdIsReached(): void
     {
-        $thresholdReached = $this->workflowContext->stat()->processed()->isLimitReached();
+        $thresholdReached = $this->process->metrics()->isProcessedThresholdReached();
 
         if ($thresholdReached) {
             $this->store();
 
-            $this->workflowContext->stat()->processed()->reset();
+            $this->process->metrics()['processed'] = 0;
 
             $this->disclose();
 
             // todo check if Idle still needed
             $keepProjectionRunning = [ProjectionStatus::RUNNING, ProjectionStatus::IDLE];
 
-            if (! in_array($this->workflowContext->status()->get(), $keepProjectionRunning, true)) {
-                $this->workflowContext->sprint()->halt();
+            if (! in_array($this->process->status()->get(), $keepProjectionRunning, true)) {
+                $this->process->sprint()->halt();
             }
         }
     }
 
     public function getName(): string
     {
-        return $this->projectionRepository->getName();
+        return $this->store->getName();
     }
 
     protected function mountProjection(): void
     {
-        $currentStatus = $this->workflowContext->status()->get();
+        $currentStatus = $this->process->status()->get();
 
-        if (! $this->projectionRepository->exists()) {
-            $this->projectionRepository->create($currentStatus);
+        if (! $this->store->exists()) {
+            $this->store->create($currentStatus);
         }
 
         $runningStatus = ProjectionStatus::RUNNING;
 
-        $this->projectionRepository->start($runningStatus);
-        $this->workflowContext->status()->set($runningStatus);
+        $this->store->start($runningStatus);
+        $this->process->status()->set($runningStatus);
+    }
+
+    protected function takeSnapshot(): ProjectionSnapshot
+    {
+        return $this->process->call(new TakeSnapshot());
+    }
+
+    protected function resetSnapshot(): void
+    {
+        $this->process->call(new ResetSnapshot());
     }
 }

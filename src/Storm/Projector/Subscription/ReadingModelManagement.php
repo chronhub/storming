@@ -7,15 +7,16 @@ namespace Storm\Projector\Subscription;
 use Storm\Contract\Projector\ProjectionRepository;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelManagement;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Input\DiscoverEventStream;
+use Storm\Projector\Workflow\Process;
 
 final readonly class ReadingModelManagement implements ReadModelManagement
 {
     use InteractWithManagement;
 
     public function __construct(
-        protected WorkflowContext $workflowContext,
-        protected ProjectionRepository $projectionRepository,
+        protected Process $process,
+        protected ProjectionRepository $store,
         private ReadModel $readModel,
     ) {}
 
@@ -27,27 +28,27 @@ final readonly class ReadingModelManagement implements ReadModelManagement
             $this->readModel->initialize();
         }
 
-        $this->workflowContext->discoverEventStream();
+        $this->process->call(new DiscoverEventStream());
 
         $this->synchronise();
     }
 
     public function store(): void
     {
-        $snapshot = $this->workflowContext->takeSnapshot();
+        $snapshot = $this->takeSnapshot();
 
-        $this->projectionRepository->persist($snapshot);
+        $this->store->persist($snapshot);
 
         $this->readModel->persist();
     }
 
     public function revise(): void
     {
-        $this->workflowContext->resetSnapshot();
+        $this->resetSnapshot();
 
-        $this->projectionRepository->reset(
-            $this->workflowContext->takeSnapshot(),
-            $this->workflowContext->status()->get()
+        $this->store->reset(
+            $this->takeSnapshot(),
+            $this->process->status()->get()
         );
 
         $this->readModel->reset();
@@ -55,14 +56,14 @@ final readonly class ReadingModelManagement implements ReadModelManagement
 
     public function discard(bool $withEmittedEvents): void
     {
-        $this->projectionRepository->delete($withEmittedEvents);
+        $this->store->delete($withEmittedEvents);
 
         if ($withEmittedEvents) {
             $this->readModel->down();
         }
 
-        $this->workflowContext->sprint()->halt();
+        $this->process->sprint()->halt();
 
-        $this->workflowContext->resetSnapshot();
+        $this->resetSnapshot();
     }
 }

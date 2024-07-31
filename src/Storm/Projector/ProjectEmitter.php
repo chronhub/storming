@@ -7,17 +7,17 @@ namespace Storm\Projector;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\ProjectionQueryFilter;
-use Storm\Contract\Projector\Subscriber;
-use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
-use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Contract\Projector\Subscriptor;
+use Storm\Projector\Workflow\Management\ProjectionDiscarded;
+use Storm\Projector\Workflow\Management\ProjectionRevised;
+use Storm\Projector\Workflow\Process;
 
 final readonly class ProjectEmitter implements EmitterProjector
 {
     use InteractWithProjection;
 
     public function __construct(
-        protected Subscriber $subscriber,
+        protected Subscriptor $subscriber,
         protected ContextReader $context,
         protected string $streamName
     ) {}
@@ -31,18 +31,18 @@ final readonly class ProjectEmitter implements EmitterProjector
 
     public function reset(): void
     {
-        $this->subscriber->interact(
-            fn (WorkflowContext $workflowContext) => $workflowContext->emit(
-                new ProjectionRevised()
-            )
+        $this->subscriber->call(
+            fn (Process $process) => $process->dispatch(
+                new ProjectionRevised(),
+            ),
         );
     }
 
     public function delete(bool $deleteEmittedEvents): void
     {
-        $this->subscriber->interact(
-            fn (WorkflowContext $workflowContext) => $workflowContext->emit(
-                new ProjectionDiscarded($deleteEmittedEvents)
+        $this->subscriber->call(
+            fn (Process $process) => $process->dispatch(
+                new ProjectionDiscarded($deleteEmittedEvents),
             )
         );
     }

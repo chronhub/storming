@@ -7,9 +7,9 @@ namespace Storm\Tests\Unit\Projector\Workflow\Activity;
 use Closure;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Activity\PersistOrUpdate;
+use Storm\Projector\Workflow\Management\ProjectionLockUpdated;
+use Storm\Projector\Workflow\Management\ProjectionStored;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamSleep;
-use Storm\Projector\Workflow\Notification\Management\ProjectionLockUpdated;
-use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
 use Storm\Projector\Workflow\Notification\Promise\HasGap;
 use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamBlank;
 

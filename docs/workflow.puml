@@ -1,0 +1,34 @@
+@startuml
+
+class Workflow {
+    -WorkflowContext workflowContext
+    -Stage stage
+    -array activities
+    -callable exceptionHandler
+    +create(WorkflowContext, Stage, array) Workflow
+    +process() void
+    +withExceptionHandler(callable) Workflow
+    -loop() void
+    -run() void
+    -handleException(Throwable) void
+}
+
+class Stage {
+    +beforeProcessing(WorkflowContext) void
+    +afterProcessing(WorkflowContext) void
+    #renew(WorkflowContext, bool) void
+    #resetOnCycleRenewed(WorkflowContext) void
+    #resetOnTermination(WorkflowContext) void
+    #forgetOnCycleRenewed(WorkflowContext) void
+    #forgetOnTermination(WorkflowContext) void
+}
+
+class WorkflowContext {
+    <<interface>>
+}
+
+Workflow --> "1" Stage : has
+Workflow --> "1" WorkflowContext : has
+Stage ..> WorkflowContext : uses
+
+@enduml

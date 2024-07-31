@@ -4,18 +4,16 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Process;
 
 final readonly class SleepForQuery
 {
-    public function __invoke(WorkflowContext $workflowContext): bool
+    public function __invoke(Process $process): void
     {
-        $hasGap = $workflowContext->recognition()->hasGap();
+        $hasGap = $process->recognition()->hasGap();
 
         if (! $hasGap) {
-            $workflowContext->streamEvent()->sleep();
+            $process->batch()->sleep();
         }
-
-        return true;
     }
 }

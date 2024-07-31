@@ -12,7 +12,7 @@ use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Projector\Checkpoint\Checkpoints;
 use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Exception\CheckpointViolation;
-use Storm\Projector\Workflow\Agent\CheckpointGapLessAgent;
+use Storm\Projector\Workflow\Component\InMemoryCheckpoint;
 
 use function array_values;
 use function count;
@@ -21,7 +21,7 @@ use function method_exists;
 beforeEach(function () {
     $this->clock = mock(SystemClock::class);
     $this->checkpoints = new Checkpoints(false);
-    $this->watcher = new CheckpointGapLessAgent($this->checkpoints, $this->clock);
+    $this->watcher = new InMemoryCheckpoint($this->checkpoints, $this->clock);
 });
 
 function mockCheckpointGapLessCreatedAt(int $expectedCalls = 1): Closure
@@ -35,7 +35,7 @@ function mockCheckpointGapLessCreatedAt(int $expectedCalls = 1): Closure
 test('cannot be used with record gaps enabled', function () {
     $this->checkpoints = new Checkpoints(true);
 
-    new CheckpointGapLessAgent($this->checkpoints, $this->clock);
+    new InMemoryCheckpoint($this->checkpoints, $this->clock);
 })->throws(LogicException::class, 'CheckpointGapLessWatcher cannot be used with record gaps enabled');
 
 test('default instance', function () {

@@ -5,21 +5,21 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Support;
 
 use Storm\Projector\Exception\InvalidArgumentException;
-use Storm\Projector\Support\ProcessedCounter;
+use Storm\Projector\Support\Metrics\ProcessedMetric;
 
 beforeEach(function () {
-    $this->processedCounter = new ProcessedCounter(5);
+    $this->processedCounter = new ProcessedMetric(5);
 });
 
 test('can be instantiated', function () {
-    expect($this->processedCounter)->toBeInstanceOf(ProcessedCounter::class)
+    expect($this->processedCounter)->toBeInstanceOf(ProcessedMetric::class)
         ->and($this->processedCounter->count())->toBe(0)
         ->and($this->processedCounter->threshold)->toBe(5)
         ->and($this->processedCounter->isLimitReached())->toBeFalse();
 });
 
 test('raises an exception if threshold is less than 1', function (int $threshold) {
-    new ProcessedCounter($threshold);
+    new ProcessedMetric($threshold);
 })
     ->with([[-10], [-1], [0]])
     ->throws(InvalidArgumentException::class, 'Processed counter threshold must be greater than 0');

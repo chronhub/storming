@@ -7,17 +7,16 @@ namespace Storm\Tests\Unit\Projector\Subscription;
 use BadMethodCallException;
 use stdClass;
 use Storm\Contract\Chronicler\EventStreamProvider;
-use Storm\Contract\Projector\AgentManager;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Factory\AgentProvider;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Subscription\AgentManager;
+use Storm\Projector\Workflow\Component;
 use TypeError;
 
 beforeEach(function () {
     $this->eventStreamProvider = mock(EventStreamProvider::class);
-    $this->watchers = mock(AgentProvider::class);
+    $this->watchers = mock(Component::class);
     $this->subscriptionManager = new AgentManager($this->watchers);
 });
 

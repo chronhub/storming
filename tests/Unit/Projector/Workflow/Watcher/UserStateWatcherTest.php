@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 
-use Storm\Projector\Workflow\Agent\UserStateAgent;
+use Storm\Projector\Workflow\Component\UserState;
 
 beforeEach(function () {
-    $this->watcher = new UserStateAgent();
+    $this->watcher = new UserState();
 });
 
 test('default instance', function () {

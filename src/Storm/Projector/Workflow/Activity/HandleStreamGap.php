@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Projector\Subscription\InteractWithManagement;
+use Storm\Projector\Workflow\Management\ProjectionStored;
 use Storm\Projector\Workflow\Notification\AfterHandleStreamGap;
 use Storm\Projector\Workflow\Notification\BeforeHandleStreamGap;
-use Storm\Projector\Workflow\Notification\Management\ProjectionStored;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Process;
 
 final class HandleStreamGap
 {
@@ -20,24 +20,22 @@ final class HandleStreamGap
      *
      * @see InteractWithManagement@persistWhenThresholdIsReached
      */
-    public function __invoke(WorkflowContext $workflowContext): bool
+    public function __invoke(Process $process): void
     {
-        $workflowContext->emit(BeforeHandleStreamGap::class);
+        $process->dispatch(BeforeHandleStreamGap::class);
 
-        $hasGap = $workflowContext->recognition()->hasGap();
+        $hasGap = $process->recognition()->hasGap();
 
         if ($hasGap) {
-            $workflowContext->recognition()->sleepOnGap();
+            $process->recognition()->sleepOnGap();
 
-            $isBatchStreamReset = $workflowContext->stat()->processed()->count() === 0;
+            $isBatchStreamReset = $process->metrics()->processed === 0;
 
             if (! $isBatchStreamReset) {
-                $workflowContext->emit(new ProjectionStored());
+                $process->dispatch(new ProjectionStored());
             }
         }
 
-        $workflowContext->emit(AfterHandleStreamGap::class);
-
-        return true;
+        $process->dispatch(AfterHandleStreamGap::class);
     }
 }

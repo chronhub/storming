@@ -6,22 +6,20 @@ namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Projector\Workflow\Notification\AfterHandleStreamGap;
 use Storm\Projector\Workflow\Notification\BeforeHandleStreamGap;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Process;
 
 final class HandleQueryStreamGap
 {
-    public function __invoke(WorkflowContext $workflowContext): bool
+    public function __invoke(Process $process): void
     {
-        $workflowContext->emit(BeforeHandleStreamGap::class);
+        $process->dispatch(BeforeHandleStreamGap::class);
 
-        $hasGap = $workflowContext->recognition()->hasGap();
+        $hasGap = $process->recognition()->hasGap();
 
         if ($hasGap) {
-            $workflowContext->recognition()->sleepOnGap();
+            $process->recognition()->sleepOnGap();
         }
 
-        $workflowContext->emit(AfterHandleStreamGap::class);
-
-        return true;
+        $process->dispatch(new AfterHandleStreamGap());
     }
 }

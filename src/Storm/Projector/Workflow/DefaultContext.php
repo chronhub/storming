@@ -28,7 +28,7 @@ final class DefaultContext implements ContextReader
     private ?string $id = null;
 
     /**
-     * @var array<Closure(WorkflowContext): bool>|array
+     * @var array<Closure(Process): bool>|array
      */
     private array $haltOn = [];
 

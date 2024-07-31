@@ -12,11 +12,11 @@ use Storm\Contract\Projector\ActivityFactory;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Filter\LoadLimiter;
-use Storm\Projector\Workflow\Activity\CollectStreams;
+use Storm\Projector\Support\CollectStreams;
 use Storm\Projector\Workflow\Activity\LoadStreams;
+use Storm\Projector\Workflow\Process;
 use Storm\Projector\Workflow\QueryFilterResolver;
 use Storm\Projector\Workflow\StreamEventReactor;
-use Storm\Projector\Workflow\WorkflowContext;
 
 use function array_map;
 
@@ -29,11 +29,11 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
         protected SystemClock $clock
     ) {}
 
-    public function __invoke(WorkflowContext $workflowContext): array
+    public function __invoke(Process $process): array
     {
         return array_map(
             fn (callable $activity): callable => $activity(),
-            $this->activities($workflowContext)
+            $this->activities($process)
         );
     }
 
@@ -42,11 +42,7 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
      */
     protected function createStreamEventReactor(Closure $reactors): StreamEventReactor
     {
-        return new StreamEventReactor(
-            $reactors,
-            $this->projectorScope,
-            $this->option->getSignal()
-        );
+        return new StreamEventReactor($reactors, $this->projectorScope);
     }
 
     /**
@@ -68,5 +64,5 @@ abstract readonly class AbstractActivityFactory implements ActivityFactory
      *
      * @return array<Closure>
      */
-    abstract protected function activities(WorkflowContext $workflowContext): array;
+    abstract protected function activities(Process $process): array;
 }

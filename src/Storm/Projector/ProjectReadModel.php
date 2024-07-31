@@ -7,17 +7,17 @@ namespace Storm\Projector;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\ReadModelProjector;
-use Storm\Contract\Projector\Subscriber;
-use Storm\Projector\Workflow\Notification\Management\ProjectionDiscarded;
-use Storm\Projector\Workflow\Notification\Management\ProjectionRevised;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Contract\Projector\Subscriptor;
+use Storm\Projector\Workflow\Management\ProjectionDiscarded;
+use Storm\Projector\Workflow\Management\ProjectionRevised;
+use Storm\Projector\Workflow\Process;
 
 final readonly class ProjectReadModel implements ReadModelProjector
 {
     use InteractWithProjection;
 
     public function __construct(
-        protected Subscriber $subscriber,
+        protected Subscriptor $subscriber,
         protected ContextReader $context,
         protected string $streamName
     ) {}
@@ -31,9 +31,18 @@ final readonly class ProjectReadModel implements ReadModelProjector
 
     public function reset(): void
     {
-        $this->subscriber->interact(
-            fn (WorkflowContext $workflowContext) => $workflowContext->emit(
+        $this->subscriber->call(
+            fn (Process $process) => $process->dispatch(
                 new ProjectionRevised()
+            )
+        );
+    }
+
+    public function delete(bool $deleteEmittedEvents): void
+    {
+        $this->subscriber->call(
+            fn (Process $process) => $process->dispatch(
+                new ProjectionDiscarded($deleteEmittedEvents)
             )
         );
     }
@@ -43,15 +52,6 @@ final readonly class ProjectReadModel implements ReadModelProjector
         $this->context->withQueryFilter($queryFilter);
 
         return $this;
-    }
-
-    public function delete(bool $deleteEmittedEvents): void
-    {
-        $this->subscriber->interact(
-            fn (WorkflowContext $workflowContext) => $workflowContext->emit(
-                new ProjectionDiscarded($deleteEmittedEvents)
-            )
-        );
     }
 
     public function getName(): string

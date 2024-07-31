@@ -4,61 +4,50 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Subscription;
 
-use Closure;
 use Storm\Contract\Projector\ActivityFactory;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\PersistentActivityFactory;
-use Storm\Contract\Projector\Subscriber;
+use Storm\Contract\Projector\Subscriptor;
 use Storm\Contract\Projector\WorkflowInterface;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
-use Storm\Projector\Exception\RuntimeException;
-use Storm\Projector\Workflow\Notification\Management\ProjectionFreed;
-use Storm\Projector\Workflow\Stage;
+use Storm\Projector\Workflow\Input\RestoreUserState;
+use Storm\Projector\Workflow\Management\ProjectionFreed;
+use Storm\Projector\Workflow\Process;
 use Storm\Projector\Workflow\Workflow;
-use Storm\Projector\Workflow\WorkflowContext;
 use Throwable;
 
-final class GenericSubscription implements Subscriber
+/**
+ * @phpstan-import-type TExceptionHandler from WorkflowInterface
+ */
+final readonly class GenericSubscription implements Subscriptor
 {
-    /**
-     * Prevents interaction with the workflow before it has started.
-     */
-    protected bool $hasStarted = false;
-
     public function __construct(
-        protected readonly WorkflowContext $workflowContext,
-        protected readonly ActivityFactory $activityFactory,
-        protected readonly Stage $stage,
+        protected Process $process,
+        protected ActivityFactory $activityFactory,
     ) {}
 
     public function start(ContextReader $context, bool $keepRunning): void
     {
-        $this->hasStarted = true;
-
-        $this->newWorkflow($context, $keepRunning)->process();
+        $this->newWorkflow($context, $keepRunning)->execute();
     }
 
-    public function interact(Closure $callback): mixed
+    public function call(callable $callback): mixed
     {
-        if (! $this->hasStarted) {
-            throw new RuntimeException('Projection has not started yet');
-        }
-
-        return value($callback, $this->workflowContext);
+        return $callback($this->process);
     }
 
     private function newWorkflow(ContextReader $context, bool $keepRunning): WorkflowInterface
     {
         $this->prepare($context, $keepRunning);
 
-        $activities = ($this->activityFactory)($this->workflowContext);
+        $activities = ($this->activityFactory)($this->process);
 
         return $this->create($activities);
     }
 
     private function create(array $activities): WorkflowInterface
     {
-        $workflow = Workflow::create($this->workflowContext, $this->stage, $activities);
+        $workflow = Workflow::create($this->process, $activities);
 
         if ($this->activityFactory instanceof PersistentActivityFactory) {
             $exceptionHandler = $this->persistentExceptionHandler();
@@ -71,29 +60,29 @@ final class GenericSubscription implements Subscriber
 
     private function prepare(ContextReader $context, bool $keepRunning): void
     {
-        $this->workflowContext->context()->set($context);
-        $this->workflowContext->restoreUserState();
+        $this->process->context()->set($context);
+        $this->process->call(new RestoreUserState());
 
-        $this->workflowContext->subscribe($this->workflowContext, $context);
+        $this->process->subscribe($this->process, $context);
 
-        $this->workflowContext->sprint()->runInBackground($keepRunning);
-        $this->workflowContext->sprint()->continue();
+        $this->process->sprint()->runInBackground($keepRunning);
+        $this->process->sprint()->continue();
     }
 
     /**
-     * Returns the exception handler for persistent projections.
+     * Returns the exception handler for persistent projection.
      *
-     * @return callable(WorkflowContext, ?Throwable): void
+     * @return TExceptionHandler
      */
     private function persistentExceptionHandler(): callable
     {
-        return function (WorkflowContext $workflowContext, ?Throwable $exception): void {
+        return function (Process $process, ?Throwable $exception): void {
             if ($exception instanceof ProjectionAlreadyRunning) {
                 throw $exception;
             }
 
             try {
-                $workflowContext->emit(new ProjectionFreed());
+                $process->dispatch(new ProjectionFreed());
             } catch (Throwable) {
                 // ignore
             }

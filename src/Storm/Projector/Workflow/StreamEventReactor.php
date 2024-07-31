@@ -11,7 +11,8 @@ use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Scope\UserStateScope;
-use Storm\Projector\Workflow\Notification\Management\PerformWhenThresholdIsReached;
+use Storm\Projector\Workflow\Input\IsUserStateInitialized;
+use Storm\Projector\Workflow\Management\PerformWhenThresholdIsReached;
 use Storm\Stream\StreamPosition;
 
 use function pcntl_signal_dispatch;
@@ -20,69 +21,68 @@ readonly class StreamEventReactor
 {
     public function __construct(
         protected Closure $reactors,
-        protected ProjectorScope $projector,
-        protected bool $dispatchSignal
+        protected ProjectorScope $projector
     ) {}
 
-    public function __invoke(WorkflowContext $workflowContext, string $streamName, DomainEvent $event, StreamPosition $expectedPosition): bool
+    public function __invoke(Process $process, string $streamName, DomainEvent $event, StreamPosition $expectedPosition): bool
     {
-        $this->dispatchSignalIfRequested();
+        $this->dispatchSignalIfRequested($process->option()->getSignal());
 
         $streamPoint = new StreamPoint($streamName, $expectedPosition, $event->header(Header::EVENT_TIME));
 
-        if ($workflowContext->processStreamEvent($streamPoint)->isGap()) {
+        if ($process->recognition()->record($streamPoint)->isGap()) {
             return false;
         }
 
-        return $this->handleEvent($workflowContext, $event);
+        return $this->handleEvent($process, $event);
     }
 
-    protected function handleEvent(WorkflowContext $workflowContext, DomainEvent $event): bool
+    protected function handleEvent(Process $process, DomainEvent $event): bool
     {
-        $workflowContext->incrementBatchStream();
+        $process->metrics()->incrementBatchStream();
 
-        $this->reactOn($workflowContext, $event);
+        $this->reactOn($process, $event);
 
-        $workflowContext->emit(new PerformWhenThresholdIsReached());
+        $process->dispatch(new PerformWhenThresholdIsReached());
 
-        return $workflowContext->sprint()->inProgress();
+        return $process->sprint()->inProgress();
     }
 
-    protected function reactOn(WorkflowContext $workflowContext, DomainEvent $event): void
+    protected function reactOn(Process $process, DomainEvent $event): void
     {
-        $userState = $this->getUserState($workflowContext);
+        $userState = $this->getUserState($process);
         $eventScope = new EventScope($event, $this->projector, $userState);
 
         ($this->reactors)($eventScope);
 
-        $this->updateUserStateIfInitialized($workflowContext, $userState);
+        $this->updateUserStateIfInitialized($process, $userState);
 
         if ($eventScope->isAcked()) {
-            $workflowContext->stat()->acked()->merge($event::class);
+            $process->metrics()->acked++;
         }
     }
 
-    protected function getUserState(WorkflowContext $workflowContext): ?UserStateScope
+    protected function getUserState(Process $process): ?UserStateScope
     {
-        if (! $workflowContext->isUserStateInitialized()) {
+        if (! $process->call(new IsUserStateInitialized())) {
             return null;
         }
 
-        $userState = $workflowContext->userState()->get();
+        $userState = $process->userState()->get();
 
         return new UserStateScope($userState);
     }
 
-    protected function updateUserStateIfInitialized(WorkflowContext $workflowContext, ?UserStateScope $scope): void
+    protected function updateUserStateIfInitialized(Process $process, ?UserStateScope $scope): void
     {
         if ($scope !== null) {
-            $workflowContext->userState()->put($scope->state());
+            $process->userState()->put($scope->state());
         }
     }
 
-    protected function dispatchSignalIfRequested(): void
+    protected function dispatchSignalIfRequested(bool $dispatchSignal): void
     {
-        if ($this->dispatchSignal) {
+        if ($dispatchSignal) {
             pcntl_signal_dispatch();
         }
     }

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Projector\Workflow\Notification\Management\ProjectionRise;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Management\ProjectionRise;
+use Storm\Projector\Workflow\Process;
 
 final readonly class RisePersistentProjection
 {
@@ -18,14 +18,14 @@ final readonly class RisePersistentProjection
         $this->onRise = true;
     }
 
-    public function __invoke(WorkflowContext $workflowContext): bool
+    public function __invoke(Process $process): bool
     {
-        if ($workflowContext->isFirstWorkflowCycle()) {
-            if ($this->discloseRemoteStatus($workflowContext)) {
+        if ($process->metrics()->isFirstCycle()) {
+            if ($this->discloseRemoteStatus($process)) {
                 return false;
             }
 
-            $workflowContext->emit(new ProjectionRise());
+            $process->dispatch(new ProjectionRise());
         }
 
         return true;

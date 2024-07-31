@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow;
 
 use Storm\Projector\Checkpoint\GapType;
+use Storm\Projector\Workflow\Input\ConditionallyStartWorkflow;
+use Storm\Projector\Workflow\Input\IsSprintTerminated;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\ResetOnlyOnceEmittedEvent;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
@@ -12,69 +14,64 @@ use Storm\Projector\Workflow\Notification\WorkflowRenewed;
 
 class Stage
 {
-    /**
-     * Starts the workflow.
-     */
-    public function beforeProcessing(WorkflowContext $workflowContext): void
+    public function __construct(
+        protected readonly Process $process
+    ) {}
+
+    public function beforeProcessing(): void
     {
-        $workflowContext->conditionallyStartWorkflow();
+        $this->process->call(new ConditionallyStartWorkflow());
     }
 
-    /**
-     * After processing the workflow.
-     */
-    public function afterProcessing(WorkflowContext $workflowContext): void
+    public function afterProcessing(): void
     {
-        // all listeners who want to stop the workflow after one completion
-        // should react to this event
-        // @example StopWhen reacting to this event
-        $workflowContext->emit(ShouldTerminateWorkflow::class);
+        $this->process->dispatch(ShouldTerminateWorkflow::class);
 
-        $this->renew($workflowContext, $workflowContext->isSprintTerminated());
+        $this->renew($this->process->call(new IsSprintTerminated()));
     }
 
     /**
      * Renews the workflow.
      */
-    protected function renew(WorkflowContext $workflowContext, bool $isSprintTerminated): void
+    protected function renew(bool $isSprintTerminated): void
     {
-        $workflowContext->emit(BeforeWorkflowRenewal::class);
+        $this->process->dispatch(BeforeWorkflowRenewal::class);
 
-        $this->resetOnCycleRenewed($workflowContext);
+        $this->resetOnCycleRenewed();
 
         if ($isSprintTerminated) {
-            $this->resetOnTermination($workflowContext);
-            $this->forgetOnTermination($workflowContext);
+            $this->resetOnTermination();
+            $this->forgetOnTermination();
         } else {
-            $workflowContext->incrementWorkflowCycle();
-            $this->forgetOnCycleRenewed($workflowContext);
+            $this->process->metrics()->cycle++;
+            $this->forgetOnCycleRenewed();
         }
 
-        $workflowContext->emit(WorkflowRenewed::class);
-
-        $workflowContext->emit(ResetOnlyOnceEmittedEvent::class);
+        $this->process->dispatch(WorkflowRenewed::class);
+        $this->process->dispatch(ResetOnlyOnceEmittedEvent::class);
     }
 
-    protected function resetOnCycleRenewed(WorkflowContext $workflowContext): void
+    protected function resetOnCycleRenewed(): void
     {
-        $workflowContext->stat()->processed()->reset();
+        $this->process->metrics()['processed'] = 0;
     }
 
-    protected function resetOnTermination(WorkflowContext $workflowContext): void
+    protected function resetOnTermination(): void
     {
-        $workflowContext->stat()->cycle()->reset();
-        $workflowContext->time()->reset();
-        $workflowContext->stat()->main()->reset();
-        $workflowContext->stat()->acked()->reset();
+        $this->process->time()->reset();
+
+        $this->process->metrics()['cycle'] = 0;
+        $this->process->metrics()['main'] = 0;
+        $this->process->metrics()['acked'] = 0;
     }
 
-    protected function forgetOnCycleRenewed(WorkflowContext $workflowContext): void
+    protected function forgetOnCycleRenewed(): void
     {
-        $workflowContext->forgetListener(GapType::RECOVERABLE_GAP->value);
-        $workflowContext->forgetListener(GapType::UNRECOVERABLE_GAP->value);
+        $this->process->removeListener(GapType::RECOVERABLE_GAP->value);
+        $this->process->removeListener(GapType::UNRECOVERABLE_GAP->value);
     }
 
-    protected function forgetOnTermination(WorkflowContext $workflowContext): void
+    protected function forgetOnTermination(): void
     {
         //
     }

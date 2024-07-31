@@ -7,7 +7,8 @@ namespace Storm\Projector\Workflow\Activity;
 use Illuminate\Support\Collection;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Projector\Iterator\MergeStreamIterator;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Support\CollectStreams;
+use Storm\Projector\Workflow\Process;
 
 final readonly class LoadStreams
 {
@@ -16,9 +17,9 @@ final readonly class LoadStreams
         private SystemClock $clock,
     ) {}
 
-    public function __invoke(WorkflowContext $workflowContext): bool
+    public function __invoke(Process $process): void
     {
-        $checkpoints = $workflowContext->recognition()->toArray();
+        $checkpoints = $process->recognition()->toArray();
 
         $streams = $this->collectStreams->fromCheckpoints($checkpoints);
 
@@ -26,8 +27,6 @@ final readonly class LoadStreams
             $streams = new MergeStreamIterator($this->clock, $streams);
         }
 
-        $workflowContext->streamEvent()->set($streams);
-
-        return true;
+        $process->batch()->set($streams);
     }
 }

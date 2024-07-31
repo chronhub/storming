@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector;
 
 use Closure;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Process;
 
 trait InteractWithProjection
 {
@@ -60,15 +60,15 @@ trait InteractWithProjection
 
     public function getState(): array
     {
-        return $this->subscriber->interact(
-            fn (WorkflowContext $workflowContext): array => $workflowContext->userState()->get()
+        return $this->subscriber->call(
+            fn (Process $process) => $process->userState()->get()
         );
     }
 
     public function getReport(): array
     {
-        return $this->subscriber->interact(
-            fn (WorkflowContext $workflowContext) => $workflowContext->report()->getReport()
+        return $this->subscriber->call(
+            fn (Process $process) => $process->compute()->report()
         );
     }
 

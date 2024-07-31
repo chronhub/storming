@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 
-use Storm\Projector\Workflow\Agent\TimeAgent;
-use Storm\Projector\Workflow\Timer;
+use Storm\Projector\Support\Timer;
+use Storm\Projector\Workflow\Component\Timing;
 
 beforeEach(function () {
     $this->timer = mock(Timer::class);
-    $this->watcher = new TimeAgent($this->timer);
+    $this->watcher = new Timing($this->timer);
 });
 
 test('default instance', function () {

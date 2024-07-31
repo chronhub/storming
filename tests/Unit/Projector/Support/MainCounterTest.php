@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Support;
 
-use Storm\Projector\Support\MainCounter;
+use Storm\Projector\Support\Metrics\MainMetric;
 
 beforeEach(function () {
-    $this->mainCounter = new MainCounter();
+    $this->mainCounter = new MainMetric();
 });
 
 test('can be instantiated', function () {
-    expect($this->mainCounter)->toBeInstanceOf(MainCounter::class)
+    expect($this->mainCounter)->toBeInstanceOf(MainMetric::class)
         ->and($this->mainCounter->current())->toBe(0)
         ->and($this->mainCounter->isDoNotReset())->toBeFalse();
 });

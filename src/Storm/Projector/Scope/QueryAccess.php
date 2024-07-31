@@ -6,23 +6,23 @@ namespace Storm\Projector\Scope;
 
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\QueryProjectorScope;
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Process;
 
 final readonly class QueryAccess implements QueryProjectorScope
 {
     public function __construct(
-        private WorkflowContext $workflowContext,
+        private Process $process,
         private SystemClock $clock
     ) {}
 
     public function stop(): void
     {
-        $this->workflowContext->sprint()->halt();
+        $this->process->sprint()->halt();
     }
 
     public function streamName(): string
     {
-        return $this->workflowContext->processedStream()->get();
+        return $this->process->stream()->get();
     }
 
     public function clock(): SystemClock

@@ -4,20 +4,16 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Projector\Workflow\WorkflowContext;
+use Storm\Projector\Workflow\Process;
 
 use function pcntl_signal_dispatch;
 
-final readonly class DispatchSignal
+final class DispatchSignal
 {
-    public function __construct(private bool $dispatchSignal) {}
-
-    public function __invoke(WorkflowContext $context): bool
+    public function __invoke(Process $process): void
     {
-        if ($this->dispatchSignal) {
+        if ($process->option()->getSignal()) {
             pcntl_signal_dispatch();
         }
-
-        return true;
     }
 }
