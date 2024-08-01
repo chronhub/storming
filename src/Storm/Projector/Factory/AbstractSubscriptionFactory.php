@@ -44,7 +44,6 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         protected readonly SystemClock $clock,
         protected readonly SymfonySerializer $serializer,
         protected readonly Dispatcher $dispatcher
-
     ) {
         while ($chronicler instanceof ChroniclerDecorator) {
             $chronicler = $chronicler->innerChronicler();
@@ -53,53 +52,53 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $this->chronicler = $chronicler;
     }
 
-    public function createQuerySubscription(ProjectionOption $option): Subscriptor
+    public function createQuerySubscription(ProjectionOption $options): Subscriptor
     {
-        $projection = $this->createProcessManager($option);
+        $process = $this->createProcessManager($options);
 
-        $projectorScope = new QueryAccess($projection, $this->clock);
+        $projectorScope = new QueryAccess($process, $this->clock);
         $activities = new QueryActivityFactory(
-            $this->chronicler, $projectorScope, $option, $this->clock
+            $this->chronicler, $projectorScope, $options, $this->clock
         );
 
-        $management = new QueryingManagement($projection);
-        $this->subscribeToMap($management, $projection);
+        $management = new QueryingManagement($process);
+        $this->subscribeToMap($management, $process);
 
-        return new GenericSubscription($projection, $activities);
+        return new GenericSubscription($process, $activities);
     }
 
-    public function createEmitterSubscription(string $streamName, ProjectionOption $option): Subscriptor
+    public function createEmitterSubscription(string $streamName, ProjectionOption $options): Subscriptor
     {
-        $projection = $this->createProcessManager($option);
+        $process = $this->createProcessManager($options);
 
         $management = new EmittingManagement(
-            $projection,
+            $process,
             $this->chronicler,
-            $this->createProjectionRepository($streamName, $option),
-            $this->createStreamCache($option),
+            $this->createProjectionRepository($streamName, $options),
+            $this->createStreamCache($options),
             new EmittedStream(),
-            $option->getSleepEmitterOnFirstCommit()
+            $options->getSleepEmitterOnFirstCommit()
         );
 
-        $this->subscribeToMap($management, $projection);
+        $this->subscribeToMap($management, $process);
 
-        $projectorScope = new EmitterAccess($projection, $this->clock);
-        $activities = new PersistentActivityFactory($this->chronicler, $projectorScope, $option, $this->clock);
+        $projectorScope = new EmitterAccess($process, $this->clock);
+        $activities = new PersistentActivityFactory($this->chronicler, $projectorScope, $options, $this->clock);
 
-        return new GenericSubscription($projection, $activities);
+        return new GenericSubscription($process, $activities);
     }
 
-    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $option): Subscriptor
+    public function createReadModelSubscription(string $streamName, ReadModel $readModel, ProjectionOption $options): Subscriptor
     {
-        $process = $this->createProcessManager($option);
+        $process = $this->createProcessManager($options);
 
-        $projectionRepository = $this->createProjectionRepository($streamName, $option);
+        $projectionRepository = $this->createProjectionRepository($streamName, $options);
 
         $management = new ReadingModelManagement($process, $projectionRepository, $readModel);
         $this->subscribeToMap($management, $process);
 
         $projectorScope = new ReadModelAccess($process, $readModel, $this->clock);
-        $activities = new PersistentActivityFactory($this->chronicler, $projectorScope, $option, $this->clock);
+        $activities = new PersistentActivityFactory($this->chronicler, $projectorScope, $options, $this->clock);
 
         return new GenericSubscription($process, $activities);
     }
@@ -124,21 +123,21 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
      */
     abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
 
-    protected function createProcessManager(ProjectionOption $option): Process
+    protected function createProcessManager(ProjectionOption $options): Process
     {
-        $component = new Component($option, $this->eventStreamProvider, $this->clock);
+        $component = new Component($options, $this->eventStreamProvider, $this->clock);
 
         return new Process($component);
     }
 
-    protected function createLockManager(ProjectionOption $option): LockManager
+    protected function createLockManager(ProjectionOption $options): LockManager
     {
-        return new LockManager($this->clock, $option->getTimeout(), $option->getLockout());
+        return new LockManager($this->clock, $options->getTimeout(), $options->getLockout());
     }
 
-    protected function createStreamCache(ProjectionOption $option): EmittedStreamCache
+    protected function createStreamCache(ProjectionOption $options): EmittedStreamCache
     {
-        return new InMemoryEmittedStreams($option->getCacheSize());
+        return new InMemoryEmittedStreams($options->getCacheSize());
     }
 
     protected function createDispatcherRepository(ProjectionRepository $projectionRepository): EventDispatcherRepository

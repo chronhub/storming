@@ -17,6 +17,9 @@ final readonly class DiscoverPartition
         $this->validatePartitions();
     }
 
+    /**
+     * @return array|array<string>
+     */
     public function __invoke(EventStreamProvider $provider): array
     {
         return $provider->filterByPartitions($this->partitions);

@@ -82,7 +82,7 @@ interface ProjectionOption extends JsonSerializable
      * Get the lock threshold in milliseconds
      * Available for persistent projection
      *
-     * @return int<0,max>
+     * @return int<0, max>
      */
     public function getLockout(): int;
 

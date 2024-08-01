@@ -6,7 +6,6 @@ namespace Storm\Projector\Workflow;
 
 use Storm\Contract\Projector\WorkflowInterface;
 use Storm\Projector\Exception\RuntimeException;
-use Storm\Projector\Workflow\Input\IsSprintTerminated;
 use Throwable;
 
 /**
@@ -68,7 +67,7 @@ final class Workflow implements WorkflowInterface
             $this->run();
 
             $this->stage->afterProcessing();
-        } while (! $this->process->call(new IsSprintTerminated()));
+        } while (! $this->process->isSprintTerminated());
     }
 
     private function run(): void

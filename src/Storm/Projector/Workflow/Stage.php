@@ -6,7 +6,6 @@ namespace Storm\Projector\Workflow;
 
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Workflow\Input\ConditionallyStartWorkflow;
-use Storm\Projector\Workflow\Input\IsSprintTerminated;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\ResetOnlyOnceEmittedEvent;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
@@ -27,7 +26,7 @@ class Stage
     {
         $this->process->dispatch(ShouldTerminateWorkflow::class);
 
-        $this->renew($this->process->call(new IsSprintTerminated()));
+        $this->renew($this->process->isSprintTerminated());
     }
 
     /**

@@ -17,6 +17,9 @@ final readonly class DiscoverStream
         $this->validateStreams();
     }
 
+    /**
+     * @return array|array<string>
+     */
     public function __invoke(EventStreamProvider $provider): array
     {
         return $provider->filterByStreams($this->streams);

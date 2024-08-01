@@ -30,8 +30,6 @@ class Process
         $this->component->dispatcher()->forgetListener($event);
     }
 
-    // fixMe add common component methods
-
     public function isSprintTerminated(): bool
     {
         return ! $this->component->sprint()->inBackground()

@@ -11,7 +11,6 @@ use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Scope\UserStateScope;
-use Storm\Projector\Workflow\Input\IsUserStateInitialized;
 use Storm\Projector\Workflow\Management\PerformWhenThresholdIsReached;
 use Storm\Stream\StreamPosition;
 
@@ -64,7 +63,7 @@ readonly class StreamEventReactor
 
     protected function getUserState(Process $process): ?UserStateScope
     {
-        if (! $process->call(new IsUserStateInitialized())) {
+        if (! $process->context()->get()->isUserStateInitialized()) {
             return null;
         }
 

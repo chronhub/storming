@@ -6,7 +6,6 @@ namespace Storm\Projector\Workflow\Component;
 
 use Storm\Contract\Projector\ComponentSubscriber;
 use Storm\Contract\Projector\ContextReader;
-use Storm\Projector\Workflow\Input\IsSprintTerminated;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
 use Storm\Projector\Workflow\Process;
 
@@ -28,7 +27,7 @@ class HaltOn implements ComponentSubscriber
     {
         $process->addListener(ShouldTerminateWorkflow::class, function (Process $process) use ($callback): void {
             // prevents stopping the projector when the projection is already terminated
-            $isTerminated = $process->call(new IsSprintTerminated());
+            $isTerminated = $process->isSprintTerminated();
 
             if (! $isTerminated && $callback($process) === true) {
                 $process->sprint()->halt();

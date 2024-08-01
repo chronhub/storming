@@ -10,7 +10,7 @@ final class ConditionallyStartWorkflow
 {
     public function __invoke(Component $component): void
     {
-        if (! $component->metrics()->cycle > 0) {
+        if ($component->metrics()->cycle < 1) {
             $component->metrics()->cycle++;
 
             $component->time()->start();

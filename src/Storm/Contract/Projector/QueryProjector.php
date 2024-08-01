@@ -7,7 +7,7 @@ namespace Storm\Contract\Projector;
 interface QueryProjector extends QueryProjectorFactory
 {
     /**
-     * Resets the projection.
+     * Resets the query projection.
      */
     public function reset(): void;
 }
