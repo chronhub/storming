@@ -34,7 +34,7 @@ class Stage
      */
     protected function renew(bool $isSprintTerminated): void
     {
-        $this->process->dispatch(BeforeWorkflowRenewal::class);
+        $this->process->dispatch(BeforeWorkflowRenewal::class, $isSprintTerminated);
 
         $this->resetOnCycleRenewed();
 
@@ -42,7 +42,7 @@ class Stage
             $this->resetOnTermination();
             $this->forgetOnTermination();
         } else {
-            $this->process->metrics()->cycle++;
+            $this->process->metrics()->increment('cycle');
             $this->forgetOnCycleRenewed();
         }
 
@@ -52,16 +52,16 @@ class Stage
 
     protected function resetOnCycleRenewed(): void
     {
-        $this->process->metrics()['processed'] = 0;
+        $this->process->metrics()->reset('processed');
     }
 
     protected function resetOnTermination(): void
     {
         $this->process->time()->reset();
 
-        $this->process->metrics()['cycle'] = 0;
-        $this->process->metrics()['main'] = 0;
-        $this->process->metrics()['acked'] = 0;
+        $this->process->metrics()->reset('cycle');
+        $this->process->metrics()->reset('main');
+        $this->process->metrics()->reset('acked');
     }
 
     protected function forgetOnCycleRenewed(): void

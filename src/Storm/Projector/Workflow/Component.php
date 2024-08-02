@@ -17,9 +17,10 @@ use Storm\Projector\Checkpoint\GapDetector;
 use Storm\Projector\Checkpoint\GapRules;
 use Storm\Projector\Support\ExponentialSleep;
 use Storm\Projector\Support\Timer;
-use Storm\Projector\Workflow\Component\CheckpointReckon;
+use Storm\Projector\Workflow\Component\CheckpointReckoning;
 use Storm\Projector\Workflow\Component\Computation;
 use Storm\Projector\Workflow\Component\Contextualize;
+use Storm\Projector\Workflow\Component\EventStreamBatch;
 use Storm\Projector\Workflow\Component\EventStreamDiscovery;
 use Storm\Projector\Workflow\Component\HaltOn;
 use Storm\Projector\Workflow\Component\InMemoryCheckpoint;
@@ -27,7 +28,6 @@ use Storm\Projector\Workflow\Component\Metrics;
 use Storm\Projector\Workflow\Component\ProcessedStream;
 use Storm\Projector\Workflow\Component\Runner;
 use Storm\Projector\Workflow\Component\StatusHolder;
-use Storm\Projector\Workflow\Component\StreamEventBatch;
 use Storm\Projector\Workflow\Component\Timing;
 use Storm\Projector\Workflow\Component\UserState;
 
@@ -82,11 +82,11 @@ final class Component implements ComponentRegistry
         return $this->components[$name];
     }
 
-    protected function batchStreamEvent(ProjectionOption $option): StreamEventBatch
+    protected function batchStreamEvent(ProjectionOption $option): EventStreamBatch
     {
         $heapSleep = new ExponentialSleep(...$option->getSleep());
 
-        return new StreamEventBatch($heapSleep);
+        return new EventStreamBatch($heapSleep);
     }
 
     protected function checkpointRecognition(ProjectionOption $option): Recognition
@@ -98,11 +98,11 @@ final class Component implements ComponentRegistry
             return new InMemoryCheckpoint($checkpoints, $this->clock);
         }
 
-        return new CheckpointReckon(
+        return new CheckpointReckoning(
             $checkpoints,
+            $this->clock,
             new GapDetector($retries),
             new GapRules(),
-            $this->clock
         );
     }
 }

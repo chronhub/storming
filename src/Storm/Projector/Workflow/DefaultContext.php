@@ -10,13 +10,13 @@ use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Projector\Context;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Projector\Exception\InvalidArgumentException;
-use Storm\Projector\Repository\EventStream\DiscoverAllStream;
-use Storm\Projector\Repository\EventStream\DiscoverPartition;
-use Storm\Projector\Repository\EventStream\DiscoverStream;
+use Storm\Projector\Workflow\EventStream\DiscoverAllStream;
+use Storm\Projector\Workflow\EventStream\DiscoverPartition;
+use Storm\Projector\Workflow\EventStream\DiscoverStream;
 
 final class DefaultContext implements ContextReader
 {
-    /** @var null|callable(EventStreamProvider): array<string> */
+    /** @var null|callable(EventStreamProvider): array<string>|array */
     private $query;
 
     private ?Closure $userState = null;
@@ -132,7 +132,7 @@ final class DefaultContext implements ContextReader
     public function query(): callable
     {
         if ($this->query === null) {
-            throw new InvalidArgumentException('Projection query not set');
+            throw new InvalidArgumentException('Projection subscriber not set');
         }
 
         return $this->query;
@@ -160,7 +160,7 @@ final class DefaultContext implements ContextReader
     private function assertQueryNotSet(): void
     {
         if ($this->query !== null) {
-            throw new InvalidArgumentException('Projection query already set');
+            throw new InvalidArgumentException('Projection subscriber already set');
         }
     }
 }

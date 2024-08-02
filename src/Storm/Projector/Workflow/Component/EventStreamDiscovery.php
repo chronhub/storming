@@ -11,10 +11,12 @@ class EventStreamDiscovery
     /** @var array|array<string> */
     protected array $streamDiscovered = [];
 
-    public function __construct(protected readonly EventStreamProvider $eventStreamProvider) {}
+    public function __construct(
+        protected readonly EventStreamProvider $eventStreamProvider
+    ) {}
 
     /**
-     * Discover new event streams.
+     * @param callable(EventStreamProvider): array<string> $query
      */
     public function discover(callable $query): array
     {

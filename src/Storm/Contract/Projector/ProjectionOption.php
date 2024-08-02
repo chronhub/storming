@@ -36,17 +36,17 @@ interface ProjectionOption extends JsonSerializable
 
     public const array DESCRIPTIONS = [
         self::SIGNAL => 'Enable async signal dispatch',
-        self::CACHE_SIZE => 'Get the number of event streams to keep in the cache',
-        self::LOAD_LIMITER => 'Get loads limiter for the query filter',
-        self::TIMEOUT => 'Get the threshold of events to keep in memory before persisting',
-        self::LOCKOUT => 'Get lock timeout in milliseconds',
-        self::SLEEP => 'Get sleep time between empty batch stream events',
-        self::BLOCK_SIZE => 'Get the lock threshold in milliseconds',
-        self::RETRIES => 'Get retries in milliseconds when a gap detected',
-        self::RECORD_GAP => 'Enable record gaps in checkpoints',
-        self::DETECTION_WINDOWS => 'Get detection windows',
-        self::ONLY_ONCE_DISCOVERY => 'Enable discovery of new event streams after each end of a projection cycle',
-        self::SLEEP_EMITTER_ON_FIRST_COMMIT => 'Get sleep emitter on first commit in milliseconds',
+        self::CACHE_SIZE => 'Number of event stream to keep in the cache',
+        self::LOAD_LIMITER => 'Limit the number of stream events to load, when set to zero, no limit is applied',
+        self::TIMEOUT => 'Lock threshold in milliseconds',
+        self::LOCKOUT => 'Lock timeout in milliseconds',
+        self::SLEEP => 'Exponential sleep time between empty batch stream event, ["base", "factor", "max"]',
+        self::BLOCK_SIZE => 'Number of events to keep in memory before persisting',
+        self::RETRIES => 'Retries in milliseconds when a gap is detected, set to empty to disable gap detection',
+        self::RECORD_GAP => 'Enable record gaps in checkpoints, requires retries to be enabled',
+        self::DETECTION_WINDOWS => 'Detection windows to bypass gaps, mostly used when resetting projection',
+        self::ONLY_ONCE_DISCOVERY => 'Enable new event stream discovery after a workflow renewal',
+        self::SLEEP_EMITTER_ON_FIRST_COMMIT => 'Sleep emitter on first commit in milliseconds',
     ];
 
     /**
@@ -100,7 +100,7 @@ interface ProjectionOption extends JsonSerializable
      *     max: positive-int,
      * }
      *
-     * @see StreamEventBatch
+     * @see EventStreamBatch
      * @see ExponentialSleep
      */
     public function getSleep(): array;
@@ -117,17 +117,14 @@ interface ProjectionOption extends JsonSerializable
      * @see HaltOn
      * @see StopWhen
      *
-     * @return array<int<0, max>>
+     * @return array|array<int<0, max>>
      */
     public function getRetries(): array;
 
     /**
      * Should Record gaps in checkpoints.
      *
-     * When retries are empty, record gaps should be disabled
-     *
-     * fixMe: this feature is wip and needs his own storage
-     *  by now, it's recorded in checkpoints
+     * When the "retries" option is empty, record gaps should be disabled
      */
     public function getRecordGap(): bool;
 
@@ -153,8 +150,7 @@ interface ProjectionOption extends JsonSerializable
     public function getLoadLimiter(): int;
 
     /**
-     * Discover new event streams after each end of a projection cycle.
-     * Available for persistent projection
+     * Discover new event streams after each workflow renewal.
      */
     public function getOnlyOnceDiscovery(): bool;
 

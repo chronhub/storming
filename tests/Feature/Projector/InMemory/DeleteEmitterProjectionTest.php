@@ -47,9 +47,10 @@ test('deletes the projection and keeps the emitted events in the event store', f
     // delete without emitted events
     $this->projector->delete(false);
 
+    $this->assertProjectionExists($projectionName, false);
     $this->assertStreamExists($streamName, true);
     $this->assertStreamExists($projectionName, true);
-    $this->assertPartialProjectionState('total', 0);
+    $this->assertProjectionState(['total' => 0]);
 
     // run again will fail
     $exception = null;
@@ -90,9 +91,10 @@ test('deletes the projection and deletes the emitted events in the event store',
     // delete with emitted events
     $this->projector->delete(true);
 
+    $this->assertProjectionExists($projectionName, false);
     $this->assertStreamExists($streamName, true);
     $this->assertStreamExists($projectionName, false);
-    $this->assertPartialProjectionState('total', 0);
+    $this->assertProjectionState(['total' => 0]);
 
     // run again
     $this->projector->run(false);
@@ -135,10 +137,11 @@ test('deletes the projection with or without emitted event with link to a new st
     // delete the projection and reset user state
     $this->projector->delete($withEmittedEvent);
 
+    $this->assertProjectionExists($projectionName, false);
     $this->assertStreamExists($streamName, true);
     $this->assertStreamExists($projectionName, false);
     $this->assertStreamExists($linkTo, true);
-    $this->assertPartialProjectionState('total', 0);
+    $this->assertProjectionState(['total' => 0]);
 
     // run again will fail
     $exception = null;

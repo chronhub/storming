@@ -4,10 +4,11 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Component;
 
-use Storm\Projector\Exception\RuntimeException;
-
 class ProcessedStream
 {
+    /**
+     * The current processed stream.
+     */
     protected ?string $streamName = null;
 
     /**
@@ -20,15 +21,9 @@ class ProcessedStream
 
     /**
      * Get the processed stream name.
-     *
-     * @throws RuntimeException when the stream name is not set
      */
     public function get(): string
     {
-        if (! $this->streamName) {
-            throw new RuntimeException('Processed stream name is not set');
-        }
-
         return $this->streamName;
     }
 }

@@ -21,12 +21,12 @@ final readonly class LoadStreams
     {
         $checkpoints = $process->recognition()->toArray();
 
-        $streams = $this->collectStreams->fromCheckpoints($checkpoints);
+        $eventStreams = $this->collectStreams->fromCheckpoints($checkpoints);
 
-        if ($streams instanceof Collection) {
-            $streams = new MergeStreamIterator($this->clock, $streams);
+        if ($eventStreams instanceof Collection) {
+            $eventStreams = new MergeStreamIterator($this->clock, $eventStreams);
         }
 
-        $process->batch()->set($streams);
+        $process->batch()->set($eventStreams);
     }
 }

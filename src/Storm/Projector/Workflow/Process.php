@@ -15,9 +15,9 @@ class Process
         protected readonly Component $component,
     ) {}
 
-    public function dispatch(string|object $event): void
+    public function dispatch(string|object $event, mixed ...$arguments): void
     {
-        $this->component->dispatcher()->emit($event);
+        $this->component->dispatcher()->emit($event, ...$arguments);
     }
 
     public function addListener(string $event, string|callable|array $handler): void

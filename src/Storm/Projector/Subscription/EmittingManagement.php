@@ -9,7 +9,7 @@ use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\EmittedStreamCache;
 use Storm\Contract\Projector\EmitterManagement;
-use Storm\Contract\Projector\ProjectionRepository;
+use Storm\Contract\Projector\Repository;
 use Storm\Projector\Workflow\EmittedStream;
 use Storm\Projector\Workflow\Input\DiscoverEventStream;
 use Storm\Projector\Workflow\Process;
@@ -26,7 +26,7 @@ final readonly class EmittingManagement implements EmitterManagement
     public function __construct(
         protected Process $process,
         protected Chronicler $chronicler,
-        protected ProjectionRepository $store,
+        protected Repository $store,
         private EmittedStreamCache $streamCache,
         private EmittedStream $emittedStream,
         private int $sleepOnFirstCommit,
@@ -120,8 +120,7 @@ final readonly class EmittingManagement implements EmitterManagement
 
     /**
      * Check if the emitted stream is cached or exists.
-     *
-     * fixMe we assume the cache is in memory
+     * We assume the cache is in memory
      */
     private function streamIsCachedOrExists(StreamName $streamName): bool
     {

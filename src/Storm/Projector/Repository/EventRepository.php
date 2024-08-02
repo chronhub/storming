@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector\Repository;
 
 use Illuminate\Contracts\Events\Dispatcher;
-use Storm\Contract\Projector\ProjectionRepository;
+use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Repository\Events\ProjectionCreated;
 use Storm\Projector\Repository\Events\ProjectionDeleted;
@@ -18,52 +18,57 @@ use Storm\Projector\Repository\Events\ProjectionStarted;
 use Storm\Projector\Repository\Events\ProjectionStopped;
 use Throwable;
 
-// todo: bind all data to events
-final readonly class EventDispatcherRepository implements ProjectionRepository
+final readonly class EventRepository implements Repository
 {
     public function __construct(
-        private ProjectionRepository $repository,
+        private Repository $repository,
         private Dispatcher $eventDispatcher
     ) {}
 
-    public function create(ProjectionStatus $projectionStatus): void
+    public function create(ProjectionStatus $status): void
     {
         $this->dispatchWhen(
-            fn () => $this->repository->create($projectionStatus),
-            ProjectionCreated::class
+            fn () => $this->repository->create($status),
+            ProjectionCreated::class,
+            $status
         );
     }
 
-    public function start(ProjectionStatus $projectionStatus): void
+    public function start(ProjectionStatus $status): void
     {
         $this->dispatchWhen(
-            fn () => $this->repository->start($projectionStatus),
-            ProjectionStarted::class
+            fn () => $this->repository->start($status),
+            ProjectionStarted::class,
+            $status
         );
     }
 
-    public function stop(ProjectionSnapshot $projectionSnapshot, ProjectionStatus $projectionStatus): void
+    public function stop(ProjectionSnapshot $snapshot, ProjectionStatus $status): void
     {
         $this->dispatchWhen(
-            fn () => $this->repository->stop($projectionSnapshot, $projectionStatus),
+            fn () => $this->repository->stop($snapshot, $status),
             ProjectionStopped::class,
+            $status,
+            $snapshot,
         );
     }
 
-    public function startAgain(ProjectionStatus $projectionStatus): void
+    public function startAgain(ProjectionStatus $status): void
     {
         $this->dispatchWhen(
-            fn () => $this->repository->startAgain($projectionStatus),
-            ProjectionRestarted::class
+            fn () => $this->repository->startAgain($status),
+            ProjectionRestarted::class,
+            $status
         );
     }
 
-    public function reset(ProjectionSnapshot $projectionSnapshot, ProjectionStatus $currentStatus): void
+    public function reset(ProjectionSnapshot $snapshot, ProjectionStatus $status): void
     {
         $this->dispatchWhen(
-            fn () => $this->repository->reset($projectionSnapshot, $currentStatus),
+            fn () => $this->repository->reset($snapshot, $status),
             ProjectionReset::class,
-            $projectionSnapshot
+            $status,
+            $snapshot
         );
     }
 
@@ -85,9 +90,9 @@ final readonly class EventDispatcherRepository implements ProjectionRepository
         );
     }
 
-    public function persist(ProjectionSnapshot $projectionSnapshot): void
+    public function persist(ProjectionSnapshot $snapshot): void
     {
-        $this->repository->persist($projectionSnapshot);
+        $this->repository->persist($snapshot);
     }
 
     public function updateLock(): void

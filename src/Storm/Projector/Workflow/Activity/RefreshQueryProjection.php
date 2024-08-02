@@ -13,10 +13,6 @@ final readonly class RefreshQueryProjection
 
     public function __invoke(Process $process): void
     {
-        /**
-         * Watch again for event streams which may have changed
-         * after the first discovery on rising projection
-         */
         if (! $this->onlyOnceDiscovery) {
             $process->call(new DiscoverEventStream());
         }

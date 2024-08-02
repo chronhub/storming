@@ -14,7 +14,7 @@ final readonly class QueryingManagement implements QueryManagement
     public function performWhenThresholdIsReached(): void
     {
         if ($this->process->metrics()->isProcessedThresholdReached()) {
-            $this->process->metrics()['processed'] = 0;
+            $this->process->metrics()->reset('processed');
         }
     }
 }

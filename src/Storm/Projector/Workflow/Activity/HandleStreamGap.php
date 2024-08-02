@@ -29,7 +29,7 @@ final class HandleStreamGap
         if ($hasGap) {
             $process->recognition()->sleepOnGap();
 
-            $isBatchStreamReset = $process->metrics()->processed === 0;
+            $isBatchStreamReset = $process->metrics()->isReset('processed');
 
             if (! $isBatchStreamReset) {
                 $process->dispatch(new ProjectionStored());

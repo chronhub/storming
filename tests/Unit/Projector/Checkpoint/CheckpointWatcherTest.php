@@ -14,7 +14,7 @@ use Storm\Projector\Checkpoint\GapRules;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Exception\CheckpointViolation;
-use Storm\Projector\Workflow\Component\CheckpointReckon;
+use Storm\Projector\Workflow\Component\CheckpointReckoning;
 
 use function array_values;
 use function count;
@@ -38,7 +38,7 @@ function mockCheckpointCreatedAt(int $expectedCalls = 1): Closure
 }
 
 test('default instance', function () {
-    expect($this->watcher)->toBeInstanceOf(CheckpointReckon::class)
+    expect($this->watcher)->toBeInstanceOf(CheckpointReckoning::class)
         ->and($this->watcher->toArray())->toBeEmpty()
         ->and($this->watcher->jsonSerialize())->toBeArray()
         ->and(method_exists($this->watcher, 'subscribe'))->toBeFalse();

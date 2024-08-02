@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Repository\EventStream;
+namespace Storm\Projector\Workflow\EventStream;
 
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Projector\Exception\InvalidArgumentException;

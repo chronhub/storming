@@ -15,9 +15,9 @@ use Storm\Projector\Repository\Data\StartAgainData;
 use Storm\Projector\Repository\Data\StartData;
 use Storm\Projector\Repository\Data\StopData;
 use Storm\Projector\Repository\Data\UpdateLockData;
+use Storm\Projector\Repository\GenericRepository;
 use Storm\Projector\Repository\LockManager;
 use Storm\Projector\Repository\Projection;
-use Storm\Projector\Repository\ProjectionRepositoryStore;
 use Storm\Serializer\JsonSerializerFactory;
 use Storm\Tests\Stubs\ProjectionSnapshotStub;
 
@@ -27,7 +27,7 @@ beforeEach(function () {
     $this->serializer = (new JsonSerializerFactory())->create();
     $this->streamName = 'stream1';
 
-    $this->projectionStore = new ProjectionRepositoryStore(
+    $this->projectionStore = new GenericRepository(
         $this->provider,
         $this->lockManager,
         $this->serializer,
@@ -69,7 +69,7 @@ test('stop projection with result and status', function (ProjectionStatus $statu
         ->withArgs(fn (string $streamName, StopData $data) => $streamName === $this->streamName
             && $data->status === $status->value
             && $data->state === $this->serializer->serialize($projectionSnapshot->userState, 'json')
-            && $data->checkpoint === $this->serializer->serialize($projectionSnapshot->checkpoints, 'json')
+            && $data->checkpoint === $this->serializer->serialize($projectionSnapshot->checkpoint, 'json')
             && $data->lockedUntil === 'lock-2');
 
     $this->projectionStore->stop($projectionSnapshot, $status);
@@ -107,7 +107,7 @@ test('persist projection with snapshot', function () {
         ->expects('updateProjection')
         ->withArgs(fn (string $streamName, PersistData $data) => $streamName === $this->streamName
             && $data->state === $this->serializer->serialize($projectionSnapshot->userState, 'json')
-            && $data->checkpoint === $this->serializer->serialize($projectionSnapshot->checkpoints, 'json')
+            && $data->checkpoint === $this->serializer->serialize($projectionSnapshot->checkpoint, 'json')
             && $data->lockedUntil === 'lock-4'
         );
 
@@ -122,7 +122,7 @@ test('reset projection with result and status', function (ProjectionStatus $stat
         ->withArgs(fn (string $streamName, ResetData $data) => $streamName === $this->streamName
             && $data->status === $status->value
             && $data->state === $this->serializer->serialize($projectionSnapshot->userState, 'json')
-            && $data->checkpoint === $this->serializer->serialize($projectionSnapshot->checkpoints, 'json')
+            && $data->checkpoint === $this->serializer->serialize($projectionSnapshot->checkpoint, 'json')
         );
 
     $this->projectionStore->reset($projectionSnapshot, $status);
@@ -147,7 +147,7 @@ test('load projection snapshot', function (ProjectionStatus $status) {
 
     $result = $this->projectionStore->loadSnapshot();
 
-    expect($result->checkpoints)->toBe(['checkpoint' => 'value'])
+    expect($result->checkpoint)->toBe(['checkpoint' => 'value'])
         ->and($result->userState)->toBe(['user' => 'state']);
 })->with('projection status');
 

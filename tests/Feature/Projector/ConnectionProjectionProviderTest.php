@@ -12,11 +12,11 @@ use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Exception\ProjectionAlreadyExists;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
 use Storm\Projector\Exception\ProjectionNotFound;
-use Storm\Projector\Repository\ConnectionProjectionProvider;
 use Storm\Projector\Repository\Data\CreateData;
 use Storm\Projector\Repository\Data\ProjectionData;
 use Storm\Projector\Repository\Data\StartData;
 use Storm\Projector\Repository\Data\UpdateLockData;
+use Storm\Projector\Repository\DatabaseProvider;
 
 uses(RefreshDatabase::class);
 
@@ -24,7 +24,7 @@ beforeEach(function () {
     $connection = $this->app['db']->connection();
 
     $connection->getSchemaBuilder()->create(
-        ConnectionProjectionProvider::TABLE_NAME, function (Blueprint $table) {
+        DatabaseProvider::TABLE_NAME, function (Blueprint $table) {
             $table->string('name')->primary();
             $table->string('status');
             $table->string('state');
@@ -32,7 +32,7 @@ beforeEach(function () {
             $table->timestamp('locked_until')->nullable();
         });
 
-    $this->projectionProvider = new ConnectionProjectionProvider(
+    $this->projectionProvider = new DatabaseProvider(
         $connection,
         ClockFactory::create()
     );

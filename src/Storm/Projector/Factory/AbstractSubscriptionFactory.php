@@ -13,12 +13,12 @@ use Storm\Contract\Projector\EmittedStreamCache;
 use Storm\Contract\Projector\Management;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ProjectionProvider;
-use Storm\Contract\Projector\ProjectionRepository;
 use Storm\Contract\Projector\ReadModel;
+use Storm\Contract\Projector\Repository;
 use Storm\Contract\Projector\SubscriptionFactory;
 use Storm\Contract\Projector\Subscriptor;
 use Storm\Contract\Serializer\SymfonySerializer;
-use Storm\Projector\Repository\EventDispatcherRepository;
+use Storm\Projector\Repository\EventRepository;
 use Storm\Projector\Repository\LockManager;
 use Storm\Projector\Scope\EmitterAccess;
 use Storm\Projector\Scope\QueryAccess;
@@ -74,7 +74,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $management = new EmittingManagement(
             $process,
             $this->chronicler,
-            $this->createProjectionRepository($streamName, $options),
+            $this->createRepository($streamName, $options),
             $this->createStreamCache($options),
             new EmittedStream(),
             $options->getSleepEmitterOnFirstCommit()
@@ -92,7 +92,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     {
         $process = $this->createProcessManager($options);
 
-        $projectionRepository = $this->createProjectionRepository($streamName, $options);
+        $projectionRepository = $this->createRepository($streamName, $options);
 
         $management = new ReadingModelManagement($process, $projectionRepository, $readModel);
         $this->subscribeToMap($management, $process);
@@ -121,7 +121,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     /**
      * Create the projection repository.
      */
-    abstract protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository;
+    abstract protected function createRepository(string $streamName, ProjectionOption $options): Repository;
 
     protected function createProcessManager(ProjectionOption $options): Process
     {
@@ -140,12 +140,11 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         return new InMemoryEmittedStreams($options->getCacheSize());
     }
 
-    protected function createDispatcherRepository(ProjectionRepository $projectionRepository): EventDispatcherRepository
+    protected function createDispatcherRepository(Repository $projectionRepository): EventRepository
     {
-        return new EventDispatcherRepository($projectionRepository, $this->dispatcher);
+        return new EventRepository($projectionRepository, $this->dispatcher);
     }
 
-    // fixMe
     protected function subscribeToMap(Management $management, Process $process): void
     {
         $map = new ManagementEventMap();

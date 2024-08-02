@@ -26,7 +26,6 @@ class HaltOn implements ComponentSubscriber
     protected function stopWhen(Process $process, callable $callback): void
     {
         $process->addListener(ShouldTerminateWorkflow::class, function (Process $process) use ($callback): void {
-            // prevents stopping the projector when the projection is already terminated
             $isTerminated = $process->isSprintTerminated();
 
             if (! $isTerminated && $callback($process) === true) {

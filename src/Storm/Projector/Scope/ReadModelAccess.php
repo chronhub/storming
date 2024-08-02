@@ -28,7 +28,7 @@ final readonly class ReadModelAccess implements ReadModelScope
         return $this->readModel;
     }
 
-    public function stack(string $operation, ...$arguments): self
+    public function stack(string $operation, mixed ...$arguments): self
     {
         $this->readModel->stack($operation, ...$arguments);
 

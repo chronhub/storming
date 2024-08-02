@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow;
 
 use Storm\Contract\Projector\WorkflowInterface;
-use Storm\Projector\Exception\RuntimeException;
 use Throwable;
 
 /**
@@ -33,10 +32,6 @@ final class Workflow implements WorkflowInterface
         return new self($process, $activities, $stage);
     }
 
-    /**
-     * @throws RuntimeException when an exception has occurred in a previous run
-     * @throws Throwable        when any other exception occurs
-     */
     public function execute(): void
     {
         $exceptionOccurred = null;

@@ -20,7 +20,7 @@ use Storm\Projector\Repository\Data\StartData;
 
 use function sprintf;
 
-final readonly class ConnectionProjectionProvider implements ProjectionProvider
+final readonly class DatabaseProvider implements ProjectionProvider
 {
     private const array FAILS = [
         'create' => 'Fail to create projection with name %s',

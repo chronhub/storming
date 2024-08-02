@@ -30,7 +30,6 @@ abstract class AbstractCheckpointRecognition implements Recognition
 
     public function update(array $checkpoints): void
     {
-        // fixMe we do not any checks of the validity of the checkpoints
         foreach ($checkpoints as $checkpoint) {
             $this->assertStreamTracked($checkpoint['stream_name']);
 

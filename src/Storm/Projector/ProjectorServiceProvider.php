@@ -13,10 +13,10 @@ use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\SubscriptionFactory;
 use Storm\Contract\Serializer\JsonSerializer;
-use Storm\Projector\Factory\ConnectionSubscriptionFactory;
+use Storm\Projector\Factory\DatabaseSubscriptionFactory;
 use Storm\Projector\Filter\QueryScopeConnection;
 use Storm\Projector\Options\DefaultOption;
-use Storm\Projector\Repository\ConnectionProjectionProvider;
+use Storm\Projector\Repository\DatabaseProvider;
 use Storm\Serializer\JsonSerializerFactory;
 use Storm\Serializer\StreamEventNormalizer;
 
@@ -47,7 +47,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
     private function registerSubscriptionFactory(): void
     {
         $this->app->singleton('projector.subscription_factory.connection', function (Application $app): SubscriptionFactory {
-            return new ConnectionSubscriptionFactory(
+            return new DatabaseSubscriptionFactory(
                 $app['chronicler.event.transactional.standard.pgsql'],
                 $app['projection.provider.connection'],
                 $app['event_stream.provider.connection'],
@@ -84,6 +84,6 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
     {
         $this->app->bind('event_stream.provider.connection', ConnectionEventStreamProvider::class);
 
-        $this->app->bind('projection.provider.connection', ConnectionProjectionProvider::class);
+        $this->app->bind('projection.provider.connection', DatabaseProvider::class);
     }
 }

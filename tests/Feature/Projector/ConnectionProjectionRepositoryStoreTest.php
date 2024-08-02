@@ -12,10 +12,10 @@ use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Repository\ConnectionProjectionProvider;
+use Storm\Projector\Repository\DatabaseProvider;
+use Storm\Projector\Repository\GenericRepository;
 use Storm\Projector\Repository\LockManager;
 use Storm\Projector\Repository\Projection;
-use Storm\Projector\Repository\ProjectionRepositoryStore;
 use Storm\Projector\Repository\ProjectionSnapshot;
 use Storm\Serializer\JsonSerializerFactory;
 
@@ -28,7 +28,7 @@ beforeEach(function () {
     $connection = $this->app['db']->connection();
 
     $connection->getSchemaBuilder()->create(
-        ConnectionProjectionProvider::TABLE_NAME, function (Blueprint $table) {
+        DatabaseProvider::TABLE_NAME, function (Blueprint $table) {
             $table->string('name')->primary();
             $table->string('status');
             $table->string('state');
@@ -37,11 +37,11 @@ beforeEach(function () {
         });
 
     $this->clock = ClockFactory::create();
-    $this->projectionProvider = new ConnectionProjectionProvider($connection, $this->clock);
+    $this->projectionProvider = new DatabaseProvider($connection, $this->clock);
 
     $this->lock = new LockManager($this->clock, 1000, 1000);
     $this->serializer = (new JsonSerializerFactory())->create();
-    $this->repository = new ProjectionRepositoryStore(
+    $this->repository = new GenericRepository(
         $this->projectionProvider,
         $this->lock,
         $this->serializer,
@@ -49,7 +49,7 @@ beforeEach(function () {
     );
 });
 
-function createProjectionStore(ProjectionRepositoryStore $store, ProjectionStatus $status): void
+function createProjectionStore(GenericRepository $store, ProjectionStatus $status): void
 {
     expect($store->exists())->toBeFalse();
 
@@ -147,7 +147,7 @@ test('persist projection', function (ProjectionStatus $status) {
     expect($projection)->toBeInstanceOf(ProjectionModel::class)
         ->and($projection)->toBeInstanceOf(Projection::class)
         ->and($projection->state())->toBe($this->serializer->serialize($snapshot->userState, 'json'))
-        ->and($projection->checkpoint())->toBe($this->serializer->serialize($snapshot->checkpoints, 'json'))
+        ->and($projection->checkpoint())->toBe($this->serializer->serialize($snapshot->checkpoint, 'json'))
         ->and($projection->status())->toBe($status->value);
 
     // assert lock refreshed with now +lock timeout 1000 milliseconds
@@ -170,8 +170,8 @@ test('reset projection', function (ProjectionStatus $status) {
     expect($this->repository->loadStatus())->toBe($status);
 
     $snapshot = $this->repository->loadSnapshot();
-    $checkpoint = CheckpointFactory::fromArray($snapshot->checkpoints[0]);
-    expect($checkpoint)->toEqual($snapshot1->checkpoints[0]);
+    $checkpoint = CheckpointFactory::fromArray($snapshot->checkpoint[0]);
+    expect($checkpoint)->toEqual($snapshot1->checkpoint[0]);
 })->with('projection status');
 
 test('refresh lock', function () {

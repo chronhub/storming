@@ -6,10 +6,10 @@ namespace Storm\Projector\Factory;
 
 use Override;
 use Storm\Contract\Projector\ProjectionOption;
-use Storm\Contract\Projector\ProjectionRepository;
-use Storm\Projector\Repository\ProjectionRepositoryStore;
+use Storm\Contract\Projector\Repository;
+use Storm\Projector\Repository\GenericRepository;
 
-final class ConnectionSubscriptionFactory extends AbstractSubscriptionFactory
+final class DatabaseSubscriptionFactory extends AbstractSubscriptionFactory
 {
     private bool $useEvents = false;
 
@@ -20,9 +20,9 @@ final class ConnectionSubscriptionFactory extends AbstractSubscriptionFactory
     }
 
     #[Override]
-    protected function createProjectionRepository(string $streamName, ProjectionOption $options): ProjectionRepository
+    protected function createRepository(string $streamName, ProjectionOption $options): Repository
     {
-        $repository = new ProjectionRepositoryStore(
+        $repository = new GenericRepository(
             $this->projectionProvider,
             $this->createLockManager($options),
             $this->serializer,

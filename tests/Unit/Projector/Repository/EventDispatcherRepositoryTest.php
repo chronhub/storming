@@ -9,9 +9,9 @@ use Exception;
 use Illuminate\Contracts\Events\Dispatcher;
 use Mockery\MockInterface;
 use RuntimeException;
-use Storm\Contract\Projector\ProjectionRepository;
+use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Repository\EventDispatcherRepository;
+use Storm\Projector\Repository\EventRepository;
 use Storm\Projector\Repository\Events\ProjectionCreated;
 use Storm\Projector\Repository\Events\ProjectionDeleted;
 use Storm\Projector\Repository\Events\ProjectionDeletedWithEvents;
@@ -26,9 +26,9 @@ use Throwable;
 
 beforeEach(function () {
     $this->projectionName = 'projection-name';
-    $this->repository = mock(ProjectionRepository::class);
+    $this->repository = mock(Repository::class);
     $this->eventDispatcher = mock(Dispatcher::class);
-    $this->eventDispatcherRepository = new EventDispatcherRepository($this->repository, $this->eventDispatcher);
+    $this->eventDispatcherRepository = new EventRepository($this->repository, $this->eventDispatcher);
     $this->projectionResultStub = new ProjectionSnapshotStub();
 });
 
@@ -49,7 +49,7 @@ test('dispatch event when create projection', function (ProjectionStatus $status
     $this->repository->expects('create')->with($status);
 
     $this->eventDispatcher->expects('dispatch')->withArgs(
-        fn (ProjectionCreated $event) => $event->projectionName === $this->projectionName
+        fn (ProjectionCreated $event) => $event->name === $this->projectionName
     );
 
     $this->eventDispatcherRepository->create($status);
@@ -74,7 +74,7 @@ test('dispatch event when start projection', function (ProjectionStatus $status)
     $this->repository->expects('start')->with($status)->once();
 
     $this->eventDispatcher->expects('dispatch')->withArgs(
-        fn (ProjectionStarted $event) => $event->projectionName === $this->projectionName
+        fn (ProjectionStarted $event) => $event->name === $this->projectionName
     );
 
     $this->eventDispatcherRepository->start($status);
@@ -143,8 +143,8 @@ test('dispatch event when reset projection', function (ProjectionStatus $status)
 
     $this->eventDispatcher->expects('dispatch')->withArgs(
         function (ProjectionReset $event) use ($result) {
-            return $event->projectionName === $this->projectionName
-                && $event->projectionResult === $result;
+            return $event->name === $this->projectionName
+                && $event->snapshot === $result;
         });
 
     $this->eventDispatcherRepository->reset($result, $status);

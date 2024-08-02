@@ -28,15 +28,10 @@ final class ManagementEventMap
 {
     public function subscribeTo(Management $management, Process $process): void
     {
-        /**
-         * @todo more info on checkpoint, we could keep the last checkpoint in memory
-         *   to be retrieved when the gap is detected
-         */
         $process->addListener(BeforeHandleStreamGap::class, function (Process $process) {
             $currentGap = $process->recognition()->gapType();
 
             if ($currentGap instanceof GapType) {
-                //dd($workflowContext->recognition()->toArray());
                 $process->dispatch($currentGap->value);
             }
         });

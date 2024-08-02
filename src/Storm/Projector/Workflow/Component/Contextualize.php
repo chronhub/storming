@@ -8,27 +8,21 @@ use Storm\Contract\Projector\ContextReader;
 
 class Contextualize
 {
+    /**
+     * The context of the projection.
+     */
     protected ?ContextReader $contextReader = null;
 
-    /**
-     * Returns the context reader.
-     */
     public function get(): ?ContextReader
     {
         return $this->contextReader;
     }
 
-    /**
-     * Sets the context reader.
-     */
     public function set(ContextReader $contextReader): void
     {
         $this->contextReader = $contextReader;
     }
 
-    /**
-     * Check if the context reader is set.
-     */
     public function isset(): bool
     {
         return $this->contextReader instanceof ContextReader;

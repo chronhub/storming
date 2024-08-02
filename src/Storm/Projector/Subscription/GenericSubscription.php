@@ -28,7 +28,11 @@ final readonly class GenericSubscription implements Subscriptor
 
     public function start(ContextReader $context, bool $keepRunning): void
     {
-        $this->newWorkflow($context, $keepRunning)->execute();
+        $this->prepare($context, $keepRunning);
+
+        $activities = ($this->activityFactory)($this->process);
+
+        $this->newWorkflow($activities)->execute();
     }
 
     public function call(callable $callback): mixed
@@ -36,16 +40,7 @@ final readonly class GenericSubscription implements Subscriptor
         return $callback($this->process);
     }
 
-    private function newWorkflow(ContextReader $context, bool $keepRunning): WorkflowInterface
-    {
-        $this->prepare($context, $keepRunning);
-
-        $activities = ($this->activityFactory)($this->process);
-
-        return $this->create($activities);
-    }
-
-    private function create(array $activities): WorkflowInterface
+    private function newWorkflow(array $activities): WorkflowInterface
     {
         $workflow = Workflow::create($this->process, $activities);
 

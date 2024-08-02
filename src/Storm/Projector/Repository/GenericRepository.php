@@ -6,7 +6,7 @@ namespace Storm\Projector\Repository;
 
 use Storm\Contract\Projector\ProjectionModel;
 use Storm\Contract\Projector\ProjectionProvider;
-use Storm\Contract\Projector\ProjectionRepository;
+use Storm\Contract\Projector\Repository;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\ProjectionStatus;
@@ -20,7 +20,7 @@ use Storm\Projector\Repository\Data\StartData;
 use Storm\Projector\Repository\Data\StopData;
 use Storm\Projector\Repository\Data\UpdateLockData;
 
-final readonly class ProjectionRepositoryStore implements ProjectionRepository
+final readonly class GenericRepository implements Repository
 {
     public function __construct(
         private ProjectionProvider $provider,
@@ -29,26 +29,26 @@ final readonly class ProjectionRepositoryStore implements ProjectionRepository
         private string $name
     ) {}
 
-    public function create(ProjectionStatus $projectionStatus): void
+    public function create(ProjectionStatus $status): void
     {
-        $data = new CreateData($projectionStatus->value);
+        $data = new CreateData($status->value);
 
         $this->provider->createProjection($this->name, $data);
     }
 
-    public function start(ProjectionStatus $projectionStatus): void
+    public function start(ProjectionStatus $status): void
     {
-        $data = new StartData($projectionStatus->value, $this->lockManager->acquire());
+        $data = new StartData($status->value, $this->lockManager->acquire());
 
         $this->provider->acquireLock($this->name, $data);
     }
 
-    public function stop(ProjectionSnapshot $projectionSnapshot, ProjectionStatus $projectionStatus): void
+    public function stop(ProjectionSnapshot $snapshot, ProjectionStatus $status): void
     {
         $data = new StopData(
-            $projectionStatus->value,
-            $this->serializer->serialize($projectionSnapshot->userState, 'json'),
-            $this->serializer->serialize($projectionSnapshot->checkpoints, 'json'),
+            $status->value,
+            $this->serializer->serialize($snapshot->userState, 'json'),
+            $this->serializer->serialize($snapshot->checkpoint, 'json'),
             $this->lockManager->refresh()
         );
 
@@ -62,30 +62,30 @@ final readonly class ProjectionRepositoryStore implements ProjectionRepository
         $this->updateProjection($data);
     }
 
-    public function startAgain(ProjectionStatus $projectionStatus): void
+    public function startAgain(ProjectionStatus $status): void
     {
-        $data = new StartAgainData($projectionStatus->value, $this->lockManager->acquire());
+        $data = new StartAgainData($status->value, $this->lockManager->acquire());
 
         $this->updateProjection($data);
     }
 
-    public function persist(ProjectionSnapshot $projectionSnapshot): void
+    public function persist(ProjectionSnapshot $snapshot): void
     {
         $data = new PersistData(
-            $this->serializer->serialize($projectionSnapshot->userState, 'json'),
-            $this->serializer->serialize($projectionSnapshot->checkpoints, 'json'),
+            $this->serializer->serialize($snapshot->userState, 'json'),
+            $this->serializer->serialize($snapshot->checkpoint, 'json'),
             $this->lockManager->refresh()
         );
 
         $this->updateProjection($data);
     }
 
-    public function reset(ProjectionSnapshot $projectionSnapshot, ProjectionStatus $currentStatus): void
+    public function reset(ProjectionSnapshot $snapshot, ProjectionStatus $status): void
     {
         $data = new ResetData(
-            $currentStatus->value,
-            $this->serializer->serialize($projectionSnapshot->userState, 'json'),
-            $this->serializer->serialize($projectionSnapshot->checkpoints, 'json'),
+            $status->value,
+            $this->serializer->serialize($snapshot->userState, 'json'),
+            $this->serializer->serialize($snapshot->checkpoint, 'json'),
         );
 
         $this->updateProjection($data);

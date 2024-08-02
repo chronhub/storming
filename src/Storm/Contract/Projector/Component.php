@@ -6,20 +6,20 @@ namespace Storm\Contract\Projector;
 
 use Storm\Projector\Workflow\Component\Computation;
 use Storm\Projector\Workflow\Component\Contextualize;
+use Storm\Projector\Workflow\Component\EventStreamBatch;
 use Storm\Projector\Workflow\Component\EventStreamDiscovery;
 use Storm\Projector\Workflow\Component\HaltOn;
 use Storm\Projector\Workflow\Component\Metrics;
 use Storm\Projector\Workflow\Component\ProcessedStream;
 use Storm\Projector\Workflow\Component\Runner;
 use Storm\Projector\Workflow\Component\StatusHolder;
-use Storm\Projector\Workflow\Component\StreamEventBatch;
 use Storm\Projector\Workflow\Component\Timing;
 use Storm\Projector\Workflow\Component\UserState;
 use Storm\Projector\Workflow\Process;
 
 /**
  * @method Contextualize         context()
- * @method StreamEventBatch      batch()
+ * @method EventStreamBatch      batch()
  * @method EventStreamDiscovery  discovery()
  * @method EventManager          dispatcher()
  * @method HaltOn                haltOn()

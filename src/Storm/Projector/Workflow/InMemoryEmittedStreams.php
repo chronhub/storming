@@ -28,10 +28,6 @@ final class InMemoryEmittedStreams implements EmittedStreamCache
 
     public function push(string $streamName): void
     {
-        if ($this->has($streamName)) {
-            throw new InvalidArgumentException("Stream $streamName is already in the cache");
-        }
-
         $this->position = ++$this->position % $this->cacheSize;
 
         $this->buffer[$this->position] = $streamName;

@@ -20,9 +20,9 @@ use Storm\Projector\Support\Metrics\MainMetric;
 use Storm\Projector\Support\Metrics\ProcessedMetric;
 use Storm\Projector\Workflow\Component;
 use Storm\Projector\Workflow\Component\Computation;
+use Storm\Projector\Workflow\Component\EventStreamBatch;
 use Storm\Projector\Workflow\Component\EventStreamDiscovery;
 use Storm\Projector\Workflow\Component\Runner;
-use Storm\Projector\Workflow\Component\StreamEventBatch;
 use Storm\Projector\Workflow\Component\Timing;
 use Storm\Projector\Workflow\Component\UserState;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
@@ -94,7 +94,7 @@ beforeEach(function () {
     $this->subscriptor = mock(Component::class);
     $this->watcherManager = mock(Component::class);
 
-    $this->streamEventWatcher = mock(StreamEventBatch::class);
+    $this->streamEventWatcher = mock(EventStreamBatch::class);
     $this->recognitionWatcher = mock(CheckpointRecognition::class);
     $this->sprintWatcher = mock(Runner::class);
     $this->timeWatcher = mock(Timing::class);

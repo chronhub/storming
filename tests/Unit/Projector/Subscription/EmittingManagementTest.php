@@ -10,7 +10,7 @@ use Storm\Chronicler\Exceptions\StreamNotFound;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Projector\EmittedStreamCache;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\ProjectionRepository;
+use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Repository\ProjectionSnapshot;
 use Storm\Projector\Subscription\EmittingManagement;
@@ -28,7 +28,7 @@ use function iterator_to_array;
 
 beforeEach(function () {
     $this->hub = mock(NotificationHub::class);
-    $this->repository = mock(ProjectionRepository::class);
+    $this->repository = mock(Repository::class);
     $this->streamCache = mock(EmittedStreamCache::class);
     $this->emittedStream = mock(EmittedStream::class);
     $this->expectation = new ManagementExpectation($this->repository, $this->hub);
@@ -83,7 +83,7 @@ test('revise projection', function (array $checkpoint, array $state, ProjectionS
 
     $this->repository->expects('reset')
         ->withArgs(
-            fn (ProjectionSnapshot $result, ProjectionStatus $status) => $result->checkpoints === $checkpoint
+            fn (ProjectionSnapshot $result, ProjectionStatus $status) => $result->checkpoint === $checkpoint
                 && $status === $currentStatus
         );
 
@@ -111,7 +111,7 @@ test('revise projection hold stream not found exception when delete a non existi
 
     $this->repository->expects('reset')
         ->withArgs(
-            fn (ProjectionSnapshot $result, ProjectionStatus $status) => $result->checkpoints === $checkpoint
+            fn (ProjectionSnapshot $result, ProjectionStatus $status) => $result->checkpoint === $checkpoint
                 && $status === $currentStatus
         );
 

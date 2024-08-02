@@ -11,14 +11,14 @@ use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Repository\ProjectionSnapshot;
 
-interface ProjectionRepository
+interface Repository
 {
     /**
      * Creates a new projection with the given status.
      *
      * @throws ProjectionAlreadyExists When a projection with the given name already exists.
      */
-    public function create(ProjectionStatus $projectionStatus): void;
+    public function create(ProjectionStatus $status): void;
 
     /**
      * Starts the projection by acquiring the lock.
@@ -26,14 +26,14 @@ interface ProjectionRepository
      * @throws ProjectionAlreadyRunning When another projection has already acquired the lock.
      * @throws ProjectionFailed         When the lock cannot be acquired.
      */
-    public function start(ProjectionStatus $projectionStatus): void;
+    public function start(ProjectionStatus $status): void;
 
     /**
      * Persists projection data
      *
      * @throws ProjectionFailed When projection data cannot be stored.
      */
-    public function persist(ProjectionSnapshot $projectionSnapshot): void;
+    public function persist(ProjectionSnapshot $snapshot): void;
 
     /**
      * Stops the projection and store data.
@@ -41,7 +41,7 @@ interface ProjectionRepository
      * @throws ProjectionNotFound When a projection with the given name doesn't exist.
      * @throws ProjectionFailed   When projection data cannot be stored.
      */
-    public function stop(ProjectionSnapshot $projectionSnapshot, ProjectionStatus $projectionStatus): void;
+    public function stop(ProjectionSnapshot $snapshot, ProjectionStatus $status): void;
 
     /**
      * Starts the projection again.
@@ -49,12 +49,12 @@ interface ProjectionRepository
      * @throws ProjectionNotFound When a projection with the given name doesn't exist.
      * @throws ProjectionFailed   When projection failed to update data.
      */
-    public function startAgain(ProjectionStatus $projectionStatus): void;
+    public function startAgain(ProjectionStatus $status): void;
 
     /**
      * Resets projection data.
      */
-    public function reset(ProjectionSnapshot $projectionSnapshot, ProjectionStatus $currentStatus): void;
+    public function reset(ProjectionSnapshot $snapshot, ProjectionStatus $status): void;
 
     /**
      * Deletes the projection.

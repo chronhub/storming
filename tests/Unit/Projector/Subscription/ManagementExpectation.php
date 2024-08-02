@@ -7,7 +7,7 @@ namespace Storm\Tests\Unit\Projector\Subscription;
 use Closure;
 use Mockery\MockInterface;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\ProjectionRepository;
+use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Repository\ProjectionSnapshot;
 use Storm\Projector\Workflow\Notification\Command\CheckpointUpdated;
@@ -24,7 +24,7 @@ use Storm\Tests\Stubs\ProjectionSnapshotStub;
 class ManagementExpectation
 {
     public function __construct(
-        protected ProjectionRepository&MockInterface $repository,
+        protected Repository&MockInterface $repository,
         protected NotificationHub&MockInterface $hub,
     ) {}
 
@@ -52,7 +52,7 @@ class ManagementExpectation
     {
         $this->assertProjectionSnapshot($checkpoint, $state);
 
-        $args = fn (ProjectionSnapshot $result) => $result->checkpoints === $checkpoint && $result->userState === $state;
+        $args = fn (ProjectionSnapshot $result) => $result->checkpoint === $checkpoint && $result->userState === $state;
 
         $this->repository->expects('persist')->withArgs($args);
     }
@@ -62,7 +62,7 @@ class ManagementExpectation
         $result = (new ProjectionSnapshotStub())->fromDefault();
 
         $this->repository->expects('loadSnapshot')->andReturn($result);
-        $this->hub->expects('emit')->with(CheckpointUpdated::class, $result->checkpoints);
+        $this->hub->expects('emit')->with(CheckpointUpdated::class, $result->checkpoint);
         $this->hub->expects('emit')->with(UserStateChanged::class, $result->userState);
 
         $this->hub->expects('emitWhen')
@@ -79,7 +79,7 @@ class ManagementExpectation
 
         $this->repository->expects('stop')
             ->withArgs(
-                fn (ProjectionSnapshot $snapshot, ProjectionStatus $status) => $snapshot->checkpoints === $checkpoint
+                fn (ProjectionSnapshot $snapshot, ProjectionStatus $status) => $snapshot->checkpoint === $checkpoint
                     && $snapshot->userState === $userState
                     && $status === ProjectionStatus::IDLE
             );

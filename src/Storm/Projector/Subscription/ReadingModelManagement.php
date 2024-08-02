@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Subscription;
 
-use Storm\Contract\Projector\ProjectionRepository;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelManagement;
+use Storm\Contract\Projector\Repository;
 use Storm\Projector\Workflow\Input\DiscoverEventStream;
 use Storm\Projector\Workflow\Process;
 
@@ -16,7 +16,7 @@ final readonly class ReadingModelManagement implements ReadModelManagement
 
     public function __construct(
         protected Process $process,
-        protected ProjectionRepository $store,
+        protected Repository $store,
         private ReadModel $readModel,
     ) {}
 

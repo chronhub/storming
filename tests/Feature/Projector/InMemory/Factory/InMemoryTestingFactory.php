@@ -23,7 +23,7 @@ use Storm\Projector\Factory\InMemorySubscriptionFactory;
 use Storm\Projector\Filter\InMemoryQueryScope;
 use Storm\Projector\Options\InMemoryOption;
 use Storm\Projector\ProjectorManager;
-use Storm\Projector\Repository\InMemoryProjectionProvider;
+use Storm\Projector\Repository\InMemoryProvider;
 use Storm\Serializer\JsonSerializerFactory;
 
 class InMemoryTestingFactory
@@ -151,7 +151,7 @@ class InMemoryTestingFactory
             $this->setupClock();
         }
 
-        $this->projectionProvider ??= new InMemoryProjectionProvider($this->clock);
+        $this->projectionProvider ??= new InMemoryProvider($this->clock);
     }
 
     public function setupQueryScope(): void

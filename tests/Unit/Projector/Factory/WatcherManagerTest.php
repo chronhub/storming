@@ -14,10 +14,10 @@ use Storm\Contract\Projector\ProjectionOption;
 use Storm\Projector\Factory\WatcherFactory;
 use Storm\Projector\Workflow\Component;
 use Storm\Projector\Workflow\Component\Computation;
+use Storm\Projector\Workflow\Component\EventStreamBatch;
 use Storm\Projector\Workflow\Component\EventStreamDiscovery;
 use Storm\Projector\Workflow\Component\HaltOn;
 use Storm\Projector\Workflow\Component\Runner;
-use Storm\Projector\Workflow\Component\StreamEventBatch;
 use Storm\Projector\Workflow\Component\Timing;
 use Storm\Projector\Workflow\Component\UserState;
 
@@ -43,7 +43,7 @@ beforeEach(function () {
  * property watcher, class name, has "subscribe" method name
  */
 dataset('watchers', [
-    'batch stream watcher' => ['streamEvent', StreamEventBatch::class, false],
+    'batch stream watcher' => ['streamEvent', EventStreamBatch::class, false],
     'sprint watcher' => ['sprint', Runner::class, false],
     'stop watcher' => ['stop', HaltOn::class, true],
     'event stream watcher' => ['discovery', EventStreamDiscovery::class, false],

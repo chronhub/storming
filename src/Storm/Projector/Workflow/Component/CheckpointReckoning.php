@@ -12,13 +12,13 @@ use Storm\Projector\Checkpoint\GapRules;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Checkpoint\StreamPoint;
 
-final class CheckpointReckon extends AbstractCheckpointRecognition
+final class CheckpointReckoning extends AbstractCheckpointRecognition
 {
     public function __construct(
         Checkpoints $checkpoints,
+        SystemClock $clock,
         private readonly GapRecognition $gapDetector,
         private readonly GapRules $rules,
-        SystemClock $clock,
     ) {
         $this->checkpoints = $checkpoints;
         $this->clock = $clock;

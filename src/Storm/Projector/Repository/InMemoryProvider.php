@@ -18,7 +18,7 @@ use function array_key_exists;
 use function array_merge;
 use function in_array;
 
-final readonly class InMemoryProjectionProvider implements ProjectionProvider
+final readonly class InMemoryProvider implements ProjectionProvider
 {
     public array $attributes;
 

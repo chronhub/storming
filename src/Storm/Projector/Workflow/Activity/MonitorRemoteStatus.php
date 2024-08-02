@@ -57,9 +57,6 @@ trait MonitorRemoteStatus
      *
      * The projection will be restarted itself when the sprint
      * is running in the background.
-     *
-     * fixMe for emitter projector, unless it was emitted under the projection name
-     *   we should not restart the projection, as emitted streams still exist
      */
     protected function onResetting(Process $process): false
     {

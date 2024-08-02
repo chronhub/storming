@@ -12,9 +12,6 @@ use Storm\Projector\Exception\InvalidArgumentException;
  * @property int<0, max> $processed
  * @property int<0, max> $acked
  * @property int<0, max> $cycle
- *
- * checkMe do we need to add methods increment, reset, etc
- *  would be easier to locate the code
  */
 class Metrics extends Fluent
 {
@@ -23,12 +20,34 @@ class Metrics extends Fluent
      */
     public function __construct(public readonly int $processedThreshold)
     {
-        /** @phpstan-ignore-next-line */
-        if ($processedThreshold < 1) {
-            throw new InvalidArgumentException('Processed threshold must be greater than 0');
-        }
-
         parent::__construct(['main' => 0, 'processed' => 0, 'acked' => 0, 'cycle' => 0]);
+    }
+
+    public function increment(string $field): void
+    {
+        $this->assertFieldExists($field);
+
+        $this->$field++;
+    }
+
+    public function reset(string $field): void
+    {
+        $this->assertFieldExists($field);
+
+        $this->$field = 0;
+    }
+
+    public function isReset(string $field): bool
+    {
+        $this->assertFieldExists($field);
+
+        return $this->$field === 0;
+    }
+
+    public function incrementBatchStream(): void
+    {
+        $this->processed++;
+        $this->main++;
     }
 
     public function isFirstCycle(): bool
@@ -36,7 +55,7 @@ class Metrics extends Fluent
         return $this->cycle === 1;
     }
 
-    public function IsBatchStreamBlank(): bool
+    public function isBatchStreamBlank(): bool
     {
         if ($this->main !== 0) {
             return false;
@@ -50,10 +69,10 @@ class Metrics extends Fluent
         return $this->processed >= $this->processedThreshold;
     }
 
-    public function incrementBatchStream(): void
+    protected function assertFieldExists(string $field): void
     {
-        $this->processed++;
-
-        $this->main++;
+        if (! $this->__isset($field)) {
+            throw new InvalidArgumentException("Field $field does not exist in Metrics");
+        }
     }
 }

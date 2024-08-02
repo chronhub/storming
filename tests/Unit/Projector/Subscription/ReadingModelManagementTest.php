@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\ProjectionRepository;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelManagement;
+use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Repository\ProjectionSnapshot;
 use Storm\Projector\Subscription\ReadingModelManagement;
@@ -21,7 +21,7 @@ use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamLimitReached;
 
 beforeEach(function () {
     $this->hub = mock(NotificationHub::class);
-    $this->repository = mock(ProjectionRepository::class);
+    $this->repository = mock(Repository::class);
     $this->expectation = new ManagementExpectation($this->repository, $this->hub);
     $this->readModel = mock(ReadModel::class);
     $this->management = new ReadingModelManagement($this->hub, $this->repository, $this->readModel);
@@ -76,7 +76,7 @@ test('revise projection', function (array $checkpoint, array $state, ProjectionS
 
     $this->repository->expects('reset')
         ->withArgs(
-            fn (ProjectionSnapshot $result, ProjectionStatus $status) => $result->checkpoints === $checkpoint
+            fn (ProjectionSnapshot $result, ProjectionStatus $status) => $result->checkpoint === $checkpoint
                 && $status === $currentStatus
         );
 

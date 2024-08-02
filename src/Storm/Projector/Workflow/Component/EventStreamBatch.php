@@ -7,7 +7,7 @@ namespace Storm\Projector\Workflow\Component;
 use Storm\Projector\Iterator\MergeStreamIterator;
 use Storm\Projector\Support\ExponentialSleep;
 
-class StreamEventBatch
+class EventStreamBatch
 {
     protected ?MergeStreamIterator $iterator = null;
 

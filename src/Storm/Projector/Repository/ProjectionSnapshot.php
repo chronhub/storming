@@ -12,10 +12,10 @@ use Storm\Projector\Checkpoint\Checkpoint;
 final readonly class ProjectionSnapshot
 {
     /**
-     * @param array<Checkpoint|CheckpointArray> $checkpoints
+     * @param array<Checkpoint|CheckpointArray> $checkpoint
      */
     public function __construct(
-        public array $checkpoints,
+        public array $checkpoint,
         public array $userState,
     ) {}
 }

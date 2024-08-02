@@ -6,10 +6,10 @@ namespace Storm\Tests\Unit\Projector\Workflow;
 
 use Closure;
 use Storm\Contract\Chronicler\QueryFilter;
-use Storm\Projector\Repository\EventStream\DiscoverAllStream;
-use Storm\Projector\Repository\EventStream\DiscoverPartition;
-use Storm\Projector\Repository\EventStream\DiscoverStream;
 use Storm\Projector\Workflow\DefaultContext;
+use Storm\Projector\Workflow\EventStream\DiscoverAllStream;
+use Storm\Projector\Workflow\EventStream\DiscoverPartition;
+use Storm\Projector\Workflow\EventStream\DiscoverStream;
 use Storm\Projector\Workflow\HaltOn;
 
 beforeEach(function () {

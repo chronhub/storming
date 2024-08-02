@@ -9,9 +9,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Storm\Clock\ClockFactory;
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Repository\ConnectionProjectionProvider;
+use Storm\Projector\Repository\DatabaseProvider;
+use Storm\Projector\Repository\GenericRepository;
 use Storm\Projector\Repository\LockManager;
-use Storm\Projector\Repository\ProjectionRepositoryStore;
 use Storm\Projector\Repository\ProjectionSnapshot;
 use Storm\Serializer\JsonSerializerFactory;
 
@@ -21,7 +21,7 @@ beforeEach(function () {
     $connection = $this->app['db']->connection();
 
     $connection->getSchemaBuilder()->create(
-        ConnectionProjectionProvider::TABLE_NAME, function (Blueprint $table) {
+        DatabaseProvider::TABLE_NAME, function (Blueprint $table) {
             $table->string('name')->primary();
             $table->string('status');
             $table->string('state');
@@ -32,7 +32,7 @@ beforeEach(function () {
     $this->projectionName = 'test';
     $this->serializer = (new JsonSerializerFactory)->create();
     $this->clock = ClockFactory::create();
-    $this->projectionProvider = new ConnectionProjectionProvider(
+    $this->projectionProvider = new DatabaseProvider(
         $connection,
         $this->clock
     );
@@ -40,7 +40,7 @@ beforeEach(function () {
 
 test('load snapshot', function () {
     $lockManager = new LockManager($this->clock, 1000, 1000);
-    $store = new ProjectionRepositoryStore(
+    $store = new GenericRepository(
         $this->projectionProvider,
         $lockManager,
         $this->serializer,
@@ -77,8 +77,8 @@ test('load snapshot', function () {
 
     $snapshotLoaded = $store->loadSnapshot();
 
-    expect(CheckpointFactory::fromArray($snapshotLoaded->checkpoints[0]))->toEqual($checkpoints[0])
-        ->and(CheckpointFactory::fromArray($snapshotLoaded->checkpoints[1]))->toEqual($checkpoints[1]);
+    expect(CheckpointFactory::fromArray($snapshotLoaded->checkpoint[0]))->toEqual($checkpoints[0])
+        ->and(CheckpointFactory::fromArray($snapshotLoaded->checkpoint[1]))->toEqual($checkpoints[1]);
 });
 
 test('incomplete test', function () {})->todo();

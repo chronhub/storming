@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\ProjectionRepository;
+use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Subscription\InteractWithManagement;
 use Storm\Projector\Workflow\Notification\Command\CheckpointReset;
@@ -16,7 +16,7 @@ dataset('states', [[[]], [['foo']], [['bar']]]);
 
 beforeEach(function () {
     $this->hub = $hub = mock(NotificationHub::class);
-    $this->repository = $repository = mock(ProjectionRepository::class);
+    $this->repository = $repository = mock(Repository::class);
     $this->expectation = new ManagementExpectation($this->repository, $this->hub);
 
     $this->management = new class($repository, $hub)
@@ -24,7 +24,7 @@ beforeEach(function () {
         use InteractWithManagement;
 
         public function __construct(
-            protected ProjectionRepository $projectionRepository,
+            protected Repository $projectionRepository,
             protected NotificationHub $hub) {}
 
         public function mountPersistentProjection(): void

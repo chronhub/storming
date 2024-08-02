@@ -56,9 +56,9 @@ trait InMemoryProjectionExpectationTrait
     /**
      * Assert projection user state.
      */
-    protected function assertProjectionState(array $state): void
+    protected function assertProjectionState(array $userState): void
     {
-        expect($this->projector->getState())->toBe($state);
+        expect($this->projector->getState())->toBe($userState);
     }
 
     /**

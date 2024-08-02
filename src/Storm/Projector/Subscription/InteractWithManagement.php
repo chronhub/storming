@@ -42,7 +42,6 @@ trait InteractWithManagement
 
     public function restart(): void
     {
-        // fixme emitter should not restart depends on it was emitted
         $this->process->sprint()->continue();
 
         $runningStatus = ProjectionStatus::RUNNING;
@@ -62,7 +61,7 @@ trait InteractWithManagement
     {
         $snapshot = $this->store->loadSnapshot();
 
-        $this->process->recognition()->update($snapshot->checkpoints);
+        $this->process->recognition()->update($snapshot->checkpoint);
 
         $userState = $snapshot->userState;
 
@@ -78,7 +77,7 @@ trait InteractWithManagement
         if ($thresholdReached) {
             $this->store();
 
-            $this->process->metrics()['processed'] = 0;
+            $this->process->metrics()->reset('processed');
 
             $this->disclose();
 

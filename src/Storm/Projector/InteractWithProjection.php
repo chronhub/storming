@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector;
 
 use Closure;
+use Storm\Projector\Support\ProjectionReport;
 use Storm\Projector\Workflow\Process;
 
 trait InteractWithProjection
@@ -65,7 +66,7 @@ trait InteractWithProjection
         );
     }
 
-    public function getReport(): array
+    public function getReport(): ProjectionReport
     {
         return $this->subscriber->call(
             fn (Process $process) => $process->compute()->report()
