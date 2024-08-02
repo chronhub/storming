@@ -23,7 +23,7 @@ use Storm\Projector\Workflow\Component\Computation;
 use Storm\Projector\Workflow\Component\EventStreamBatch;
 use Storm\Projector\Workflow\Component\EventStreamDiscovery;
 use Storm\Projector\Workflow\Component\Runner;
-use Storm\Projector\Workflow\Component\Timing;
+use Storm\Projector\Workflow\Component\Timer;
 use Storm\Projector\Workflow\Component\UserState;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamIncrements;
@@ -97,7 +97,7 @@ beforeEach(function () {
     $this->streamEventWatcher = mock(EventStreamBatch::class);
     $this->recognitionWatcher = mock(CheckpointRecognition::class);
     $this->sprintWatcher = mock(Runner::class);
-    $this->timeWatcher = mock(Timing::class);
+    $this->timeWatcher = mock(Timer::class);
     $this->userStateWatcher = mock(UserState::class);
     $this->eventStreamWatcher = mock(EventStreamDiscovery::class);
     $this->reportWatcher = mock(Computation::class);
@@ -621,7 +621,7 @@ describe('notify timer', function () {
     test('get current time', function () {
         $currentTime = (int) microtime();
         $this->subscriptor->expects('time')->andReturn($this->timeWatcher);
-        $this->timeWatcher->expects('getCurrentTimestamp')->andReturn($currentTime);
+        $this->timeWatcher->expects('getCurrentTime')->andReturn($currentTime);
 
         $notification = new CurrentTime();
 

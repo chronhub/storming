@@ -14,9 +14,9 @@ use Storm\Projector\Workflow\Process;
 /**
  * @template TComputation of array{
  *     projection_id: string,
- *     started_at: int<0, max>,
- *     elapsed_time: int<0, max>,
- *     ended_at: int<0, max>,
+ *     started_at: string,
+ *     elapsed_time: float,
+ *     ended_at: string,
  *     cycle: int<0, max>,
  *     acked_event: int<0, max>,
  *     total_event: int<0, max>,
@@ -50,9 +50,9 @@ class Computation implements ComponentSubscriber
                 $this->report['cycle'] = $process->metrics()->get('cycle');
                 $this->report['acked_event'] = $process->metrics()->get('acked');
                 $this->report['total_event'] = $process->metrics()->get('main');
-                $this->report['started_at'] = $process->time()->getStartedTime();
-                $this->report['ended_at'] = $process->time()->getCurrentTimestamp();
-                $this->report['elapsed_time'] = $this->report['ended_at'] - $this->report['started_at'];
+                $this->report['started_at'] = $process->time()->getStartedTime()->format();
+                $this->report['ended_at'] = $process->time()->getCurrentTime()->format();
+                $this->report['elapsed_time'] = $process->time()->getElapsedTime();
                 $this->report['checkpoint'] = $process->recognition()->jsonSerialize();
                 $this->report['options'] = $process->option()->jsonSerialize();
             }

@@ -12,7 +12,6 @@ use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryReadModelProjectionTe
 use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
 use function count;
-use function time;
 
 uses(
     InMemoryReadModelProjectionTestBaseTrait::class,
@@ -45,7 +44,7 @@ test('stop projection when cycle reached', function (int $cycles) {
     $this->assertProjectionReport(cycle: $cycles, ackedEvent: 4, totalEvent: 4);
 })->with([[5], [10], [20]]);
 
-test('stop projection with expiration', function (int $expiredAt) {
+test('stop projection with expiration', function () {
     $this->setupProjection(
         streamName: $streamName = 'account',
         projectionName: 'balance',
@@ -59,14 +58,12 @@ test('stop projection with expiration', function (int $expiredAt) {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getIncrementUserStateReactor())
-        ->haltOn(StopWhen::timeExpired($expiredAt))
+        ->haltOn(StopWhen::timeExpired('2', 'seconds'))
         ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
         ->run(inBackground: true);
 
     $this->assertPartialProjectionReport(['acked_event' => 4, 'total_event' => 4]);
-})
-    ->with([[time() + 1], [time() + 2]])
-    ->group('sleep');
+})->group('sleep');
 
 test('stop projection when recoverable gap detected', function (array $retries) {
     $this->setupProjection(

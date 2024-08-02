@@ -18,7 +18,7 @@ use Storm\Projector\Workflow\Component\EventStreamBatch;
 use Storm\Projector\Workflow\Component\EventStreamDiscovery;
 use Storm\Projector\Workflow\Component\HaltOn;
 use Storm\Projector\Workflow\Component\Runner;
-use Storm\Projector\Workflow\Component\Timing;
+use Storm\Projector\Workflow\Component\Timer;
 use Storm\Projector\Workflow\Component\UserState;
 
 use function method_exists;
@@ -47,7 +47,7 @@ dataset('watchers', [
     'sprint watcher' => ['sprint', Runner::class, false],
     'stop watcher' => ['stop', HaltOn::class, true],
     'event stream watcher' => ['discovery', EventStreamDiscovery::class, false],
-    'time watcher' => ['time', Timing::class, false],
+    'time watcher' => ['time', Timer::class, false],
     'user state watcher' => ['userState', UserState::class, false],
     'checkpoint recognition watcher' => ['recognition', CheckpointRecognition::class, false],
     'report watcher' => ['report', Computation::class, true],

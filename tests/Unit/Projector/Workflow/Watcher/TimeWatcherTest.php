@@ -5,11 +5,11 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 
 use Storm\Projector\Support\Timer;
-use Storm\Projector\Workflow\Component\Timing;
+use Storm\Projector\Workflow\Component\Timer;
 
 beforeEach(function () {
     $this->timer = mock(Timer::class);
-    $this->watcher = new Timing($this->timer);
+    $this->watcher = new Timer($this->timer);
 });
 
 test('default instance', function () {
@@ -49,5 +49,5 @@ test('get elapsed time', function () {
 test('get current timestamp', function () {
     $this->timer->expects('getCurrentTimestamp')->andReturn(1234567890);
 
-    expect($this->watcher->getCurrentTimestamp())->toBe(1234567890);
+    expect($this->watcher->getCurrentTime())->toBe(1234567890);
 });

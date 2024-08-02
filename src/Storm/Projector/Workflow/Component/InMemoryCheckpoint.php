@@ -18,7 +18,7 @@ final class InMemoryCheckpoint extends AbstractCheckpointRecognition
         SystemClock $clock,
     ) {
         if ($checkpoints->recordGaps) {
-            throw new LogicException('In memory checkpoint cannot be used with record gaps enabled');
+            throw new LogicException('In memory checkpoint cannot be used with record gaps option enabled');
         }
 
         $this->checkpoints = $checkpoints;

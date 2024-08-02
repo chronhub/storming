@@ -46,7 +46,7 @@ class Stage
             $this->forgetOnCycleRenewed();
         }
 
-        $this->process->dispatch(WorkflowRenewed::class);
+        $this->process->dispatch(WorkflowRenewed::class, $isSprintTerminated);
         $this->process->dispatch(ResetOnlyOnceEmittedEvent::class);
     }
 
@@ -58,7 +58,6 @@ class Stage
     protected function resetOnTermination(): void
     {
         $this->process->time()->reset();
-
         $this->process->metrics()->reset('cycle');
         $this->process->metrics()->reset('main');
         $this->process->metrics()->reset('acked');

@@ -16,7 +16,6 @@ use Storm\Projector\Checkpoint\Checkpoints;
 use Storm\Projector\Checkpoint\GapDetector;
 use Storm\Projector\Checkpoint\GapRules;
 use Storm\Projector\Support\ExponentialSleep;
-use Storm\Projector\Support\Timer;
 use Storm\Projector\Workflow\Component\CheckpointReckoning;
 use Storm\Projector\Workflow\Component\Computation;
 use Storm\Projector\Workflow\Component\Contextualize;
@@ -28,7 +27,7 @@ use Storm\Projector\Workflow\Component\Metrics;
 use Storm\Projector\Workflow\Component\ProcessedStream;
 use Storm\Projector\Workflow\Component\Runner;
 use Storm\Projector\Workflow\Component\StatusHolder;
-use Storm\Projector\Workflow\Component\Timing;
+use Storm\Projector\Workflow\Component\Timer;
 use Storm\Projector\Workflow\Component\UserState;
 
 final class Component implements ComponentRegistry
@@ -54,7 +53,7 @@ final class Component implements ComponentRegistry
             'sprint' => new Runner(),
             'stop' => new HaltOn(),
             'batch' => $this->batchStreamEvent($option),
-            'time' => new Timing(new Timer($clock)),
+            'time' => new Timer($clock),
             'userState' => new UserState(),
         ];
     }

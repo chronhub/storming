@@ -13,7 +13,7 @@ use Storm\Projector\Workflow\Component\Metrics;
 use Storm\Projector\Workflow\Component\ProcessedStream;
 use Storm\Projector\Workflow\Component\Runner;
 use Storm\Projector\Workflow\Component\StatusHolder;
-use Storm\Projector\Workflow\Component\Timing;
+use Storm\Projector\Workflow\Component\Timer;
 use Storm\Projector\Workflow\Component\UserState;
 use Storm\Projector\Workflow\Process;
 
@@ -30,7 +30,7 @@ use Storm\Projector\Workflow\Process;
  * @method Runner                sprint()
  * @method Metrics               metrics()
  * @method StatusHolder          status()
- * @method Timing                time()
+ * @method Timer                 time()
  * @method UserState             userState()
  */
 interface Component
