@@ -12,7 +12,7 @@ use JsonSerializable;
  *     position: int<0, max>,
  *     event_time: string|null,
  *     created_at: string,
- *     gaps: array<positive-int>|array,
+ *     gaps: array<positive-int|array{0: positive-int, 1: positive-int}>|array,
  *     gap_type?: string|null
  * }
  */

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Component;
 
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\CheckpointRecognition as Recognition;
 use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\Checkpoint\Checkpoints;
@@ -13,12 +12,12 @@ use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Exception\CheckpointViolation;
 
-abstract class AbstractCheckpointRecognition implements Recognition
+/**
+ * @property-read  Checkpoints $checkpoints
+ * @property-read  SystemClock $clock
+ */
+trait ProvideRecognition
 {
-    protected Checkpoints $checkpoints;
-
-    protected SystemClock $clock;
-
     public function track(string ...$streamNames): void
     {
         collect($streamNames)
@@ -60,6 +59,9 @@ abstract class AbstractCheckpointRecognition implements Recognition
         );
     }
 
+    /**
+     * @throws CheckpointViolation when stream is not tracked
+     */
     protected function assertStreamTracked(string $streamName): void
     {
         if (! $this->checkpoints->has($streamName)) {

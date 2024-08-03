@@ -5,24 +5,24 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Component;
 
 use Storm\Contract\Clock\SystemClock;
+use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Contract\Projector\GapRecognition;
 use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Checkpoint\Checkpoints;
-use Storm\Projector\Checkpoint\GapRules;
+use Storm\Projector\Checkpoint\GapRecorder;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Checkpoint\StreamPoint;
 
-final class CheckpointReckoning extends AbstractCheckpointRecognition
+final class CheckpointReckoning implements CheckpointRecognition
 {
+    use ProvideRecognition;
+
     public function __construct(
-        Checkpoints $checkpoints,
-        SystemClock $clock,
+        protected Checkpoints $checkpoints,
+        protected SystemClock $clock,
         private readonly GapRecognition $gapDetector,
-        private readonly GapRules $rules,
-    ) {
-        $this->checkpoints = $checkpoints;
-        $this->clock = $clock;
-    }
+        private readonly GapRecorder $gapRecorder,
+    ) {}
 
     public function record(StreamPoint $streamPoint): Checkpoint
     {
@@ -72,7 +72,12 @@ final class CheckpointReckoning extends AbstractCheckpointRecognition
         $gaps = $lastCheckPoint->gaps;
 
         if (! $isRecoverable) {
-            $gaps = $this->rules->mergeGaps($lastCheckPoint, $streamPoint->position);
+            $gaps = $this->gapRecorder->merge(
+                $streamPoint->name,
+                $lastCheckPoint->gaps,
+                $lastCheckPoint->position,
+                $streamPoint->position
+            );
         }
 
         $checkpoint = $this->create($streamPoint, $gaps, $gapType);

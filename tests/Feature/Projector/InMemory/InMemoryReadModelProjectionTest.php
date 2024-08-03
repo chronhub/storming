@@ -206,8 +206,47 @@ test('detect gaps with setup retries and record gap', function (array $retries, 
     $this->assertReadModelBalance($streamName, 100);
     $this->assertProjectionModel(projectionName: $projectionName, status: ProjectionStatus::IDLE->value, lockedUntil: null);
 
-    $expectedGaps = $recordGap ? [2, 4, 6, 7, 8, 9] : [];
+    $expectedGaps = $recordGap ? [2, 4, [6, 9]] : [];
     $this->assertProjectionModelCheckpoint(projectionName: $projectionName, streamName: $streamName, position: 10, gaps: $expectedGaps);
+
+    $expectedCycles = $this->calculateExpectedCycles(
+        numberOfEventWithNoGap: 1,
+        numberOfRetry: count($retries),
+        numberOfEventWithGap: 3
+    );
+
+    $this->assertProjectionReport(cycle: $expectedCycles, ackedEvent: 4, totalEvent: 4);
+})->with(
+    'projection options with non empty retries',
+    'projection options record gap'
+);
+
+test('detect larger gaps with setup retries and record gap with range threshold', function (array $retries, bool $recordGap) {
+    $this->setupProjection(
+        streamName: $streamName = 'account',
+        projectionName: $projectionName = 'balance',
+        options: ['retries' => $retries, 'recordGap' => $recordGap]
+    );
+
+    $this->balanceEventStore($streamName)
+        ->withBalanceCreated(version: 1, amount: 100)
+        ->withVersioningAmount([[3, 200], [25, -150], [70, -50]]);
+
+    $reactors = $this->getReadModelReactor(keepRunning: true, stopAt: ['events', 4]);
+
+    $this->projector
+        ->initialize(fn (): array => ['total' => 0])
+        ->subscribeToStream($streamName)
+        ->when($reactors)
+        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->run(inBackground: true);
+
+    $this->assertProjectionState(['total' => 100, 'events' => $this->expectedStateEvents]);
+    $this->assertReadModelBalance($streamName, 100);
+    $this->assertProjectionModel(projectionName: $projectionName, status: ProjectionStatus::IDLE->value, lockedUntil: null);
+
+    $expectedGaps = $recordGap ? [2, [4, 24], [26, 69]] : [];
+    $this->assertProjectionModelCheckpoint(projectionName: $projectionName, streamName: $streamName, position: 70, gaps: $expectedGaps);
 
     $expectedCycles = $this->calculateExpectedCycles(
         numberOfEventWithNoGap: 1,

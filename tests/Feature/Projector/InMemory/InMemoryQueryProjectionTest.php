@@ -366,7 +366,6 @@ test('query projection running in background and resolve gap when retries are co
         numberOfRetry: count($retries),
         numberOfEventWithGap: 2
     );
-
     $this->assertProjectionReport(cycle: $expectedCycles, ackedEvent: 3, totalEvent: 3);
 })->with('projection options with non empty retries');
 
