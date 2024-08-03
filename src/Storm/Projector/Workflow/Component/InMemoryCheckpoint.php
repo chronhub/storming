@@ -12,7 +12,7 @@ use Storm\Projector\Checkpoint\Checkpoints;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Checkpoint\StreamPoint;
 
-final class InMemoryCheckpoint implements CheckpointRecognition
+final readonly class InMemoryCheckpoint implements CheckpointRecognition
 {
     use ProvideRecognition;
 

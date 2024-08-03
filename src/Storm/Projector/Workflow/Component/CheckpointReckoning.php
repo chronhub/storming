@@ -13,15 +13,15 @@ use Storm\Projector\Checkpoint\GapRecorder;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Checkpoint\StreamPoint;
 
-final class CheckpointReckoning implements CheckpointRecognition
+final readonly class CheckpointReckoning implements CheckpointRecognition
 {
     use ProvideRecognition;
 
     public function __construct(
         protected Checkpoints $checkpoints,
         protected SystemClock $clock,
-        private readonly GapRecognition $gapDetector,
-        private readonly GapRecorder $gapRecorder,
+        private GapRecognition $gapDetector,
+        private GapRecorder $gapRecorder,
     ) {}
 
     public function record(StreamPoint $streamPoint): Checkpoint
@@ -67,7 +67,6 @@ final class CheckpointReckoning implements CheckpointRecognition
     private function recordWhenNonRecoverableGap(StreamPoint $streamPoint, Checkpoint $lastCheckPoint): Checkpoint
     {
         $isRecoverable = $this->gapDetector->recover();
-        $gapType = $this->gapDetector->gapType();
 
         $gaps = $lastCheckPoint->gaps;
 
@@ -80,7 +79,7 @@ final class CheckpointReckoning implements CheckpointRecognition
             );
         }
 
-        $checkpoint = $this->create($streamPoint, $gaps, $gapType);
+        $checkpoint = $this->create($streamPoint, $gaps, $this->gapDetector->gapType());
 
         return $isRecoverable ? $checkpoint : $this->checkpoints->save($checkpoint);
     }
