@@ -9,25 +9,22 @@ use Storm\Contract\Projector\ProjectorScope;
 
 use function in_array;
 
-// fixme phpstan
 /**
- * @template TAcked of DomainEvent
+ * @template TEvent of DomainEvent
  */
 final class EventScope
 {
     private bool $isAcked = false;
 
     public function __construct(
-        /**
-         * @var TAcked
-         */
+        /** @var TEvent $event */
         private readonly DomainEvent $event,
         public readonly ProjectorScope $projector,
         public readonly ?UserStateScope $userState = null
     ) {}
 
     /**
-     * @param class-string<TAcked> $event
+     * @param class-string<TEvent> $event
      */
     public function ack(string $event): ?self
     {
@@ -45,7 +42,7 @@ final class EventScope
     }
 
     /**
-     * @param class-string<TAcked> ...$events
+     * @param class-string<TEvent> ...$events
      */
     public function ackOneOf(string ...$events): ?self
     {
@@ -57,9 +54,7 @@ final class EventScope
     }
 
     /**
-     * @param class-string<TAcked> $event
-     *
-     * @phpstan-assert-if-true TAcked $this->event
+     * @param class-string<TEvent> $event
      */
     public function match(string $event): bool
     {
@@ -77,7 +72,6 @@ final class EventScope
     }
 
     /**
-     * @template TEvent of DomainEvent
      * @template TProjectorScope of ProjectorScope
      * @template TUserStateScope of UserStateScope|null
      * @template TReturn of mixed

@@ -20,9 +20,6 @@ use function iterator_to_array;
  */
 trait InMemoryProjectionExpectationTrait
 {
-    /**
-     * Assert stream exists in event store.
-     */
     protected function assertStreamExists(StreamName|string $streamName, bool $exists): void
     {
         if (is_string($streamName)) {
@@ -45,33 +42,21 @@ trait InMemoryProjectionExpectationTrait
         expect($expectedPositions)->toBe($internalPositions);
     }
 
-    /**
-     * Assert projection exists.
-     */
     protected function assertProjectionExists(string $projectionName, bool $exists): void
     {
         expect($this->factory->projectionProvider->exists($projectionName))->toBe($exists);
     }
 
-    /**
-     * Assert projection user state.
-     */
     protected function assertProjectionState(array $userState): void
     {
         expect($this->projector->getState())->toBe($userState);
     }
 
-    /**
-     * Assert projection user state with a given field and value.
-     */
     protected function assertPartialProjectionState(mixed $field, mixed $value): void
     {
         expect($this->projector->getState())->toHaveKey($field, $value);
     }
 
-    /**
-     * Assert projection model.
-     */
     protected function assertProjectionModel(
         string $projectionName,
         string $status,
@@ -91,9 +76,6 @@ trait InMemoryProjectionExpectationTrait
             ->and($projection->lockedUntil())->toBe($lockedUntil);
     }
 
-    /**
-     * Assert projection model checkpoint.
-     */
     protected function assertProjectionModelCheckpoint(
         string $projectionName,
         string $streamName,
@@ -113,9 +95,6 @@ trait InMemoryProjectionExpectationTrait
             ->and($streamCheckpoint['created_at'])->toBeString();
     }
 
-    /**
-     * Assert the projection report.
-     */
     protected function assertProjectionReport(
         int $cycle,
         int $ackedEvent,

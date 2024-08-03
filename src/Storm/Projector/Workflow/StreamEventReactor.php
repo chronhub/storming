@@ -57,7 +57,7 @@ readonly class StreamEventReactor
         $this->updateUserStateIfInitialized($process, $userState);
 
         if ($eventScope->isAcked()) {
-            $process->metrics()->acked++;
+            $process->metrics()->increment('acked');
         }
     }
 

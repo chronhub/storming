@@ -16,6 +16,11 @@ final class BalanceAdded extends AbstractDomainEvent
         ]);
     }
 
+    public function id(): string
+    {
+        return $this->content['id'];
+    }
+
     public function amount(): int
     {
         return $this->content['amount'];

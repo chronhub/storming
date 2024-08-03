@@ -45,14 +45,12 @@ trait InMemoryQueryProjectionTestBaseTrait
     {
         return function (EventScope $scope) use ($keepRunning, $stopAt): void {
             $callback = function (DomainEvent $event, QueryProjectorScope $scope, UserStateScope $userState) use ($keepRunning, $stopAt): void {
-                $balanceId = $event->toContent()['id'];
-
                 if ($event instanceof BalanceCreated || $event instanceof BalanceAdded) {
-                    $userState->increment('balances.'.$balanceId, $event->amount());
+                    $userState->increment('balances.'.$event->id(), $event->amount());
                 }
 
                 if ($event instanceof BalanceSubtracted) {
-                    $userState->decrement('balances.'.$balanceId, $event->amount());
+                    $userState->decrement('balances.'.$event->id(), $event->amount());
                 }
 
                 $userState->merge('events', [$event::class]);
