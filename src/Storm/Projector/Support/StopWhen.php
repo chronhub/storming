@@ -16,6 +16,7 @@ use Storm\Projector\Workflow\Process;
  * @template TProcess of Process
  *
  * Stop the projection when a certain condition is met.
+ *
  * The stopping process can only occur after a cycle was completed,
  * and react on ShouldTerminateWorkflow notification was dispatched.
  *

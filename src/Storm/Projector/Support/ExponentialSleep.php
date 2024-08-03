@@ -5,14 +5,15 @@ declare(strict_types=1);
 namespace Storm\Projector\Support;
 
 use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Exception\LogicException;
 
 use function min;
 use function usleep;
 
-final class ExponentialSleep
+class ExponentialSleep
 {
-    /** @var int<0, max> */
-    protected int $currentSleepTime;
+    /** @var int<1, max> */
+    protected int $sleepTime;
 
     public function __construct(
         /**
@@ -44,7 +45,7 @@ final class ExponentialSleep
      */
     public function sleep(): void
     {
-        usleep($this->currentSleepTime);
+        usleep($this->sleepTime);
     }
 
     /**
@@ -55,9 +56,9 @@ final class ExponentialSleep
      */
     public function increment(): void
     {
-        $this->currentSleepTime = $this->currentSleepTime > $this->max
+        $this->sleepTime = $this->sleepTime > $this->max
             ? $this->base
-            : min((int) ($this->currentSleepTime * $this->factor), $this->max);
+            : min((int) ($this->sleepTime * $this->factor), $this->max);
     }
 
     /**
@@ -65,17 +66,15 @@ final class ExponentialSleep
      */
     public function reset(): void
     {
-        $this->currentSleepTime = $this->base;
+        $this->sleepTime = $this->base;
     }
 
     /**
      * Get the current sleep time in milliseconds.
-     *
-     * todo exposed for testing purposes
      */
     public function getSleepingTime(): int
     {
-        return $this->currentSleepTime;
+        return $this->sleepTime;
     }
 
     /**
@@ -92,9 +91,8 @@ final class ExponentialSleep
             throw new InvalidArgumentException('Growth factor must be greater or equal than 1');
         }
 
-        // @phpstan-ignore-next-line
-        if ($this->max < 1) {
-            throw new InvalidArgumentException('Max sleep time must be greater than 0');
+        if ($this->base >= $this->max) {
+            throw new LogicException('Base sleep time must be less than to max sleep time');
         }
     }
 }
