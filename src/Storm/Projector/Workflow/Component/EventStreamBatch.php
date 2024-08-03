@@ -15,9 +15,6 @@ class EventStreamBatch
         protected ExponentialSleep $sleepTime
     ) {}
 
-    /**
-     * Set the batch stream iterator.
-     */
     public function set(?MergeStreamIterator $iterator): void
     {
         $this->iterator = $iterator;
@@ -25,9 +22,6 @@ class EventStreamBatch
         $iterator !== null ? $this->sleepTime->reset() : $this->sleepTime->increment();
     }
 
-    /**
-     * Pull the batch stream iterator.
-     */
     public function pull(): ?MergeStreamIterator
     {
         $iterator = $this->iterator;

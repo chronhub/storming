@@ -14,7 +14,7 @@ use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Projector\Checkpoint\Checkpoints;
 use Storm\Projector\Checkpoint\GapDetector;
-use Storm\Projector\Checkpoint\GapRules;
+use Storm\Projector\Checkpoint\GapRecorder;
 use Storm\Projector\Support\ExponentialSleep;
 use Storm\Projector\Workflow\Component\CheckpointReckoning;
 use Storm\Projector\Workflow\Component\Computation;
@@ -101,7 +101,7 @@ final class Component implements ComponentRegistry
             $checkpoints,
             $this->clock,
             new GapDetector($retries),
-            new GapRules(),
+            new GapRecorder(),
         );
     }
 }

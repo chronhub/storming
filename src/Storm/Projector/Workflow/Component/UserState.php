@@ -18,17 +18,11 @@ class UserState
         $this->state = value($original) ?? [];
     }
 
-    /**
-     * Put the user state.
-     */
     public function put(array $state): void
     {
         $this->state = $state;
     }
 
-    /**
-     * Get the user state.
-     */
     public function get(): array
     {
         return $this->state;
