@@ -4,11 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector\Operations;
 
-use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Scope\EventScope;
-use Storm\Projector\Scope\UserStateScope;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
@@ -80,38 +77,33 @@ test('resets from monitoring within the projection instance', function () {
     $monitor = $this->factory->monitor();
     $resetStatus = null;
 
-    $reactors = function (EventScope $scope) use ($monitor, &$resetStatus): void {
-        $callback = function (DomainEvent $event, ReadModelScope $scope, UserStateScope $userState): void {
-            $field = 'total';
-            $id = $event->toContent()['id'];
+    /**
+     * @param-closure-this ReadModelScope $reactors
+     */
+    $reactors = [
+        [
+            function (BalanceCreated $event) {
+                $this->userState->upsert('total', $event->amount());
+                $this->stack('insert', $event->id(), ['total' => $event->amount()]);
+            },
+            function (BalanceAdded $event) {
+                $this->userState->increment('total', $event->amount());
+                $this->stack('increment', $event->id(), 'total', $event->amount());
+            },
+            function (BalanceSubtracted $event) {
+                $this->userState->decrement('total', $event->amount());
+                $this->stack('decrement', $event->id(), 'total', $event->amount());
+            },
+        ],
+        function (ReadModelScope $scope) use ($monitor, &$resetStatus) {
+            $scope->userState()->merge('events', [$scope->event()::class]);
 
-            if ($event instanceof BalanceCreated) {
-                $userState->upsert($field, $event->amount());
-                $scope->stack('insert', $id, [$field => $event->amount()]);
+            if ($resetStatus === null && count($scope->userState()['events']) === 4) {
+                $monitor->markAsReset('balance');
+                $resetStatus = $monitor->statusOf('balance');
             }
-
-            if ($event instanceof BalanceAdded) {
-                $userState->increment($field, $event->amount());
-                $scope->stack('increment', $id, $field, $event->amount());
-            }
-
-            if ($event instanceof BalanceSubtracted) {
-                $userState->decrement($field, $event->amount());
-                $scope->stack('decrement', $id, $field, $event->amount());
-            }
-
-            $userState->merge('events', [$event::class]);
-        };
-
-        $scope
-            ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-            ->then($callback);
-
-        if ($resetStatus === null && count($scope->userState['events']) === 4) {
-            $monitor->markAsReset('balance');
-            $resetStatus = $monitor->statusOf('balance');
-        }
-    };
+        },
+    ];
 
     $this->projector
         ->initialize(fn (): array => ['total' => 0])

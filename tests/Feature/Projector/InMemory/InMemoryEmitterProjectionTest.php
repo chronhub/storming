@@ -6,10 +6,7 @@ namespace Storm\Tests\Feature\Projector;
 
 use Storm\Clock\Clock;
 use Storm\Contract\Projector\EmitterScope;
-use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Scope\EventScope;
-use Storm\Projector\Scope\UserStateScope;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryEmitterProjectionTestBaseTrait;
@@ -72,16 +69,14 @@ test('emitter scope with one processed event', function () {
 
     $this->balanceEventStore($eventStream)->withBalanceCreated(1, 100);
 
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ackOneOf(BalanceCreated::class)
-            ->then(function (BalanceCreated $event, ProjectorScope $scope, ?UserStateScope $userState): void {
-                expect($userState)->toBeNull()
-                    ->and($scope)->toBeInstanceOf(EmitterScope::class)
-                    ->and($scope->streamName())->toBe('account')
-                    ->and($scope->clock())->toBeInstanceOf(Clock::class);
-            });
-    };
+    $reactors = [
+        [function (BalanceCreated $event) {}],
+        function (EmitterScope $scope): void {
+            expect($scope)->toBeInstanceOf(EmitterScope::class)
+                ->and($scope->streamName())->toBe('account')
+                ->and($scope->clock())->toBeInstanceOf(Clock::class);
+        },
+    ];
 
     $this->projector
         ->subscribeToStream($eventStream)

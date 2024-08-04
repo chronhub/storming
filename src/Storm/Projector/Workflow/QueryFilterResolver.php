@@ -23,6 +23,7 @@ final readonly class QueryFilterResolver
             $queryFilter->setStreamName($streamName);
         }
 
+        // checkMe should interface extend ProjectionQueryFilter or only query filter
         if ($queryFilter instanceof LoadLimiterQueryFilter) {
             $queryFilter->setLoadLimiter($loadLimiter);
         }

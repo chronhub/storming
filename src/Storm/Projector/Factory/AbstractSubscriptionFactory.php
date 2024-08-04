@@ -20,9 +20,6 @@ use Storm\Contract\Projector\Subscriptor;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Repository\EventRepository;
 use Storm\Projector\Repository\LockManager;
-use Storm\Projector\Scope\EmitterAccess;
-use Storm\Projector\Scope\QueryAccess;
-use Storm\Projector\Scope\ReadModelAccess;
 use Storm\Projector\Subscription\EmittingManagement;
 use Storm\Projector\Subscription\GenericSubscription;
 use Storm\Projector\Subscription\ManagementEventMap;
@@ -55,10 +52,8 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     public function createQuerySubscription(ProjectionOption $options): Subscriptor
     {
         $process = $this->createProcessManager($options);
-
-        $projectorScope = new QueryAccess($process, $this->clock);
         $activities = new QueryActivityFactory(
-            $this->chronicler, $projectorScope, $options, $this->clock
+            $this->chronicler, $options, $this->clock
         );
 
         $management = new QueryingManagement($process);
@@ -82,8 +77,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
 
         $this->subscribeToMap($management, $process);
 
-        $projectorScope = new EmitterAccess($process, $this->clock);
-        $activities = new PersistentActivityFactory($this->chronicler, $projectorScope, $options, $this->clock);
+        $activities = new EmitterActivityFactory($this->chronicler, $options, $this->clock);
 
         return new GenericSubscription($process, $activities);
     }
@@ -97,8 +91,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
         $management = new ReadingModelManagement($process, $projectionRepository, $readModel);
         $this->subscribeToMap($management, $process);
 
-        $projectorScope = new ReadModelAccess($process, $readModel, $this->clock);
-        $activities = new PersistentActivityFactory($this->chronicler, $projectorScope, $options, $this->clock);
+        $activities = new ReadModelActivityFactory($this->chronicler, $options, $this->clock, $readModel);
 
         return new GenericSubscription($process, $activities);
     }

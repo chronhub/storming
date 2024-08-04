@@ -38,7 +38,7 @@ trait InteractWithProjection
         return $this;
     }
 
-    public function when(Closure $reactors): static
+    public function when(array $reactors): static
     {
         $this->context->when($reactors);
 

@@ -10,18 +10,16 @@ use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\Workflow\Management\ProjectionClosed;
 use Storm\Projector\Workflow\Process;
 
-final readonly class ReadModelAccess implements ReadModelScope
+final class ReadModelAccess implements ReadModelScope
 {
-    public function __construct(
-        private Process $process,
-        private ReadModel $readModel,
-        private SystemClock $clock
-    ) {}
+    use BoundScope;
 
-    public function stop(): void
-    {
-        $this->process->dispatch(new ProjectionClosed());
-    }
+    public function __construct(
+        protected Process $process,
+        protected SystemClock $clock,
+        public readonly ReadModel $readModel,
+        public ?UserStateScope $userState = null,
+    ) {}
 
     public function readModel(): ReadModel
     {
@@ -35,13 +33,8 @@ final readonly class ReadModelAccess implements ReadModelScope
         return $this;
     }
 
-    public function streamName(): string
+    public function stop(): void
     {
-        return $this->process->stream()->get();
-    }
-
-    public function clock(): SystemClock
-    {
-        return $this->clock;
+        $this->process->dispatch(new ProjectionClosed());
     }
 }

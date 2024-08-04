@@ -11,8 +11,6 @@ use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Contract\Projector\QueryProjectorScope;
-use Storm\Projector\Scope\EventScope;
-use Storm\Projector\Scope\UserStateScope;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
@@ -41,19 +39,25 @@ trait InMemoryQueryProjectionTestBaseTrait
         }
     }
 
-    protected function getQueryReactor(bool $keepRunning = false, array $stopAt = []): Closure
+    protected function getQueryReactor(bool $keepRunning = false, array $stopAt = []): array
     {
-        return function (EventScope $scope) use ($keepRunning, $stopAt): void {
-            $callback = function (DomainEvent $event, QueryProjectorScope $scope, UserStateScope $userState) use ($keepRunning, $stopAt): void {
-                if ($event instanceof BalanceCreated || $event instanceof BalanceAdded) {
-                    $userState->increment('balances.'.$event->id(), $event->amount());
-                }
-
-                if ($event instanceof BalanceSubtracted) {
-                    $userState->decrement('balances.'.$event->id(), $event->amount());
-                }
-
-                $userState->merge('events', [$event::class]);
+        return [
+            [
+                function (BalanceCreated $event) {
+                    /** @var QueryProjectorScope $this */
+                    $this->userState->increment('balances.'.$event->id(), $event->amount());
+                },
+                function (BalanceAdded $event) {
+                    /** @var QueryProjectorScope $this */
+                    $this->userState->increment('balances.'.$event->id(), $event->amount());
+                },
+                function (BalanceSubtracted $event) {
+                    /** @var QueryProjectorScope $this */
+                    $this->userState->decrement('balances.'.$event->id(), $event->amount());
+                },
+            ],
+            function (QueryProjectorScope $scope) use ($keepRunning, $stopAt) {
+                $scope->userState->merge('events', [$scope->event()::class]);
 
                 if (! $keepRunning || $stopAt === []) {
                     return;
@@ -62,18 +66,14 @@ trait InMemoryQueryProjectionTestBaseTrait
                 // fixMe use closure
                 [$field, $expected] = $stopAt;
                 if ($field === 'events') {
-                    if (count($userState[$field]) === $expected) {
+                    if (count($scope->userState[$field]) === $expected) {
                         $scope->stop();
                     }
-                } elseif ($userState[$field] === $expected) {
+                } elseif ($scope->userState[$field] === $expected) {
                     $scope->stop();
                 }
-            };
-
-            $scope
-                ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-                ?->then($callback);
-        };
+            },
+        ];
     }
 
     protected function customFilterQueryEvents(string ...$events): InMemoryQueryFilter

@@ -8,7 +8,6 @@ use Closure;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Projector\Exception\InvalidArgumentException;
-use Storm\Projector\Scope\EventScope;
 
 interface ContextReader extends Context
 {
@@ -27,11 +26,9 @@ interface ContextReader extends Context
     /**
      * Get the event handlers to be called when an event is received.
      *
-     * @return Closure(EventScope): void
-     *
      * @throws InvalidArgumentException When reactors are not set
      */
-    public function reactors(): Closure;
+    public function reactors(): array;
 
     /**
      * Get the query to fetch streams.

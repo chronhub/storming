@@ -12,11 +12,14 @@ use Storm\Projector\Workflow\Management\StreamEventEmitted;
 use Storm\Projector\Workflow\Management\StreamEventLinkedTo;
 use Storm\Projector\Workflow\Process;
 
-final readonly class EmitterAccess implements EmitterScope
+final class EmitterAccess implements EmitterScope
 {
+    use BoundScope;
+
     public function __construct(
-        private Process $process,
-        private SystemClock $clock
+        protected readonly Process $process,
+        protected readonly SystemClock $clock,
+        public ?UserStateScope $userState = null,
     ) {}
 
     public function emit(DomainEvent $event): void
@@ -32,15 +35,5 @@ final readonly class EmitterAccess implements EmitterScope
     public function stop(): void
     {
         $this->process->dispatch(new ProjectionClosed());
-    }
-
-    public function streamName(): string
-    {
-        return $this->process->stream()->get();
-    }
-
-    public function clock(): SystemClock
-    {
-        return $this->clock;
     }
 }

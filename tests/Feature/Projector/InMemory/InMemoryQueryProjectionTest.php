@@ -5,11 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Feature\Projector;
 
 use Storm\Clock\Clock;
-use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Projector\ProjectorScope;
 use Storm\Contract\Projector\QueryProjectorScope;
-use Storm\Projector\Scope\EventScope;
-use Storm\Projector\Scope\UserStateScope;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
@@ -66,16 +62,14 @@ test('query event scope with one stream event', function () {
     $this->makeEventStore($streamName = 'account', BalanceId::create())
         ->withBalanceCreated(1, 100);
 
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ackOneOf(BalanceCreated::class)
-            ->then(function (BalanceCreated $event, ProjectorScope $scope, ?UserStateScope $userState): void {
-                expect($userState)->toBeNull()
-                    ->and($scope)->toBeInstanceOf(QueryProjectorScope::class)
-                    ->and($scope->streamName())->toBe('account')
-                    ->and($scope->clock())->toBeInstanceOf(Clock::class);
-            });
-    };
+    $reactors = [
+        [function (BalanceCreated $event) {}],
+        function (QueryProjectorScope $scope): void {
+            expect($scope)->toBeInstanceOf(QueryProjectorScope::class)
+                ->and($scope->streamName())->toBe('account')
+                ->and($scope->clock())->toBeInstanceOf(Clock::class);
+        },
+    ];
 
     $this->projector
         ->subscribeToStream($streamName)
@@ -216,76 +210,67 @@ test('query projection with a custom query filter', function () {
 test('query projection running in background and stop projection from event scope', function () {
     $this->setupProjection();
 
-    $this->makeEventStore($streamName = 'account', $balanceId = BalanceId::create())
+    $this->makeEventStore($streamName = 'account', BalanceId::create())
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
-    $reactors = function (EventScope $eventScope): void {
-        $callback = function (DomainEvent $event, QueryProjectorScope $scope, UserStateScope $userState): void {
-            $balanceId = $event->toContent()['id'];
+    $reactors = [
+        [
+            function (BalanceCreated $event) {},
+            function (BalanceAdded $event) {},
+            function (BalanceSubtracted $event) {},
+        ],
+        function (QueryProjectorScope $scope): void {
+            $scope->userState()->merge('events', [$scope->event()::class]);
 
-            if ($event instanceof BalanceCreated || $event instanceof BalanceAdded) {
-                $userState->increment('balances.'.$balanceId, $event->amount());
+            if (count($scope->userState()['events']) === 2) {
+                $scope->stop();
             }
-        };
-
-        $eventScope->ack(BalanceCreated::class)?->then($callback);
-        $eventScope->ack(BalanceAdded::class)?->then($callback);
-
-        if ($eventScope->match(BalanceSubtracted::class)) {
-            $eventScope->projector->stop();
-        }
-    };
+        },
+    ];
 
     $this->projector
-        ->initialize(fn (): array => [])
+        ->initialize(fn (): array => ['events' => []])
         ->subscribeToStream($streamName)
         ->when($reactors)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(true);
 
-    $this->assertProjectionState(['balances' => [$balanceId->toString() => 300]]);
+    $this->assertPartialProjectionState('events', [BalanceCreated::class, BalanceAdded::class]);
 
-    $this->assertProjectionReport(cycle: 1, ackedEvent: 2, totalEvent: 3);
+    $this->assertProjectionReport(cycle: 1, ackedEvent: 2, totalEvent: 2);
 });
 
-/**
- * The only difference is the stop() call inside the then() callback
- * will increment the acked event count
- */
 test('query projection running in background and stop projection from event scope 2', function () {
     $this->setupProjection();
 
-    $this->makeEventStore($streamName = 'balance', $balanceId = BalanceId::create())
+    $this->makeEventStore($streamName = 'account', BalanceId::create())
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
-    $reactors = function (EventScope $eventScope): void {
-        $callback = function (DomainEvent $event, QueryProjectorScope $scope, UserStateScope $userState): void {
-            $balanceId = $event->toContent()['id'];
-
-            if ($event instanceof BalanceCreated || $event instanceof BalanceAdded) {
-                $userState->increment('balances.'.$balanceId, $event->amount());
-            }
-
-            if ($event instanceof BalanceSubtracted) {
-                $scope->stop();
-            }
-        };
-
-        $eventScope->ack(BalanceCreated::class)?->then($callback);
-        $eventScope->ack(BalanceAdded::class)?->then($callback);
-        $eventScope->ack(BalanceSubtracted::class)?->then($callback);
-    };
+    $reactors = [
+        [
+            function (BalanceCreated $event) {},
+            function (BalanceAdded $event) {},
+            function (BalanceSubtracted $event) {
+                $this->stop();
+            },
+        ],
+        function (QueryProjectorScope $scope): void {
+            $scope->userState()->merge('events', [$scope->event()::class]);
+        },
+    ];
 
     $this->projector
-        ->initialize(fn (): array => [])
+        ->initialize(fn (): array => ['events' => []])
         ->subscribeToStream($streamName)
         ->when($reactors)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(true);
 
-    $this->assertProjectionState(['balances' => [$balanceId->toString() => 300]]);
+    $this->assertPartialProjectionState('events', [
+        BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class,
+    ]);
 
     $this->assertProjectionReport(cycle: 1, ackedEvent: 3, totalEvent: 3);
 });

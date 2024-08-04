@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Storm\Contract\Projector;
 
 use Closure;
-use Storm\Projector\Scope\EventScope;
 
 interface ProjectorFactory extends Projector
 {
@@ -42,11 +41,11 @@ interface ProjectorFactory extends Projector
     /**
      * Proxy method to set the reactors.
      *
-     * @param Closure(EventScope): void $reactors
+     * @todo add two parameters: array $reactors and Closure $then
      *
      * @see Context::when()
      */
-    public function when(Closure $reactors): static;
+    public function when(array $reactors): static;
 
     /**
      * Proxy method to set the stop watch callback.

@@ -7,7 +7,6 @@ namespace Storm\Contract\Projector;
 use Closure;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Projector\Exception\InvalidArgumentException;
-use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Support\StopWhen;
 use Storm\Projector\Workflow\Process;
 
@@ -53,11 +52,9 @@ interface Context
     /**
      * Sets the event reactors to be called when an event is received.
      *
-     * @param Closure(EventScope): void $reactors
-     *
      * @throws InvalidArgumentException When reactors are already set
      */
-    public function when(Closure $reactors): self;
+    public function when(array $reactors): self;
 
     /**
      * Stop the projection when a condition is met.

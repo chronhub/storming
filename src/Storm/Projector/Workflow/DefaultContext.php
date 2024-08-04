@@ -21,7 +21,7 @@ final class DefaultContext implements ContextReader
 
     private ?Closure $userState = null;
 
-    private ?Closure $reactors = null;
+    private ?array $reactors = null;
 
     private ?QueryFilter $queryFilter = null;
 
@@ -92,7 +92,7 @@ final class DefaultContext implements ContextReader
         return $this;
     }
 
-    public function when(Closure $reactors): self
+    public function when(array $reactors): self
     {
         if ($this->reactors !== null) {
             throw new InvalidArgumentException('Projection reactors already set');
@@ -120,7 +120,7 @@ final class DefaultContext implements ContextReader
         return $this->userState instanceof Closure;
     }
 
-    public function reactors(): Closure
+    public function reactors(): array
     {
         if ($this->reactors === null) {
             throw new InvalidArgumentException('Projection reactors not set');

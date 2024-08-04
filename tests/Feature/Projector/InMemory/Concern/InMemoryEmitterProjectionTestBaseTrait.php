@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector\InMemory\Concern;
 
-use Closure;
-use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\EmitterScope;
 use Storm\Contract\Projector\ProjectorManagerInterface;
-use Storm\Projector\Scope\EventScope;
-use Storm\Projector\Scope\UserStateScope;
+use Storm\Contract\Projector\ReadModelScope;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
@@ -46,18 +43,25 @@ trait InMemoryEmitterProjectionTestBaseTrait
         }
     }
 
-    public function getEmitterReactor(?string $linkTo = null, bool $keepRunning = false, array $stopAt = []): Closure
+    protected function getEmitterReactor(?string $linkTo = null, bool $keepRunning = false, array $stopAt = []): array
     {
-        return function (EventScope $scope) use ($linkTo, $keepRunning, $stopAt): void {
-            $callback = function (DomainEvent $event, EmitterScope $scope, UserStateScope $userState) use ($linkTo, $keepRunning, $stopAt): void {
-                $field = 'total';
-                if ($event instanceof BalanceCreated || $event instanceof BalanceAdded) {
-                    $userState->increment($field, $event->amount());
-                }
-
-                if ($event instanceof BalanceSubtracted) {
-                    $userState->decrement($field, $event->amount());
-                }
+        return [
+            [
+                function (BalanceCreated $event) {
+                    /** @var ReadModelScope $this */
+                    $this->userState->upsert('total', $event->amount());
+                },
+                function (BalanceAdded $event) {
+                    /** @var ReadModelScope $this */
+                    $this->userState->increment('total', $event->amount());
+                },
+                function (BalanceSubtracted $event) {
+                    /** @var ReadModelScope $this */
+                    $this->userState->decrement('total', $event->amount());
+                },
+            ],
+            function (EmitterScope $scope) use ($linkTo, $keepRunning, $stopAt) {
+                $event = $scope->event();
 
                 is_string($linkTo)
                     ? $scope->linkTo($linkTo, $event)
@@ -68,14 +72,10 @@ trait InMemoryEmitterProjectionTestBaseTrait
                 }
 
                 [$field, $expected] = $stopAt;
-                if ($userState[$field] === $expected) {
+                if ($scope->userState()[$field] === $expected) {
                     $scope->stop();
                 }
-            };
-
-            $scope
-                ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
-                ?->then($callback);
-        };
+            },
+        ];
     }
 }

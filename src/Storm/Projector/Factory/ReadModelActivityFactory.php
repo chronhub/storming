@@ -7,31 +7,33 @@ namespace Storm\Projector\Factory;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\ActivityFactory;
+use Storm\Contract\Projector\PersistentActivityFactory;
 use Storm\Contract\Projector\ProjectionOption;
+use Storm\Contract\Projector\ReadModel;
 use Storm\Projector\Filter\LoadLimiter;
 use Storm\Projector\Scope\EventScopeFactory;
-use Storm\Projector\Scope\QueryAccess;
+use Storm\Projector\Scope\ReadModelAccess;
 use Storm\Projector\Support\CollectStreams;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
-use Storm\Projector\Workflow\Activity\HandleQueryStreamGap;
 use Storm\Projector\Workflow\Activity\HandleStreamEvent;
+use Storm\Projector\Workflow\Activity\HandleStreamGap;
 use Storm\Projector\Workflow\Activity\LoadStreams;
-use Storm\Projector\Workflow\Activity\RefreshQueryProjection;
-use Storm\Projector\Workflow\Activity\RiseQueryProjection;
-use Storm\Projector\Workflow\Activity\SleepForQuery;
+use Storm\Projector\Workflow\Activity\PersistOrUpdate;
+use Storm\Projector\Workflow\Activity\RefreshPersistentProjection;
+use Storm\Projector\Workflow\Activity\RisePersistentProjection;
 use Storm\Projector\Workflow\Process;
 use Storm\Projector\Workflow\QueryFilterResolver;
 use Storm\Projector\Workflow\StreamEventReactor;
 
 use function array_map;
 
-final readonly class QueryActivityFactory implements ActivityFactory
+final readonly class ReadModelActivityFactory implements PersistentActivityFactory
 {
     public function __construct(
         protected Chronicler $chronicler,
         protected ProjectionOption $option,
         protected SystemClock $clock,
+        protected ReadModel $readModel
     ) {}
 
     public function __invoke(Process $process): array
@@ -48,7 +50,7 @@ final readonly class QueryActivityFactory implements ActivityFactory
 
         $factory = new EventScopeFactory(
             $reactors,
-            new QueryAccess($process, $this->clock),
+            new ReadModelAccess($process, $this->clock, $this->readModel),
             $then,
         );
 
@@ -59,13 +61,13 @@ final readonly class QueryActivityFactory implements ActivityFactory
         );
 
         return [
-            fn (): callable => new RiseQueryProjection(),
+            fn (): callable => new RisePersistentProjection(),
             fn (): callable => $streamEventLoader,
             fn (): callable => new HandleStreamEvent($eventProcessor),
-            fn (): callable => new HandleQueryStreamGap(),
-            fn (): callable => new SleepForQuery(),
+            fn (): callable => new HandleStreamGap(),
+            fn (): callable => new PersistOrUpdate(),
             fn (): callable => new DispatchSignal(),
-            fn (): callable => new RefreshQueryProjection($this->option->getOnlyOnceDiscovery()),
+            fn (): callable => new RefreshPersistentProjection($this->option->getOnlyOnceDiscovery()),
         ];
     }
 

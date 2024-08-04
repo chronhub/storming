@@ -11,10 +11,11 @@ use function array_key_exists;
 use function array_merge;
 use function is_array;
 
+// todo: see laravel fluent or attributes
 class UserStateScope implements ArrayAccess
 {
     public function __construct(
-        protected array $state
+        public array $state
     ) {}
 
     /**
@@ -85,6 +86,8 @@ class UserStateScope implements ArrayAccess
 
     /**
      * Return the current state.
+     *
+     * @deprecated use $this->state instead
      */
     public function state(): array
     {

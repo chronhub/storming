@@ -6,12 +6,8 @@ namespace Storm\Tests\Feature\Projector;
 
 use Exception;
 use Storm\Clock\Clock;
-use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Projector\ProjectorScope;
 use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Scope\EventScope;
-use Storm\Projector\Scope\UserStateScope;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
@@ -114,18 +110,16 @@ test('read model scope with one processed event', function () {
 
     $this->balanceEventStore($streamName)->withBalanceCreated(version: 1, amount: 100);
 
-    $reactors = function (EventScope $scope): void {
-        $scope
-            ->ack(BalanceCreated::class)
-            ->then(function (DomainEvent $event, ProjectorScope $scope, ?UserStateScope $userState): void {
-                /** @var ReadModelScope $scope */
-                expect($userState)->toBeNull()
-                    ->and($scope->streamName())->toBe('account')
-                    ->and($scope)->toBeInstanceOf(ReadModelScope::class)
-                    ->and($scope->readModel())->toBe($this->readModel)
-                    ->and($scope->clock())->toBeInstanceOf(Clock::class);
-            });
-    };
+    $reactors = [
+        [function (BalanceCreated $event) {}],
+        function (ReadModelScope $scope): void {
+            expect($scope->userState())->toBeNull()
+                ->and($scope->streamName())->toBe('account')
+                ->and($scope)->toBeInstanceOf(ReadModelScope::class)
+                ->and($scope->readModel())->toBe($this->readModel)
+                ->and($scope->clock())->toBeInstanceOf(Clock::class);
+        },
+    ];
 
     $this->projector
         ->subscribeToStream($streamName)
@@ -142,9 +136,14 @@ test('reactors should never been called when no event is processed', function ()
         projectionName: $projectionName = 'balance'
     );
 
-    $reactors = function (): void {
-        throw new Exception('should never been called');
-    };
+    $reactors = [
+        [function (BalanceCreated $event) {
+            $this->userState->upsert('total', $event->amount());
+        }],
+        function (): void {
+            throw new Exception('should never been called');
+        },
+    ];
 
     $this->projector
         ->subscribeToStream($streamName)

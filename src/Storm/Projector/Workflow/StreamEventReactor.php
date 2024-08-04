@@ -4,13 +4,10 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow;
 
-use Closure;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\Header;
-use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Checkpoint\StreamPoint;
-use Storm\Projector\Scope\EventScope;
-use Storm\Projector\Scope\UserStateScope;
+use Storm\Projector\Scope\EventScopeFactory;
 use Storm\Projector\Workflow\Management\PerformWhenThresholdIsReached;
 use Storm\Stream\StreamPosition;
 
@@ -19,8 +16,7 @@ use function pcntl_signal_dispatch;
 readonly class StreamEventReactor
 {
     public function __construct(
-        protected Closure $reactors,
-        protected ProjectorScope $projector
+        protected EventScopeFactory $eventScopeFactory,
     ) {}
 
     public function __invoke(Process $process, string $streamName, DomainEvent $event, StreamPosition $expectedPosition): bool
@@ -50,33 +46,25 @@ readonly class StreamEventReactor
     protected function reactOn(Process $process, DomainEvent $event): void
     {
         $userState = $this->getUserState($process);
-        $eventScope = new EventScope($event, $this->projector, $userState);
 
-        ($this->reactors)($eventScope);
+        $projector = $this->eventScopeFactory->handle($event, $userState);
 
-        $this->updateUserStateIfInitialized($process, $userState);
+        if ($projector->userState() !== null) {
+            $process->userState()->put($projector->userState()->state);
+        }
 
-        if ($eventScope->isAcked()) {
+        if ($projector->event() instanceof DomainEvent) {
             $process->metrics()->increment('acked');
         }
     }
 
-    protected function getUserState(Process $process): ?UserStateScope
+    protected function getUserState(Process $process): ?array
     {
         if (! $process->context()->get()->isUserStateInitialized()) {
             return null;
         }
 
-        $userState = $process->userState()->get();
-
-        return new UserStateScope($userState);
-    }
-
-    protected function updateUserStateIfInitialized(Process $process, ?UserStateScope $scope): void
-    {
-        if ($scope !== null) {
-            $process->userState()->put($scope->state());
-        }
+        return $process->userState()->get();
     }
 
     protected function dispatchSignalIfRequested(bool $dispatchSignal): void
