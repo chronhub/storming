@@ -14,7 +14,7 @@ use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\SubscriptionFactory;
 use Storm\Contract\Serializer\JsonSerializer;
 use Storm\Projector\Factory\DatabaseSubscriptionFactory;
-use Storm\Projector\Filter\QueryScopeConnection;
+use Storm\Projector\Filter\DatabaseQueryScope;
 use Storm\Projector\Options\DefaultOption;
 use Storm\Projector\Repository\DatabaseProvider;
 use Storm\Serializer\JsonSerializerFactory;
@@ -54,7 +54,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
                 $app[SystemClock::class],
                 $app['projection.serializer.json.default']->create(),
                 $app[Dispatcher::class],
-                $app[QueryScopeConnection::class],
+                $app[DatabaseQueryScope::class],
                 new DefaultOption(signal: true, retries: [])
             );
         });

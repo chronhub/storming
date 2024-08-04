@@ -11,16 +11,16 @@ use Storm\Chronicler\InMemory\InMemoryEventStreamProvider;
 use Storm\Clock\Clock;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Chronicler\InMemoryChronicler;
+use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ProjectionProvider;
-use Storm\Contract\Projector\ProjectionQueryScope;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\ProjectorMonitorInterface;
 use Storm\Contract\Projector\SubscriptionFactory;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Factory\InMemorySubscriptionFactory;
-use Storm\Projector\Filter\InMemoryQueryScope;
+use Storm\Projector\Filter\InMemoryFromToPosition;
 use Storm\Projector\Options\InMemoryOption;
 use Storm\Projector\ProjectorManager;
 use Storm\Projector\Repository\InMemoryProvider;
@@ -42,7 +42,7 @@ class InMemoryTestingFactory
 
     public ?ProjectionOption $projectionOption = null;
 
-    public ?ProjectionQueryScope $queryScope = null;
+    public ?InMemoryQueryFilter $inMemoryQueryFilter = null;
 
     public ?ProjectorManagerInterface $projectorManager = null;
 
@@ -64,12 +64,11 @@ class InMemoryTestingFactory
         }
 
         $this->setupProjectionOption();
-        $this->setupQueryScope();
+        $this->setupQueryFilter();
 
         $this->projectorManager = new ProjectorManager(
             $this->createSubscriptionFactory(),
             $this->projectionOption,
-            $this->queryScope
         );
 
         return $this->projectorManager;
@@ -154,8 +153,8 @@ class InMemoryTestingFactory
         $this->projectionProvider ??= new InMemoryProvider($this->clock);
     }
 
-    public function setupQueryScope(): void
+    public function setupQueryFilter(): void
     {
-        $this->queryScope ??= new InMemoryQueryScope();
+        $this->inMemoryQueryFilter ??= new InMemoryFromToPosition();
     }
 }

@@ -18,6 +18,7 @@ use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
+use function array_keys;
 use function count;
 
 trait InMemoryReadModelProjectionTestBaseTrait
@@ -54,21 +55,20 @@ trait InMemoryReadModelProjectionTestBaseTrait
         return function (EventScope $scope) use ($keepRunning, $stopAt): void {
             $callback = function (DomainEvent $event, ReadModelScope $scope, UserStateScope $userState) use ($keepRunning, $stopAt): void {
                 $field = 'total';
-                $id = $event->toContent()['id'];
 
                 if ($event instanceof BalanceCreated) {
                     $userState->upsert($field, $event->amount());
-                    $scope->stack('insert', $id, [$field => $event->amount()]);
+                    $scope->stack('insert', $event->id(), [$field => $event->amount()]);
                 }
 
                 if ($event instanceof BalanceAdded) {
                     $userState->increment($field, $event->amount());
-                    $scope->stack('increment', $id, $field, $event->amount());
+                    $scope->stack('increment', $event->id(), $field, $event->amount());
                 }
 
                 if ($event instanceof BalanceSubtracted) {
                     $userState->decrement($field, $event->amount());
-                    $scope->stack('decrement', $id, $field, $event->amount());
+                    $scope->stack('decrement', $event->id(), $field, $event->amount());
                 }
 
                 $userState->merge('events', [$event::class]);
@@ -89,6 +89,45 @@ trait InMemoryReadModelProjectionTestBaseTrait
         };
     }
 
+    protected function test(bool $keepRunning = false, array $stopAt = []): Closure
+    {
+        return function (EventScope $scope) use ($keepRunning, $stopAt): void {
+            $eventHandlers = [
+                BalanceCreated::class => function (BalanceCreated $event, ReadModelScope $scope, UserStateScope $userState) {
+                    $userState->upsert('total', $event->amount());
+                    $scope->stack('insert', $event->id(), ['total' => $event->amount()]);
+                },
+                BalanceAdded::class => function (BalanceAdded $event, ReadModelScope $scope, UserStateScope $userState) {
+                    $userState->increment('total', $event->amount());
+                    $scope->stack('increment', $event->id(), 'total', $event->amount());
+                },
+                BalanceSubtracted::class => function (BalanceSubtracted $event, ReadModelScope $scope, UserStateScope $userState) {
+                    $userState->decrement('total', $event->amount());
+                    $scope->stack('decrement', $event->id(), 'total', $event->amount());
+                },
+            ];
+
+            $scope
+                ->ackOneOf(...array_keys($eventHandlers))
+                ?->then(
+                    function (DomainEvent $event, ReadModelScope $scope, UserStateScope $userState) use ($eventHandlers, $keepRunning, $stopAt) {
+                        $eventHandlers[$event::class]($event, $scope, $userState);
+
+                        $userState->merge('events', [$event::class]);
+
+                        if (! $keepRunning || $stopAt === []) {
+                            return;
+                        }
+
+                        [$field, $expected] = $stopAt;
+                        if (count($userState[$field]) === $expected) {
+                            $scope->stop();
+                        }
+                    }
+                );
+        };
+    }
+
     protected function getIncrementUserStateReactor(): Closure
     {
         return function (EventScope $scope): void {
@@ -96,8 +135,8 @@ trait InMemoryReadModelProjectionTestBaseTrait
                 ->ackOneOf(BalanceCreated::class, BalanceAdded::class, BalanceSubtracted::class)
                 ->then(function (DomainEvent $event, ReadModelScope $scope, UserStateScope $userState): void {
                     ! $event instanceof BalanceSubtracted
-                        ? $userState->increment('total', $event->toContent()['amount'])
-                        : $userState->decrement('total', $event->toContent()['amount']);
+                        ? $userState->increment('total', $event->amount())
+                        : $userState->decrement('total', $event->amount());
                 });
         };
     }

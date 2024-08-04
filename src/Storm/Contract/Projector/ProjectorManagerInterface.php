@@ -31,11 +31,6 @@ interface ProjectorManagerInterface
         array $options = []): ReadModelProjector;
 
     /**
-     * Get the projection query scope.
-     */
-    public function queryScope(): ?ProjectionQueryScope;
-
-    /**
      * Get the projector monitor.
      */
     public function monitor(): ProjectorMonitorInterface;

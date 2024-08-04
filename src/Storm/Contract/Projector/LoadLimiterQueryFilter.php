@@ -6,7 +6,7 @@ namespace Storm\Contract\Projector;
 
 use Storm\Projector\Filter\LoadLimiter;
 
-interface LoadLimiterProjectionQueryFilter extends ProjectionQueryFilter
+interface LoadLimiterQueryFilter extends ProjectionQueryFilter
 {
     /**
      * Set the number of stream events to load per stream.

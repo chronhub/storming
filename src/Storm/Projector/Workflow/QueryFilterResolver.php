@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow;
 
 use Storm\Contract\Chronicler\QueryFilter;
-use Storm\Contract\Projector\LoadLimiterProjectionQueryFilter;
+use Storm\Contract\Projector\LoadLimiterQueryFilter;
 use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\StreamNameAwareQueryFilter;
 use Storm\Projector\Filter\LoadLimiter;
@@ -23,7 +23,7 @@ final readonly class QueryFilterResolver
             $queryFilter->setStreamName($streamName);
         }
 
-        if ($queryFilter instanceof LoadLimiterProjectionQueryFilter) {
+        if ($queryFilter instanceof LoadLimiterQueryFilter) {
             $queryFilter->setLoadLimiter($loadLimiter);
         }
 

@@ -6,7 +6,7 @@ namespace Storm\Tests\Unit\Projector\Filter;
 
 use Storm\Chronicler\Direction;
 use Storm\Contract\Message\EventHeader;
-use Storm\Projector\Filter\InMemoryFromIncludedPositionWithLoadLimiter;
+use Storm\Projector\Filter\InMemoryFromToPosition;
 use Storm\Projector\Filter\LoadLimiter;
 use Storm\Stream\StreamPosition;
 use Storm\Tests\Stubs\StreamEventsGeneratorStub;
@@ -16,7 +16,7 @@ use function range;
 
 beforeEach(function () {
     $this->eventStub = new StreamEventsGeneratorStub();
-    $this->queryFilter = new InMemoryFromIncludedPositionWithLoadLimiter();
+    $this->queryFilter = new InMemoryFromToPosition();
 });
 
 test('filter stream event with load limiter as max position and stream position as min position',

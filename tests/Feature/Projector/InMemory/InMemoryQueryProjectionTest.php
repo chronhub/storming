@@ -47,7 +47,7 @@ test('query projection', function (?string $descriptionId) {
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
         ->when($this->getQueryReactor())
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
     $this->assertProjectionState(
@@ -80,7 +80,7 @@ test('query event scope with one stream event', function () {
     $this->projector
         ->subscribeToStream($streamName)
         ->when($reactors)
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 });
 
@@ -99,7 +99,7 @@ test('query projection with many streams', function () {
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamOne, $streamTwo)
         ->when($this->getQueryReactor())
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
     $this->assertProjectionState(
@@ -133,7 +133,7 @@ test('query projection from stream partition', function () {
         ->initialize(fn (): array => [])
         ->subscribeToPartition('balance')
         ->when($this->getQueryReactor())
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
     $this->assertProjectionState(
@@ -158,7 +158,7 @@ test('query projection from stream partition which does not exist', function () 
         ->initialize(fn (): array => [])
         ->subscribeToPartition('balance')
         ->when($this->getQueryReactor())
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
     $this->assertProjectionState([]);
@@ -174,7 +174,7 @@ test('stop query projection from query scope', function () {
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
         ->when($this->getQueryReactor(keepRunning: true, stopAt: ['events', 2]))
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(true);
 
     $this->assertProjectionState(
@@ -241,7 +241,7 @@ test('query projection running in background and stop projection from event scop
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
         ->when($reactors)
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(true);
 
     $this->assertProjectionState(['balances' => [$balanceId->toString() => 300]]);
@@ -282,7 +282,7 @@ test('query projection running in background and stop projection from event scop
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
         ->when($reactors)
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(true);
 
     $this->assertProjectionState(['balances' => [$balanceId->toString() => 300]]);
@@ -301,7 +301,7 @@ test('query projection running once and does not stop on gap', function () {
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
         ->when($this->getQueryReactor())
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
     $this->assertProjectionState(
@@ -326,7 +326,7 @@ test('query projection running once and stop on gap when retries are configured'
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
         ->when($this->getQueryReactor())
-        ->filter($this->factory->queryScope->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
     $this->assertProjectionState(
@@ -351,7 +351,7 @@ test('query projection running in background and resolve gap when retries are co
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
         ->when($this->getQueryReactor(keepRunning: true, stopAt: ['events', 3]))
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(true);
 
     $this->assertProjectionState(
@@ -386,7 +386,7 @@ test('should perform when max batch is reached with reset and sleep', function (
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
         ->when($this->getQueryReactor())
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
     $this->assertPartialProjectionState('balances', [$balanceId->toString() => 1400]);

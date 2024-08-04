@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Filter;
 
 use Illuminate\Database\Query\Builder;
-use Storm\Contract\Projector\ProjectionQueryFilterConnection;
+use Storm\Contract\Projector\DatabaseProjectionQueryFilter;
 use Storm\Projector\Filter\FromIncludedPosition;
 use Storm\Stream\StreamPosition;
 
@@ -15,7 +15,7 @@ beforeEach(function () {
 });
 
 test('default instance', function () {
-    expect($this->filter)->toBeInstanceOf(ProjectionQueryFilterConnection::class);
+    expect($this->filter)->toBeInstanceOf(DatabaseProjectionQueryFilter::class);
 });
 
 test('callback', function (int $position) {

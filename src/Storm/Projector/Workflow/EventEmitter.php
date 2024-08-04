@@ -80,11 +80,6 @@ final class EventEmitter implements ComponentSubscriber, EventManager
         $this->onceListeners = [];
     }
 
-    /**
-     * Check if listener exists.
-     *
-     * @param TListener $listener
-     */
     public function has(string $listener): bool
     {
         return array_key_exists($listener, $this->listeners);

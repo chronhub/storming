@@ -7,7 +7,6 @@ namespace Storm\Projector;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\ProjectionOption;
-use Storm\Contract\Projector\ProjectionQueryScope;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\ProjectorMonitorInterface;
 use Storm\Contract\Projector\QueryProjector;
@@ -24,7 +23,6 @@ final class ProjectorManager implements ProjectorManagerInterface
     public function __construct(
         private readonly SubscriptionFactory $factory,
         private readonly ProjectionOption|array $options,
-        private readonly ?ProjectionQueryScope $queryScope = null,
     ) {}
 
     public function newQueryProjector(array $options = []): QueryProjector
@@ -52,11 +50,6 @@ final class ProjectorManager implements ProjectorManagerInterface
         $context = $this->createContextBuilder();
 
         return new ProjectReadModel($subscription, $context, $streamName);
-    }
-
-    public function queryScope(): ?ProjectionQueryScope
-    {
-        return $this->queryScope;
     }
 
     public function monitor(): ProjectorMonitorInterface

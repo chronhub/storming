@@ -43,7 +43,7 @@ test('resets the read model projection', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor())
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: false);
 
     $this->assertPartialProjectionState('total', 100);
@@ -117,7 +117,7 @@ test('resets from monitoring within the projection instance', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($reactors)
-        ->filter($this->projectorManager->queryScope()->fromIncludedPosition())
+        ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: false);
 
     expect($resetStatus)->toBe(ProjectionStatus::RESETTING->value);

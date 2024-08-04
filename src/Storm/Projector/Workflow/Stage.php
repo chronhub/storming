@@ -26,13 +26,10 @@ class Stage
     {
         $this->process->dispatch(ShouldTerminateWorkflow::class);
 
-        $this->renew($this->process->isSprintTerminated());
+        $this->renewWorkflow($this->process->isSprintTerminated());
     }
 
-    /**
-     * Renews the workflow.
-     */
-    protected function renew(bool $isSprintTerminated): void
+    protected function renewWorkflow(bool $isSprintTerminated): void
     {
         $this->process->dispatch(BeforeWorkflowRenewal::class, $isSprintTerminated);
 
