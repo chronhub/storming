@@ -10,7 +10,7 @@ use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ActivityFactory;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Projector\Filter\LoadLimiter;
-use Storm\Projector\Scope\EventScopeFactory;
+use Storm\Projector\Scope\ProjectorScopeFactory;
 use Storm\Projector\Scope\QueryAccess;
 use Storm\Projector\Support\CollectStreams;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
@@ -46,7 +46,7 @@ final readonly class QueryActivityFactory implements ActivityFactory
     {
         [$reactors, $then] = $process->context()->get()->reactors();
 
-        $factory = new EventScopeFactory(
+        $factory = new ProjectorScopeFactory(
             $reactors,
             new QueryAccess($process, $this->clock),
             $then,

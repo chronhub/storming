@@ -11,7 +11,7 @@ use Storm\Contract\Projector\PersistentActivityFactory as PersistentActivity;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Projector\Filter\LoadLimiter;
 use Storm\Projector\Scope\EmitterAccess;
-use Storm\Projector\Scope\EventScopeFactory;
+use Storm\Projector\Scope\ProjectorScopeFactory;
 use Storm\Projector\Support\CollectStreams;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
 use Storm\Projector\Workflow\Activity\HandleStreamEvent;
@@ -46,7 +46,7 @@ final readonly class EmitterActivityFactory implements PersistentActivity
     {
         [$reactors, $then] = $process->context()->get()->reactors();
 
-        $factory = new EventScopeFactory(
+        $factory = new ProjectorScopeFactory(
             $reactors,
             new EmitterAccess($process, $this->clock),
             $then,

@@ -13,7 +13,7 @@ use Storm\Projector\Exception\RuntimeException;
 use function is_array;
 use function is_callable;
 
-class EventScopeFactory
+class ProjectorScopeFactory
 {
     use ReflectsClosures;
 
@@ -43,7 +43,9 @@ class EventScopeFactory
             return $this->then($this->projector);
         }
 
-        return $this->then(($this->projector)(null, $userStateScope));
+        ($this->projector)(null, $userStateScope);
+
+        return $this->then($this->projector);
     }
 
     protected function then(ProjectorScope $projector): ProjectorScope

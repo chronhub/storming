@@ -11,7 +11,7 @@ use Storm\Contract\Projector\PersistentActivityFactory;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Projector\Filter\LoadLimiter;
-use Storm\Projector\Scope\EventScopeFactory;
+use Storm\Projector\Scope\ProjectorScopeFactory;
 use Storm\Projector\Scope\ReadModelAccess;
 use Storm\Projector\Support\CollectStreams;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
@@ -48,7 +48,7 @@ final readonly class ReadModelActivityFactory implements PersistentActivityFacto
     {
         [$reactors, $then] = $process->context()->get()->reactors();
 
-        $factory = new EventScopeFactory(
+        $factory = new ProjectorScopeFactory(
             $reactors,
             new ReadModelAccess($process, $this->clock, $this->readModel),
             $then,
