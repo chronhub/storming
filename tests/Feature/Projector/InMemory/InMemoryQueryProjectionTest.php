@@ -221,7 +221,7 @@ test('query projection running in background and stop projection from event scop
             function (BalanceSubtracted $event) {},
         ],
         function (QueryProjectorScope $scope): void {
-            $scope->userState()->merge('events', [$scope->event()::class]);
+            $scope->userState()->push('events', $scope->event()::class);
 
             if (count($scope->userState()['events']) === 2) {
                 $scope->stop();
@@ -257,7 +257,7 @@ test('query projection running in background and stop projection from event scop
             },
         ],
         function (QueryProjectorScope $scope): void {
-            $scope->userState()->merge('events', [$scope->event()::class]);
+            $scope->userState()->push('events', $scope->event()::class);
         },
     ];
 

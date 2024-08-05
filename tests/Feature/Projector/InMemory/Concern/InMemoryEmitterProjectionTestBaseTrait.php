@@ -7,7 +7,6 @@ namespace Storm\Tests\Feature\Projector\InMemory\Concern;
 use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\EmitterScope;
 use Storm\Contract\Projector\ProjectorManagerInterface;
-use Storm\Contract\Projector\ReadModelScope;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
@@ -48,15 +47,15 @@ trait InMemoryEmitterProjectionTestBaseTrait
         return [
             [
                 function (BalanceCreated $event) {
-                    /** @var ReadModelScope $this */
-                    $this->userState->upsert('total', $event->amount());
+                    /** @var EmitterScope $this */
+                    $this->userState->set('total', $event->amount());
                 },
                 function (BalanceAdded $event) {
-                    /** @var ReadModelScope $this */
+                    /** @var EmitterScope $this */
                     $this->userState->increment('total', $event->amount());
                 },
                 function (BalanceSubtracted $event) {
-                    /** @var ReadModelScope $this */
+                    /** @var EmitterScope $this */
                     $this->userState->decrement('total', $event->amount());
                 },
             ],

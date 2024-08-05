@@ -51,7 +51,7 @@ trait InMemoryReadModelProjectionTestBaseTrait
             [
                 function (BalanceCreated $event) {
                     /** @var ReadModelScope $this */
-                    $this->userState->upsert('total', $event->amount());
+                    $this->userState->set('total', $event->amount());
                     $this->stack('insert', $event->id(), ['total' => $event->amount()]);
                 },
                 function (BalanceAdded $event) {
@@ -66,7 +66,7 @@ trait InMemoryReadModelProjectionTestBaseTrait
                 },
             ],
             function (ReadModelScope $scope) use ($keepRunning, $stopAt) {
-                $scope->userState->merge('events', [$scope->event()::class]);
+                $scope->userState->push('events', $scope->event()::class);
                 if (! $keepRunning || $stopAt === []) {
                     return;
                 }
@@ -85,7 +85,7 @@ trait InMemoryReadModelProjectionTestBaseTrait
             [
                 function (BalanceCreated $event) {
                     /** @var ReadModelScope $this */
-                    $this->userState->upsert('total', $event->amount());
+                    $this->userState->set('total', $event->amount());
                 },
                 function (BalanceAdded $event) {
                     /** @var ReadModelScope $this */

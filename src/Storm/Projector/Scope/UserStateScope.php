@@ -6,109 +6,176 @@ namespace Storm\Projector\Scope;
 
 use ArrayAccess;
 use Illuminate\Support\Arr;
+use Storm\Projector\Exception\InvalidArgumentException;
 
-use function array_key_exists;
-use function array_merge;
+use function abs;
+use function array_unshift;
+use function gettype;
 use function is_array;
+use function is_bool;
+use function is_float;
+use function is_int;
+use function is_string;
+use function sprintf;
 
-// todo: see laravel fluent or attributes
 class UserStateScope implements ArrayAccess
 {
     public function __construct(
-        public array $state
+        public array $state = []
     ) {}
 
-    /**
-     * Update the value of an existing field or insert a new field with the given value.
-     *
-     * @return $this
-     */
-    public function upsert(string $field, mixed $value): self
+    public function get(string $key, mixed $default = null)
     {
-        $this->updateUserState($field, $value, false);
+        return Arr::get($this->state, $key, $default);
+    }
+
+    public function set(string|array $key, mixed $value = null): void
+    {
+        $keys = is_array($key) ? $key : [$key => $value];
+
+        foreach ($keys as $key => $value) {
+            Arr::set($this->state, $key, $value);
+        }
+    }
+
+    public function prepend(string $key, mixed $value): self
+    {
+        $array = $this->get($key, []);
+
+        array_unshift($array, $value);
+
+        $this->set($key, $array);
 
         return $this;
     }
 
     /**
-     * Increment the value of an existing field or insert a new field with the given value.
-     *
      * @return $this
      */
-    public function increment(string $field = 'count', int $value = 1): self
+    public function push(string $key, mixed $value): self
     {
-        $this->updateUserState($field, $value, true);
+        $array = $this->get($key, []);
+
+        $array[] = $value;
+
+        $this->set($key, $array);
+
+        return $this;
+    }
+
+    public function increment(string $key, int $step = 1): self
+    {
+        $value = $this->integer($key, null);
+
+        $value += abs($step);
+
+        $this->set($key, $value);
+
+        return $this;
+    }
+
+    public function decrement(string $key, int $step = 1): self
+    {
+        $value = $this->integer($key, null);
+
+        $value -= abs($step);
+
+        $this->set($key, $value);
 
         return $this;
     }
 
     /**
-     * Decrement the value of an existing field or insert a new field with the given value.
+     * Get the specified string configuration value.
      *
-     * @return $this
+     * @param (Closure():(string|null))|string|null $default
      */
-    public function decrement(string $field = 'count', int $value = -1): self
+    public function string(string $key, mixed $default = null): string
     {
-        $this->updateUserState($field, $value > 0 ? -$value : $value, true);
+        $value = $this->get($key, $default);
 
-        return $this;
+        if (! is_string($value)) {
+            throw new InvalidArgumentException(
+                sprintf('User state value for key [%s] must be a string, %s given.', $key, gettype($value))
+            );
+        }
+
+        return $value;
     }
 
     /**
-     * Merge the value of an existing field or insert a new field with the given value.
-     *
-     * @return $this
+     * @param (Closure():(int|null))|int|null $default
      */
-    public function merge(string $field, mixed $value): self
+    public function integer(string $key, mixed $default = null): int
     {
-        //fixMe if value is not array, it updates the field with the value
-        //force value to be an array
-        $oldValue = data_get($this->state, $field);
+        $value = $this->get($key, $default);
 
-        $withMerge = is_array($oldValue) ? array_merge($oldValue, Arr::wrap($value)) : $value;
+        if (! is_int($value)) {
+            throw new InvalidArgumentException(
+                sprintf('User state value for key [%s] must be an integer, %s given.', $key, gettype($value))
+            );
+        }
 
-        Arr::set($this->state, $field, $withMerge);
-
-        return $this;
+        return $value;
     }
 
     /**
-     * Forget the value of an existing field.
-     *
-     * @return $this
+     * @param (Closure():(float|null))|float|null $default
      */
-    public function forget(string $field): self
+    public function float(string $key, mixed $default = null): float
     {
-        Arr::forget($this->state, $field);
+        $value = $this->get($key, $default);
 
-        return $this;
+        if (! is_float($value)) {
+            throw new InvalidArgumentException(
+                sprintf('User state value for key [%s] must be a float, %s given.', $key, gettype($value))
+            );
+        }
+
+        return $value;
     }
 
     /**
-     * Return the current state.
-     *
-     * @deprecated use $this->state instead
+     * @param (Closure():(bool|null))|bool|null $default
      */
-    public function state(): array
+    public function boolean(string $key, mixed $default = null): bool
+    {
+        $value = $this->get($key, $default);
+
+        if (! is_bool($value)) {
+            throw new InvalidArgumentException(
+                sprintf('User state value for key [%s] must be a boolean, %s given.', $key, gettype($value))
+            );
+        }
+
+        return $value;
+    }
+
+    /**
+     * @param  (Closure():(array<array-key, mixed>|null))|array<array-key, mixed>|null $default
+     * @return array<array-key, mixed>
+     */
+    public function array(string $key, mixed $default = null): array
+    {
+        $value = $this->get($key, $default);
+
+        if (! is_array($value)) {
+            throw new InvalidArgumentException(
+                sprintf('User state value for key [%s] must be an array, %s given.', $key, gettype($value))
+            );
+        }
+
+        return $value;
+    }
+
+    public function all(): array
     {
         return $this->state;
     }
 
-    /**
-     * Check if the state has a field.
-     */
-    public function has(string $field): bool
+    public function has(string $key): bool
     {
-        return array_key_exists($field, $this->state);
-    }
-
-    private function updateUserState(string $field, mixed $value, bool $increment): void
-    {
-        $oldValue = data_get($this->state, $field);
-
-        $withValue = $increment ? $oldValue + $value : $value;
-
-        Arr::set($this->state, $field, $withValue);
+        return Arr::has($this->state, $key);
     }
 
     public function offsetExists(mixed $offset): bool
@@ -116,21 +183,18 @@ class UserStateScope implements ArrayAccess
         return $this->has($offset);
     }
 
-    /**
-     * @return mixed default to null
-     */
     public function offsetGet(mixed $offset): mixed
     {
-        return data_get($this->state, $offset);
+        return $this->get($offset);
     }
 
     public function offsetSet(mixed $offset, mixed $value): void
     {
-        $this->upsert($offset, $value);
+        $this->set($offset, $value);
     }
 
     public function offsetUnset(mixed $offset): void
     {
-        $this->forget($offset);
+        Arr::forget($this->state, $offset);
     }
 }

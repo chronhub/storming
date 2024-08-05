@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Scope;
 
-use Closure;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
 
@@ -46,20 +45,5 @@ trait BoundScope
         $this->userState = $userState;
 
         return $this;
-    }
-
-    public function match(string $event): bool
-    {
-        return $event === $this->event::class;
-    }
-
-    /**
-     * @param Closure(self): bool $callback
-     */
-    public function stopWhen(Closure $callback): void
-    {
-        if ($callback($this) === true) {
-            $this->stop();
-        }
     }
 }

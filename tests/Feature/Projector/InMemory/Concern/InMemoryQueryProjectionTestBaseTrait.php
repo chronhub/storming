@@ -45,7 +45,7 @@ trait InMemoryQueryProjectionTestBaseTrait
             [
                 function (BalanceCreated $event) {
                     /** @var QueryProjectorScope $this */
-                    $this->userState->increment('balances.'.$event->id(), $event->amount());
+                    $this->userState->set('balances.'.$event->id(), $event->amount());
                 },
                 function (BalanceAdded $event) {
                     /** @var QueryProjectorScope $this */
@@ -53,11 +53,16 @@ trait InMemoryQueryProjectionTestBaseTrait
                 },
                 function (BalanceSubtracted $event) {
                     /** @var QueryProjectorScope $this */
+                    // for custom query filter
+                    if (! $this->userState->has('balances.'.$event->id())) {
+                        $this->userState->set('balances.'.$event->id(), 0);
+                    }
+
                     $this->userState->decrement('balances.'.$event->id(), $event->amount());
                 },
             ],
             function (QueryProjectorScope $scope) use ($keepRunning, $stopAt) {
-                $scope->userState->merge('events', [$scope->event()::class]);
+                $scope->userState->push('events', $scope->event()::class);
 
                 if (! $keepRunning || $stopAt === []) {
                     return;

@@ -83,7 +83,7 @@ test('resets from monitoring within the projection instance', function () {
     $reactors = [
         [
             function (BalanceCreated $event) {
-                $this->userState->upsert('total', $event->amount());
+                $this->userState->set('total', $event->amount());
                 $this->stack('insert', $event->id(), ['total' => $event->amount()]);
             },
             function (BalanceAdded $event) {
@@ -96,7 +96,7 @@ test('resets from monitoring within the projection instance', function () {
             },
         ],
         function (ReadModelScope $scope) use ($monitor, &$resetStatus) {
-            $scope->userState()->merge('events', [$scope->event()::class]);
+            $scope->userState()->push('events', [$scope->event()::class]);
 
             if ($resetStatus === null && count($scope->userState()['events']) === 4) {
                 $monitor->markAsReset('balance');

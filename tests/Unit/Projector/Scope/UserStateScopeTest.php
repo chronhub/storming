@@ -2,144 +2,169 @@
 
 declare(strict_types=1);
 
-namespace Storm\Tests\Unit\Projector\Scope;
+namespace Storm\Tests\Scope;
 
 use ArrayAccess;
-use stdClass;
+use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Scope\UserStateScope;
 
-use function abs;
-
 test('default instance', function () {
-    $scope = new UserStateScope([]);
+    $state = new UserStateScope();
 
-    expect($scope)->toBeInstanceOf(ArrayAccess::class)
-        ->and($scope->state())->toBe([]);
+    expect($state)->toBeInstanceOf(ArrayAccess::class)
+        ->and($state->all())->toBeEmpty();
 });
 
-test('default instance with state', function (array $state) {
-    $scope = new UserStateScope($state);
+test('offset unset', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    expect($state->all())->toBe(['foo' => 'bar']);
 
-    expect($scope->state())->toBe($state);
-})->with([
-    'empty state' => [[]],
-    'state with data' => [['key' => 'value']],
-]);
+    $state->offsetUnset('foo');
 
-test('insert when key does not exists in state', function () {
-    $scope = new UserStateScope(['key' => 'value']);
-    expect($scope->state())->toBe(['key' => 'value']);
+    expect($state->all())->toBeEmpty();
+});
+test('has', function () {
+    $state = new UserStateScope();
+    expect($state->has('foo'))->toBeFalse();
 
-    $return = $scope->upsert('unknown', 'new value');
-    expect($return)->toBe($scope)
-        ->and($scope->state())->toBe(['key' => 'value', 'unknown' => 'new value']);
+    $state->set('foo', 'bar');
+    expect($state->has('foo'))->toBeTrue();
 });
 
-test('update if key exist', function (mixed $value) {
-    $scope = new UserStateScope(['key' => 'value']);
-    expect($scope->state())->toBe(['key' => 'value']);
+test('offset exists', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    expect($state->offsetExists('foo'))->toBeTrue();
 
-    $return = $scope->upsert('key', $value);
-    expect($return)->toBe($scope)
-        ->and($scope->state())->toBe(['key' => $value]);
-})
-    ->with([
-        'null value' => [null],
-        'true value' => [true],
-        'false value' => [false],
-        'integer value' => [5],
-        'string value' => ['some_value'],
-        'array value' => [['some_value']],
-        'object value' => [new stdClass()],
-    ]);
-
-test('merge array if key exist', function () {
-    $scope = new UserStateScope(['key' => ['value']]);
-    expect($scope->state())->toBe(['key' => ['value']]);
-
-    $return = $scope->merge('key', ['new value']);
-    expect($return)->toBe($scope)
-        ->and($scope->state())->toBe(['key' => ['value', 'new value']]);
+    $state->offsetUnset('foo');
+    expect($state->offsetExists('foo'))->toBeFalse();
 });
 
-test('merge array if key does not exist', function () {
-    $scope = new UserStateScope(['some_key' => ['value']]);
-    expect($scope->state())->toBe(['some_key' => ['value']]);
+test('string', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    expect($state->string('foo'))->toBe('bar');
 
-    $return = $scope->merge('key', ['new value']);
-    expect($return)->toBe($scope)
-        ->and($scope->state())->toBe(['some_key' => ['value'], 'key' => ['new value']]);
+    $state->set('foo', 123);
+
+    expect($state->string('foo'));
+})->throws(InvalidArgumentException::class, 'User state value for key [foo] must be a string, integer given.');
+test('all', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    expect($state->all())->toBe(['foo' => 'bar']);
+});
+test('float', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    expect($state->float('foo'))->toBe(123.45);
+
+    $state->set('foo', 123);
+
+    expect($state->float('foo'));
+})->throws(InvalidArgumentException::class, 'User state value for key [foo] must be a float, string given.');
+
+test('offset get', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    expect($state->offsetGet('foo'))->toBe('bar');
+
+    $state->set('foo', 123);
+
+    expect($state->offsetGet('foo'));
 });
 
-test('does not increment key state if key does not exist', function () {
-    $scope = new UserStateScope(['some_key' => 1]);
+test('set', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    $state->set('baz', 'bar');
 
-    $return = $scope->increment('key');
-    expect($return)->toBe($scope)
-        ->and($scope->state())->toBe(['some_key' => 1]);
+    expect($state->get('foo'))->toBe('bar')
+        ->and($state->get('baz'))->toBe('bar')
+        ->and($state->get('bar'))->toBeNull()
+        ->and($state->all())->toBe(['foo' => 'bar', 'baz' => 'bar']);
+});
+test('integer', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    expect($state->integer('foo'))->toBe(123);
+
+    $state->set('foo', 123);
+
+    expect($state->integer('foo'));
+})->throws(InvalidArgumentException::class, 'User state value for key [foo] must be an integer, string given.');
+test('boolean', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    expect($state->boolean('foo'))->toBeTrue();
+
+    $state->set('foo', 123);
+
+    expect($state->boolean('foo'));
+})->throws(InvalidArgumentException::class, 'User state value for key [foo] must be a boolean, string given.');
+
+test('offset set', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    $state->offsetSet('baz', 'bar');
+
+    expect($state->get('foo'))->toBe('bar')
+        ->and($state->get('baz'))->toBe('bar')
+        ->and($state->get('bar'))->toBeNull()
+        ->and($state->all())->toBe(['foo' => 'bar', 'baz' => 'bar']);
+});
+test('get', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    expect($state->get('foo'))->toBe('bar');
+
+    $state->set('foo', 123);
+
+    expect($state->get('foo'))
+        ->and($state->get('bar'))->toBeNull();
 });
 
-test('decrement key state', function (int $value) {
-    $scope = new UserStateScope(['key' => 3]);
+test('push', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    $state->push('some', 'value');
+    $state->push('some', 'another');
 
-    $return = $scope->decrement('key');
-    expect($return)->toBe($scope)
-        ->and($scope->state())->toBe(['key' => 3 - abs($value)]);
-})
-    ->with([
-        'positive value' => [1, 2],
-        'negative value' => [-1, -2],
-    ]);
-
-test('does not decrement key state if key does not exist', function () {
-    $scope = new UserStateScope(['some_key' => 1]);
-
-    $return = $scope->decrement('key');
-    expect($return)->toBe($scope)
-        ->and($scope->state())->toBe(['some_key' => 1]);
+    expect($state->get('foo'))->toBe('bar')
+        ->and($state->get('some'))->toBe(['value', 'another'])
+        ->and($state->all())->toBe(['foo' => 'bar', 'some' => ['value', 'another']]);
 });
 
-test('forget key state', function () {
-    $scope = new UserStateScope(['key' => 'value']);
+test('array', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    expect($state->array('foo'))->toBe(['bar']);
 
-    $return = $scope->forget('key');
-    expect($return)->toBe($scope)
-        ->and($scope->state())->toBe([]);
+    $state->set('foo', 123);
+
+    expect($state->array('foo'));
+})->throws(InvalidArgumentException::class, 'User state value for key [foo] must be an array, string given.');
+
+test('prepend', function () {
+    $state = new UserStateScope(['foo' => 'bar']);
+    $state->prepend('some', 'value');
+    $state->prepend('some', 'another');
+
+    expect($state->get('foo'))->toBe('bar')
+        ->and($state->get('some'))->toBe(['another', 'value'])
+        ->and($state->all())->toBe(['foo' => 'bar', 'some' => ['another', 'value']]);
 });
 
-describe('test array access', function () {
-    test('offset exists', function () {
-        $scope = new UserStateScope(['key' => 'value']);
+test('increment', function () {
+    $state = new UserStateScope(['foo' => 1]);
+    $state->increment('foo');
 
-        expect(isset($scope['key']))->toBeTrue()
-            ->and(isset($scope['unknown']))->toBeFalse();
-    });
+    expect($state->get('foo'))->toBe(2);
 
-    test('offset get', function () {
-        $scope = new UserStateScope(['key' => 'value']);
+    $state->increment('foo', -1);
 
-        expect($scope['key'])->toBe('value');
-    });
+    expect($state->get('foo'))->toBe(3);
 
-    test('offset get with unknown field', function () {
-        $scope = new UserStateScope([]);
+    $state->increment('bar', -1);
+})->throws(InvalidArgumentException::class, 'User state value for key [bar] must be an integer, NULL given.');
 
-        expect($scope['unknown'])->toBeNull();
-    });
+test('decrement', function () {
+    $state = new UserStateScope(['foo' => 1]);
+    $state->decrement('foo');
 
-    test('offset set', function () {
-        $scope = new UserStateScope([]);
+    expect($state->get('foo'))->toBe(0);
 
-        $scope['key'] = 'value';
+    $state->decrement('foo', -1);
 
-        expect($scope->state())->toBe(['key' => 'value']);
-    });
+    expect($state->get('foo'))->toBe(-1);
 
-    test('offset unset', function () {
-        $scope = new UserStateScope(['key' => 'value']);
-
-        unset($scope['key']);
-
-        expect($scope->state())->toBe([]);
-    });
-});
+    $state->decrement('bar', -1);
+})->throws(InvalidArgumentException::class, 'User state value for key [bar] must be an integer, NULL given.');
