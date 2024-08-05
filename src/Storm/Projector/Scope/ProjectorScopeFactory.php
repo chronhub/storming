@@ -10,6 +10,7 @@ use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Exception\RuntimeException;
 
+use function is_a;
 use function is_array;
 use function is_callable;
 
@@ -43,9 +44,7 @@ class ProjectorScopeFactory
             return $this->then($this->projector);
         }
 
-        ($this->projector)(null, $userStateScope);
-
-        return $this->then($this->projector);
+        return $this->then(($this->projector)(null, $userStateScope));
     }
 
     protected function then(ProjectorScope $projector): ProjectorScope
@@ -63,6 +62,10 @@ class ProjectorScopeFactory
 
         foreach ($reactors as $reactor) {
             $eventClass = $this->firstClosureParameterType($reactor);
+
+            if (! is_a($eventClass, DomainEvent::class, true)) {
+                throw new RuntimeException("Event reactor $eventClass must be a subclass of ".DomainEvent::class);
+            }
 
             if (isset($boundReactors[$eventClass])) {
                 throw new RuntimeException("Event reactor $eventClass already registered");
