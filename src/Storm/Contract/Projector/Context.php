@@ -6,6 +6,7 @@ namespace Storm\Contract\Projector;
 
 use Closure;
 use Storm\Contract\Chronicler\QueryFilter;
+use Storm\Contract\Message\DomainEvent;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Support\StopWhen;
 use Storm\Projector\Workflow\Process;
@@ -50,9 +51,13 @@ interface Context
     public function subscribeToAll(): self;
 
     /**
-     * Sets the event reactors to be called when an event is received.
+     * Sets the event reactors to be called when a stream event is received.
+     *
+     * @param array<array<(Closure(DomainEvent): void)>> $reactors
+     * @param (Closure(ProjectorScope): void)|null       $then
      *
      * @throws InvalidArgumentException When reactors are already set
+     * @throws InvalidArgumentException When reactors are empty
      */
     public function when(array $reactors, ?Closure $then = null): self;
 

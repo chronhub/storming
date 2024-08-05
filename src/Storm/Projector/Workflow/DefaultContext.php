@@ -24,9 +24,10 @@ final class DefaultContext implements ContextReader
     private ?Closure $userState = null;
 
     /**
-     * fixMe
+     * @template THandlers of array<Closure(DomainEvent): void>
+     * @template TThen of (Closure(ProjectorScope): void)|null
      *
-     * @var array<array<(Closure(DomainEvent): (void))>, (Closure(ProjectorScope): (void))>|null
+     * @param array<THandlers, TThen>|null $reactors
      */
     private ?array $reactors = null;
 
@@ -103,6 +104,10 @@ final class DefaultContext implements ContextReader
     {
         if ($this->reactors !== null) {
             throw new InvalidArgumentException('Projection reactors already set');
+        }
+
+        if ($reactors === []) {
+            throw new InvalidArgumentException('Projection reactors cannot be empty');
         }
 
         $this->reactors = [$reactors, $then];

@@ -9,7 +9,6 @@ use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Projector\ActivityFactory;
 use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Filter\LoadLimiter;
-use Storm\Projector\Scope\ProjectorScopeFactory;
 use Storm\Projector\Support\CollectStreams;
 use Storm\Projector\Workflow\Activity\LoadStreams;
 use Storm\Projector\Workflow\Process;
@@ -50,11 +49,7 @@ trait ProvideActivityBuilder
      */
     protected function createStreamEventReactor(ProjectorScope $projectorScope, array $reactors, ?Closure $then): StreamEventReactor|callable
     {
-        $factory = new ProjectorScopeFactory(
-            $reactors,
-            $projectorScope,
-            $then,
-        );
+        $factory = new ProjectorScopeFactory($reactors, $projectorScope, $then);
 
         return new StreamEventReactor($factory);
     }

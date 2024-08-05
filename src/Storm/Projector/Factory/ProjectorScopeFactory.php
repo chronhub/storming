@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Scope;
+namespace Storm\Projector\Factory;
 
 use Closure;
 use Illuminate\Support\Traits\ReflectsClosures;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Exception\RuntimeException;
+use Storm\Projector\Scope\UserStateScope;
 
 use function is_a;
 use function is_array;
@@ -39,6 +40,7 @@ class ProjectorScopeFactory
 
         if (isset($this->boundReactors[$event::class])) {
             ($this->projector)($event, $userStateScope);
+
             $this->boundReactors[$event::class]($this->projector);
 
             return $this->then($this->projector);

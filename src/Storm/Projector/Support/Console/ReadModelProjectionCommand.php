@@ -23,7 +23,7 @@ abstract class ReadModelProjectionCommand extends Command implements SignalableC
         parent::__construct();
     }
 
-    protected function make(Closure $reactors, ?Closure $init = null): ProjectorFactory
+    protected function make(?Closure $init, array $reactors, ?Closure $then = null): ProjectorFactory
     {
         if ($this->dispatchSignal) {
             pcntl_async_signals(true);
@@ -36,9 +36,9 @@ abstract class ReadModelProjectionCommand extends Command implements SignalableC
         }
 
         return $projector
-            ->filter($this->getProjectionQueryFilter())
+            ->filter($this->queryFilter())
             ->subscribeToStream(...$this->subscribeTo())
-            ->when($reactors);
+            ->when($reactors, $then);
     }
 
     public function getSubscribedSignals(): array
@@ -62,9 +62,4 @@ abstract class ReadModelProjectionCommand extends Command implements SignalableC
     abstract protected function subscribeTo(): array;
 
     abstract protected function queryFilter(): ?ProjectionQueryFilter;
-
-    protected function getProjectionQueryFilter(): ProjectionQueryFilter
-    {
-        return $this->queryFilter() ?? $this->projectorManager->queryScope()->fromIncludedPosition();
-    }
 }

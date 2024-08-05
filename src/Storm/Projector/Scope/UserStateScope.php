@@ -25,7 +25,7 @@ class UserStateScope implements ArrayAccess
         public array $state = []
     ) {}
 
-    public function get(string $key, mixed $default = null)
+    public function get(string $key, mixed $default = null): mixed
     {
         return Arr::get($this->state, $key, $default);
     }
@@ -50,9 +50,6 @@ class UserStateScope implements ArrayAccess
         return $this;
     }
 
-    /**
-     * @return $this
-     */
     public function push(string $key, mixed $value): self
     {
         $array = $this->get($key, []);

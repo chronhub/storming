@@ -16,11 +16,6 @@ trait BoundScope
         return $this->event;
     }
 
-    public function eventClass(): ?string
-    {
-        return $this?->event::class;
-    }
-
     public function userState(): ?UserStateScope
     {
         return $this->userState;
@@ -38,6 +33,8 @@ trait BoundScope
 
     /**
      * @internal
+     * checkMe it's sensitive to use this method
+     *  either encapsulate again or use reflection
      */
     public function __invoke(?DomainEvent $event, ?UserStateScope $userState = null): static
     {
