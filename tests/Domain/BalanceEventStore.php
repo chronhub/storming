@@ -15,6 +15,7 @@ use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
+use Storm\Tests\Domain\Balance\BalanceNoOp;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 
 use function iterator_to_array;
@@ -80,6 +81,18 @@ class BalanceEventStore
     {
         $event = $this->withHeaders(
             BalanceSubtracted::withBalance($this->balanceId, $amount),
+            $version
+        );
+
+        $this->appendEvent($event);
+
+        return $this;
+    }
+
+    public function withBalanceNoOp(int $version): self
+    {
+        $event = $this->withHeaders(
+            BalanceNoOp::withBalance($this->balanceId),
             $version
         );
 

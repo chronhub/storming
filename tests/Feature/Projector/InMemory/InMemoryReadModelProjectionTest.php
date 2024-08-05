@@ -15,6 +15,7 @@ use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryReadModelProjectionTestBaseTrait;
 use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
+use Storm\Tests\Stubs\Double\Message\SomeEvent;
 
 use function array_merge;
 use function count;
@@ -285,3 +286,35 @@ test('fails detect gaps with running once and setup retries', function (array $r
     $this->assertProjectionModelCheckpoint(projectionName: $projectionName, streamName: $streamName, position: 1);
     $this->assertProjectionReport(cycle: 1, ackedEvent: 1, totalEvent: 1);
 })->with('projection options with non empty retries');
+
+test('called then callback even when stream event is not acknowledged', function () {
+    $this->setupProjection(
+        streamName: $streamName = 'account',
+        projectionName: 'balance'
+    );
+
+    $this->balanceEventStore($streamName)
+        ->withBalanceCreated(version: 1, amount: 100)
+        ->withBalanceNoOp(version: 2);
+
+    $reactors = [
+        [
+            function (BalanceCreated $event) {},
+            function (SomeEvent $event) {
+                throw new Exception('Event is not part of the stream');
+            },
+        ],
+        function (ReadModelScope $scope): void {
+            $scope->userState()->increment('then called');
+        },
+    ];
+
+    $this->projector
+        ->initialize(fn (): array => ['then called' => 0])
+        ->subscribeToStream($streamName)
+        ->when($reactors)
+        ->filter($this->factory->inMemoryQueryFilter)
+        ->run(inBackground: false);
+
+    $this->assertProjectionState(['then called' => 2]);
+});
