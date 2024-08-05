@@ -33,7 +33,7 @@ test('deletes the projection and keeps the read model', function () {
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
-        ->when($this->getReadModelReactor())
+        ->when($this->getReadModelReactor(), $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: false);
 
@@ -71,7 +71,7 @@ test('deletes the projection and the read model', function () {
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
-        ->when($this->getReadModelReactor())
+        ->when($this->getReadModelReactor(), $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: false);
 

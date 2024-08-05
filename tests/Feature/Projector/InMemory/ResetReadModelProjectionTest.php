@@ -39,7 +39,7 @@ test('resets the read model projection', function () {
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
-        ->when($this->getReadModelReactor())
+        ->when($this->getReadModelReactor(), $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: false);
 
@@ -81,34 +81,34 @@ test('resets from monitoring within the projection instance', function () {
      * @param-closure-this ReadModelScope $reactors
      */
     $reactors = [
-        [
-            function (BalanceCreated $event) {
-                $this->userState->set('total', $event->amount());
-                $this->stack('insert', $event->id(), ['total' => $event->amount()]);
-            },
-            function (BalanceAdded $event) {
-                $this->userState->increment('total', $event->amount());
-                $this->stack('increment', $event->id(), 'total', $event->amount());
-            },
-            function (BalanceSubtracted $event) {
-                $this->userState->decrement('total', $event->amount());
-                $this->stack('decrement', $event->id(), 'total', $event->amount());
-            },
-        ],
-        function (ReadModelScope $scope) use ($monitor, &$resetStatus) {
-            $scope->userState()->push('events', [$scope->event()::class]);
-
-            if ($resetStatus === null && count($scope->userState()['events']) === 4) {
-                $monitor->markAsReset('balance');
-                $resetStatus = $monitor->statusOf('balance');
-            }
+        function (BalanceCreated $event) {
+            $this->userState->set('total', $event->amount());
+            $this->stack('insert', $event->id(), ['total' => $event->amount()]);
+        },
+        function (BalanceAdded $event) {
+            $this->userState->increment('total', $event->amount());
+            $this->stack('increment', $event->id(), 'total', $event->amount());
+        },
+        function (BalanceSubtracted $event) {
+            $this->userState->decrement('total', $event->amount());
+            $this->stack('decrement', $event->id(), 'total', $event->amount());
         },
     ];
+
+    // todo abstract monitor then reactor for other operations
+    $thenReactor = function (ReadModelScope $scope) use ($monitor, &$resetStatus) {
+        $scope->userState()->push('events', [$scope->event()::class]);
+
+        if ($resetStatus === null && count($scope->userState()['events']) === 4) {
+            $monitor->markAsReset('balance');
+            $resetStatus = $monitor->statusOf('balance');
+        }
+    };
 
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
-        ->when($reactors)
+        ->when($reactors, $thenReactor)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: false);
 

@@ -36,7 +36,7 @@ test('stop projection when cycle reached', function (int $cycles) {
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
-        ->when($this->getIncrementUserStateReactor())
+        ->when($this->getIncrementUserStateReactor(), $this->getThenReactor())
         ->haltOn(StopWhen::cycleReached($cycles))
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: true);
@@ -57,7 +57,7 @@ test('stop projection with expiration', function () {
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
-        ->when($this->getIncrementUserStateReactor())
+        ->when($this->getIncrementUserStateReactor(), $this->getThenReactor())
         ->haltOn(StopWhen::timeExpired('2', 'seconds'))
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: true);
@@ -102,7 +102,7 @@ test('stop projection when unrecoverable gap detected', function (array $retries
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
-        ->when($this->getIncrementUserStateReactor())
+        ->when($this->getIncrementUserStateReactor(), $this->getThenReactor())
         ->haltOn(StopWhen::gapDetected(GapType::UNRECOVERABLE_GAP))
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: true);

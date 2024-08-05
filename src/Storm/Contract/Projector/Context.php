@@ -54,7 +54,7 @@ interface Context
      *
      * @throws InvalidArgumentException When reactors are already set
      */
-    public function when(array $reactors): self;
+    public function when(array $reactors, ?Closure $then = null): self;
 
     /**
      * Stop the projection when a condition is met.

@@ -50,7 +50,7 @@ test('reads events from the beginning of the stream', function (?string $descrip
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
-        ->when($this->getReadModelReactor())
+        ->when($this->getReadModelReactor(), $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: false);
 
@@ -76,7 +76,7 @@ test('run projection again from last position kept in memory', function () {
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
-        ->when($reactors)
+        ->when($reactors, $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: false);
 
@@ -111,20 +111,18 @@ test('read model scope with one processed event', function () {
 
     $this->balanceEventStore($streamName)->withBalanceCreated(version: 1, amount: 100);
 
-    $reactors = [
-        [function (BalanceCreated $event) {}],
-        function (ReadModelScope $scope): void {
-            expect($scope->userState())->toBeNull()
-                ->and($scope->streamName())->toBe('account')
-                ->and($scope)->toBeInstanceOf(ReadModelScope::class)
-                ->and($scope->readModel())->toBe($this->readModel)
-                ->and($scope->clock())->toBeInstanceOf(Clock::class);
-        },
-    ];
+    $reactors = [function (BalanceCreated $event) {}];
+    $thenReactor = function (ReadModelScope $scope): void {
+        expect($scope->userState())->toBeNull()
+            ->and($scope->streamName())->toBe('account')
+            ->and($scope)->toBeInstanceOf(ReadModelScope::class)
+            ->and($scope->readModel())->toBe($this->readModel)
+            ->and($scope->clock())->toBeInstanceOf(Clock::class);
+    };
 
     $this->projector
         ->subscribeToStream($streamName)
-        ->when($reactors)
+        ->when($reactors, $thenReactor)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: false);
 
@@ -137,18 +135,17 @@ test('reactors should never been called when no event is processed', function ()
         projectionName: $projectionName = 'balance'
     );
 
-    $reactors = [
-        [function (BalanceCreated $event) {
-            $this->userState->upsert('total', $event->amount());
-        }],
-        function (): void {
-            throw new Exception('should never been called');
-        },
-    ];
+    $reactors = [function (BalanceCreated $event) {
+        $this->userState->upsert('total', $event->amount());
+    }];
+
+    $thenReactor = function (): void {
+        throw new Exception('should never been called');
+    };
 
     $this->projector
         ->subscribeToStream($streamName)
-        ->when($reactors)
+        ->when($reactors, $thenReactor)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: false);
 
@@ -166,12 +163,13 @@ test('does not detect gaps with no retry', function (bool $keepRunning) {
         ->withBalanceCreated(version: 1, amount: 100)
         ->withVersioningAmount([[3, 200], [5, -150], [7, -25]]);
 
-    $reactors = $this->getReadModelReactor(keepRunning: true, stopAt: ['events', 4]);
+    $reactors = $this->getReadModelReactor();
+    $thenReactor = $this->getThenReactor(keepRunning: true, stopAt: ['events', 4]);
 
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
-        ->when($reactors)
+        ->when($reactors, $thenReactor)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: $keepRunning);
 
@@ -193,12 +191,13 @@ test('detect gaps with setup retries and record gap', function (array $retries, 
         ->withBalanceCreated(version: 1, amount: 100)
         ->withVersioningAmount([[3, 200], [5, -150], [10, -50]]);
 
-    $reactors = $this->getReadModelReactor(keepRunning: true, stopAt: ['events', 4]);
+    $reactors = $this->getReadModelReactor();
+    $thenReactor = $this->getThenReactor(keepRunning: true, stopAt: ['events', 4]);
 
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
-        ->when($reactors)
+        ->when($reactors, $thenReactor)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: true);
 
@@ -232,12 +231,13 @@ test('detect larger gaps with setup retries and record gap with range threshold'
         ->withBalanceCreated(version: 1, amount: 100)
         ->withVersioningAmount([[3, 200], [25, -150], [70, -50]]);
 
-    $reactors = $this->getReadModelReactor(keepRunning: true, stopAt: ['events', 4]);
+    $reactors = $this->getReadModelReactor();
+    $thenReactor = $this->getThenReactor(keepRunning: true, stopAt: ['events', 4]);
 
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
-        ->when($reactors)
+        ->when($reactors, $thenReactor)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: true);
 
@@ -271,12 +271,10 @@ test('fails detect gaps with running once and setup retries', function (array $r
         ->withBalanceCreated(version: 1, amount: 100)
         ->withBalanceAdded(version: 10, amount: 200);
 
-    $reactors = $this->getReadModelReactor();
-
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream('account')
-        ->when($reactors)
+        ->when($this->getReadModelReactor(), $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: false);
 
@@ -298,21 +296,20 @@ test('called then callback even when stream event is not acknowledged', function
         ->withBalanceNoOp(version: 2);
 
     $reactors = [
-        [
-            function (BalanceCreated $event) {},
-            function (SomeEvent $event) {
-                throw new Exception('Event is not part of the stream');
-            },
-        ],
-        function (ReadModelScope $scope): void {
-            $scope->userState()->increment('then called');
+        function (BalanceCreated $event) {},
+        function (SomeEvent $event) {
+            throw new Exception('Event is not part of the stream');
         },
     ];
+
+    $thenReactor = function (ReadModelScope $scope): void {
+        $scope->userState()->increment('then called');
+    };
 
     $this->projector
         ->initialize(fn (): array => ['then called' => 0])
         ->subscribeToStream($streamName)
-        ->when($reactors)
+        ->when($reactors, $thenReactor)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(inBackground: false);
 

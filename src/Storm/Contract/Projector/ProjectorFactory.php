@@ -41,11 +41,9 @@ interface ProjectorFactory extends Projector
     /**
      * Proxy method to set the reactors.
      *
-     * @todo add two parameters: array $reactors and Closure $then
-     *
      * @see Context::when()
      */
-    public function when(array $reactors): static;
+    public function when(array $reactors, ?Closure $then = null): static;
 
     /**
      * Proxy method to set the stop watch callback.

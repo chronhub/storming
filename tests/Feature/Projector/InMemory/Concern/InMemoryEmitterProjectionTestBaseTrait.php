@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector\InMemory\Concern;
 
+use Closure;
 use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\EmitterScope;
 use Storm\Contract\Projector\ProjectorManagerInterface;
@@ -42,39 +43,41 @@ trait InMemoryEmitterProjectionTestBaseTrait
         }
     }
 
-    protected function getEmitterReactor(?string $linkTo = null, bool $keepRunning = false, array $stopAt = []): array
+    protected function getEmitterReactor(): array
     {
         return [
-            [
-                function (BalanceCreated $event) {
-                    /** @var EmitterScope $this */
-                    $this->userState->set('total', $event->amount());
-                },
-                function (BalanceAdded $event) {
-                    /** @var EmitterScope $this */
-                    $this->userState->increment('total', $event->amount());
-                },
-                function (BalanceSubtracted $event) {
-                    /** @var EmitterScope $this */
-                    $this->userState->decrement('total', $event->amount());
-                },
-            ],
-            function (EmitterScope $scope) use ($linkTo, $keepRunning, $stopAt) {
-                $event = $scope->event();
-
-                is_string($linkTo)
-                    ? $scope->linkTo($linkTo, $event)
-                    : $scope->emit($event);
-
-                if (! $keepRunning || $stopAt === []) {
-                    return;
-                }
-
-                [$field, $expected] = $stopAt;
-                if ($scope->userState()[$field] === $expected) {
-                    $scope->stop();
-                }
+            function (BalanceCreated $event) {
+                /** @var EmitterScope $this */
+                $this->userState->set('total', $event->amount());
+            },
+            function (BalanceAdded $event) {
+                /** @var EmitterScope $this */
+                $this->userState->increment('total', $event->amount());
+            },
+            function (BalanceSubtracted $event) {
+                /** @var EmitterScope $this */
+                $this->userState->decrement('total', $event->amount());
             },
         ];
+    }
+
+    protected function getThenReactor(?string $linkTo = null, bool $keepRunning = false, array $stopAt = []): Closure
+    {
+        return function (EmitterScope $scope) use ($linkTo, $keepRunning, $stopAt) {
+            $event = $scope->event();
+
+            is_string($linkTo)
+                ? $scope->linkTo($linkTo, $event)
+                : $scope->emit($event);
+
+            if (! $keepRunning || $stopAt === []) {
+                return;
+            }
+
+            [$field, $expected] = $stopAt;
+            if ($scope->userState()[$field] === $expected) {
+                $scope->stop();
+            }
+        };
     }
 }

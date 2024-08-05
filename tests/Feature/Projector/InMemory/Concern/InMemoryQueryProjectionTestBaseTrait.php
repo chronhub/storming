@@ -39,46 +39,48 @@ trait InMemoryQueryProjectionTestBaseTrait
         }
     }
 
-    protected function getQueryReactor(bool $keepRunning = false, array $stopAt = []): array
+    protected function getQueryReactor(): array
     {
         return [
-            [
-                function (BalanceCreated $event) {
-                    /** @var QueryProjectorScope $this */
-                    $this->userState->set('balances.'.$event->id(), $event->amount());
-                },
-                function (BalanceAdded $event) {
-                    /** @var QueryProjectorScope $this */
-                    $this->userState->increment('balances.'.$event->id(), $event->amount());
-                },
-                function (BalanceSubtracted $event) {
-                    /** @var QueryProjectorScope $this */
-                    // for custom query filter
-                    if (! $this->userState->has('balances.'.$event->id())) {
-                        $this->userState->set('balances.'.$event->id(), 0);
-                    }
-
-                    $this->userState->decrement('balances.'.$event->id(), $event->amount());
-                },
-            ],
-            function (QueryProjectorScope $scope) use ($keepRunning, $stopAt) {
-                $scope->userState->push('events', $scope->event()::class);
-
-                if (! $keepRunning || $stopAt === []) {
-                    return;
+            function (BalanceCreated $event) {
+                /** @var QueryProjectorScope $this */
+                $this->userState->set('balances.'.$event->id(), $event->amount());
+            },
+            function (BalanceAdded $event) {
+                /** @var QueryProjectorScope $this */
+                $this->userState->increment('balances.'.$event->id(), $event->amount());
+            },
+            function (BalanceSubtracted $event) {
+                /** @var QueryProjectorScope $this */
+                // for custom query filter
+                if (! $this->userState->has('balances.'.$event->id())) {
+                    $this->userState->set('balances.'.$event->id(), 0);
                 }
 
-                // fixMe use closure
-                [$field, $expected] = $stopAt;
-                if ($field === 'events') {
-                    if (count($scope->userState[$field]) === $expected) {
-                        $scope->stop();
-                    }
-                } elseif ($scope->userState[$field] === $expected) {
-                    $scope->stop();
-                }
+                $this->userState->decrement('balances.'.$event->id(), $event->amount());
             },
         ];
+    }
+
+    protected function getThenReactor(bool $keepRunning = false, array $stopAt = []): Closure
+    {
+        return function (QueryProjectorScope $scope) use ($keepRunning, $stopAt) {
+            $scope->userState->push('events', $scope->event()::class);
+
+            if (! $keepRunning || $stopAt === []) {
+                return;
+            }
+
+            // fixMe use closure
+            [$field, $expected] = $stopAt;
+            if ($field === 'events') {
+                if (count($scope->userState[$field]) === $expected) {
+                    $scope->stop();
+                }
+            } elseif ($scope->userState[$field] === $expected) {
+                $scope->stop();
+            }
+        };
     }
 
     protected function customFilterQueryEvents(string ...$events): InMemoryQueryFilter

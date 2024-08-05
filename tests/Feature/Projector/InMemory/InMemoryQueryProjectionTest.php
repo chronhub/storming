@@ -42,7 +42,7 @@ test('query projection', function (?string $descriptionId) {
     $this->projector
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
-        ->when($this->getQueryReactor())
+        ->when($this->getQueryReactor(), $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
@@ -62,18 +62,16 @@ test('query event scope with one stream event', function () {
     $this->makeEventStore($streamName = 'account', BalanceId::create())
         ->withBalanceCreated(1, 100);
 
-    $reactors = [
-        [function (BalanceCreated $event) {}],
-        function (QueryProjectorScope $scope): void {
-            expect($scope)->toBeInstanceOf(QueryProjectorScope::class)
-                ->and($scope->streamName())->toBe('account')
-                ->and($scope->clock())->toBeInstanceOf(Clock::class);
-        },
-    ];
+    $reactors = [function (BalanceCreated $event) {}];
+    $thenReactor = function (QueryProjectorScope $scope): void {
+        expect($scope)->toBeInstanceOf(QueryProjectorScope::class)
+            ->and($scope->streamName())->toBe('account')
+            ->and($scope->clock())->toBeInstanceOf(Clock::class);
+    };
 
     $this->projector
         ->subscribeToStream($streamName)
-        ->when($reactors)
+        ->when($reactors, $thenReactor)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 });
@@ -92,7 +90,7 @@ test('query projection with many streams', function () {
     $this->projector
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamOne, $streamTwo)
-        ->when($this->getQueryReactor())
+        ->when($this->getQueryReactor(), $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
@@ -126,7 +124,7 @@ test('query projection from stream partition', function () {
     $this->projector
         ->initialize(fn (): array => [])
         ->subscribeToPartition('balance')
-        ->when($this->getQueryReactor())
+        ->when($this->getQueryReactor(), $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
@@ -151,7 +149,7 @@ test('query projection from stream partition which does not exist', function () 
     $this->projector
         ->initialize(fn (): array => [])
         ->subscribeToPartition('balance')
-        ->when($this->getQueryReactor())
+        ->when($this->getQueryReactor(), $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
@@ -164,10 +162,12 @@ test('stop query projection from query scope', function () {
         ->withBalanceCreated(1, 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
+    $thenReactor = $this->getThenReactor(keepRunning: true, stopAt: ['events', 2]);
+
     $this->projector
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
-        ->when($this->getQueryReactor(keepRunning: true, stopAt: ['events', 2]))
+        ->when($this->getQueryReactor(), $thenReactor)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(true);
 
@@ -193,7 +193,7 @@ test('query projection with a custom query filter', function () {
     $this->projector
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
-        ->when($this->getQueryReactor())
+        ->when($this->getQueryReactor(), $this->getThenReactor())
         ->filter($customQueryFilter)
         ->run(false);
 
@@ -215,24 +215,23 @@ test('query projection running in background and stop projection from event scop
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
     $reactors = [
-        [
-            function (BalanceCreated $event) {},
-            function (BalanceAdded $event) {},
-            function (BalanceSubtracted $event) {},
-        ],
-        function (QueryProjectorScope $scope): void {
-            $scope->userState()->push('events', $scope->event()::class);
-
-            if (count($scope->userState()['events']) === 2) {
-                $scope->stop();
-            }
-        },
+        function (BalanceCreated $event) {},
+        function (BalanceAdded $event) {},
+        function (BalanceSubtracted $event) {},
     ];
+
+    $thenReactor = function (QueryProjectorScope $scope): void {
+        $scope->userState()->push('events', $scope->event()::class);
+
+        if (count($scope->userState()['events']) === 2) {
+            $scope->stop();
+        }
+    };
 
     $this->projector
         ->initialize(fn (): array => ['events' => []])
         ->subscribeToStream($streamName)
-        ->when($reactors)
+        ->when($reactors, $thenReactor)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(true);
 
@@ -249,22 +248,21 @@ test('query projection running in background and stop projection from event scop
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
     $reactors = [
-        [
-            function (BalanceCreated $event) {},
-            function (BalanceAdded $event) {},
-            function (BalanceSubtracted $event) {
-                $this->stop();
-            },
-        ],
-        function (QueryProjectorScope $scope): void {
-            $scope->userState()->push('events', $scope->event()::class);
+        function (BalanceCreated $event) {},
+        function (BalanceAdded $event) {},
+        function (BalanceSubtracted $event) {
+            $this->stop();
         },
     ];
+
+    $thenReactor = function (QueryProjectorScope $scope): void {
+        $scope->userState()->push('events', $scope->event()::class);
+    };
 
     $this->projector
         ->initialize(fn (): array => ['events' => []])
         ->subscribeToStream($streamName)
-        ->when($reactors)
+        ->when($reactors, $thenReactor)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(true);
 
@@ -285,7 +283,7 @@ test('query projection running once and does not stop on gap', function () {
     $this->projector
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
-        ->when($this->getQueryReactor())
+        ->when($this->getQueryReactor(), $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
@@ -310,7 +308,7 @@ test('query projection running once and stop on gap when retries are configured'
     $this->projector
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
-        ->when($this->getQueryReactor())
+        ->when($this->getQueryReactor(), $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 
@@ -332,10 +330,12 @@ test('query projection running in background and resolve gap when retries are co
         ->withBalanceAdded(3, 200)
         ->withBalanceSubtracted(10, 50);
 
+    $thenReactor = $this->getThenReactor(keepRunning: true, stopAt: ['events', 3]);
+
     $this->projector
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
-        ->when($this->getQueryReactor(keepRunning: true, stopAt: ['events', 3]))
+        ->when($this->getQueryReactor(), $thenReactor)
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(true);
 
@@ -370,7 +370,7 @@ test('should perform when max batch is reached with reset and sleep', function (
     $this->projector
         ->initialize(fn (): array => [])
         ->subscribeToStream($streamName)
-        ->when($this->getQueryReactor())
+        ->when($this->getQueryReactor(), $this->getThenReactor())
         ->filter($this->factory->inMemoryQueryFilter)
         ->run(false);
 

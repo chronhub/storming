@@ -7,8 +7,10 @@ namespace Storm\Projector\Workflow;
 use Closure;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Chronicler\QueryFilter;
+use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\Context;
 use Storm\Contract\Projector\ContextReader;
+use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Workflow\EventStream\DiscoverAllStream;
 use Storm\Projector\Workflow\EventStream\DiscoverPartition;
@@ -21,6 +23,11 @@ final class DefaultContext implements ContextReader
 
     private ?Closure $userState = null;
 
+    /**
+     * fixMe
+     *
+     * @var array<array<(Closure(DomainEvent): (void))>, (Closure(ProjectorScope): (void))>|null
+     */
     private ?array $reactors = null;
 
     private ?QueryFilter $queryFilter = null;
@@ -92,13 +99,13 @@ final class DefaultContext implements ContextReader
         return $this;
     }
 
-    public function when(array $reactors): self
+    public function when(array $reactors, ?Closure $then = null): self
     {
         if ($this->reactors !== null) {
             throw new InvalidArgumentException('Projection reactors already set');
         }
 
-        $this->reactors = $reactors;
+        $this->reactors = [$reactors, $then];
 
         return $this;
     }
