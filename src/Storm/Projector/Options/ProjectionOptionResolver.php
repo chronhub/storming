@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Options;
 
-use Storm\Contract\Projector\ProjectionOption;
-use Storm\Contract\Projector\ProjectionOptionImmutable;
-
 use function array_merge;
 use function get_class;
 

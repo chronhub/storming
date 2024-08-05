@@ -7,8 +7,8 @@ namespace Storm\Tests\Unit\Projector\Workflow;
 use Closure;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\Subscriptor;
 use Storm\Projector\InteractWithProjection;
+use Storm\Projector\Subscription\Subscriptor;
 use Storm\Projector\Workflow\Notification\Promise\CurrentUserState;
 use Storm\Projector\Workflow\Notification\Promise\GetProjectionReport;
 

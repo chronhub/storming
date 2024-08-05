@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Subscription;
 
+use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Repository\ProjectionSnapshot;
 use Storm\Projector\Workflow\Input\ResetSnapshot;
@@ -14,6 +15,9 @@ use function in_array;
 
 /**
  * @property-read Process $process
+ * @property-read Repository $store
+ *
+ * @phpstan-require-implements PersistentManagement
  */
 trait InteractWithManagement
 {

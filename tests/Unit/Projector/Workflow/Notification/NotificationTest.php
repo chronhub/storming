@@ -4,10 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Workflow\Notification;
 
+use Checkpoint\CheckpointRecognition;
 use stdClass;
 use Storm\Clock\PointInTime;
-use Storm\Contract\Projector\CheckpointRecognition;
-use Storm\Contract\Projector\Component;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\Checkpoint\StreamPoint;

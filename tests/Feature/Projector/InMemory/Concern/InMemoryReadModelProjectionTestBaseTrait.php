@@ -7,7 +7,7 @@ namespace Storm\Tests\Feature\Projector\InMemory\Concern;
 use Closure;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\ReadModelProjector;
-use Storm\Contract\Projector\ReadModelScope;
+use Storm\Projector\Scope\ReadModelScope;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
@@ -29,18 +29,21 @@ trait InMemoryReadModelProjectionTestBaseTrait
 
     protected ?ProjectorManagerInterface $projectorManager = null;
 
-    //fixme streamNames as array and create event store for each stream
+    /**
+     * @param array{string, ?BalanceId} $streamNames
+     */
     protected function setupProjection(
-        string $streamName,
+        array $streamNames,
         string $projectionName,
         ?string $descriptionId = null,
         array $options = [],
-        ?BalanceId $balanceId = null
     ): void {
         $this->projectorManager = $this->factory->createProjectorManager();
         $this->projector = $this->projectorManager->newReadModelProjector($projectionName, $this->readModel, $options);
 
-        $this->makeEventStore($streamName, $balanceId);
+        foreach ($streamNames as [$streamName, $balanceId]) {
+            $this->makeEventStore($streamName, $balanceId);
+        }
 
         if ($descriptionId) {
             $this->projector->describe($descriptionId);

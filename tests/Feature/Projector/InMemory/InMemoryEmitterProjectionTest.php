@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Storm\Tests\Feature\Projector;
 
 use Storm\Clock\Clock;
-use Storm\Contract\Projector\EmitterScope;
 use Storm\Projector\ProjectionStatus;
+use Storm\Projector\Scope\EmitterScope;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryEmitterProjectionTestBaseTrait;

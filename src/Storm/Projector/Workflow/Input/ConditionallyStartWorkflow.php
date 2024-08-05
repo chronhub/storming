@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Input;
 
-use Storm\Contract\Projector\Component;
+use Storm\Projector\Workflow\ComponentRegistry;
 
 final class ConditionallyStartWorkflow
 {
-    public function __invoke(Component $component): void
+    public function __invoke(ComponentRegistry $component): void
     {
         if ($component->metrics()->cycle < 1) {
             $component->metrics()->cycle++;

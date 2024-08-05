@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Filter;
 
+use Filter\ProjectionQueryFilter;
 use InvalidArgumentException;
 use Storm\Chronicler\Direction;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Message\EventHeader;
-use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Projector\Filter\InMemoryLimitByOneQuery;
 use Storm\Stream\StreamPosition;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;

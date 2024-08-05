@@ -4,26 +4,29 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Factory;
 
-use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ReadModel;
-use Storm\Contract\Projector\Subscriptor;
+use Storm\Projector\Options\ProjectionOption;
 use Storm\Projector\Subscription\GenericSubscription;
 use Storm\Projector\Subscription\ReadingModelManagement;
+use Storm\Projector\Subscription\Subscriptor;
 
-final readonly class ReadModelSubscriptionFactory
+final readonly class ReadModelSubscriptionFactory extends AbstractSubscriptionFactory
 {
-    public function __construct(private SubscriptionBuilder $builder) {}
-
-    public function create(string $streamName, ReadModel $readModel, ProjectionOption $options): Subscriptor
+    public function create(?string $streamName, ?ReadModel $readModel, ProjectionOption $options): Subscriptor
     {
-        $process = $this->builder->createProcessManager($options);
+        $process = $this->createProcessManager($options);
 
-        $projectionRepository = $this->builder->createRepository($streamName, $options);
+        $projectionRepository = $this->createRepository($streamName, $options);
 
         $management = new ReadingModelManagement($process, $projectionRepository, $readModel);
-        $this->builder->subscribeToMap($management, $process);
+        $this->subscribe($management, $process);
 
-        $activities = new ReadModelActivityFactory($this->builder->chronicler, $options, $this->builder->clock, $readModel);
+        $activities = new ReadModelActivityFactory(
+            $this->manager->eventStore(),
+            $options,
+            $this->manager->clock(),
+            $readModel
+        );
 
         return new GenericSubscription($process, $activities);
     }

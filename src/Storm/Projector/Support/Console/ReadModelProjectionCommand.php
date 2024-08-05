@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Storm\Projector\Support\Console;
 
 use Closure;
+use Filter\ProjectionQueryFilter;
 use Illuminate\Console\Command;
-use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\ProjectorFactory;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\ReadModel;

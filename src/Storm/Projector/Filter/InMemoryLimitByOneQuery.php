@@ -7,7 +7,6 @@ namespace Storm\Projector\Filter;
 use Storm\Chronicler\Direction;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Projector\Support\ExtractEventHeaderTrait;
 use Storm\Stream\StreamPosition;
 

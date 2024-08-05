@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Workflow;
 
 use Closure;
+use Scope\ProjectorScope;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\Header;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Scope\EventScope;

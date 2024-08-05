@@ -22,9 +22,4 @@ class Contextualize
     {
         $this->contextReader = $contextReader;
     }
-
-    public function isset(): bool
-    {
-        return $this->contextReader instanceof ContextReader;
-    }
 }

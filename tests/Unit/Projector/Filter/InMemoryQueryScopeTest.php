@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Filter;
 
+use Filter\ProjectionQueryFilter;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Projector\LoadLimiterProjectionQueryFilter;
-use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Projector\Filter\InMemoryFromToPosition;
 use Storm\Projector\Filter\InMemoryQueryScope;
 

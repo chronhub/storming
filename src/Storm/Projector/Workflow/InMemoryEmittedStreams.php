@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow;
 
-use Storm\Contract\Projector\EmittedStreamCache;
 use Storm\Projector\Exception\InvalidArgumentException;
 
 use function array_fill;

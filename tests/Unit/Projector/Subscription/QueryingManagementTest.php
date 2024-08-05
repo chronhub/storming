@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\QueryManagement;
 use Storm\Projector\Subscription\QueryingManagement;
+use Storm\Projector\Subscription\QueryManagement;
 use Storm\Projector\Workflow\Notification\Command\SprintStopped;
 
 beforeEach(function () {

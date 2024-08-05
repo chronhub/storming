@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Component;
 
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Projector\Checkpoint\Checkpoint;
 use Storm\Projector\Checkpoint\CheckpointFactory;
+use Storm\Projector\Checkpoint\CheckpointRecognition;
 use Storm\Projector\Checkpoint\Checkpoints;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Checkpoint\StreamPoint;

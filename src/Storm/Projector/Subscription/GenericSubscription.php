@@ -4,16 +4,15 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Subscription;
 
-use Storm\Contract\Projector\ActivityFactory;
 use Storm\Contract\Projector\ContextReader;
-use Storm\Contract\Projector\PersistentActivityFactory;
-use Storm\Contract\Projector\Subscriptor;
-use Storm\Contract\Projector\WorkflowInterface;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
+use Storm\Projector\Factory\ActivityFactory;
+use Storm\Projector\Factory\PersistentActivityFactory;
 use Storm\Projector\Workflow\Input\RestoreUserState;
 use Storm\Projector\Workflow\Management\ProjectionFreed;
 use Storm\Projector\Workflow\Process;
 use Storm\Projector\Workflow\Workflow;
+use Storm\Projector\Workflow\WorkflowInterface;
 use Throwable;
 
 /**
@@ -22,8 +21,8 @@ use Throwable;
 final readonly class GenericSubscription implements Subscriptor
 {
     public function __construct(
-        protected Process $process,
-        protected ActivityFactory $activityFactory,
+        private Process $process,
+        private ActivityFactory $activityFactory,
     ) {}
 
     public function start(ContextReader $context, bool $keepRunning): void

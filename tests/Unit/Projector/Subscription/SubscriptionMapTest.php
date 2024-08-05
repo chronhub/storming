@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Mockery\MockInterface;
-use Storm\Contract\Projector\EmitterManagement;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\PersistentManagement;
-use Storm\Contract\Projector\QueryManagement;
-use Storm\Contract\Projector\ReadModelManagement;
+use Storm\Projector\Subscription\EmitterManagement;
 use Storm\Projector\Subscription\ManagementEventMap;
+use Storm\Projector\Subscription\PersistentManagement;
+use Storm\Projector\Subscription\QueryManagement;
+use Storm\Projector\Subscription\ReadModelManagement;
 use Storm\Projector\Workflow\Management\PerformWhenThresholdIsReached;
 use Storm\Projector\Workflow\Management\ProjectionClosed;
 use Storm\Projector\Workflow\Management\ProjectionDiscarded;

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Scope;
 
+use Scope\ReadModelScope;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ReadModel;
-use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\Scope\ReadModelAccess;
 use Storm\Projector\Workflow\Management\ProjectionClosed;
 use Storm\Projector\Workflow\Notification\Promise\CurrentProcessedStream;

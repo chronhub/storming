@@ -6,7 +6,7 @@ namespace Storm\Tests\Unit\Projector\Support;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use Storm\Contract\Projector\ProjectionOption;
+use Options\ProjectionOption;
 use Storm\Projector\Options\ProvideOption;
 use Storm\Projector\Support\Console\OptionalProjectionCommand;
 

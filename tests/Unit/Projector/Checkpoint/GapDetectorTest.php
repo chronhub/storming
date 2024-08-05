@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Checkpoint;
 
-use Storm\Contract\Projector\GapRecognition;
+use Checkpoint\GapRecognition;
 use Storm\Projector\Checkpoint\GapDetector;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Exception\RuntimeException;

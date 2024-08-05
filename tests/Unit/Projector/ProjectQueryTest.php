@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector;
 
+use Filter\ProjectionQueryFilter;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Projector\ContextReader;
-use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\QuerySubscriber;
 use Storm\Projector\ProjectQuery;
 

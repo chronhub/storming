@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow;
 
 use Storm\Contract\Chronicler\QueryFilter;
-use Storm\Contract\Projector\LoadLimiterQueryFilter;
-use Storm\Contract\Projector\ProjectionQueryFilter;
-use Storm\Contract\Projector\StreamNameAwareQueryFilter;
 use Storm\Projector\Filter\LoadLimiter;
+use Storm\Projector\Filter\LoadLimiterQueryFilter;
+use Storm\Projector\Filter\ProjectionQueryFilter;
+use Storm\Projector\Filter\StreamNameAwareQueryFilter;
 use Storm\Stream\StreamPosition;
 
 final readonly class QueryFilterResolver
@@ -23,7 +23,6 @@ final readonly class QueryFilterResolver
             $queryFilter->setStreamName($streamName);
         }
 
-        // checkMe should interface extend ProjectionQueryFilter or only query filter
         if ($queryFilter instanceof LoadLimiterQueryFilter) {
             $queryFilter->setLoadLimiter($loadLimiter);
         }

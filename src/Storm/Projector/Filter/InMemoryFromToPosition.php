@@ -7,11 +7,10 @@ namespace Storm\Projector\Filter;
 use Storm\Chronicler\Direction;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Projector\LoadLimiterQueryFilter;
 use Storm\Projector\Support\ExtractEventHeaderTrait;
 use Storm\Stream\StreamPosition;
 
-final class InMemoryFromToPosition implements InMemoryQueryFilter, LoadLimiterQueryFilter
+final class InMemoryFromToPosition implements InMemoryQueryFilter, LoadLimiterQueryFilter, ProjectionQueryFilter
 {
     use ExtractEventHeaderTrait;
 

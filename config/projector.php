@@ -5,27 +5,23 @@ declare(strict_types=1);
 return [
     'default' => 'in_memory',
 
-    'connections' => [
+    'connection' => [
         'in_memory' => [
-            'default' => [
-                'factory' => \Storm\Projector\Factory\InMemorySubscriptionFactory::class,
-                'event_store_id' => 'from event store config',
-                'event_store_provider' => 'from event store config',
-                'options' => [], // service id or projection option class
-                'projection_provider' => \Storm\Projector\Repository\InMemoryProvider::class,
-                'use_events' => false,
-            ],
+            'provider' => 'projector.provider.in_memory',
+            'options' => \Storm\Projector\Options\InMemoryOption::class,
+            'chronicler' => 'chronicler.in_memory',
+            'chronicler.provider' => 'chronicler.provider.in_memory',
+            'serializer' => 'projector.serializer.json',
+            'dispatch_events' => false,
         ],
 
-        'database' => [
-            'pgsql' => [
-                'factory' => \Storm\Projector\Factory\DatabaseSubscriptionFactory::class,
-                'event_store_id' => 'from event store config',
-                'event_store_provider' => 'from event store config',
-                'options' => [], // service id or projection option class
-                'projection_provider' => \Storm\Projector\Repository\DatabaseProvider::class,
-                'use_events' => false,
-            ],
+        'pgsql' => [
+            'provider' => 'projector.provider.database',
+            'options' => \Storm\Projector\Options\DefaultOption::class,
+            'chronicler' => 'chronicler.database',
+            'chronicler.provider' => 'chronicler.provider.database',
+            'serializer' => 'projector.serializer.json',
+            'dispatch_events' => false,
         ],
     ],
 ];

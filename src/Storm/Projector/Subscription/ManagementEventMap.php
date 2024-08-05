@@ -4,9 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Subscription;
 
-use Storm\Contract\Projector\EmitterManagement;
-use Storm\Contract\Projector\Management;
-use Storm\Contract\Projector\PersistentManagement;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Workflow\Management\PerformWhenThresholdIsReached;
 use Storm\Projector\Workflow\Management\ProjectionClosed;

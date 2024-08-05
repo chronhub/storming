@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Checkpoint;
 
-use Storm\Contract\Projector\GapRecognition;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Exception\RuntimeException;
 

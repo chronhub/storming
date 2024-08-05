@@ -6,10 +6,9 @@ namespace Storm\Projector\Factory;
 
 use Closure;
 use Storm\Contract\Chronicler\QueryFilter;
-use Storm\Contract\Projector\ActivityFactory;
-use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Filter\LoadLimiter;
-use Storm\Projector\Support\CollectStreams;
+use Storm\Projector\Scope\ProjectorScope;
+use Storm\Projector\Workflow\Activity\CollectStreams;
 use Storm\Projector\Workflow\Activity\LoadStreams;
 use Storm\Projector\Workflow\Process;
 use Storm\Projector\Workflow\QueryFilterResolver;

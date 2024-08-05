@@ -7,7 +7,6 @@ namespace Storm\Projector\Workflow\Activity;
 use Illuminate\Support\Collection;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Projector\Iterator\MergeStreamIterator;
-use Storm\Projector\Support\CollectStreams;
 use Storm\Projector\Workflow\Process;
 
 final readonly class LoadStreams

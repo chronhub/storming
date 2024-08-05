@@ -8,6 +8,7 @@ use Closure;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Scope\ProjectorScope;
 use Storm\Projector\Support\StopWhen;
 use Storm\Projector\Workflow\Process;
 

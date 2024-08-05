@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Option;
 
 use JsonSerializable;
+use Options\ProjectionOptionImmutable;
 use ReflectionClass;
-use Storm\Contract\Projector\ProjectionOptionImmutable;
 use Storm\Projector\Options\InMemoryOptionFixed;
 
 test('default instance', function () {

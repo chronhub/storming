@@ -5,13 +5,13 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Closure;
-use Storm\Contract\Projector\ActivityFactory;
-use Storm\Contract\Projector\Component;
+use Factory\ActivityFactory;
 use Storm\Contract\Projector\ContextReader;
-use Storm\Contract\Projector\EmitterManagement;
 use Storm\Contract\Projector\NotificationHub;
+use Storm\Projector\Subscription\EmitterManagement;
 use Storm\Projector\Subscription\EmitterSubscription;
 use Storm\Projector\Workflow\Component\Runner;
+use Storm\Projector\Workflow\ComponentRegistry;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
 use Storm\Projector\Workflow\Notification\IsSprintTerminated;
@@ -24,7 +24,7 @@ beforeEach(function () {
     $this->activities = mock(ActivityFactory::class);
     $this->hub = mock(NotificationHub::class);
     $this->management = mock(EmitterManagement::class)->shouldIgnoreMissing();
-    $this->subscriptor = mock(Component::class);
+    $this->subscriptor = mock(ComponentRegistry::class);
 
     $this->subscription = new EmitterSubscription(
         $this->subscriptor,

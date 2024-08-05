@@ -26,12 +26,12 @@ trait InMemoryProjectionExpectationTrait
             $streamName = new StreamName($streamName);
         }
 
-        expect($this->factory->chronicler->hasStream($streamName))->toBe($exists);
+        expect($this->factory->getEventStore()->hasStream($streamName))->toBe($exists);
     }
 
     protected function assertInternalPositionsOfStream(string $streamName, BalanceId $balanceId, array $expectedPositions): void
     {
-        $streamEvents = $this->factory->chronicler->retrieveAll(new StreamName($streamName), $balanceId);
+        $streamEvents = $this->factory->getEventStore()->retrieveAll(new StreamName($streamName), $balanceId);
         $events = iterator_to_array($streamEvents);
 
         $internalPositions = [];
@@ -44,7 +44,7 @@ trait InMemoryProjectionExpectationTrait
 
     protected function assertProjectionExists(string $projectionName, bool $exists): void
     {
-        expect($this->factory->projectionProvider->exists($projectionName))->toBe($exists);
+        expect($this->factory->getProjectionProvider()->exists($projectionName))->toBe($exists);
     }
 
     protected function assertProjectionState(array $userState): void
@@ -64,11 +64,11 @@ trait InMemoryProjectionExpectationTrait
     ): void {
         $this->assertProjectionExists($projectionName, true);
 
-        $projection = $this->factory->projectionProvider->retrieve($projectionName);
+        $projection = $this->factory->getProjectionProvider()->retrieve($projectionName);
         expect($projection)->toBeInstanceOf(ProjectionModel::class);
 
         $userState = $this->projector->getState();
-        $encodedState = $this->factory->serializer->encode($userState, 'json');
+        $encodedState = $this->factory->getSerializer()->encode($userState, 'json');
 
         expect($projection->state())->toBe($encodedState)
             ->and($projection->name())->toBe($projectionName)
@@ -84,8 +84,8 @@ trait InMemoryProjectionExpectationTrait
     ): void {
         $this->assertProjectionExists($projectionName, true);
 
-        $projection = $this->factory->projectionProvider->retrieve($projectionName);
-        $checkpoint = $this->factory->serializer->decode($projection->checkpoint(), 'json');
+        $projection = $this->factory->getProjectionProvider()->retrieve($projectionName);
+        $checkpoint = $this->factory->getSerializer()->decode($projection->checkpoint(), 'json');
         $streamCheckpoint = $checkpoint[$streamName];
 
         expect($streamCheckpoint)->toHaveKey('position', $position)

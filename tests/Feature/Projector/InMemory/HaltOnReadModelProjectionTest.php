@@ -25,7 +25,7 @@ beforeEach(function () {
 
 test('stop projection when cycle reached', function (int $cycles) {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: 'balance',
     );
 
@@ -46,7 +46,7 @@ test('stop projection when cycle reached', function (int $cycles) {
 
 test('stop projection with expiration', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: 'balance',
     );
 
@@ -67,7 +67,7 @@ test('stop projection with expiration', function () {
 
 test('stop projection when recoverable gap detected', function (array $retries) {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: 'balance',
         options: ['retries' => $retries],
     );
@@ -90,7 +90,7 @@ test('stop projection when recoverable gap detected', function (array $retries) 
 
 test('stop projection when unrecoverable gap detected', function (array $retries) {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: 'balance',
         options: ['retries' => $retries],
     );

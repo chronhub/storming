@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Subscription;
 
-use Storm\Contract\Projector\QueryManagement;
 use Storm\Projector\Workflow\Process;
 
 final readonly class QueryingManagement implements QueryManagement

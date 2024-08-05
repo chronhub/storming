@@ -5,15 +5,15 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Closure;
-use Storm\Contract\Projector\ActivityFactory;
-use Storm\Contract\Projector\Component;
+use Factory\ActivityFactory;
+use Scope\ReadModelScope;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ReadModel;
-use Storm\Contract\Projector\ReadModelManagement;
-use Storm\Contract\Projector\ReadModelScope;
+use Storm\Projector\Subscription\ReadModelManagement;
 use Storm\Projector\Subscription\ReadModelSubscription;
 use Storm\Projector\Workflow\Component\Runner;
+use Storm\Projector\Workflow\ComponentRegistry;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
 use Storm\Projector\Workflow\Notification\IsSprintTerminated;
@@ -27,7 +27,7 @@ beforeEach(function () {
     $this->projectorScope = mock(ReadModelScope::class);
     $this->hub = mock(NotificationHub::class);
     $this->management = mock(ReadModelManagement::class);
-    $this->subscriptor = mock(Component::class);
+    $this->subscriptor = mock(ComponentRegistry::class);
     $this->readModel = mock(ReadModel::class);
 
     $this->subscription = new ReadModelSubscription(

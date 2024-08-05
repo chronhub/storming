@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Subscription;
 
+use Checkpoint\CheckpointRecognition;
 use Closure;
-use Storm\Contract\Projector\ActivityFactory;
-use Storm\Contract\Projector\CheckpointRecognition;
-use Storm\Contract\Projector\Component;
+use Factory\ActivityFactory;
+use Scope\QueryProjectorScope;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\QueryManagement;
-use Storm\Contract\Projector\QueryProjectorScope;
+use Storm\Projector\Subscription\QueryManagement;
 use Storm\Projector\Subscription\QuerySubscription;
 use Storm\Projector\Workflow\Component\Runner;
+use Storm\Projector\Workflow\ComponentRegistry;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
 use Storm\Projector\Workflow\Notification\IsSprintTerminated;
@@ -27,7 +27,7 @@ beforeEach(function () {
     $this->projectorScope = mock(QueryProjectorScope::class);
     $this->hub = mock(NotificationHub::class);
     $this->management = mock(QueryManagement::class);
-    $this->subscriptor = mock(Component::class);
+    $this->subscriptor = mock(ComponentRegistry::class);
 
     $this->subscription = new QuerySubscription(
         $this->subscriptor,

@@ -7,7 +7,7 @@ namespace Storm\Projector;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\QueryProjector;
-use Storm\Contract\Projector\Subscriptor;
+use Storm\Projector\Subscription\Subscriptor;
 use Storm\Projector\Workflow\Input\ResetSnapshot;
 use Storm\Projector\Workflow\Process;
 

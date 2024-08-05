@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Filter;
 
-use Storm\Contract\Projector\DatabaseProjectionQueryFilter;
+use Filter\DatabaseProjectionQueryFilter;
+use Filter\ProjectionQueryFilter;
 use Storm\Contract\Projector\LoadLimiterProjectionQueryFilter;
-use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Projector\Filter\DatabaseQueryScope;
 use Storm\Projector\Filter\FromIncludedPosition;
 use Storm\Projector\Filter\FromIncludedPositionWithLoadLimiter;

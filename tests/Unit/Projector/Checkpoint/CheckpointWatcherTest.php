@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Checkpoint;
 
+use Checkpoint\CheckpointRecognition;
+use Checkpoint\GapRecognition;
 use Closure;
 use Mockery\MockInterface;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\CheckpointRecognition;
-use Storm\Contract\Projector\GapRecognition;
 use Storm\Projector\Checkpoint\Checkpoints;
 use Storm\Projector\Checkpoint\GapRules;
 use Storm\Projector\Checkpoint\GapType;

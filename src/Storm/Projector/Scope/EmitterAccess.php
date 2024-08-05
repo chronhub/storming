@@ -6,7 +6,6 @@ namespace Storm\Projector\Scope;
 
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Projector\EmitterScope;
 use Storm\Projector\Workflow\Management\ProjectionClosed;
 use Storm\Projector\Workflow\Management\StreamEventEmitted;
 use Storm\Projector\Workflow\Management\StreamEventLinkedTo;

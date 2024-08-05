@@ -22,8 +22,8 @@ trait BalanceEventStoreSetupTrait
     protected function makeEventStore(string $streamName, ?BalanceId $balanceId = null): BalanceEventStore
     {
         return $this->eventStore[$streamName] ??= new BalanceEventStore(
-            $this->factory->chronicler,
-            $this->factory->clock,
+            $this->factory->getEventStore(),
+            $this->factory->getClock(),
             new StreamName($streamName),
             $balanceId ?? BalanceId::create(),
         );

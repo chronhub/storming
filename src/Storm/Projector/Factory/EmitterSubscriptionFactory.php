@@ -4,33 +4,36 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Factory;
 
-use Storm\Contract\Projector\ProjectionOption;
-use Storm\Contract\Projector\Subscriptor;
+use Storm\Contract\Projector\ReadModel;
+use Storm\Projector\Options\ProjectionOption;
 use Storm\Projector\Subscription\EmittingManagement;
 use Storm\Projector\Subscription\GenericSubscription;
+use Storm\Projector\Subscription\Subscriptor;
 use Storm\Projector\Workflow\EmittedStream;
 use Storm\Projector\Workflow\InMemoryEmittedStreams;
 
-final readonly class EmitterSubscriptionFactory
+final readonly class EmitterSubscriptionFactory extends AbstractSubscriptionFactory
 {
-    public function __construct(private SubscriptionBuilder $builder) {}
-
-    public function create(string $streamName, ProjectionOption $options): Subscriptor
+    public function create(?string $streamName, ?ReadModel $readModel, ProjectionOption $options): Subscriptor
     {
-        $process = $this->builder->createProcessManager($options);
+        $process = $this->createProcessManager($options);
 
         $management = new EmittingManagement(
             $process,
-            $this->builder->chronicler,
-            $this->builder->createRepository($streamName, $options),
+            $this->createRepository($streamName, $options),
+            $this->manager->eventStore(),
             new InMemoryEmittedStreams($options->getCacheSize()),
             new EmittedStream(),
             $options->getSleepEmitterOnFirstCommit()
         );
 
-        $this->builder->subscribeToMap($management, $process);
+        $this->subscribe($management, $process);
 
-        $activities = new EmitterActivityFactory($this->builder->chronicler, $options, $this->builder->clock);
+        $activities = new EmitterActivityFactory(
+            $this->manager->eventStore(),
+            $options,
+            $this->manager->clock()
+        );
 
         return new GenericSubscription($process, $activities);
     }

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector;
 
 use Closure;
+use Filter\ProjectionQueryFilter;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmitterSubscriber;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Projector\ProjectEmitter;
 use Storm\Projector\Workflow\Management\ProjectionDiscarded;
 use Storm\Projector\Workflow\Management\ProjectionRevised;

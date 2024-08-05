@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector;
 
 use Closure;
+use Filter\ProjectionQueryFilter;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\ReadModelSubscriber;
 use Storm\Projector\ProjectReadModel;
 use Storm\Projector\Workflow\Management\ProjectionDiscarded;

@@ -6,7 +6,7 @@ namespace Storm\Projector\Support\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use Storm\Contract\Projector\ProjectionOption;
+use Options\ProjectionOption;
 use Storm\Projector\Options\DefaultOption;
 use Symfony\Component\Console\Input\InputOption;
 

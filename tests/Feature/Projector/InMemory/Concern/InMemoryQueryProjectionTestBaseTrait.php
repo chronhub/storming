@@ -10,7 +10,7 @@ use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\QueryProjector;
-use Storm\Contract\Projector\QueryProjectorScope;
+use Storm\Projector\Scope\QueryProjectorScope;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;

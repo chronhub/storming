@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Factory;
 
+use Options\ProjectionOption;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\ProjectionOption;
 use Storm\Projector\Factory\WatcherFactory;
 
 use function array_keys;

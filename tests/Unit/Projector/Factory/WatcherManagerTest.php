@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector;
 
 use BadMethodCallException;
+use Checkpoint\CheckpointRecognition;
+use Options\ProjectionOption;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\ProjectionOption;
 use Storm\Projector\Factory\WatcherFactory;
 use Storm\Projector\Workflow\Component;
 use Storm\Projector\Workflow\Component\Computation;

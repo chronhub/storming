@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Option;
 
 use JsonSerializable;
-use Storm\Contract\Projector\ProjectionOption;
+use Options\ProjectionOption;
 use Storm\Projector\Options\DefaultOption;
 
 test('default instance', function () {

@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector;
 
+use Options\ProjectionOption;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\EmitterSubscriber;
-use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Projector\ProjectionQueryScope;
 use Storm\Contract\Projector\ProjectorManagerInterface;

@@ -6,12 +6,11 @@ namespace Storm\Tests\Feature\Projector;
 
 use Exception;
 use Storm\Clock\Clock;
-use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\ProjectionStatus;
+use Storm\Projector\Scope\ReadModelScope;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
-use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryReadModelProjectionTestBaseTrait;
@@ -39,7 +38,7 @@ beforeEach(function () {
 
 test('reads events from the beginning of the stream', function (?string $descriptionId) {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
         descriptionId: $descriptionId,
     );
@@ -64,7 +63,7 @@ test('reads events from the beginning of the stream', function (?string $descrip
 
 test('run projection again from last position kept in memory', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
     );
 
@@ -106,8 +105,8 @@ test('run projection again from last position kept in memory', function () {
 
 test('read model scope with one processed event', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
-        projectionName: $projectionName = 'balance'
+        [[$streamName = 'account', null]],
+        projectionName: $projectionName = 'balance',
     );
 
     $this->balanceEventStore($streamName)->withBalanceCreated(version: 1, amount: 100);
@@ -132,8 +131,8 @@ test('read model scope with one processed event', function () {
 
 test('reactors should never been called when no event is processed', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
-        projectionName: $projectionName = 'balance'
+        [[$streamName = 'account', null]],
+        projectionName: $projectionName = 'balance',
     );
 
     $reactors = [function (BalanceCreated $event) {
@@ -156,8 +155,8 @@ test('reactors should never been called when no event is processed', function ()
 
 test('does not detect gaps with no retry', function (bool $keepRunning) {
     $this->setupProjection(
-        streamName: $streamName = 'account',
-        projectionName: $projectionName = 'balance'
+        [[$streamName = 'account', null]],
+        projectionName: $projectionName = 'balance',
     );
 
     $this->balanceEventStore($streamName)
@@ -183,7 +182,7 @@ test('does not detect gaps with no retry', function (bool $keepRunning) {
 
 test('detect gaps with setup retries and record gap', function (array $retries, bool $recordGap) {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
         options: ['retries' => $retries, 'recordGap' => $recordGap]
     );
@@ -223,7 +222,7 @@ test('detect gaps with setup retries and record gap', function (array $retries, 
 
 test('detect larger gaps with setup retries and record gap with range threshold', function (array $retries, bool $recordGap) {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
         options: ['retries' => $retries, 'recordGap' => $recordGap]
     );
@@ -263,7 +262,7 @@ test('detect larger gaps with setup retries and record gap with range threshold'
 
 test('fails detect gaps with running once and setup retries', function (array $retries) {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
         options: ['retries' => $retries]
     );
@@ -288,7 +287,7 @@ test('fails detect gaps with running once and setup retries', function (array $r
 
 test('called [then] callback even when stream event is not acknowledged', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: 'balance'
     );
 
@@ -319,22 +318,23 @@ test('called [then] callback even when stream event is not acknowledged', functi
 
 test('subscribe to all stream', function () {
     $this->setupProjection(
-        streamName: $accountOne = 'account_one',
+        [
+            [$a1 = 'account1', null],
+            [$a2 = 'account2', null],
+        ],
         projectionName: 'balance',
-        balanceId: BalanceId::create(),
     );
 
-    $this->balanceEventStore($accountOne)
+    $this->balanceEventStore($a1)
         ->withBalanceCreated(version: 1, amount: 100)
         ->withVersioningAmount([[2, 200], [3, -100], [4, -100]]);
 
-    $balanceTwoEventStore = $this->makeEventStore($accountTwo = 'account_two');
-    $balanceTwoEventStore
+    $this->balanceEventStore($a2)
         ->withBalanceCreated(version: 1, amount: 600)
         ->withVersioningAmount([[2, 100], [3, -100], [4, -100]]);
 
-    $this->assertStreamExists($accountOne, true);
-    $this->assertStreamExists($accountTwo, true);
+    $this->assertStreamExists($a1, true);
+    $this->assertStreamExists($a2, true);
 
     $this->projector
         ->initialize(fn (): array => ['total' => 0])
@@ -346,17 +346,16 @@ test('subscribe to all stream', function () {
     $this->assertPartialProjectionState('total', 600);
     expect($this->projector->getState()['events'])->toHaveCount(8);
 
-    $this->assertReadModelBalance($accountOne, 100);
-    $this->assertReadModelBalance($accountTwo, 500);
+    $this->assertReadModelBalance($a1, 100);
+    $this->assertReadModelBalance($a2, 500);
     $this->assertProjectionReport(cycle: 1, ackedEvent: 8, totalEvent: 8);
 });
 
 test('load stream events with block size and load limiter', function () {
     $this->setupProjection(
-        streamName: $accountOne = 'account_one',
+        [[$accountOne = 'account_one', null]],
         projectionName: 'balance',
         options: ['blockSize' => 100, 'loadLimiter' => 100],
-        balanceId: BalanceId::create(),
     );
 
     $this->balanceEventStore($accountOne)->make(1000);

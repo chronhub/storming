@@ -7,8 +7,8 @@ namespace Storm\Projector\Factory;
 use Closure;
 use Illuminate\Support\Traits\ReflectsClosures;
 use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Projector\ProjectorScope;
 use Storm\Projector\Exception\RuntimeException;
+use Storm\Projector\Scope\ProjectorScope;
 use Storm\Projector\Scope\UserStateScope;
 
 use function is_a;
@@ -27,15 +27,15 @@ class ProjectorScopeFactory
         /** @var Closure(ProjectorScope $projector): void */
         protected ?Closure $callback = null,
     ) {
+        if (! is_callable($this->projector)) {
+            throw new RuntimeException('Projector scope is not callable');
+        }
+
         $this->boundReactors = $this->bindReactors($reactors);
     }
 
     public function handle(DomainEvent $event, ?array $userState = null): ProjectorScope
     {
-        if (! is_callable($this->projector)) {
-            throw new RuntimeException('Projector scope is not callable');
-        }
-
         $userStateScope = is_array($userState) ? new UserStateScope($userState) : null;
 
         if (isset($this->boundReactors[$event::class])) {

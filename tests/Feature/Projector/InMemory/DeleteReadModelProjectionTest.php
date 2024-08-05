@@ -22,7 +22,7 @@ beforeEach(function () {
 
 test('deletes the projection and keeps the read model', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
     );
 
@@ -60,7 +60,7 @@ test('deletes the projection and keeps the read model', function () {
 
 test('deletes the projection and the read model', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
     );
 

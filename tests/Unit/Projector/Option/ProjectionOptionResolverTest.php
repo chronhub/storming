@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Option;
 
-use Storm\Contract\Projector\ProjectionOption;
-use Storm\Contract\Projector\ProjectionOptionImmutable;
+use Options\ProjectionOption;
+use Options\ProjectionOptionImmutable;
 use Storm\Projector\Options\DefaultOption;
 use Storm\Projector\Options\InMemoryOption;
 use Storm\Projector\Options\InMemoryOptionFixed;

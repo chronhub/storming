@@ -7,10 +7,9 @@ namespace Storm\Projector\Subscription;
 use Storm\Chronicler\Exceptions\StreamNotFound;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Projector\EmittedStreamCache;
-use Storm\Contract\Projector\EmitterManagement;
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\Workflow\EmittedStream;
+use Storm\Projector\Workflow\EmittedStreamCache;
 use Storm\Projector\Workflow\Input\DiscoverEventStream;
 use Storm\Projector\Workflow\Process;
 use Storm\Stream\Stream;
@@ -25,8 +24,8 @@ final readonly class EmittingManagement implements EmitterManagement
 
     public function __construct(
         protected Process $process,
-        protected Chronicler $chronicler,
         protected Repository $store,
+        private Chronicler $chronicler,
         private EmittedStreamCache $streamCache,
         private EmittedStream $emittedStream,
         private int $sleepOnFirstCommit,

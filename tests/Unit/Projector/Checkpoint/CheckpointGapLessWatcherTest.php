@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Checkpoint;
 
+use Checkpoint\CheckpointRecognition;
 use Closure;
 use LogicException;
 use Mockery\MockInterface;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\CheckpointRecognition;
 use Storm\Projector\Checkpoint\Checkpoints;
 use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Exception\CheckpointViolation;

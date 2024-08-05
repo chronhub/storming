@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Storm\Projector;
 
 use Storm\Contract\Projector\ContextReader;
-use Storm\Contract\Projector\ProjectionQueryFilter;
 use Storm\Contract\Projector\ReadModelProjector;
-use Storm\Contract\Projector\Subscriptor;
+use Storm\Projector\Filter\ProjectionQueryFilter;
+use Storm\Projector\Subscription\Subscriptor;
 use Storm\Projector\Workflow\Management\ProjectionDiscarded;
 use Storm\Projector\Workflow\Management\ProjectionRevised;
 use Storm\Projector\Workflow\Process;

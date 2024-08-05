@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Storm\Tests\Testing;
 
 use Mockery\MockInterface;
+use Options\ProjectionOption;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\Component;
-use Storm\Contract\Projector\ProjectionOption;
 use Storm\Projector\Factory\WatcherFactory;
 use Storm\Projector\Workflow\Component;
+use Storm\Projector\Workflow\ComponentRegistry;
 
 trait WatcherManagerTestingTrait
 {
@@ -39,7 +39,7 @@ trait WatcherManagerTestingTrait
 
         $factory = new WatcherFactory($this->projectionOption, $this->eventStreamProvider, $this->clock);
 
-        $this->watcherManager = new Component($factory->watchers);
+        $this->watcherManager = new ComponentRegistry($factory->watchers);
 
         $this->subscriptor->shouldReceive('watcher')->andReturn($this->watcherManager);
     }

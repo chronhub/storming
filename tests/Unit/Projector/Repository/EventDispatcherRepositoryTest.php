@@ -102,7 +102,7 @@ test('dispatch event when stop projection', function (ProjectionStatus $status) 
 
     $this->eventDispatcher
         ->shouldReceive('dispatch')
-        ->withArgs(fn (ProjectionStopped $event) => $event->projectionName === $this->projectionName)
+        ->withArgs(fn (ProjectionStopped $event) => $event->name === $this->projectionName)
         ->once();
 
     $this->eventDispatcherRepository->stop($result, $status);
@@ -130,7 +130,7 @@ test('dispatch event when start again projection', function (ProjectionStatus $s
 
     $this->eventDispatcher
         ->expects('dispatch')
-        ->withArgs(fn (ProjectionRestarted $event) => $event->projectionName === $this->projectionName);
+        ->withArgs(fn (ProjectionRestarted $event) => $event->name === $this->projectionName);
 
     $this->eventDispatcherRepository->startAgain($status);
 })->with('projection status');

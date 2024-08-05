@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Scope;
 
+use Scope\EmitterScope;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
-use Storm\Contract\Projector\EmitterScope;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Scope\EmitterAccess;
 use Storm\Projector\Workflow\Management\ProjectionClosed;

@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Options;
 
-use Storm\Contract\Projector\ProjectionOptionImmutable;
-
 final class InMemoryOptionFixed implements ProjectionOptionImmutable
 {
     use ProvideOption;

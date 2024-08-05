@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Storm\Projector\Scope;
 
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\QueryProjectorScope;
 use Storm\Projector\Workflow\Process;
 
 final class QueryAccess implements QueryProjectorScope

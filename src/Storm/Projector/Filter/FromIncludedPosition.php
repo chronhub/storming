@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace Storm\Projector\Filter;
 
 use Illuminate\Database\Query\Builder;
-use Storm\Contract\Projector\DatabaseProjectionQueryFilter;
-use Storm\Contract\Projector\LoadLimiterQueryFilter;
 use Storm\Stream\StreamPosition;
 
 final class FromIncludedPosition implements DatabaseProjectionQueryFilter, LoadLimiterQueryFilter

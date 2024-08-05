@@ -6,11 +6,11 @@ namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ReadModel;
-use Storm\Contract\Projector\ReadModelManagement;
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Repository\ProjectionSnapshot;
 use Storm\Projector\Subscription\ReadingModelManagement;
+use Storm\Projector\Subscription\ReadModelManagement;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamReset;
 use Storm\Projector\Workflow\Notification\Command\CheckpointReset;
 use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;

@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Scope;
 
+use Scope\QueryProjectorScope;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Contract\Projector\QueryProjectorScope;
 use Storm\Projector\Scope\QueryAccess;
 use Storm\Projector\Workflow\Notification\Command\SprintStopped;
 use Storm\Projector\Workflow\Notification\Promise\CurrentProcessedStream;

@@ -4,15 +4,13 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow;
 
-use Storm\Contract\Projector\Component;
-
 /**
  * @mixin Component
  */
 class Process
 {
     public function __construct(
-        protected readonly Component $component,
+        protected readonly ComponentRegistry $component,
     ) {}
 
     public function dispatch(string|object $event, mixed ...$arguments): void

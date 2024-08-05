@@ -6,8 +6,7 @@ namespace Storm\Projector\Factory;
 
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\PersistentActivityFactory as PersistentActivity;
-use Storm\Contract\Projector\ProjectionOption;
+use Storm\Projector\Options\ProjectionOption;
 use Storm\Projector\Scope\EmitterAccess;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
 use Storm\Projector\Workflow\Activity\HandleStreamEvent;
@@ -17,7 +16,7 @@ use Storm\Projector\Workflow\Activity\RefreshPersistentProjection;
 use Storm\Projector\Workflow\Activity\RisePersistentProjection;
 use Storm\Projector\Workflow\Process;
 
-final readonly class EmitterActivityFactory implements PersistentActivity
+final readonly class EmitterActivityFactory implements PersistentActivityFactory
 {
     use ProvideActivityBuilder;
 

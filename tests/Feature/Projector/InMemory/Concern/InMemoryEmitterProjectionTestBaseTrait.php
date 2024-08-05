@@ -6,8 +6,8 @@ namespace Storm\Tests\Feature\Projector\InMemory\Concern;
 
 use Closure;
 use Storm\Contract\Projector\EmitterProjector;
-use Storm\Contract\Projector\EmitterScope;
 use Storm\Contract\Projector\ProjectorManagerInterface;
+use Storm\Projector\Scope\EmitterScope;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;

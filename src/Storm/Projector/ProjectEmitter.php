@@ -6,8 +6,8 @@ namespace Storm\Projector;
 
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmitterProjector;
-use Storm\Contract\Projector\ProjectionQueryFilter;
-use Storm\Contract\Projector\Subscriptor;
+use Storm\Projector\Filter\ProjectionQueryFilter;
+use Storm\Projector\Subscription\Subscriptor;
 use Storm\Projector\Workflow\Management\ProjectionDiscarded;
 use Storm\Projector\Workflow\Management\ProjectionRevised;
 use Storm\Projector\Workflow\Process;

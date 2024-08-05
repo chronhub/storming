@@ -6,8 +6,7 @@ namespace Storm\Projector\Factory;
 
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Contract\Projector\ActivityFactory;
-use Storm\Contract\Projector\ProjectionOption;
+use Storm\Projector\Options\ProjectionOption;
 use Storm\Projector\Scope\QueryAccess;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
 use Storm\Projector\Workflow\Activity\HandleQueryStreamGap;

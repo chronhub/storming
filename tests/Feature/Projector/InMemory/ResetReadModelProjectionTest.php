@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector\Operations;
 
-use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\ProjectionStatus;
+use Storm\Projector\Scope\ReadModelScope;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
@@ -28,7 +28,7 @@ beforeEach(function () {
 
 test('resets the read model projection', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
     );
 
@@ -66,7 +66,7 @@ test('resets the read model projection', function () {
 
 test('resets from monitoring within the projection instance', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
     );
 
@@ -74,7 +74,7 @@ test('resets from monitoring within the projection instance', function () {
         ->withBalanceCreated(version: 1, amount: 100)
         ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
 
-    $monitor = $this->factory->monitor();
+    $monitor = $this->factory->getMonitor();
     $resetStatus = null;
 
     /**
@@ -95,7 +95,6 @@ test('resets from monitoring within the projection instance', function () {
         },
     ];
 
-    // todo abstract monitor then reactor for other operations
     $thenReactor = function (ReadModelScope $scope) use ($monitor, &$resetStatus) {
         $scope->userState()->push('events', [$scope->event()::class]);
 

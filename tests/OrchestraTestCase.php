@@ -24,6 +24,8 @@ class OrchestraTestCase extends TestCase
 
     protected function getPackageProviders($app): array
     {
-        return [StormServiceProvider::class];
+        return [
+            StormServiceProvider::class,
+        ];
     }
 }

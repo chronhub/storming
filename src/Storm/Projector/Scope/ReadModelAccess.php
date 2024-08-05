@@ -6,7 +6,6 @@ namespace Storm\Projector\Scope;
 
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ReadModel;
-use Storm\Contract\Projector\ReadModelScope;
 use Storm\Projector\Workflow\Management\ProjectionClosed;
 use Storm\Projector\Workflow\Process;
 

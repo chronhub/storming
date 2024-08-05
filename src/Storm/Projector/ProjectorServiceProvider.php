@@ -4,31 +4,42 @@ declare(strict_types=1);
 
 namespace Storm\Projector;
 
-use Illuminate\Contracts\Events\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
-use Storm\Chronicler\Connection\ConnectionEventStreamProvider;
-use Storm\Contract\Clock\SystemClock;
+use Storm\Chronicler\InMemory\InMemoryEventStore;
+use Storm\Chronicler\InMemory\InMemoryEventStreamProvider;
+use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Projector\ProjectorManagerInterface;
-use Storm\Contract\Projector\SubscriptionFactory;
 use Storm\Contract\Serializer\JsonSerializer;
-use Storm\Projector\Factory\DatabaseSubscriptionFactory;
-use Storm\Projector\Filter\DatabaseQueryScope;
-use Storm\Projector\Options\DefaultOption;
-use Storm\Projector\Repository\DatabaseProvider;
-use Storm\Serializer\JsonSerializerFactory;
-use Storm\Serializer\StreamEventNormalizer;
+use Storm\Contract\Serializer\SymfonySerializer;
+use Storm\Projector\Connector\InMemoryConnector;
+use Storm\Projector\Connector\SubscriptionFactoryResolver;
+use Storm\Projector\Repository\InMemoryProvider;
 
 class ProjectorServiceProvider extends ServiceProvider implements DeferrableProvider
 {
+    public array $singletons = [
+        'chronicler.provider.in_memory' => InMemoryEventStreamProvider::class,
+        'projector.provider.in_memory' => InMemoryProvider::class,
+    ];
+
+    protected string $projector = __DIR__.'/../../../config/projector.php';
+
+    public function boot(): void
+    {
+        if ($this->app->runningInConsole()) {
+            $this->publishes([$this->projector => config_path('projector.php')], 'config');
+        }
+    }
+
     public function register(): void
     {
+        $this->mergeConfigFrom($this->projector, 'projector');
+
         $this->registerJsonSerializer();
 
-        $this->registerProviders();
-
-        $this->registerSubscriptionFactory();
+        $this->registerEventStoreService();
 
         $this->registerProjectorManager();
     }
@@ -36,54 +47,56 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
     public function provides(): array
     {
         return [
-            'event_stream.provider.connection',
-            'projection.provider.connection',
-            'projector.subscription_factory.connection',
-            'projection.serializer.json.default',
+            'projector.provider.in_memory',
+            'chronicler.provider.in_memory',
+            'chronicler.in_memory',
+            'projector.serializer.json',
+            'projector.manager',
             ProjectorManagerInterface::class,
+            ProjectorServiceManager::class,
         ];
     }
 
-    private function registerSubscriptionFactory(): void
+    protected function registerProjectorManager(): void
     {
-        $this->app->singleton('projector.subscription_factory.connection', function (Application $app): SubscriptionFactory {
-            return new DatabaseSubscriptionFactory(
-                $app['chronicler.event.transactional.standard.pgsql'],
-                $app['projection.provider.connection'],
-                $app['event_stream.provider.connection'],
-                $app[SystemClock::class],
-                $app['projection.serializer.json.default']->create(),
-                $app[Dispatcher::class],
-                $app[DatabaseQueryScope::class],
-                new DefaultOption(signal: true, retries: [])
+        $this->app->singleton(ProjectorServiceManager::class, function (Application $app) {
+            $projector = new ProjectorServiceManager($app);
+
+            // todo use closure
+            $projector->addConnector('in_memory', new InMemoryConnector($app));
+
+            return $projector;
+        });
+
+        $this->app->singleton(ProjectorManagerInterface::class, function (Application $app): ProjectorManagerInterface {
+            return new ProjectorManager(
+                $app[ProjectorServiceManager::class],
+                new SubscriptionFactoryResolver(),
             );
         });
+
+        $this->app->alias(ProjectorManagerInterface::class, 'projector.manager');
     }
 
-    private function registerProjectorManager(): void
+    protected function registerJsonSerializer(): void
     {
-        $this->app->singleton(ProjectorManagerInterface::class, function (Application $app): ProjectorManagerInterface {
-            return new ProjectorManager($app['projector.subscription_factory.connection']);
+        $this->app->bind('projector.serializer.json', function (Application $app): SymfonySerializer {
+            /** @var JsonSerializer $factory */
+            $factory = $app['storm.serializer'];
+
+            return $factory
+                ->withEncodeOptions(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_FORCE_OBJECT)
+                ->withDecodeOptions(JSON_OBJECT_AS_ARRAY | JSON_BIGINT_AS_STRING)
+                ->create();
         });
     }
 
-    private function registerJsonSerializer(): void
+    protected function registerEventStoreService(): void
     {
-        $this->app->singleton('projection.serializer.json.default', function (Application $app): JsonSerializer {
-            $factory = new JsonSerializerFactory();
-            $factory->withEncodeOptions(JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRESERVE_ZERO_FRACTION | JSON_FORCE_OBJECT);
-            $factory->withDecodeOptions(JSON_OBJECT_AS_ARRAY | JSON_BIGINT_AS_STRING);
+        $this->app->singleton('chronicler.in_memory', function (Application $app): Chronicler {
+            $provider = $app['chronicler.provider.in_memory'];
 
-            $factory->withNormalizer($app[StreamEventNormalizer::class]);
-
-            return $factory;
+            return new InMemoryEventStore($provider);
         });
-    }
-
-    private function registerProviders(): void
-    {
-        $this->app->bind('event_stream.provider.connection', ConnectionEventStreamProvider::class);
-
-        $this->app->bind('projection.provider.connection', DatabaseProvider::class);
     }
 }

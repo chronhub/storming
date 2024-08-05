@@ -6,5 +6,5 @@ namespace Storm\Projector\Repository\Events;
 
 final readonly class ProjectionDeleted
 {
-    public function __construct(public string $projectionName) {}
+    public function __construct(public string $name) {}
 }

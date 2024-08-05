@@ -94,7 +94,7 @@ class GapRecorder
         };
     }
 
-    private function ensureLastPositionIsMaxPositionOfPreviousGaps(Collection $previousGaps, int $lastCheckPointPosition, string $streamName): void
+    protected function ensureLastPositionIsMaxPositionOfPreviousGaps(Collection $previousGaps, int $lastCheckPointPosition, string $streamName): void
     {
         if ($previousGaps->isEmpty()) {
             return;
