@@ -4,26 +4,25 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Chronicler;
 
+use Storm\Chronicler\InMemory\InMemoryEventStore;
+use Storm\Chronicler\InMemory\InMemoryEventStreamProvider;
+use Storm\Clock\ClockFactory;
 use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
 use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Domain\BalanceEventStore;
-use Storm\Tests\Feature\Projector\InMemory\Factory\InMemoryTestingFactory;
 
-//fixme test is tied to the projection in memory factory
 test('append stream events', function () {
-    $factory = new InMemoryTestingFactory();
-
     $streamName = new StreamName('balance');
-    $chronicler = $factory->createEventStore();
-    $factory->setupClock();
+    $chronicler = new InMemoryEventStore(new InMemoryEventStreamProvider());
+    $clock = ClockFactory::create();
 
     expect($chronicler->hasStream($streamName))->toBeFalse();
 
     $balanceId = BalanceId::create();
-    $store = new BalanceEventStore($chronicler, $factory->clock, $streamName, $balanceId);
+    $store = new BalanceEventStore($chronicler, $clock, $streamName, $balanceId);
     $store
         ->withBalanceCreated(1, 100)
         ->withBalanceAdded(2, 200)
