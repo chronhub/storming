@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector\Scope;
 
 use ArrayAccess;
+use Closure;
 use Illuminate\Support\Arr;
 use Storm\Projector\Exception\InvalidArgumentException;
 
@@ -86,8 +87,6 @@ class UserStateScope implements ArrayAccess
     }
 
     /**
-     * Get the specified string configuration value.
-     *
      * @param (Closure():(string|null))|string|null $default
      */
     public function string(string $key, mixed $default = null): string
