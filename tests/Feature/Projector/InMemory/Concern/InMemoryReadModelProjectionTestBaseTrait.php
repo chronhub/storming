@@ -29,6 +29,7 @@ trait InMemoryReadModelProjectionTestBaseTrait
 
     protected ?ProjectorManagerInterface $projectorManager = null;
 
+    //fixme streamNames as array and create event store for each stream
     protected function setupProjection(
         string $streamName,
         string $projectionName,
@@ -51,7 +52,7 @@ trait InMemoryReadModelProjectionTestBaseTrait
         return [
             function (BalanceCreated $event) {
                 /** @var ReadModelScope $this */
-                $this->userState->set('total', $event->amount());
+                $this->userState->increment('total', $event->amount());
                 $this->stack('insert', $event->id(), ['total' => $event->amount()]);
             },
             function (BalanceAdded $event) {
@@ -70,6 +71,10 @@ trait InMemoryReadModelProjectionTestBaseTrait
     protected function getThenReactor(bool $keepRunning = false, array $stopAt = []): Closure
     {
         return function (ReadModelScope $scope) use ($keepRunning, $stopAt) {
+            if ($scope->event() === null) {
+                return;
+            }
+
             $scope->userState->push('events', $scope->event()::class);
             if (! $keepRunning || $stopAt === []) {
                 return;
@@ -102,10 +107,13 @@ trait InMemoryReadModelProjectionTestBaseTrait
 
     protected function assertReadModelBalance(string $streamName, int $total): void
     {
-        expect($this->readModel->isInitialized())->toBeTrue()
-            ->and($this->readModel->getContainer())->toBe(
-                [$this->eventStore[$streamName]->balanceId->toString() => ['total' => $total]]
-            );
+        expect($this->readModel->isInitialized())->toBeTrue();
+
+        $container = $this->readModel->getContainer();
+        expect($container)->toHaveKey(
+            $this->eventStore[$streamName]->balanceId->toString(),
+            ['total' => $total]
+        );
     }
 
     protected function assertReadModelDown(): void

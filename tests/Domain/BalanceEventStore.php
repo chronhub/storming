@@ -18,7 +18,9 @@ use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceNoOp;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 
+use function count;
 use function iterator_to_array;
+use function random_int;
 
 class BalanceEventStore
 {
@@ -34,6 +36,17 @@ class BalanceEventStore
         $stream = new Stream($this->streamName, [$event]);
 
         $this->chronicler->append($stream);
+    }
+
+    public function make(int $times, bool $withNoOp = false): self
+    {
+        $this->withBalanceCreated(1);
+
+        for ($i = 2; $i <= $times; $i++) {
+            $this->randomEvent($i, random_int(-1000, 1000), $withNoOp);
+        }
+
+        return $this;
     }
 
     /**
@@ -120,5 +133,19 @@ class BalanceEventStore
             EventHeader::AGGREGATE_VERSION => $version,
             Header::EVENT_TIME => $this->clock->generate(),
         ]);
+    }
+
+    protected function randomEvent(int $version, int $amount, bool $withNoOp): self
+    {
+        $events = [
+            fn () => $this->withBalanceAdded($version, $amount),
+            fn () => $this->withBalanceSubtracted($version, $amount),
+        ];
+
+        if ($withNoOp) {
+            $events[] = fn () => $this->withBalanceNoOp($version);
+        }
+
+        return $events[random_int(0, count($events) - 1)]();
     }
 }

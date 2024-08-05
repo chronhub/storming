@@ -11,6 +11,7 @@ use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
+use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryReadModelProjectionTestBaseTrait;
@@ -285,7 +286,7 @@ test('fails detect gaps with running once and setup retries', function (array $r
     $this->assertProjectionReport(cycle: 1, ackedEvent: 1, totalEvent: 1);
 })->with('projection options with non empty retries');
 
-test('called then callback even when stream event is not acknowledged', function () {
+test('called [then] callback even when stream event is not acknowledged', function () {
     $this->setupProjection(
         streamName: $streamName = 'account',
         projectionName: 'balance'
@@ -314,4 +315,70 @@ test('called then callback even when stream event is not acknowledged', function
         ->run(inBackground: false);
 
     $this->assertProjectionState(['then called' => 2]);
+});
+
+test('subscribe to all stream', function () {
+    $this->setupProjection(
+        streamName: $accountOne = 'account_one',
+        projectionName: 'balance',
+        balanceId: BalanceId::create(),
+    );
+
+    $this->balanceEventStore($accountOne)
+        ->withBalanceCreated(version: 1, amount: 100)
+        ->withVersioningAmount([[2, 200], [3, -100], [4, -100]]);
+
+    $balanceTwoEventStore = $this->makeEventStore($accountTwo = 'account_two');
+    $balanceTwoEventStore
+        ->withBalanceCreated(version: 1, amount: 600)
+        ->withVersioningAmount([[2, 100], [3, -100], [4, -100]]);
+
+    $this->assertStreamExists($accountOne, true);
+    $this->assertStreamExists($accountTwo, true);
+
+    $this->projector
+        ->initialize(fn (): array => ['total' => 0])
+        ->subscribeToAll()
+        ->when($this->getReadModelReactor(), $this->getThenReactor())
+        ->filter($this->factory->inMemoryQueryFilter)
+        ->run(inBackground: false);
+
+    $this->assertPartialProjectionState('total', 600);
+    expect($this->projector->getState()['events'])->toHaveCount(8);
+
+    $this->assertReadModelBalance($accountOne, 100);
+    $this->assertReadModelBalance($accountTwo, 500);
+    $this->assertProjectionReport(cycle: 1, ackedEvent: 8, totalEvent: 8);
+});
+
+test('load stream events with block size and load limiter', function () {
+    $this->setupProjection(
+        streamName: $accountOne = 'account_one',
+        projectionName: 'balance',
+        options: ['blockSize' => 100, 'loadLimiter' => 100],
+        balanceId: BalanceId::create(),
+    );
+
+    $this->balanceEventStore($accountOne)->make(1000);
+    $this->assertStreamExists($accountOne, true);
+
+    $thenReactor = function (ReadModelScope $scope): void {
+        $scope->userState()->push('events', $scope->event()::class);
+
+        if (count($scope->userState()['events']) === 1000) {
+            $scope->stop();
+        }
+    };
+
+    $this->projector
+        ->initialize(fn (): array => ['total' => 0])
+        ->subscribeToAll()
+        ->when($this->getReadModelReactor(), $thenReactor)
+        ->filter($this->factory->inMemoryQueryFilter)
+        ->run(inBackground: true);
+
+    expect($this->projector->getState()['events'])->toHaveCount(1000);
+
+    $expectedCycles = 1000 / 100; // load limiter divided by block size (no gaps)
+    $this->assertProjectionReport(cycle: $expectedCycles, ackedEvent: 1000, totalEvent: 1000);
 });
