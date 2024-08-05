@@ -14,9 +14,9 @@ final class DatabaseSubscriptionFactory extends AbstractSubscriptionFactory
     private bool $useEvents = false;
 
     #[Override]
-    public function useEvents(bool $useEvents): void
+    public function useDispatcher(bool $useDispatcher): void
     {
-        $this->useEvents = $useEvents;
+        $this->useEvents = $useDispatcher;
     }
 
     #[Override]

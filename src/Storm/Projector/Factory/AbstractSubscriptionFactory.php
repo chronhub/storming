@@ -107,7 +107,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     /**
      * Decorate the projection repository with an event dispatcher.
      */
-    abstract protected function useEvents(bool $useEvents): void;
+    abstract protected function useDispatcher(bool $useDispatcher): void;
 
     /**
      * Create the projection repository.
