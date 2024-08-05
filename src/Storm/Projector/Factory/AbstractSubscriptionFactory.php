@@ -52,9 +52,7 @@ abstract class AbstractSubscriptionFactory implements SubscriptionFactory
     public function createQuerySubscription(ProjectionOption $options): Subscriptor
     {
         $process = $this->createProcessManager($options);
-        $activities = new QueryActivityFactory(
-            $this->chronicler, $options, $this->clock
-        );
+        $activities = new QueryActivityFactory($this->chronicler, $options, $this->clock);
 
         $management = new QueryingManagement($process);
         $this->subscribeToMap($management, $process);

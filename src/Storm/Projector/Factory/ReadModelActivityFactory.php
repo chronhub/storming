@@ -5,30 +5,23 @@ declare(strict_types=1);
 namespace Storm\Projector\Factory;
 
 use Storm\Contract\Chronicler\Chronicler;
-use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\PersistentActivityFactory;
 use Storm\Contract\Projector\ProjectionOption;
 use Storm\Contract\Projector\ReadModel;
-use Storm\Projector\Filter\LoadLimiter;
-use Storm\Projector\Scope\ProjectorScopeFactory;
 use Storm\Projector\Scope\ReadModelAccess;
-use Storm\Projector\Support\CollectStreams;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
 use Storm\Projector\Workflow\Activity\HandleStreamEvent;
 use Storm\Projector\Workflow\Activity\HandleStreamGap;
-use Storm\Projector\Workflow\Activity\LoadStreams;
 use Storm\Projector\Workflow\Activity\PersistOrUpdate;
 use Storm\Projector\Workflow\Activity\RefreshPersistentProjection;
 use Storm\Projector\Workflow\Activity\RisePersistentProjection;
 use Storm\Projector\Workflow\Process;
-use Storm\Projector\Workflow\QueryFilterResolver;
-use Storm\Projector\Workflow\StreamEventReactor;
-
-use function array_map;
 
 final readonly class ReadModelActivityFactory implements PersistentActivityFactory
 {
+    use ProvideActivityBuilder;
+
     public function __construct(
         protected Chronicler $chronicler,
         protected ProjectionOption $option,
@@ -36,25 +29,11 @@ final readonly class ReadModelActivityFactory implements PersistentActivityFacto
         protected ReadModel $readModel
     ) {}
 
-    public function __invoke(Process $process): array
-    {
-        return array_map(
-            fn (callable $activity): callable => $activity(),
-            $this->activities($process)
-        );
-    }
-
     protected function activities(Process $process): array
     {
         [$reactors, $then] = $process->context()->get()->reactors();
-
-        $factory = new ProjectorScopeFactory(
-            $reactors,
-            new ReadModelAccess($process, $this->clock, $this->readModel),
-            $then,
-        );
-
-        $eventProcessor = new StreamEventReactor($factory);
+        $projectorScope = new ReadModelAccess($process, $this->clock, $this->readModel);
+        $eventProcessor = $this->createStreamEventReactor($projectorScope, $reactors, $then);
 
         $streamEventLoader = $this->createStreamLoader(
             $process->context()->get()->queryFilter(),
@@ -69,19 +48,5 @@ final readonly class ReadModelActivityFactory implements PersistentActivityFacto
             fn (): callable => new DispatchSignal(),
             fn (): callable => new RefreshPersistentProjection($this->option->getOnlyOnceDiscovery()),
         ];
-    }
-
-    /**
-     * Create the stream event loader.
-     */
-    protected function createStreamLoader(QueryFilter $queryFilter): LoadStreams
-    {
-        $collectStreams = new CollectStreams(
-            $this->chronicler,
-            new LoadLimiter($this->option->getLoadLimiter()),
-            new QueryFilterResolver($queryFilter)
-        );
-
-        return new LoadStreams($collectStreams, $this->clock);
     }
 }

@@ -61,7 +61,7 @@ final class ProjectorManager implements ProjectorManagerInterface
     }
 
     /**
-     * Creates a ProjectionOption instance with the specified options.
+     * Creates a projection option instance with the specified options.
      *
      * @param array<ProjectionOption::*, null|string|int|bool|array> $options
      *
