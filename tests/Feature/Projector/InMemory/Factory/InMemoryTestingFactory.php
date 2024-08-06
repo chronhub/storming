@@ -7,9 +7,10 @@ namespace Storm\Tests\Feature\Projector\InMemory\Factory;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Clock\SystemClock;
+use Storm\Contract\Projector\Monitoring;
+use Storm\Contract\Projector\MonitoringManager;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Projector\ProjectorManagerInterface;
-use Storm\Contract\Projector\ProjectorMonitorInterface;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Filter\InMemoryFromToPosition;
@@ -41,11 +42,11 @@ class InMemoryTestingFactory
         $this->inMemoryQueryFilter ??= new InMemoryFromToPosition();
     }
 
-    public function getMonitor(): ProjectorMonitorInterface
+    public function getMonitor(): Monitoring
     {
         $connection = $this->connectionManager->connectionName();
 
-        return $this->projectorManager->monitor($connection);
+        return app(MonitoringManager::class)->monitor($connection);
     }
 
     public function getProjectionProvider(): ProjectionProvider

@@ -6,7 +6,6 @@ namespace Storm\Projector;
 
 use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\ProjectorManagerInterface;
-use Storm\Contract\Projector\ProjectorMonitorInterface;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelProjector;
@@ -15,14 +14,11 @@ use Storm\Projector\Connector\SubscriptionFactoryResolver;
 use Storm\Projector\Options\ProjectionOption;
 use Storm\Projector\Workflow\DefaultContext;
 
-final class ProjectorManager implements ProjectorManagerInterface
+final readonly class ProjectorManager implements ProjectorManagerInterface
 {
-    /** @var array<string, ProjectorMonitorInterface>|array */
-    private array $monitors = [];
-
     public function __construct(
-        private readonly ProjectorServiceManager $manager,
-        private readonly SubscriptionFactoryResolver $resolver,
+        private ProjectorServiceManager $manager,
+        private SubscriptionFactoryResolver $resolver,
     ) {}
 
     public function newQueryProjector(array $options = [], ?string $connection = null): QueryProjector
@@ -58,22 +54,8 @@ final class ProjectorManager implements ProjectorManagerInterface
         return new ProjectReadModel($readModelSubscription, new DefaultContext(), $streamName);
     }
 
-    public function monitor(string $connection): ProjectorMonitorInterface
-    {
-        if (isset($this->monitors[$connection])) {
-            return $this->monitors[$connection];
-        }
-
-        $manager = $this->manager->connection($connection);
-
-        return $this->monitors[$connection] = new ProjectorMonitor(
-            $manager->projectionProvider(),
-            $manager->serializer(),
-        );
-    }
-
     /**
-     * @return array{0: ConnectionManager, 1: ProjectionOption}
+     * @return array{ConnectionManager, ProjectionOption}
      */
     private function getConnectionWithOptions(?string $connection = null, array $options = []): array
     {

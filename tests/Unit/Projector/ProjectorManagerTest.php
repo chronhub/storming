@@ -8,10 +8,10 @@ use Options\ProjectionOption;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\EmitterSubscriber;
+use Storm\Contract\Projector\Monitoring;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Projector\ProjectionQueryScope;
 use Storm\Contract\Projector\ProjectorManagerInterface;
-use Storm\Contract\Projector\ProjectorMonitorInterface;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Contract\Projector\QuerySubscriber;
 use Storm\Contract\Projector\ReadModel;
@@ -103,7 +103,7 @@ test('get projector monitor', function () {
     $this->subscriptionFactory->expects('getSerializer')->andReturn(mock(SymfonySerializer::class));
 
     expect($this->projectorManager->monitor())->toBeInstanceOf(ProjectorMonitor::class)
-        ->and($this->projectorManager->monitor())->toBeInstanceOf(ProjectorMonitorInterface::class);
+        ->and($this->projectorManager->monitor())->toBeInstanceOf(Monitoring::class);
 });
 
 test('get same projector monitor instance', function () {

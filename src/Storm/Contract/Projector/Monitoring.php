@@ -7,7 +7,7 @@ namespace Storm\Contract\Projector;
 use Storm\Projector\Exception\ProjectionFailed;
 use Storm\Projector\Exception\ProjectionNotFound;
 
-interface ProjectorMonitorInterface
+interface Monitoring
 {
     /**
      * Mark the projection as stopped.

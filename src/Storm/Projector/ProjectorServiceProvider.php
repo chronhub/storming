@@ -10,6 +10,7 @@ use Illuminate\Support\ServiceProvider;
 use Storm\Chronicler\InMemory\InMemoryEventStore;
 use Storm\Chronicler\InMemory\InMemoryEventStreamProvider;
 use Storm\Contract\Chronicler\Chronicler;
+use Storm\Contract\Projector\MonitoringManager;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Serializer\JsonSerializer;
 use Storm\Contract\Serializer\SymfonySerializer;
@@ -41,7 +42,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
 
         $this->registerEventStoreService();
 
-        $this->registerProjectorManager();
+        $this->registerManagers();
     }
 
     public function provides(): array
@@ -57,13 +58,13 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
         ];
     }
 
-    protected function registerProjectorManager(): void
+    protected function registerManagers(): void
     {
         $this->app->singleton(ProjectorServiceManager::class, function (Application $app) {
             $projector = new ProjectorServiceManager($app);
 
             // todo use closure
-            $projector->addConnector('in_memory', new InMemoryConnector($app));
+            $projector->addConnector('in_memory', fn (Application $app) => new InMemoryConnector($app));
 
             return $projector;
         });
@@ -76,6 +77,10 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
         });
 
         $this->app->alias(ProjectorManagerInterface::class, 'projector.manager');
+
+        $this->app->singleton(MonitoringManager::class, function (Application $app) {
+            return new MonitorManager($app[ProjectorServiceManager::class]);
+        });
     }
 
     protected function registerJsonSerializer(): void

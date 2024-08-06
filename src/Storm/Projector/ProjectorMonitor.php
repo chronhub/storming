@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Storm\Projector;
 
+use Storm\Contract\Projector\Monitoring;
 use Storm\Contract\Projector\ProjectionModel;
 use Storm\Contract\Projector\ProjectionProvider;
-use Storm\Contract\Projector\ProjectorMonitorInterface;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Exception\ProjectionFailed;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\Repository\Data\UpdateStatusData;
 use Throwable;
 
-final readonly class ProjectorMonitor implements ProjectorMonitorInterface
+final readonly class ProjectorMonitor implements Monitoring
 {
     public function __construct(
         private ProjectionProvider $projectionProvider,

@@ -33,9 +33,4 @@ interface ProjectorManagerInterface
         array $options = [],
         ?string $connection = null,
     ): ReadModelProjector;
-
-    /**
-     * Get the projector monitor.
-     */
-    public function monitor(string $connection): ProjectorMonitorInterface;
 }
