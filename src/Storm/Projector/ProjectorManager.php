@@ -15,7 +15,8 @@ use Storm\Projector\Workflow\DefaultContext;
 
 final class ProjectorManager implements ProjectorManagerInterface
 {
-    private ?ProjectorMonitorInterface $monitor = null;
+    /** @var array<string, ProjectorMonitorInterface>|array */
+    private array $monitors = [];
 
     public function __construct(
         private readonly ProjectorServiceManager $manager,
@@ -63,9 +64,13 @@ final class ProjectorManager implements ProjectorManagerInterface
 
     public function monitor(?string $connection = null): ProjectorMonitorInterface
     {
+        if (isset($this->monitors[$connection])) {
+            return $this->monitors[$connection];
+        }
+
         $manager = $this->manager->connection($connection);
 
-        return $this->monitor ??= new ProjectorMonitor(
+        return $this->monitors[$manager->getDefaultConnection()] = new ProjectorMonitor(
             $manager->projectionProvider(),
             $manager->serializer(),
         );
