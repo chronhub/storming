@@ -354,7 +354,6 @@ test('query projection running in background and resolve gap when retries are co
     $this->assertProjectionReport(cycle: $expectedCycles, ackedEvent: 3, totalEvent: 3);
 })->with('projection options with non empty retries');
 
-// TODO: todo spy hub manager
 test('should perform when max batch is reached with reset and sleep', function () {
     $this->setupProjection(
         options: ['blockSize' => 2, 'sleep' => ['base' => 100, 'factor' => 1, 'max' => 1000]]

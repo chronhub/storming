@@ -29,8 +29,8 @@ dataset('should record gaps', [[true], [false]]);
 
 test('emit stream event to event store under the projection name', function (string $eventStream) {
     $this->setupProjection(
-        streamName: $eventStream,
-        projectionName: $projectionName = 'operation'
+        [[$eventStream, null]],
+        projectionName: $projectionName = 'balance',
     );
 
     $this->assertProjectionExists($projectionName, false);
@@ -61,8 +61,8 @@ test('emit stream event to event store under the projection name', function (str
 
 test('emitter scope with one processed event', function () {
     $this->setupProjection(
-        streamName: $eventStream = 'account',
-        projectionName: $projectionName = 'operation'
+        [[$eventStream = 'account', null]],
+        projectionName: $projectionName = 'operation',
     );
 
     $this->balanceEventStore($eventStream)->withBalanceCreated(1, 100);
@@ -87,9 +87,9 @@ test('emit stream event with retries and gaps', function (array $retries, bool $
     $options = ['retries' => $retries, 'recordGap' => $recordGap];
 
     $this->setupProjection(
-        streamName: $eventStream = 'balance',
-        projectionName: $projectionName = 'operation',
-        options: $options
+        [[$eventStream = 'account', null]],
+        projectionName: $projectionName = 'balance',
+        options: $options,
     );
 
     $this->assertProjectionExists($projectionName, false);
@@ -132,8 +132,8 @@ test('link event to a new stream', function () {
     $emittedStream = 'operation_emitted';
 
     $this->setupProjection(
-        streamName: $eventStream = 'balance',
-        projectionName: $projectionName = 'operation'
+        [[$eventStream = 'balance', null]],
+        projectionName: $projectionName = 'operation',
     );
 
     $this->assertProjectionExists($projectionName, false);
@@ -167,9 +167,8 @@ test('link event to a new stream', function () {
 
 test('link event to a new stream with gaps', function (array $retries, bool $recordGap) {
     $emittedStream = 'operation_emitted';
-
     $this->setupProjection(
-        streamName: $eventStream = 'balance',
+        [[$eventStream = 'balance', null]],
         projectionName: $projectionName = 'operation',
         options: ['retries' => $retries, 'recordGap' => $recordGap]
     );
@@ -229,9 +228,8 @@ test('link event to a new stream with gaps', function (array $retries, bool $rec
  */
 test('internal position header of emitted event is position of original stream event', function () {
     $this->setupProjection(
-        streamName: $eventStream = 'balance',
+        [[$eventStream = 'balance', $balanceId = BalanceId::create()]],
         projectionName: $projectionName = 'operation',
-        balanceId: $balanceId = BalanceId::create()
     );
 
     $this->assertProjectionExists($projectionName, false);
@@ -266,10 +264,9 @@ test('internal position header of link_to event is position of original stream e
     $emittedStream = 'operation_emitted';
 
     $this->setupProjection(
-        streamName: $eventStream = 'balance',
+        [[$eventStream = 'balance', $balanceId = BalanceId::create()]],
         projectionName: $projectionName = 'operation',
         options: ['retries' => $retries],
-        balanceId: $balanceId = BalanceId::create()
     );
 
     $this->assertStreamExists($eventStream, false);

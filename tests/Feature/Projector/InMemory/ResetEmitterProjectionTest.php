@@ -20,7 +20,7 @@ beforeEach(function () {
 
 test('resets the projection and deletes the emitted events in the event store', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
     );
 
@@ -61,7 +61,7 @@ test('resets the projection and deletes the emitted events in the event store', 
  */
 test('resets the projection and does not deletes the link to emitted events in the event store', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
     );
 

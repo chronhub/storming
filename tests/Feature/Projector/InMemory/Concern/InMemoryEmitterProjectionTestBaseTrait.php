@@ -26,17 +26,21 @@ trait InMemoryEmitterProjectionTestBaseTrait
 
     protected ?ProjectorManagerInterface $projectorManager = null;
 
+    /**
+     * @param array{string, ?BalanceId} $streamNames
+     */
     protected function setupProjection(
-        string $streamName,
+        array $streamNames,
         string $projectionName,
         ?string $descriptionId = null,
         array $options = [],
-        ?BalanceId $balanceId = null
     ): void {
         $this->projectorManager = $this->factory->createProjectorManager();
         $this->projector = $this->projectorManager->newEmitterProjector($projectionName, $options);
 
-        $this->makeEventStore($streamName, $balanceId);
+        foreach ($streamNames as [$streamName, $balanceId]) {
+            $this->makeEventStore($streamName, $balanceId);
+        }
 
         if ($descriptionId) {
             $this->projector->describe($descriptionId);

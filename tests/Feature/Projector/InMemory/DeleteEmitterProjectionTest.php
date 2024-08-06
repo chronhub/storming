@@ -23,7 +23,7 @@ beforeEach(function () {
  */
 test('deletes the projection and keeps the emitted events in the event store', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
     );
 
@@ -67,7 +67,7 @@ test('deletes the projection and keeps the emitted events in the event store', f
 
 test('deletes the projection and deletes the emitted events in the event store', function () {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
     );
 
@@ -109,7 +109,7 @@ test('deletes the projection and deletes the emitted events in the event store',
  */
 test('deletes the projection with or without emitted event with link to a new stream keeps the emitted events in the event store', function (bool $withEmittedEvent) {
     $this->setupProjection(
-        streamName: $streamName = 'account',
+        [[$streamName = 'account', null]],
         projectionName: $projectionName = 'balance',
     );
 
