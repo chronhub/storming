@@ -50,7 +50,7 @@ readonly class StreamEventReactor
         $projector = $this->eventScopeFactory->handle($event, $userState);
 
         if ($projector->userState() !== null) {
-            $process->userState()->put($projector->userState()->state);
+            $process->userState()->put($projector->userState()->all());
         }
 
         if ($projector->event() instanceof DomainEvent) {

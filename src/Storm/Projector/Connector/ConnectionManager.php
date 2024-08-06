@@ -16,7 +16,7 @@ interface ConnectionManager
 {
     public function eventStore(): Chronicler;
 
-    public function eventStoreProvider(): EventStreamProvider;
+    public function eventStreamProvider(): EventStreamProvider;
 
     public function projectionProvider(): ProjectionProvider;
 
@@ -26,7 +26,7 @@ interface ConnectionManager
 
     public function dispatcher(): ?Dispatcher;
 
-    public function getProjectionOption(array $options = []): ProjectionOption;
+    public function toProjectionOption(array $options = []): ProjectionOption;
 
-    public function getConnection(): string;
+    public function connectionName(): string;
 }

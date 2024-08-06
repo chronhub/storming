@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector\InMemory\Factory;
 
-use Options\ProjectionOption;
 use Storm\Contract\Chronicler\Chronicler;
-use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ProjectionProvider;
@@ -21,11 +19,9 @@ class InMemoryTestingFactory
 {
     public InMemoryQueryFilter $inMemoryQueryFilter;
 
-    protected ConnectionManager $subscriptionManager;
+    protected ConnectionManager $connectionManager;
 
     public ?ProjectorManagerInterface $projectorManager = null;
-
-    protected ?ProjectorMonitorInterface $monitor = null;
 
     public function createProjectorManager(): ProjectorManagerInterface
     {
@@ -35,7 +31,7 @@ class InMemoryTestingFactory
 
         $this->setupQueryFilter();
 
-        $this->subscriptionManager = app(ProjectorServiceManager::class)->connection();
+        $this->connectionManager = app(ProjectorServiceManager::class)->connection();
 
         return $this->projectorManager = app(ProjectorManagerInterface::class);
     }
@@ -47,36 +43,28 @@ class InMemoryTestingFactory
 
     public function getMonitor(): ProjectorMonitorInterface
     {
-        return $this->monitor ??= $this->createProjectorManager()->monitor();
+        $connection = $this->connectionManager->connectionName();
+
+        return $this->projectorManager->monitor($connection);
     }
 
     public function getProjectionProvider(): ProjectionProvider
     {
-        return $this->subscriptionManager->projectionProvider();
+        return $this->connectionManager->projectionProvider();
     }
 
     public function getEventStore(): Chronicler
     {
-        return $this->subscriptionManager->eventStore();
-    }
-
-    public function getEventStoreProvider(): EventStreamProvider
-    {
-        return $this->subscriptionManager->eventStoreProvider();
-    }
-
-    public function getProjectionOption(): ProjectionOption
-    {
-        return $this->subscriptionManager->getProjectionOption();
+        return $this->connectionManager->eventStore();
     }
 
     public function getClock(): SystemClock
     {
-        return $this->subscriptionManager->clock();
+        return $this->connectionManager->clock();
     }
 
     public function getSerializer(): SymfonySerializer
     {
-        return $this->subscriptionManager->serializer();
+        return $this->connectionManager->serializer();
     }
 }

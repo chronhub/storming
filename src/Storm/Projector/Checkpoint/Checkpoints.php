@@ -91,9 +91,7 @@ final class Checkpoints implements Arrayable, Countable, JsonSerializable
 
     /**
      * Return the checkpoints as an array.
-     *
-     * If the record gaps setting is disabled,
-     * the gaps and gap type will be excluded from the array.
+     * It excludes gaps from the checkpoints if recording gaps is disabled.
      *
      * @return array<CheckpointArray>
      */

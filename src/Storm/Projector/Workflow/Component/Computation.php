@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Component;
 
-use Options\ProjectionOption;
 use Storm\Contract\Projector\ContextReader;
+use Storm\Projector\Options\ProjectionOption;
 use Storm\Projector\Support\ProjectionReport;
 use Storm\Projector\Workflow\ComponentSubscriber;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;

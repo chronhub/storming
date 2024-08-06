@@ -39,7 +39,7 @@ abstract readonly class AbstractSubscriptionFactory implements SubscriptionFacto
     {
         $component = new Component(
             $options,
-            $this->manager->eventStoreProvider(),
+            $this->manager->eventStreamProvider(),
             $this->manager->clock()
         );
 

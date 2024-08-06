@@ -40,7 +40,7 @@ final class InMemoryConnectionManager implements ConnectionManager
         $this->chronicler = $chronicler;
     }
 
-    public function getProjectionOption(array $options = []): ProjectionOption
+    public function toProjectionOption(array $options = []): ProjectionOption
     {
         $resolver = new ProjectionOptionResolver($this->options);
 
@@ -52,7 +52,7 @@ final class InMemoryConnectionManager implements ConnectionManager
         return $this->chronicler;
     }
 
-    public function eventStoreProvider(): EventStreamProvider
+    public function eventStreamProvider(): EventStreamProvider
     {
         return $this->eventStreamProvider;
     }
@@ -77,7 +77,7 @@ final class InMemoryConnectionManager implements ConnectionManager
         return $this->dispatcher;
     }
 
-    public function getConnection(): string
+    public function connectionName(): string
     {
         return 'in_memory';
     }

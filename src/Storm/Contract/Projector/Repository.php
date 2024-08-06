@@ -82,7 +82,11 @@ interface Repository
     public function loadStatus(): ProjectionStatus;
 
     /**
-     * Loads the projection state and stream positions.
+     * Load the projection snapshot.
+     *
+     * A snapshot is a representation of the current state of the projection,
+     * with the user state and checkpoint which includes the current stream position.
+     * And gaps if enabled.
      *
      * @throws ProjectionNotFound When the projection does not exist.
      */

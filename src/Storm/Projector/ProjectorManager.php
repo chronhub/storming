@@ -10,7 +10,9 @@ use Storm\Contract\Projector\ProjectorMonitorInterface;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelProjector;
+use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Connector\SubscriptionFactoryResolver;
+use Storm\Projector\Options\ProjectionOption;
 use Storm\Projector\Workflow\DefaultContext;
 
 final class ProjectorManager implements ProjectorManagerInterface
@@ -25,44 +27,38 @@ final class ProjectorManager implements ProjectorManagerInterface
 
     public function newQueryProjector(array $options = [], ?string $connection = null): QueryProjector
     {
-        $subscriber = $this->manager->connection($connection);
-
-        $options = $subscriber->getProjectionOption($options);
+        [$connectionManager, $projectionOptions] = $this->getConnectionWithOptions($connection, $options);
 
         $querySubscription = $this->resolver
-            ->resolve('query', $subscriber)
-            ->create(null, null, $options);
+            ->resolve('query', $connectionManager)
+            ->create(null, null, $projectionOptions);
 
         return new ProjectQuery($querySubscription, new DefaultContext());
     }
 
     public function newEmitterProjector(string $streamName, array $options = [], ?string $connection = null): EmitterProjector
     {
-        $subscriber = $this->manager->connection($connection);
-
-        $options = $subscriber->getProjectionOption($options);
+        [$connectionManager, $projectionOptions] = $this->getConnectionWithOptions($connection, $options);
 
         $emitterSubscription = $this->resolver
-            ->resolve('emitter', $subscriber)
-            ->create($streamName, null, $options);
+            ->resolve('emitter', $connectionManager)
+            ->create($streamName, null, $projectionOptions);
 
         return new ProjectEmitter($emitterSubscription, new DefaultContext(), $streamName);
     }
 
     public function newReadModelProjector(string $streamName, ReadModel $readModel, array $options = [], ?string $connection = null): ReadModelProjector
     {
-        $subscriber = $this->manager->connection($connection);
-
-        $options = $subscriber->getProjectionOption($options);
+        [$connectionManager, $projectionOptions] = $this->getConnectionWithOptions($connection, $options);
 
         $readModelSubscription = $this->resolver
-            ->resolve('read_model', $subscriber)
-            ->create($streamName, $readModel, $options);
+            ->resolve('read_model', $connectionManager)
+            ->create($streamName, $readModel, $projectionOptions);
 
         return new ProjectReadModel($readModelSubscription, new DefaultContext(), $streamName);
     }
 
-    public function monitor(?string $connection = null): ProjectorMonitorInterface
+    public function monitor(string $connection): ProjectorMonitorInterface
     {
         if (isset($this->monitors[$connection])) {
             return $this->monitors[$connection];
@@ -70,9 +66,21 @@ final class ProjectorManager implements ProjectorManagerInterface
 
         $manager = $this->manager->connection($connection);
 
-        return $this->monitors[$manager->getConnection()] = new ProjectorMonitor(
+        return $this->monitors[$connection] = new ProjectorMonitor(
             $manager->projectionProvider(),
             $manager->serializer(),
         );
+    }
+
+    /**
+     * @return array{0: ConnectionManager, 1: ProjectionOption}
+     */
+    private function getConnectionWithOptions(?string $connection = null, array $options = []): array
+    {
+        $connectionManager = $this->manager->connection($connection);
+
+        $options = $connectionManager->toProjectionOption($options);
+
+        return [$connectionManager, $options];
     }
 }

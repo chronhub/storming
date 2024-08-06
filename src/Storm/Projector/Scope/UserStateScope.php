@@ -22,7 +22,7 @@ use function sprintf;
 class UserStateScope implements ArrayAccess
 {
     public function __construct(
-        public array $state = []
+        protected array $state = []
     ) {}
 
     public function get(string $key, mixed $default = null): mixed

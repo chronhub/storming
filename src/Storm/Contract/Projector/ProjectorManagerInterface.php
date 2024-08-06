@@ -37,5 +37,5 @@ interface ProjectorManagerInterface
     /**
      * Get the projector monitor.
      */
-    public function monitor(?string $connection = null): ProjectorMonitorInterface;
+    public function monitor(string $connection): ProjectorMonitorInterface;
 }
