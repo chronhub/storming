@@ -77,7 +77,7 @@ final class InMemoryConnectionManager implements ConnectionManager
         return $this->dispatcher;
     }
 
-    public function getDefaultConnection(): string
+    public function getConnection(): string
     {
         return 'in_memory';
     }

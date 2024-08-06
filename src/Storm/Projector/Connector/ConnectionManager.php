@@ -28,5 +28,5 @@ interface ConnectionManager
 
     public function getProjectionOption(array $options = []): ProjectionOption;
 
-    public function getDefaultConnection(): string;
+    public function getConnection(): string;
 }

@@ -70,7 +70,7 @@ final class ProjectorManager implements ProjectorManagerInterface
 
         $manager = $this->manager->connection($connection);
 
-        return $this->monitors[$manager->getDefaultConnection()] = new ProjectorMonitor(
+        return $this->monitors[$manager->getConnection()] = new ProjectorMonitor(
             $manager->projectionProvider(),
             $manager->serializer(),
         );
