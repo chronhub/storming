@@ -10,7 +10,7 @@ use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Serializer\SymfonySerializer;
-use Storm\Projector\Options\ProjectionOption;
+use Storm\Projector\Options\Option;
 
 interface ConnectionManager
 {
@@ -26,7 +26,7 @@ interface ConnectionManager
 
     public function dispatcher(): ?Dispatcher;
 
-    public function toProjectionOption(array $options = []): ProjectionOption;
+    public function toProjectionOption(array $options = []): Option;
 
     public function connectionName(): string;
 }

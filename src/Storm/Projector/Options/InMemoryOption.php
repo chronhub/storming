@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Options;
 
-final class InMemoryOption implements ProjectionOption
+final class InMemoryOption implements Option
 {
     use ProvideOption;
 

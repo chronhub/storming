@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Subscription;
+namespace Storm\Projector\Provider;
 
 use Storm\Projector\Exception\ProjectionNotFound;
 use Throwable;
 
-interface PersistentManagement extends Management
+interface PersistentProvider extends Provider
 {
     /**
      * Mount the persistent subscription and resume the projection.
@@ -37,7 +37,7 @@ interface PersistentManagement extends Management
     public function store(): void;
 
     /**
-     * Update lock if it can be refreshed.
+     * Check if the projection should update the lock.
      */
     public function shouldUpdateLock(): void;
 

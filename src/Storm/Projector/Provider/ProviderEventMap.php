@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Subscription;
+namespace Storm\Projector\Provider;
 
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Workflow\Management\PerformWhenThresholdIsReached;
@@ -21,9 +21,9 @@ use Storm\Projector\Workflow\Management\StreamEventLinkedTo;
 use Storm\Projector\Workflow\Notification\BeforeHandleStreamGap;
 use Storm\Projector\Workflow\Process;
 
-final class ManagementEventMap
+final class ProviderEventMap
 {
-    public function subscribeTo(Management $management, Process $process): void
+    public function subscribeTo(Provider $management, Process $process): void
     {
         $process->addListener(BeforeHandleStreamGap::class, function (Process $process) {
             $currentGap = $process->recognition()->gapType();
@@ -38,12 +38,12 @@ final class ManagementEventMap
             fn () => $management->performWhenThresholdIsReached(),
         );
 
-        if ($management instanceof PersistentManagement) {
+        if ($management instanceof PersistentProvider) {
             $this->withManagement($management, $process);
         }
     }
 
-    private function withManagement(PersistentManagement $management, Process $process): void
+    private function withManagement(PersistentProvider $management, Process $process): void
     {
         $map = [
             ProjectionRise::class => fn () => $management->rise(),
@@ -58,7 +58,7 @@ final class ManagementEventMap
             ProjectionSynchronized::class => fn () => $management->synchronise(),
         ];
 
-        if ($management instanceof EmitterManagement) {
+        if ($management instanceof EmitterProvider) {
             $map = $map + [
                 StreamEventEmitted::class => fn (Process $process, StreamEventEmitted $listener) => $management->emit($listener->event),
                 StreamEventLinkedTo::class => fn (Process $process, StreamEventLinkedTo $listener) => $management->linkTo($listener->streamName, $listener->event),

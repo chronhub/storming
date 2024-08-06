@@ -7,10 +7,10 @@ namespace Storm\Tests\Unit\Projector\Option;
 use JsonSerializable;
 use Options\ProjectionOptionImmutable;
 use ReflectionClass;
-use Storm\Projector\Options\InMemoryOptionFixed;
+use Storm\Projector\Options\InMemoryFixedOption;
 
 test('default instance', function () {
-    $options = new InMemoryOptionFixed();
+    $options = new InMemoryFixedOption();
 
     expect($options)->toBeInstanceOf(ProjectionOptionImmutable::class)
         ->and($options)->toBeInstanceOf(JsonSerializable::class)
@@ -29,7 +29,7 @@ test('default instance', function () {
 });
 
 test('json serialize instance', function () {
-    $options = new InMemoryOptionFixed();
+    $options = new InMemoryFixedOption();
 
     expect($options->jsonSerialize())
         ->toBe([
@@ -49,7 +49,7 @@ test('json serialize instance', function () {
 });
 
 test('instance has not constructor arguments', function () {
-    $reflection = new ReflectionClass(InMemoryOptionFixed::class);
+    $reflection = new ReflectionClass(InMemoryFixedOption::class);
     $parameters = $reflection->getConstructor()->getParameters();
 
     expect($parameters)->toBeEmpty();

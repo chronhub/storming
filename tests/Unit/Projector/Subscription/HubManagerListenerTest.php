@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Subscription\HubManager;
+use Storm\Projector\Provider\HubManager;
 use Storm\Projector\Workflow\ComponentRegistry;
 use Storm\Tests\Stubs\CallableNotificationStub;
 use Storm\Tests\Stubs\NonCallableNotificationStub;

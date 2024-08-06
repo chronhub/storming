@@ -34,7 +34,7 @@ class OptionalProjectionCommand
     /**
      * Configure the command with the given options.
      *
-     * @return array<ProjectionOption::*, mixed>
+     * @return array<Option::*, mixed>
      */
     public function configure(Command $command, array $mergeOptions = []): array
     {
@@ -76,7 +76,7 @@ class OptionalProjectionCommand
     /**
      * Merge the given options with the default projection options class.
      *
-     * @return array<ProjectionOption::*, mixed>
+     * @return array<Option::*, mixed>
      */
     protected function toArray(array $options): array
     {

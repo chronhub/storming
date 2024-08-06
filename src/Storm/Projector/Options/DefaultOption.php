@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Options;
 
-final class DefaultOption implements ProjectionOption
+final class DefaultOption implements Option
 {
     use ProvideOption;
 

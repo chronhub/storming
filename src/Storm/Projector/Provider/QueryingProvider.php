@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Subscription;
+namespace Storm\Projector\Provider;
 
 use Storm\Projector\Workflow\Process;
 
-final readonly class QueryingManagement implements QueryManagement
+final readonly class QueryingProvider implements QueryProvider
 {
     public function __construct(private Process $process) {}
 

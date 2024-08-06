@@ -7,7 +7,7 @@ namespace Storm\Tests\Unit\Projector\Subscription;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Subscription\InteractWithManagement;
+use Storm\Projector\Provider\InteractWithProvider;
 use Storm\Projector\Workflow\Notification\Command\CheckpointReset;
 use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
 
@@ -21,7 +21,7 @@ beforeEach(function () {
 
     $this->management = new class($repository, $hub)
     {
-        use InteractWithManagement;
+        use InteractWithProvider;
 
         public function __construct(
             protected Repository $projectionRepository,

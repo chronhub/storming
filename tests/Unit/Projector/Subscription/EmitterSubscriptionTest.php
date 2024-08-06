@@ -8,8 +8,8 @@ use Closure;
 use Factory\ActivityFactory;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Subscription\EmitterManagement;
-use Storm\Projector\Subscription\EmitterSubscription;
+use Storm\Projector\Provider\EmitterProvider;
+use Storm\Projector\Provider\EmitterSubscription;
 use Storm\Projector\Workflow\Component\Runner;
 use Storm\Projector\Workflow\ComponentRegistry;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
@@ -23,7 +23,7 @@ use Storm\Projector\Workflow\Notification\WorkflowRenewed;
 beforeEach(function () {
     $this->activities = mock(ActivityFactory::class);
     $this->hub = mock(NotificationHub::class);
-    $this->management = mock(EmitterManagement::class)->shouldIgnoreMissing();
+    $this->management = mock(EmitterProvider::class)->shouldIgnoreMissing();
     $this->subscriptor = mock(ComponentRegistry::class);
 
     $this->subscription = new EmitterSubscription(

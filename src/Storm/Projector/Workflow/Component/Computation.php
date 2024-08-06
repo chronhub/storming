@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Component;
 
 use Storm\Contract\Projector\ContextReader;
-use Storm\Projector\Options\ProjectionOption;
+use Storm\Projector\Options\Option;
 use Storm\Projector\Support\ProjectionReport;
 use Storm\Projector\Workflow\ComponentSubscriber;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
@@ -21,7 +21,7 @@ use Storm\Projector\Workflow\Process;
  *     acked_event: int<0, max>,
  *     total_event: int<0, max>,
  *     checkpoint: array,
- *     options: array<ProjectionOption::*, null|string|int|bool|array>,
+ *     options: array<Option::*, null|string|int|bool|array>,
  * }
  */
 class Computation implements ComponentSubscriber

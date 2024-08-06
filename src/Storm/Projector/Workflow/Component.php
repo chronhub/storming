@@ -12,7 +12,7 @@ use Storm\Projector\Checkpoint\CheckpointRecognition as Recognition;
 use Storm\Projector\Checkpoint\Checkpoints;
 use Storm\Projector\Checkpoint\GapDetector;
 use Storm\Projector\Checkpoint\GapRecorder;
-use Storm\Projector\Options\ProjectionOption;
+use Storm\Projector\Options\Option;
 use Storm\Projector\Support\ExponentialSleep;
 use Storm\Projector\Workflow\Component\CheckpointReckoning;
 use Storm\Projector\Workflow\Component\Computation;
@@ -34,7 +34,7 @@ final class Component implements ComponentRegistry
     public array $components;
 
     public function __construct(
-        protected ProjectionOption $option,
+        protected Option $option,
         protected EventStreamProvider $eventStreamProvider,
         protected SystemClock $clock
     ) {
@@ -79,14 +79,14 @@ final class Component implements ComponentRegistry
         return $this->components[$name];
     }
 
-    protected function batchStreamEvent(ProjectionOption $option): EventStreamBatch
+    protected function batchStreamEvent(Option $option): EventStreamBatch
     {
         $heapSleep = new ExponentialSleep(...$option->getSleep());
 
         return new EventStreamBatch($heapSleep);
     }
 
-    protected function checkpointRecognition(ProjectionOption $option): Recognition
+    protected function checkpointRecognition(Option $option): Recognition
     {
         $retries = $option->getRetries();
         $checkpoints = new Checkpoints($option->getRecordGap());

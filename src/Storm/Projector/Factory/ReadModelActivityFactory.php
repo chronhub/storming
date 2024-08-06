@@ -7,7 +7,7 @@ namespace Storm\Projector\Factory;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ReadModel;
-use Storm\Projector\Options\ProjectionOption;
+use Storm\Projector\Options\Option;
 use Storm\Projector\Scope\ReadModelAccess;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
 use Storm\Projector\Workflow\Activity\HandleStreamEvent;
@@ -23,7 +23,7 @@ final readonly class ReadModelActivityFactory implements PersistentActivityFacto
 
     public function __construct(
         protected Chronicler $chronicler,
-        protected ProjectionOption $option,
+        protected Option $option,
         protected SystemClock $clock,
         protected ReadModel $readModel
     ) {}

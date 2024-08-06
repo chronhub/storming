@@ -9,22 +9,22 @@ use function get_class;
 
 final readonly class ProjectionOptionResolver
 {
-    public function __construct(private ProjectionOption|array $options = []) {}
+    public function __construct(private Option|array $options = []) {}
 
-    public function __invoke(array $options = []): ProjectionOption
+    public function __invoke(array $options = []): Option
     {
-        if ($this->options instanceof ProjectionOptionImmutable) {
+        if ($this->options instanceof OptionImmutable) {
             return $this->options;
         }
 
-        if ($this->options instanceof ProjectionOption) {
+        if ($this->options instanceof Option) {
             return $options !== [] ? $this->mergeOptions($options) : $this->options;
         }
 
         return new DefaultOption(...(array_merge($this->options, $options)));
     }
 
-    private function mergeOptions(array $options): ProjectionOption
+    private function mergeOptions(array $options): Option
     {
         $optionClass = get_class($this->options);
 

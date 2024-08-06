@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Subscription;
+namespace Storm\Projector\Provider;
 
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
@@ -17,9 +17,9 @@ use function in_array;
  * @property-read Process $process
  * @property-read Repository $store
  *
- * @phpstan-require-implements PersistentManagement
+ * @phpstan-require-implements PersistentProvider
  */
-trait InteractWithManagement
+trait InteractWithProvider
 {
     public function shouldUpdateLock(): void
     {

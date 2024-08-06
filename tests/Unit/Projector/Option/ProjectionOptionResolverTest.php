@@ -7,12 +7,12 @@ namespace Storm\Tests\Unit\Projector\Option;
 use Options\ProjectionOption;
 use Options\ProjectionOptionImmutable;
 use Storm\Projector\Options\DefaultOption;
+use Storm\Projector\Options\InMemoryFixedOption;
 use Storm\Projector\Options\InMemoryOption;
-use Storm\Projector\Options\InMemoryOptionFixed;
 use Storm\Projector\Options\ProjectionOptionResolver;
 
 test('return constructed options if immutable', function () {
-    $immutableOption = new InMemoryOptionFixed();
+    $immutableOption = new InMemoryFixedOption();
 
     expect($immutableOption)->toBeInstanceOf(ProjectionOptionImmutable::class)
         ->and($immutableOption)->getSignal()->toBeFalse();

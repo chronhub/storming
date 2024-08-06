@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Subscription;
+namespace Storm\Projector\Provider;
 
 use Storm\Chronicler\Exceptions\StreamNotFound;
 use Storm\Contract\Chronicler\Chronicler;
@@ -18,9 +18,9 @@ use Throwable;
 
 use function usleep;
 
-final readonly class EmittingManagement implements EmitterManagement
+final readonly class EmittingProvider implements EmitterProvider
 {
-    use InteractWithManagement;
+    use InteractWithProvider;
 
     public function __construct(
         protected Process $process,

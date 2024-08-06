@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Subscription;
+namespace Storm\Projector\Provider;
 
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\Workflow\Input\DiscoverEventStream;
 use Storm\Projector\Workflow\Process;
 
-final readonly class ReadingModelManagement implements ReadModelManagement
+final readonly class ReadingModelProvider implements ReadModelProvider
 {
-    use InteractWithManagement;
+    use InteractWithProvider;
 
     public function __construct(
         protected Process $process,

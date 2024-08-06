@@ -13,7 +13,7 @@ use Storm\Contract\Chronicler\InMemoryChronicler;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Serializer\SymfonySerializer;
-use Storm\Projector\Options\ProjectionOption;
+use Storm\Projector\Options\Option;
 use Storm\Projector\Options\ProjectionOptionResolver;
 
 final class InMemoryConnectionManager implements ConnectionManager
@@ -26,7 +26,7 @@ final class InMemoryConnectionManager implements ConnectionManager
         private readonly ProjectionProvider $projectionProvider,
         private readonly SystemClock $clock,
         private readonly SymfonySerializer $serializer,
-        private readonly ProjectionOption|array $options,
+        private readonly Option|array $options,
         private readonly ?Dispatcher $dispatcher = null,
     ) {
         while ($chronicler instanceof ChroniclerDecorator) {
@@ -40,7 +40,7 @@ final class InMemoryConnectionManager implements ConnectionManager
         $this->chronicler = $chronicler;
     }
 
-    public function toProjectionOption(array $options = []): ProjectionOption
+    public function toProjectionOption(array $options = []): Option
     {
         $resolver = new ProjectionOptionResolver($this->options);
 

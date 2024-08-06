@@ -11,7 +11,7 @@ use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelProjector;
 use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Connector\SubscriptionFactoryResolver;
-use Storm\Projector\Options\ProjectionOption;
+use Storm\Projector\Options\Option;
 use Storm\Projector\Workflow\DefaultContext;
 
 final readonly class ProjectorManager implements ProjectorManagerInterface
@@ -23,46 +23,46 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
 
     public function newQueryProjector(array $options = [], ?string $connection = null): QueryProjector
     {
-        [$connectionManager, $projectionOptions] = $this->getConnectionWithOptions($connection, $options);
+        [$connector, $optionInstance] = $this->getConnectionWithOptions($connection, $options);
 
         $querySubscription = $this->resolver
-            ->resolve('query', $connectionManager)
-            ->create(null, null, $projectionOptions);
+            ->resolve('query', $connector)
+            ->create(null, null, $optionInstance);
 
         return new ProjectQuery($querySubscription, new DefaultContext());
     }
 
     public function newEmitterProjector(string $streamName, array $options = [], ?string $connection = null): EmitterProjector
     {
-        [$connectionManager, $projectionOptions] = $this->getConnectionWithOptions($connection, $options);
+        [$connector, $optionInstance] = $this->getConnectionWithOptions($connection, $options);
 
         $emitterSubscription = $this->resolver
-            ->resolve('emitter', $connectionManager)
-            ->create($streamName, null, $projectionOptions);
+            ->resolve('emitter', $connector)
+            ->create($streamName, null, $optionInstance);
 
         return new ProjectEmitter($emitterSubscription, new DefaultContext(), $streamName);
     }
 
     public function newReadModelProjector(string $streamName, ReadModel $readModel, array $options = [], ?string $connection = null): ReadModelProjector
     {
-        [$connectionManager, $projectionOptions] = $this->getConnectionWithOptions($connection, $options);
+        [$connector, $optionInstance] = $this->getConnectionWithOptions($connection, $options);
 
         $readModelSubscription = $this->resolver
-            ->resolve('read_model', $connectionManager)
-            ->create($streamName, $readModel, $projectionOptions);
+            ->resolve('read_model', $connector)
+            ->create($streamName, $readModel, $optionInstance);
 
         return new ProjectReadModel($readModelSubscription, new DefaultContext(), $streamName);
     }
 
     /**
-     * @return array{ConnectionManager, ProjectionOption}
+     * @return array{ConnectionManager, Option}
      */
-    private function getConnectionWithOptions(?string $connection = null, array $options = []): array
+    private function getConnectionWithOptions(?string $connection = null, array $option = []): array
     {
-        $connectionManager = $this->manager->connection($connection);
+        $connector = $this->manager->connection($connection);
 
-        $options = $connectionManager->toProjectionOption($options);
+        $option = $connector->toProjectionOption($option);
 
-        return [$connectionManager, $options];
+        return [$connector, $option];
     }
 }

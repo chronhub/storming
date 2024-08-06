@@ -6,7 +6,7 @@ namespace Storm\Projector\Factory;
 
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Projector\Options\ProjectionOption;
+use Storm\Projector\Options\Option;
 use Storm\Projector\Scope\QueryAccess;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
 use Storm\Projector\Workflow\Activity\HandleQueryStreamGap;
@@ -22,7 +22,7 @@ final readonly class QueryActivityFactory implements ActivityFactory
 
     public function __construct(
         protected Chronicler $chronicler,
-        protected ProjectionOption $option,
+        protected Option $option,
         protected SystemClock $clock,
     ) {}
 

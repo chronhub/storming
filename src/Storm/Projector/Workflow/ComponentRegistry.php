@@ -6,7 +6,7 @@ namespace Storm\Projector\Workflow;
 
 use Storm\Contract\Projector\ContextReader;
 use Storm\Projector\Checkpoint\CheckpointRecognition;
-use Storm\Projector\Options\ProjectionOption;
+use Storm\Projector\Options\Option;
 use Storm\Projector\Workflow\Component\Computation;
 use Storm\Projector\Workflow\Component\Contextualize;
 use Storm\Projector\Workflow\Component\EventStreamBatch;
@@ -25,7 +25,7 @@ use Storm\Projector\Workflow\Component\UserState;
  * @method EventStreamDiscovery  discovery()
  * @method EventManager          dispatcher()
  * @method HaltOn                haltOn()
- * @method ProjectionOption      option()
+ * @method Option                option()
  * @method ProcessedStream       stream()
  * @method CheckpointRecognition recognition()
  * @method Computation           compute()

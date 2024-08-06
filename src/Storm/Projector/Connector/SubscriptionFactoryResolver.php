@@ -5,29 +5,29 @@ declare(strict_types=1);
 namespace Storm\Projector\Connector;
 
 use Storm\Projector\Exception\InvalidArgumentException;
-use Storm\Projector\Factory\EmitterSubscriptionFactory;
-use Storm\Projector\Factory\QuerySubscriptionFactory;
-use Storm\Projector\Factory\ReadModelSubscriptionFactory;
-use Storm\Projector\Factory\SubscriptionFactory;
+use Storm\Projector\Factory\EmitterProviderFactory;
+use Storm\Projector\Factory\ProviderFactory;
+use Storm\Projector\Factory\QueryProviderFactory;
+use Storm\Projector\Factory\ReadModelProviderFactory;
 
 class SubscriptionFactoryResolver
 {
-    /** @var array<string, class-string<SubscriptionFactory>|SubscriptionFactory> */
+    /** @var array<string, class-string<ProviderFactory>|ProviderFactory> */
     protected array $factories = [
-        'query' => QuerySubscriptionFactory::class,
-        'emitter' => EmitterSubscriptionFactory::class,
-        'read_model' => ReadModelSubscriptionFactory::class,
+        'query' => QueryProviderFactory::class,
+        'emitter' => EmitterProviderFactory::class,
+        'read_model' => ReadModelProviderFactory::class,
     ];
 
-    public function resolve(string $name, ConnectionManager $manager): SubscriptionFactory
+    public function resolve(string $name, ConnectionManager $manager): ProviderFactory
     {
         $factory = $this->factories[$name] ?? null;
 
         if (! $factory) {
-            throw new InvalidArgumentException("Invalid subscription type: $name");
+            throw new InvalidArgumentException("Invalid provider factory type: $name");
         }
 
-        if ($factory instanceof SubscriptionFactory) {
+        if ($factory instanceof ProviderFactory) {
             return $factory;
         }
 
@@ -38,7 +38,7 @@ class SubscriptionFactoryResolver
         return new $this->factories[$name]($manager);
     }
 
-    public function addFactory(string $name, SubscriptionFactory|string $factory): void
+    public function addFactory(string $name, ProviderFactory|string $factory): void
     {
         $this->factories[$name] = $factory;
     }

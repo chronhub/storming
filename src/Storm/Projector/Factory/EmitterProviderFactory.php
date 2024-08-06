@@ -5,20 +5,20 @@ declare(strict_types=1);
 namespace Storm\Projector\Factory;
 
 use Storm\Contract\Projector\ReadModel;
-use Storm\Projector\Options\ProjectionOption;
-use Storm\Projector\Subscription\EmittingManagement;
-use Storm\Projector\Subscription\GenericSubscription;
-use Storm\Projector\Subscription\Subscriptor;
+use Storm\Projector\Options\Option;
+use Storm\Projector\Provider\EmittingProvider;
+use Storm\Projector\Provider\GenericSubscription;
+use Storm\Projector\Provider\Subscriptor;
 use Storm\Projector\Workflow\EmittedStream;
 use Storm\Projector\Workflow\InMemoryEmittedStreams;
 
-final readonly class EmitterSubscriptionFactory extends AbstractSubscriptionFactory
+final readonly class EmitterProviderFactory extends AbstractProviderFactory
 {
-    public function create(?string $streamName, ?ReadModel $readModel, ProjectionOption $options): Subscriptor
+    public function create(?string $streamName, ?ReadModel $readModel, Option $options): Subscriptor
     {
         $process = $this->createProcessManager($options);
 
-        $management = new EmittingManagement(
+        $provider = new EmittingProvider(
             $process,
             $this->createRepository($streamName, $options),
             $this->manager->eventStore(),
@@ -27,7 +27,7 @@ final readonly class EmitterSubscriptionFactory extends AbstractSubscriptionFact
             $options->getSleepEmitterOnFirstCommit()
         );
 
-        $this->subscribe($management, $process);
+        $this->subscribe($provider, $process);
 
         $activities = new EmitterActivityFactory(
             $this->manager->eventStore(),

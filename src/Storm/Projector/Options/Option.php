@@ -8,7 +8,7 @@ use JsonSerializable;
 use Storm\Projector\Support\ExponentialSleep;
 use Storm\Projector\Support\StopWhen;
 
-interface ProjectionOption extends JsonSerializable
+interface Option extends JsonSerializable
 {
     public const string SIGNAL = 'signal';
 

@@ -10,7 +10,7 @@ use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Subscription\AgentManager;
+use Storm\Projector\Provider\AgentManager;
 use Storm\Projector\Workflow\Component;
 use TypeError;
 

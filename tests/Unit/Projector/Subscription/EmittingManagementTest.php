@@ -11,8 +11,8 @@ use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
+use Storm\Projector\Provider\EmittingProvider;
 use Storm\Projector\Repository\ProjectionSnapshot;
-use Storm\Projector\Subscription\EmittingManagement;
 use Storm\Projector\Workflow\EmittedStream;
 use Storm\Projector\Workflow\EmittedStreamCache;
 use Storm\Projector\Workflow\Notification\Command\CheckpointReset;
@@ -33,7 +33,7 @@ beforeEach(function () {
     $this->emittedStream = mock(EmittedStream::class);
     $this->expectation = new ManagementExpectation($this->repository, $this->hub);
     $this->chronicler = mock(Chronicler::class);
-    $this->management = new EmittingManagement(
+    $this->management = new EmittingProvider(
         $this->hub,
         $this->chronicler,
         $this->repository,

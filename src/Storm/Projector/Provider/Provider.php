@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Subscription;
+namespace Storm\Projector\Provider;
 
-interface Management
+interface Provider
 {
     /**
      * Perform actions when the threshold is reached.
@@ -13,8 +13,8 @@ interface Management
      *  - persistent subscription may persist a batch stream event when the threshold is reached.
      *  - query subscription may sleep for a while when the threshold is reached.
      *
-     * @see ProjectionOption::BLOCK_SIZE
-     * @see ProjectionOption::SLEEP
+     * @see Option::BLOCK_SIZE
+     * @see Option::SLEEP
      */
     public function performWhenThresholdIsReached(): void;
 }

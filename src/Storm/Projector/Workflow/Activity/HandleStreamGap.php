@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Projector\Subscription\InteractWithManagement;
+use Storm\Projector\Provider\InteractWithProvider;
 use Storm\Projector\Workflow\Management\ProjectionStored;
 use Storm\Projector\Workflow\Notification\AfterHandleStreamGap;
 use Storm\Projector\Workflow\Notification\BeforeHandleStreamGap;
@@ -18,7 +18,7 @@ final class HandleStreamGap
      * Then we store the projection if some stream events
      * still need to be processed before the gap detection.
      *
-     * @see InteractWithManagement@persistWhenThresholdIsReached
+     * @see InteractWithProvider@persistWhenThresholdIsReached
      */
     public function __invoke(Process $process): void
     {

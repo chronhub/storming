@@ -22,6 +22,7 @@ class ProjectorScopeFactory
     protected array $boundReactors;
 
     public function __construct(
+        /** @var array<string, Closure> */
         protected array $reactors,
         protected readonly ProjectorScope $projector,
         /** @var Closure(ProjectorScope $projector): void */

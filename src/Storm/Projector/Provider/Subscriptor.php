@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Subscription;
+namespace Storm\Projector\Provider;
 
 use Storm\Contract\Projector\ContextReader;
 use Storm\Projector\Workflow\Process;

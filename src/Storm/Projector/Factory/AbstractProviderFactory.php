@@ -6,20 +6,20 @@ namespace Storm\Projector\Factory;
 
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\Connector\ConnectionManager;
-use Storm\Projector\Options\ProjectionOption;
+use Storm\Projector\Options\Option;
+use Storm\Projector\Provider\Provider;
+use Storm\Projector\Provider\ProviderEventMap;
 use Storm\Projector\Repository\EventRepository;
 use Storm\Projector\Repository\GenericRepository;
 use Storm\Projector\Repository\LockManager;
-use Storm\Projector\Subscription\Management;
-use Storm\Projector\Subscription\ManagementEventMap;
 use Storm\Projector\Workflow\Component;
 use Storm\Projector\Workflow\Process;
 
-abstract readonly class AbstractSubscriptionFactory implements SubscriptionFactory
+abstract readonly class AbstractProviderFactory implements ProviderFactory
 {
     public function __construct(protected ConnectionManager $manager) {}
 
-    protected function createRepository(string $streamName, ProjectionOption $options): Repository
+    protected function createRepository(string $streamName, Option $options): Repository
     {
         $repository = new GenericRepository(
             $this->manager->projectionProvider(),
@@ -35,7 +35,7 @@ abstract readonly class AbstractSubscriptionFactory implements SubscriptionFacto
         return $repository;
     }
 
-    protected function createProcessManager(ProjectionOption $options): Process
+    protected function createProcessManager(Option $options): Process
     {
         $component = new Component(
             $options,
@@ -46,14 +46,14 @@ abstract readonly class AbstractSubscriptionFactory implements SubscriptionFacto
         return new Process($component);
     }
 
-    protected function subscribe(Management $management, Process $process): void
+    protected function subscribe(Provider $management, Process $process): void
     {
-        $map = new ManagementEventMap();
+        $map = new ProviderEventMap();
 
         $map->subscribeTo($management, $process);
     }
 
-    protected function createLockManager(ProjectionOption $options): LockManager
+    protected function createLockManager(Option $options): LockManager
     {
         return new LockManager(
             $this->manager->clock(),
