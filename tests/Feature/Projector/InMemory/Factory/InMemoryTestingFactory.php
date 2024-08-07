@@ -24,7 +24,7 @@ class InMemoryTestingFactory
 
     public ?ProjectorManagerInterface $projectorManager = null;
 
-    public function createProjectorManager(): ProjectorManagerInterface
+    public function createProjectorManager(string $connection = 'in_memory'): ProjectorManagerInterface
     {
         if ($this->projectorManager) {
             return $this->projectorManager;
@@ -32,7 +32,7 @@ class InMemoryTestingFactory
 
         $this->setupQueryFilter();
 
-        $this->connectionManager = app(ProjectorServiceManager::class)->connection();
+        $this->connectionManager = app(ProjectorServiceManager::class)->connection($connection);
 
         return $this->projectorManager = app(ProjectorManagerInterface::class);
     }

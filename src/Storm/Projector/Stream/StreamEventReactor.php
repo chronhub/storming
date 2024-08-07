@@ -7,8 +7,8 @@ namespace Storm\Projector\Stream;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\Header;
 use Storm\Projector\Checkpoint\StreamPoint;
-use Storm\Projector\Factory\ProjectorScopeFactory;
 use Storm\Projector\Provider\Events\PerformWhenThresholdIsReached;
+use Storm\Projector\Scope\ProjectorScopeFactory;
 use Storm\Projector\Workflow\Process;
 use Storm\Stream\StreamPosition;
 
@@ -17,7 +17,7 @@ use function pcntl_signal_dispatch;
 readonly class StreamEventReactor
 {
     public function __construct(
-        protected ProjectorScopeFactory $eventScopeFactory,
+        protected ProjectorScopeFactory $projectorScope,
     ) {}
 
     public function __invoke(Process $process, string $streamName, DomainEvent $event, StreamPosition $expectedPosition): bool
@@ -48,7 +48,7 @@ readonly class StreamEventReactor
     {
         $userState = $this->getUserState($process);
 
-        $projector = $this->eventScopeFactory->handle($event, $userState);
+        $projector = $this->projectorScope->handle($event, $userState);
 
         if ($projector->userState() !== null) {
             $process->userState()->put($projector->userState()->all());

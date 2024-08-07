@@ -164,6 +164,13 @@ class UserStateScope implements ArrayAccess
         return $value;
     }
 
+    public function setState(array $state): self
+    {
+        $this->state = $state;
+
+        return $this;
+    }
+
     public function all(): array
     {
         return $this->state;

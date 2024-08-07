@@ -60,6 +60,8 @@ class ProjectorServiceManager
     {
         $connector = $this->connectors[$name];
 
+        $this->app['config']->set('projector.default', $name);
+
         if ($connector instanceof Closure) {
             return $connector($this->app)->connect($config);
         }

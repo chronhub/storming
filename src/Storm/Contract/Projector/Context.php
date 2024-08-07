@@ -54,11 +54,17 @@ interface Context
     /**
      * Sets the event reactors to be called when a stream event is received.
      *
+     * Empty reactors array is allowed when then callback set,
+     * It is meant to acked all event streams you subscribed to,
+     * with an emitter projector when emit or link to a new event stream.
+     *
+     * Note that all stream events will be considered as acked.
+     *
      * @param array<array<(Closure(DomainEvent): void)>> $reactors
      * @param (Closure(ProjectorScope): void)|null       $then
      *
      * @throws InvalidArgumentException When reactors are already set
-     * @throws InvalidArgumentException When reactors are empty
+     * @throws InvalidArgumentException When reactors are empty and then callback is null
      */
     public function when(array $reactors, ?Closure $then = null): self;
 

@@ -34,8 +34,9 @@ trait InMemoryEmitterProjectionTestBaseTrait
         string $projectionName,
         ?string $descriptionId = null,
         array $options = [],
+        string $connection = 'in_memory',
     ): void {
-        $this->projectorManager = $this->factory->createProjectorManager();
+        $this->projectorManager = $this->factory->createProjectorManager($connection);
         $this->projector = $this->projectorManager->newEmitterProjector($projectionName, $options);
 
         foreach ($streamNames as [$streamName, $balanceId]) {

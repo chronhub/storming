@@ -44,6 +44,7 @@ class CollectStreams
 
             try {
                 $events = $this->chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
+
                 $streamEvents->push([new StreamIterator($events), $streamName]);
             } catch (StreamNotFound) {
                 continue;

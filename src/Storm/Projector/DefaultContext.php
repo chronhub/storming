@@ -23,7 +23,7 @@ final class DefaultContext implements ContextReader
     private ?Closure $userState = null;
 
     /**
-     * @template THandlers of Closure
+     * @template THandlers of array<Closure>|array
      * @template TThen of (Closure(ProjectorScope): void)|null
      *
      * @param Closure|null $reactors
@@ -105,8 +105,8 @@ final class DefaultContext implements ContextReader
             throw new InvalidArgumentException('Projection reactors already set');
         }
 
-        if ($reactors === []) {
-            throw new InvalidArgumentException('Projection reactors cannot be empty');
+        if ($reactors === [] && $then === null) {
+            throw new InvalidArgumentException('Projection reactors cannot be null when then callback is null');
         }
 
         $this->reactors = [$reactors, $then];

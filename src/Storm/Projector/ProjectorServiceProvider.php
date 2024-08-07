@@ -7,6 +7,7 @@ namespace Storm\Projector;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
+use Storm\Chronicler\InMemory\InMemoryAutoIncrementEventStore;
 use Storm\Chronicler\InMemory\InMemoryEventStore;
 use Storm\Chronicler\InMemory\InMemoryEventStreamProvider;
 use Storm\Contract\Chronicler\Chronicler;
@@ -53,6 +54,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
         return [
             'projector.provider.in_memory',
             'chronicler.provider.in_memory',
+            'chronicler.provider.in_memory.auto_increment',
             'chronicler.in_memory',
             'projector.serializer.json',
             'projector.manager',
@@ -66,8 +68,8 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
         $this->app->singleton(ProjectorServiceManager::class, function (Application $app) {
             $projector = new ProjectorServiceManager($app);
 
-            // todo use closure
             $projector->addConnector('in_memory', fn (Application $app) => new InMemoryConnector($app));
+            $projector->addConnector('in_memory-auto-increment', fn (Application $app) => new InMemoryConnector($app));
 
             return $projector;
         });
@@ -105,6 +107,12 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
             $provider = $app['chronicler.provider.in_memory'];
 
             return new InMemoryEventStore($provider);
+        });
+
+        $this->app->singleton('chronicler.in_memory.auto_increment', function (Application $app): Chronicler {
+            $provider = $app['chronicler.provider.in_memory'];
+
+            return new InMemoryAutoIncrementEventStore($provider);
         });
     }
 }

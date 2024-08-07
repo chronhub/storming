@@ -6,6 +6,8 @@ namespace Storm\Projector\Factory;
 
 use Closure;
 use Storm\Contract\Chronicler\QueryFilter;
+use Storm\Projector\Scope\AckScopeFactory;
+use Storm\Projector\Scope\AlwaysAckScopeFactory;
 use Storm\Projector\Scope\ProjectorScope;
 use Storm\Projector\Stream\CollectStreams;
 use Storm\Projector\Stream\Filter\LoadLimiter;
@@ -48,7 +50,9 @@ trait ProvideActivityBuilder
      */
     protected function createStreamEventReactor(ProjectorScope $projectorScope, array $reactors, ?Closure $then): StreamEventReactor|callable
     {
-        $factory = new ProjectorScopeFactory($reactors, $projectorScope, $then);
+        $factory = $reactors === []
+            ? new AlwaysAckScopeFactory($projectorScope, $then)
+            : new AckScopeFactory($reactors, $projectorScope, $then);
 
         return new StreamEventReactor($factory);
     }

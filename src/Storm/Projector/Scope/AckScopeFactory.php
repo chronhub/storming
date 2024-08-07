@@ -2,24 +2,29 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Factory;
+namespace Storm\Projector\Scope;
 
 use Closure;
 use Illuminate\Support\Traits\ReflectsClosures;
+use ReflectionException;
 use Storm\Contract\Message\DomainEvent;
+use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Exception\RuntimeException;
-use Storm\Projector\Scope\ProjectorScope;
-use Storm\Projector\Scope\UserStateScope;
 
 use function is_a;
 use function is_array;
 use function is_callable;
 
-class ProjectorScopeFactory
+final class AckScopeFactory implements ProjectorScopeFactory
 {
     use ReflectsClosures;
 
-    protected array $boundReactors;
+    /**
+     * @var array<string, Closure>
+     */
+    private array $boundReactors;
+
+    private UserStateScope $userStateScope;
 
     public function __construct(
         /** @var array<string, Closure> */
@@ -32,12 +37,13 @@ class ProjectorScopeFactory
             throw new RuntimeException('Projector scope is not callable');
         }
 
+        $this->userStateScope = new UserStateScope();
         $this->boundReactors = $this->bindReactors($reactors);
     }
 
     public function handle(DomainEvent $event, ?array $userState = null): ProjectorScope
     {
-        $userStateScope = is_array($userState) ? new UserStateScope($userState) : null;
+        $userStateScope = is_array($userState) ? $this->userStateScope->setState($userState) : null;
 
         if (isset($this->boundReactors[$event::class])) {
             ($this->projector)($event, $userStateScope);
@@ -50,7 +56,7 @@ class ProjectorScopeFactory
         return $this->then(($this->projector)(null, $userStateScope));
     }
 
-    protected function then(ProjectorScope $projector): ProjectorScope
+    private function then(ProjectorScope $projector): ProjectorScope
     {
         if ($this->callback) {
             ($this->callback)($projector);
@@ -59,7 +65,12 @@ class ProjectorScopeFactory
         return $projector;
     }
 
-    protected function bindReactors(array $reactors): array
+    /**
+     * @throws ReflectionException
+     * @throws InvalidArgumentException when event reactor is not a subclass of DomainEvent
+     * @throws InvalidArgumentException when event reactor already registered
+     */
+    private function bindReactors(array $reactors): array
     {
         $boundReactors = [];
 
@@ -67,11 +78,11 @@ class ProjectorScopeFactory
             $eventClass = $this->firstClosureParameterType($reactor);
 
             if (! is_a($eventClass, DomainEvent::class, true)) {
-                throw new RuntimeException("Event reactor $eventClass must be a subclass of ".DomainEvent::class);
+                throw new InvalidArgumentException("Event reactor $eventClass must be a subclass of ".DomainEvent::class);
             }
 
-            if (isset($boundReactors[$eventClass])) {
-                throw new RuntimeException("Event reactor $eventClass already registered");
+            if (isset($this->boundReactors[$eventClass])) {
+                throw new InvalidArgumentException("Event reactor $eventClass already registered");
             }
 
             $boundReactors[$eventClass] = function (ProjectorScope $bindScope) use ($reactor) {
