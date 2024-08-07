@@ -24,4 +24,11 @@ return [
             'dispatch_events' => false,
         ],
     ],
+
+    'console' => [
+        'commands' => [
+            \Storm\Projector\Support\Console\ReadMonitorProjectionCommand::class,
+            \Storm\Projector\Support\Console\MarkMonitorProjectionCommand::class,
+        ],
+    ],
 ];

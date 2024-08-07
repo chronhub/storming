@@ -31,6 +31,9 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([$this->projector => config_path('projector.php')], 'config');
+
+            $commands = config('projector.console.commands', []);
+            $this->commands($commands);
         }
     }
 
