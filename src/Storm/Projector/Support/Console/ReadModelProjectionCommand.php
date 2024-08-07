@@ -5,21 +5,27 @@ declare(strict_types=1);
 namespace Storm\Projector\Support\Console;
 
 use Closure;
-use Filter\ProjectionQueryFilter;
 use Illuminate\Console\Command;
+use Storm\Contract\Projector\MonitoringManager;
 use Storm\Contract\Projector\ProjectorFactory;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\ReadModel;
+use Storm\Projector\Stream\Filter\ProjectionQueryFilter;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
 
 use function pcntl_async_signals;
 
+/**
+ * checkMe not useful as it is
+ */
 abstract class ReadModelProjectionCommand extends Command implements SignalableCommandInterface
 {
     protected bool $dispatchSignal = true;
 
-    public function __construct(protected ProjectorManagerInterface $projectorManager)
-    {
+    public function __construct(
+        protected ProjectorManagerInterface $projectorManager,
+        protected MonitoringManager $monitoring,
+    ) {
         parent::__construct();
     }
 
@@ -29,7 +35,12 @@ abstract class ReadModelProjectionCommand extends Command implements SignalableC
             pcntl_async_signals(true);
         }
 
-        $projector = $this->projectorManager->newReadModelProjector($this->projectionName(), $this->readModel());
+        $projector = $this->projectorManager->newReadModelProjector(
+            $this->projectionName(),
+            $this->readModel(),
+            [],
+            $this->connection()
+        );
 
         if ($init instanceof Closure) {
             $projector->initialize($init);
@@ -50,10 +61,12 @@ abstract class ReadModelProjectionCommand extends Command implements SignalableC
     {
         $this->info("Stopping read model projection: {$this->projectionName()}");
 
-        $this->projectorManager->monitor()->markAsStop($this->projectionName());
+        $this->monitoring->monitor($this->connection())->markAsStop($this->projectionName());
 
         return self::SUCCESS;
     }
+
+    abstract protected function connection(): string;
 
     abstract protected function readModel(): ReadModel;
 

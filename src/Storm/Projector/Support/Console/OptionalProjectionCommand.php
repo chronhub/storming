@@ -6,8 +6,8 @@ namespace Storm\Projector\Support\Console;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Str;
-use Options\ProjectionOption;
 use Storm\Projector\Options\DefaultOption;
+use Storm\Projector\Options\Option;
 use Symfony\Component\Console\Input\InputOption;
 
 use function array_merge;
@@ -17,16 +17,16 @@ use function is_bool;
 
 class OptionalProjectionCommand
 {
-    protected string|ProjectionOption $projectionOption = DefaultOption::class;
+    protected string|Option $option = DefaultOption::class;
 
     /**
      * Set the default projection option.
      *
      * Defaults to {@see DefaultOption}.
      */
-    public function withDefault(ProjectionOption|string $option): self
+    public function withDefault(Option|string $option): self
     {
-        $this->projectionOption = $option;
+        $this->option = $option;
 
         return $this;
     }
@@ -68,7 +68,7 @@ class OptionalProjectionCommand
             Str::kebab($name),
             null,
             InputOption::VALUE_OPTIONAL,
-            ProjectionOption::DESCRIPTIONS[$name],
+            Option::DESCRIPTIONS[$name],
             $this->expectValue($value)
         );
     }
@@ -80,9 +80,9 @@ class OptionalProjectionCommand
      */
     protected function toArray(array $options): array
     {
-        $projectionOption = $this->projectionOption instanceof ProjectionOption
-            ? $this->projectionOption
-            : new $this->projectionOption();
+        $projectionOption = $this->option instanceof Option
+            ? $this->option
+            : new $this->option();
 
         return array_merge($projectionOption->jsonSerialize(), $options);
     }
