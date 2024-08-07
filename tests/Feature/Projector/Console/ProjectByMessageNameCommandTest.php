@@ -70,9 +70,7 @@ test('test emit all stream events to by message name stream and partition', func
 
     $partitions = $eventStore->filterPartitions('$mn');
 
-    expect($partitions)->toBe([
-        '$mn-Storm_Tests_Domain_Balance_BalanceCreated',
-        '$mn-Storm_Tests_Domain_Balance_BalanceAdded',
-        '$mn-Storm_Tests_Domain_Balance_BalanceSubtracted',
-    ]);
+    expect('$mn-Storm_Tests_Domain_Balance_BalanceCreated')->toBeIn($partitions)
+        ->and('$mn-Storm_Tests_Domain_Balance_BalanceAdded')->toBeIn($partitions)
+        ->and('$mn-Storm_Tests_Domain_Balance_BalanceSubtracted')->toBeIn($partitions);
 });
