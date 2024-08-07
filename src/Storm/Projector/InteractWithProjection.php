@@ -5,9 +5,13 @@ declare(strict_types=1);
 namespace Storm\Projector;
 
 use Closure;
+use Storm\Contract\Projector\ProjectorFactory;
 use Storm\Projector\Support\ProjectionReport;
 use Storm\Projector\Workflow\Process;
 
+/**
+ * @phpstan-require-implements ProjectorFactory
+ */
 trait InteractWithProjection
 {
     public function initialize(Closure $userState): static

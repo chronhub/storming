@@ -10,10 +10,10 @@ use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\Monitoring;
 use Storm\Contract\Projector\MonitoringManager;
 use Storm\Contract\Projector\ProjectionProvider;
+use Storm\Contract\Projector\ProjectorManagement;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Connector\ConnectionManager;
-use Storm\Projector\ProjectorServiceManager;
 use Storm\Projector\Stream\Filter\InMemoryFromToPosition;
 
 class InMemoryTestingFactory
@@ -32,7 +32,7 @@ class InMemoryTestingFactory
 
         $this->setupQueryFilter();
 
-        $this->connectionManager = app(ProjectorServiceManager::class)->connection($connection);
+        $this->connectionManager = app(ProjectorManagement::class)->connection($connection);
 
         return $this->projectorManager = app(ProjectorManagerInterface::class);
     }

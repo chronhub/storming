@@ -12,6 +12,7 @@ use Storm\Chronicler\InMemory\InMemoryEventStreamProvider;
 use Storm\Chronicler\InMemory\VersioningEventStore;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Projector\MonitoringManager;
+use Storm\Contract\Projector\ProjectorManagement;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Serializer\JsonSerializer;
 use Storm\Contract\Serializer\SymfonySerializer;
@@ -26,6 +27,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
         'projector.provider.in_memory' => InMemoryProjectionProvider::class,
         SubscriptionFactoryResolver::class,
         ProjectorManagerInterface::class => ProjectorManager::class,
+        MonitoringManager::class => MonitorManager::class,
     ];
 
     protected string $projector = __DIR__.'/../../../config/projector.php';
@@ -61,23 +63,19 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
             'projector.serializer.json',
             'projector.manager',
             ProjectorManagerInterface::class,
-            ProjectorServiceManager::class,
+            ProjectorManagement::class,
         ];
     }
 
     protected function registerManagers(): void
     {
-        $this->app->singleton(ProjectorServiceManager::class, function (Application $app) {
+        $this->app->singleton(ProjectorManagement::class, function (Application $app) {
             $projector = new ProjectorServiceManager($app);
 
             $projector->addConnector('in_memory', fn (Application $app) => new InMemoryConnector($app));
             $projector->addConnector('in_memory-incremental', fn (Application $app) => new InMemoryConnector($app));
 
             return $projector;
-        });
-
-        $this->app->singleton(MonitoringManager::class, function (Application $app) {
-            return new MonitorManager($app[ProjectorServiceManager::class]);
         });
 
         $this->app->alias(ProjectorManagerInterface::class, 'projector.manager');

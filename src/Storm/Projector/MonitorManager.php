@@ -6,20 +6,21 @@ namespace Storm\Projector;
 
 use Storm\Contract\Projector\Monitoring;
 use Storm\Contract\Projector\MonitoringManager;
+use Storm\Contract\Projector\ProjectorManagement;
 
 final class MonitorManager implements MonitoringManager
 {
     /** @var array<string, Monitoring> */
     private array $monitors = [];
 
-    public function __construct(private readonly ProjectorServiceManager $manager) {}
+    public function __construct(private readonly ProjectorManagement $projector) {}
 
     public function monitor(?string $connection): Monitoring
     {
-        $manager = $this->manager->connection($connection);
+        $manager = $this->projector->connection($connection);
 
         if (! $connection) {
-            $connection = $this->manager->getDefaultDriver();
+            $connection = $this->projector->getDefaultDriver();
         }
 
         return $this->monitors[$connection] ??= new ProjectorMonitor(

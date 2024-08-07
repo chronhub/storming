@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector;
 
 use Storm\Contract\Projector\EmitterProjector;
+use Storm\Contract\Projector\ProjectorManagement;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Contract\Projector\ReadModel;
@@ -16,7 +17,7 @@ use Storm\Projector\Options\Option;
 final readonly class ProjectorManager implements ProjectorManagerInterface
 {
     public function __construct(
-        private ProjectorServiceManager $manager,
+        private ProjectorManagement $manager,
         private SubscriptionFactoryResolver $resolver,
     ) {}
 
