@@ -15,6 +15,11 @@ interface Projector
     public function run(bool $inBackground): void;
 
     /**
+     * Stop the projection.
+     */
+    public function stop(): void;
+
+    /**
      * Get the projection state.
      */
     public function getState(): array;

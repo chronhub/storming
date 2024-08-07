@@ -300,6 +300,35 @@ test('internal position header of link_to event is position of original stream e
     $this->assertInternalPositionsOfStream($emittedStream, $balanceId, [1, 5, 20, 100]);
 })->with('projection options with non empty retries');
 
+test('stop projection from projector', function () {
+    $this->setupProjection(
+        [[$eventStream = 'account', null]],
+        projectionName: $projectionName = 'balance',
+    );
+
+    $this->assertProjectionExists($projectionName, false);
+    $this->assertStreamExists($eventStream, false);
+
+    $this->balanceEventStore($eventStream)
+        ->withBalanceCreated(1, 100)
+        ->withVersioningAmount([[2, 200], [3, -150], [4, -150]]);
+
+    $projector = $this->projector;
+    $thenReactor = function (EmitterScope $scope) use ($projector): void {
+        if ($scope->userState()->integer('total') === 0) {
+            $projector->stop();
+        }
+    };
+
+    $this->projector
+        ->initialize(fn (): array => ['total' => 0])
+        ->subscribeToStream($eventStream)
+        ->when($this->getEmitterReactor(), $thenReactor)
+        ->filter($this->factory->inMemoryQueryFilter)
+        ->run(true);
+    $this->assertProjectionReport(cycle: 1, ackedEvent: 4, totalEvent: 4);
+});
+
 test('emit with many streams', function () {})->todo();
 
 test('link with many streams', function () {})->todo();

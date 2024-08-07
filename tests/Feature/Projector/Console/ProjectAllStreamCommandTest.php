@@ -13,7 +13,7 @@ use Storm\Tests\Domain\BalanceEventStore;
 
 use function json_decode;
 
-test('test emit all stream events to all stream', function () {
+test('test emit all stream events to internal stream all', function () {
     $connection = 'in_memory-incremental';
     $projectionName = '$all';
     $stream1 = 'account1';

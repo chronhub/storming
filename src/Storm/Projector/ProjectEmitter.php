@@ -6,6 +6,7 @@ namespace Storm\Projector;
 
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmitterProjector;
+use Storm\Projector\Provider\Events\ProjectionClosed;
 use Storm\Projector\Provider\Events\ProjectionDiscarded;
 use Storm\Projector\Provider\Events\ProjectionRevised;
 use Storm\Projector\Provider\Subscriptor;
@@ -27,6 +28,15 @@ final readonly class ProjectEmitter implements EmitterProjector
         $this->describeIfNeeded();
 
         $this->subscriber->start($this->context, $inBackground);
+    }
+
+    public function stop(): void
+    {
+        $this->subscriber->call(
+            fn (Process $process) => $process->dispatch(
+                new ProjectionClosed(),
+            ),
+        );
     }
 
     public function reset(): void

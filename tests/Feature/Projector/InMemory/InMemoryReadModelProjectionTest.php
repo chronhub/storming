@@ -381,3 +381,33 @@ test('load stream events with block size and load limiter', function () {
     $expectedCycles = 1000 / 100; // load limiter divided by block size (no gaps)
     $this->assertProjectionReport(cycle: $expectedCycles, ackedEvent: 1000, totalEvent: 1000);
 });
+
+test('stop projection from projector', function () {
+    $this->setupProjection(
+        [[$accountOne = 'account_one', null]],
+        projectionName: 'balance',
+        options: ['signal' => true],
+    );
+
+    $this->balanceEventStore($accountOne)->make(10);
+    $this->assertStreamExists($accountOne, true);
+
+    $projector = $this->projector;
+    $thenReactor = function (ReadModelScope $scope) use ($projector): void {
+        $scope->userState()->push('events', $scope->event()::class);
+        if (count($scope->userState()['events']) === 10) {
+            $projector->stop();
+        }
+    };
+
+    $this->projector
+        ->initialize(fn (): array => ['total' => 0])
+        ->subscribeToAll()
+        ->when($this->getReadModelReactor(), $thenReactor)
+        ->filter($this->factory->inMemoryQueryFilter)
+        ->run(inBackground: true);
+
+    expect($this->projector->getState()['events'])->toHaveCount(10);
+
+    $this->assertProjectionReport(cycle: 1, ackedEvent: 10, totalEvent: 10);
+});

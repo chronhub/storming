@@ -377,3 +377,40 @@ test('should perform when max batch is reached with reset and sleep', function (
 
     $this->assertProjectionReport(cycle: 1, ackedEvent: 5, totalEvent: 5);
 });
+
+test('stop projection from query projector', function () {
+    $this->setupProjection();
+
+    $this->makeEventStore($streamName = 'balance')
+        ->withBalanceCreated(1, 100)
+        ->withVersioningAmount([[2, 200], [3, -150], [4, -50]]);
+
+    $reactors = [
+        function (BalanceCreated $event) {
+            $this->userState()->increment('events');
+        },
+        function (BalanceAdded $event) {
+            $this->userState()->increment('events');
+        },
+        function (BalanceSubtracted $event) {
+            $this->userState()->increment('events');
+        },
+    ];
+
+    $projector = $this->projector;
+    $thenReactor = function (QueryProjectorScope $scope) use ($projector): void {
+        dump($scope->userState()->integer('events'));
+        if ($scope->userState()->integer('events') === 4) {
+            $projector->stop();
+        }
+    };
+
+    $this->projector
+        ->initialize(fn (): array => ['events' => 0])
+        ->subscribeToStream($streamName)
+        ->when($reactors, $thenReactor)
+        ->filter($this->factory->inMemoryQueryFilter)
+        ->run(true);
+
+    $this->assertProjectionReport(cycle: 1, ackedEvent: 4, totalEvent: 4);
+});

@@ -42,10 +42,8 @@ class InMemoryTestingFactory
         $this->inMemoryQueryFilter ??= new InMemoryFromToPosition();
     }
 
-    public function getMonitor(): Monitoring
+    public function getMonitor(string $connection = 'in_memory'): Monitoring
     {
-        $connection = $this->connectionManager->connectionName();
-
         return app(MonitoringManager::class)->monitor($connection);
     }
 
