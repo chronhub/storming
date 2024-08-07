@@ -15,7 +15,8 @@ use function in_array;
 
 #[AsCommand(
     name: 'projector:monitor:mark',
-    description: 'Marks a projection as stopping, resetting, deleting or deleting with emitted evens')]
+    description: 'Marks a projection as stopping, resetting, deleting or deleting with emitted evens'
+)]
 final class MarkMonitorProjectionCommand extends Command
 {
     public function __construct(

@@ -18,10 +18,8 @@ final class InMemoryLimitByOneQuery implements InMemoryQueryFilter, ProjectionQu
 
     public function apply(): callable
     {
-        return function (DomainEvent $event): bool {
-            return $this->extractInternalPosition($event)
-                ->equalsTo($this->streamPosition->value);
-        };
+        return fn (DomainEvent $event): bool => $this->extractInternalPosition($event)
+            ->equalsTo($this->streamPosition->value);
     }
 
     public function setStreamPosition(StreamPosition $streamPosition): void

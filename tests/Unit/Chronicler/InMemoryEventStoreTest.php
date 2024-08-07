@@ -9,8 +9,8 @@ use Storm\Aggregate\GenericAggregateId;
 use Storm\Chronicler\Direction;
 use Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Storm\Chronicler\Exceptions\StreamNotFound;
-use Storm\Chronicler\InMemory\InMemoryEventStore;
 use Storm\Chronicler\InMemory\InMemoryEventStreamProvider;
+use Storm\Chronicler\InMemory\VersioningEventStore;
 use Storm\Contract\Aggregate\AggregateIdentity;
 use Storm\Contract\Chronicler\InMemoryChronicler;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
@@ -29,7 +29,7 @@ use function range;
 
 beforeEach(function () {
     $this->eventStreamProvider = new InMemoryEventStreamProvider();
-    $this->eventStore = new InMemoryEventStore($this->eventStreamProvider);
+    $this->eventStore = new VersioningEventStore($this->eventStreamProvider);
     $this->aggregateId = GenericAggregateId::fromString(Uuid::v4()->jsonSerialize());
 });
 

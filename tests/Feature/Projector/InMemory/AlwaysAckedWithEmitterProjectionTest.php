@@ -103,7 +103,7 @@ test('test emit internal stream to an incremental event store', function () {
     $this->setupProjection(
         [[$stream1 = 'account1', null], [$stream2 = 'account2', null]],
         projectionName: $projectionName = '$all',
-        connection: 'in_memory-auto-increment',
+        connection: 'in_memory-incremental',
     );
 
     $this->assertProjectionExists($projectionName, false);

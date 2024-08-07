@@ -8,14 +8,10 @@ use Generator;
 use Illuminate\Support\Collection;
 use Storm\Chronicler\Direction;
 use Storm\Chronicler\Exceptions\ConcurrencyException;
-use Storm\Chronicler\Exceptions\InvalidArgumentException;
 use Storm\Chronicler\Exceptions\NoStreamEventReturn;
-use Storm\Chronicler\Exceptions\StreamNotFound;
-use Storm\Contract\Aggregate\AggregateIdentity;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Chronicler\InMemoryChronicler;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
-use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\EventHeader;
 use Storm\Stream\Stream;
@@ -26,74 +22,31 @@ use function array_map;
 use function count;
 use function iterator_to_array;
 
-final class InMemoryEventStore implements InMemoryChronicler
+final class VersioningEventStore implements InMemoryChronicler
 {
+    use ProvideInMemoryEventStore;
+
     /** @var Collection<array<string, array<DomainEvent>>> */
-    private Collection $streams;
+    protected Collection $streams;
 
     public function __construct(
-        private readonly EventStreamProvider $eventStreamProvider,
+        protected readonly EventStreamProvider $eventStreamProvider,
     ) {
         $this->streams = new Collection();
     }
 
-    public function append(Stream $stream): void
-    {
-        $streamName = $stream->name;
-
-        $this->eventStreamProvider->createStream($streamName->name, null, $streamName->partition());
-
-        $this->store($streamName, $stream->events());
-    }
-
-    public function delete(StreamName $streamName): void
-    {
-        $this->assertStreamExists($streamName);
-
-        $this->eventStreamProvider->deleteStream($streamName->name);
-
-        $this->streams = $this->streams->forget($streamName->name);
-    }
-
-    public function retrieveAll(StreamName $streamName, AggregateIdentity $aggregateId, Direction $direction = Direction::FORWARD): Generator
-    {
-        $queryFilter = new RetrieveAllInMemoryQueryFilter($aggregateId, $direction);
-
-        return $this->retrieveFiltered($streamName, $queryFilter);
-    }
-
-    public function retrieveFiltered(StreamName $streamName, QueryFilter $queryFilter): Generator
-    {
-        if (! $queryFilter instanceof InMemoryQueryFilter) {
-            throw new InvalidArgumentException('Query filter must be an instance of InMemoryQueryFilter');
-        }
-
-        $this->assertStreamExists($streamName);
-
-        return $this->filter($streamName, $queryFilter);
-    }
-
-    public function filterStreams(string ...$streams): array
-    {
-        return $this->eventStreamProvider->filterByStreams($streams);
-    }
-
-    public function filterPartitions(string ...$partitions): array
-    {
-        return $this->eventStreamProvider->filterByPartitions($partitions);
-    }
-
-    public function hasStream(StreamName $streamName): bool
-    {
-        return $this->eventStreamProvider->hasRealStreamName($streamName->name);
-    }
-
+    /**
+     * @return Collection<array<string, array<DomainEvent>>>
+     */
     public function getStreams(): Collection
     {
         return $this->streams;
     }
 
-    private function store(StreamName $streamName, iterable $events): void
+    /**
+     * @throws ConcurrencyException when the concurrency is detected
+     */
+    protected function store(StreamName $streamName, iterable $events): void
     {
         $streamEvents = $this->addInternalPositionIfNecessary(iterator_to_array($events));
 
@@ -102,7 +55,7 @@ final class InMemoryEventStore implements InMemoryChronicler
         $this->streams = $this->streams->mergeRecursive([$streamName->name => $streamEvents]);
     }
 
-    private function filter(StreamName $streamName, InMemoryQueryFilter $queryFilter): Generator
+    protected function filter(StreamName $streamName, InMemoryQueryFilter $queryFilter): Generator
     {
         $this->assertStreamExists($streamName);
 
@@ -124,21 +77,12 @@ final class InMemoryEventStore implements InMemoryChronicler
             $internalPosition = EventHeader::INTERNAL_POSITION;
 
             if ($streamEvent->hasNot($internalPosition)) {
-                $streamEvent = $streamEvent->withHeader(
-                    $internalPosition,
-                    $streamEvent->header(EventHeader::AGGREGATE_VERSION)
-                );
+                $aggregateVersion = $streamEvent->header(EventHeader::AGGREGATE_VERSION);
+                $streamEvent = $streamEvent->withHeader($internalPosition, $aggregateVersion);
             }
         }
 
         return $streamEvents;
-    }
-
-    private function assertStreamExists(StreamName $streamName): void
-    {
-        if (! $this->hasStream($streamName)) {
-            throw StreamNotFound::withStreamName($streamName);
-        }
     }
 
     /**
@@ -160,16 +104,14 @@ final class InMemoryEventStore implements InMemoryChronicler
         $nextPositions = $this->extractAggregateVersion($streamEvents);
 
         if (array_diff($nextPositions, $positions) === []) {
-            throw new ConcurrencyException(
-                "In memory concurrency detected for stream $streamName->name"
-            );
+            throw new ConcurrencyException("In memory concurrency detected for stream $streamName->name");
         }
     }
 
     /**
      * Extract the aggregate version from the stream event.
      *
-     * @return array<int<0, max>>
+     * @return array<positive-int>
      */
     private function extractAggregateVersion(array $streamEvents): array
     {

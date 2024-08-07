@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Chronicler;
 
-use Storm\Chronicler\InMemory\InMemoryEventStore;
 use Storm\Chronicler\InMemory\InMemoryEventStreamProvider;
+use Storm\Chronicler\InMemory\VersioningEventStore;
 use Storm\Clock\ClockFactory;
 use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceAdded;
@@ -16,7 +16,7 @@ use Storm\Tests\Domain\BalanceEventStore;
 
 test('append stream events', function () {
     $streamName = new StreamName('balance');
-    $chronicler = new InMemoryEventStore(new InMemoryEventStreamProvider());
+    $chronicler = new VersioningEventStore(new InMemoryEventStreamProvider());
     $clock = ClockFactory::create();
 
     expect($chronicler->hasStream($streamName))->toBeFalse();

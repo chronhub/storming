@@ -25,7 +25,7 @@ use function range;
 
 beforeEach(function () {
     $this->eventStreamProvider = new InMemoryEventStreamProvider();
-    $this->eventStore = new InMemoryAutoIncrementEventStore($this->eventStreamProvider);
+    $this->eventStore = new IncrementalEventStore($this->eventStreamProvider);
     $this->aggregateId = GenericAggregateId::fromString(Uuid::v4()->jsonSerialize());
 });
 

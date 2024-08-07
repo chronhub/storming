@@ -10,8 +10,6 @@ use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\EventHeader;
 
-use function is_array;
-
 final readonly class RetrieveAllInMemoryQueryFilter implements InMemoryQueryFilter
 {
     public function __construct(
@@ -21,13 +19,7 @@ final readonly class RetrieveAllInMemoryQueryFilter implements InMemoryQueryFilt
 
     public function apply(): callable
     {
-        return function (DomainEvent|array $event): ?DomainEvent {
-            if (is_array($event)) {
-                $event = $event[1];
-            }
-
-            return $this->matchAggregateId($event) ? $event : null;
-        };
+        return fn (DomainEvent $event): ?DomainEvent => $this->matchAggregateId($event) ? $event : null;
     }
 
     public function orderBy(): Direction

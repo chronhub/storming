@@ -16,10 +16,10 @@ return [
             'dispatch_events' => false,
         ],
 
-        'in_memory-auto-increment' => [
+        'in_memory-incremental' => [
             'provider' => 'projector.provider.in_memory',
             'options' => \Storm\Projector\Options\InMemoryOption::class,
-            'chronicler' => 'chronicler.in_memory.auto_increment',
+            'chronicler' => 'chronicler.in_memory.incremental',
             'chronicler.provider' => 'chronicler.provider.in_memory',
             'serializer' => 'projector.serializer.json',
             'dispatch_events' => false,
@@ -39,6 +39,9 @@ return [
         'commands' => [
             \Storm\Projector\Support\Console\ReadMonitorProjectionCommand::class,
             \Storm\Projector\Support\Console\MarkMonitorProjectionCommand::class,
+            \Storm\Projector\Support\Console\Edges\ProjectByPartitionCommand::class,
+            \Storm\Projector\Support\Console\Edges\ProjectAllStreamCommand::class,
+            \Storm\Projector\Support\Console\Edges\ProjectByMessageNameCommand::class,
         ],
     ],
 ];

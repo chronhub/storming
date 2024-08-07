@@ -10,6 +10,8 @@ use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Connector\Connector;
 use Storm\Projector\Exception\InvalidArgumentException;
 
+use function is_array;
+
 class ProjectorServiceManager
 {
     /** @var array<string, Connector|Closure(Application): Connector> */
@@ -34,14 +36,17 @@ class ProjectorServiceManager
 
         $config = config("projector.connection.$name");
 
-        if (! $config) {
+        if (! is_array($config) || $config === []) {
             throw new InvalidArgumentException("No configuration found for connector $name.");
         }
 
         return $this->connections[$name] = $this->resolveConnector($name, $config);
     }
 
-    public function addConnector(string $name, Connector|Closure $connector): void
+    /**
+     * @param Closure(Application): Connector $connector
+     */
+    public function addConnector(string $name, Closure $connector): void
     {
         $this->connectors[$name] = $connector;
     }
@@ -62,10 +67,6 @@ class ProjectorServiceManager
 
         $this->app['config']->set('projector.default', $name);
 
-        if ($connector instanceof Closure) {
-            return $connector($this->app)->connect($config);
-        }
-
-        return $connector->connect($config);
+        return $connector($this->app)->connect($config);
     }
 }
