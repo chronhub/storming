@@ -6,8 +6,8 @@ namespace Storm\Tests\Unit\Projector\Filter;
 
 use Storm\Chronicler\Direction;
 use Storm\Contract\Message\EventHeader;
-use Storm\Projector\Filter\InMemoryFromToPosition;
-use Storm\Projector\Filter\LoadLimiter;
+use Storm\Projector\Stream\Filter\InMemoryFromToPosition;
+use Storm\Projector\Stream\Filter\LoadLimiter;
 use Storm\Stream\StreamPosition;
 use Storm\Tests\Stubs\StreamEventsGeneratorStub;
 

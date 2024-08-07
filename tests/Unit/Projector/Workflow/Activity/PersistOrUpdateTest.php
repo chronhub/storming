@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Workflow\Activity;
 
 use Closure;
+use Provider\Event\ProjectionLockUpdated;
+use Provider\Event\ProjectionStored;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Activity\PersistOrUpdate;
-use Storm\Projector\Workflow\Management\ProjectionLockUpdated;
-use Storm\Projector\Workflow\Management\ProjectionStored;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamSleep;
 use Storm\Projector\Workflow\Notification\Promise\HasGap;
 use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamBlank;

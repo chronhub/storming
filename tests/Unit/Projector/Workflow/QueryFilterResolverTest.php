@@ -7,8 +7,8 @@ namespace Storm\Tests\Unit\Projector\Workflow;
 use Filter\ProjectionQueryFilter;
 use Filter\StreamNameAwareQueryFilter;
 use Storm\Contract\Projector\LoadLimiterProjectionQueryFilter;
-use Storm\Projector\Filter\LoadLimiter;
-use Storm\Projector\Workflow\QueryFilterResolver;
+use Storm\Projector\Stream\Filter\LoadLimiter;
+use Storm\Projector\Stream\QueryFilterResolver;
 use Storm\Stream\StreamPosition;
 
 test('set projection query filter', function () {

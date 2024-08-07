@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Workflow;
 
-use Storm\Projector\Workflow\EmittedStream;
+use Storm\Projector\Stream\EmittedStream;
 
 beforeEach(function () {
     $this->emittedStream = new EmittedStream();

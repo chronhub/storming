@@ -9,8 +9,8 @@ use Storm\Projector\Options\Option;
 use Storm\Projector\Provider\EmittingProvider;
 use Storm\Projector\Provider\GenericSubscription;
 use Storm\Projector\Provider\Subscriptor;
-use Storm\Projector\Workflow\EmittedStream;
-use Storm\Projector\Workflow\InMemoryEmittedStreams;
+use Storm\Projector\Stream\EmittedStream;
+use Storm\Projector\Stream\InMemoryEmittedStreams;
 
 final readonly class EmitterProviderFactory extends AbstractProviderFactory
 {

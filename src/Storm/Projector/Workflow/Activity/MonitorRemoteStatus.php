@@ -5,12 +5,12 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Workflow\Management\ProjectionClosed;
-use Storm\Projector\Workflow\Management\ProjectionDiscarded;
-use Storm\Projector\Workflow\Management\ProjectionRestarted;
-use Storm\Projector\Workflow\Management\ProjectionRevised;
-use Storm\Projector\Workflow\Management\ProjectionStatusDisclosed;
-use Storm\Projector\Workflow\Management\ProjectionSynchronized;
+use Storm\Projector\Provider\Events\ProjectionClosed;
+use Storm\Projector\Provider\Events\ProjectionDiscarded;
+use Storm\Projector\Provider\Events\ProjectionRestarted;
+use Storm\Projector\Provider\Events\ProjectionRevised;
+use Storm\Projector\Provider\Events\ProjectionStatusDisclosed;
+use Storm\Projector\Provider\Events\ProjectionSynchronized;
 use Storm\Projector\Workflow\Process;
 
 /**

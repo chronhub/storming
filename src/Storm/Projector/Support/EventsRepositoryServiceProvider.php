@@ -16,6 +16,9 @@ use Storm\Projector\Repository\Events\ProjectionRestarted;
 use Storm\Projector\Repository\Events\ProjectionStarted;
 use Storm\Projector\Repository\Events\ProjectionStopped;
 
+/**
+ * fixMe works for laravel 10 <= not for 11
+ */
 class EventsRepositoryServiceProvider extends EventServiceProvider
 {
     /**

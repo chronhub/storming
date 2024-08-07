@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Workflow;
 
 use Closure;
+use Provider\Event\PerformWhenThresholdIsReached;
 use Scope\ProjectorScope;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\Header;
@@ -13,7 +14,7 @@ use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Scope\EventScope;
 use Storm\Projector\Scope\UserStateScope;
-use Storm\Projector\Workflow\Management\PerformWhenThresholdIsReached;
+use Storm\Projector\Stream\StreamEventReactor;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamIncrements;
 use Storm\Projector\Workflow\Notification\Command\StreamEventAcked;
 use Storm\Projector\Workflow\Notification\Command\UserStateChanged;
@@ -21,7 +22,6 @@ use Storm\Projector\Workflow\Notification\Promise\CurrentUserState;
 use Storm\Projector\Workflow\Notification\Promise\IsSprintRunning;
 use Storm\Projector\Workflow\Notification\Promise\IsUserStateInitialized;
 use Storm\Projector\Workflow\Notification\Promise\StreamEventProcessed;
-use Storm\Projector\Workflow\StreamEventReactor;
 use Storm\Stream\StreamPosition;
 
 use function is_array;

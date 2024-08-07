@@ -12,7 +12,6 @@ use Storm\Contract\Projector\ReadModelProjector;
 use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Connector\SubscriptionFactoryResolver;
 use Storm\Projector\Options\Option;
-use Storm\Projector\Workflow\DefaultContext;
 
 final readonly class ProjectorManager implements ProjectorManagerInterface
 {
@@ -57,11 +56,11 @@ final readonly class ProjectorManager implements ProjectorManagerInterface
     /**
      * @return array{ConnectionManager, Option}
      */
-    private function getConnectionWithOptions(?string $connection = null, array $option = []): array
+    private function getConnectionWithOptions(?string $connection = null, array $options = []): array
     {
         $connector = $this->manager->connection($connection);
 
-        $option = $connector->toProjectionOption($option);
+        $option = $connector->toProjectionOption($options);
 
         return [$connector, $option];
     }

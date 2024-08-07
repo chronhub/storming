@@ -41,7 +41,7 @@ final class Component implements ComponentRegistry
         $this->components = [
             'context' => new Contextualize(),
             'discovery' => new EventStreamDiscovery($eventStreamProvider),
-            'dispatcher' => new EventEmitter(),
+            'dispatcher' => new Notify(),
             'option' => $option,
             'stream' => new ProcessedStream(),
             'recognition' => $this->checkpointRecognition($option),

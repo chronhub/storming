@@ -8,8 +8,8 @@ use Generator;
 use Storm\Clock\ClockFactory;
 use Storm\Contract\Message\EventHeader;
 use Storm\Contract\Message\Header;
-use Storm\Projector\Iterator\MergeStreamIterator;
-use Storm\Projector\Iterator\StreamIterator;
+use Storm\Projector\Stream\Iterator\MergeStreamIterator;
+use Storm\Projector\Stream\Iterator\StreamIterator;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 
 final readonly class MergeStreamIteratorStub

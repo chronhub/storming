@@ -6,7 +6,7 @@ namespace Storm\Tests\Unit\Projector\Repository\EventStream;
 
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Projector\Exception\InvalidArgumentException;
-use Storm\Projector\Workflow\EventStream\DiscoverStream;
+use Storm\Projector\Stream\Query\DiscoverStream;
 
 beforeEach(function () {
     $this->provider = mock(EventStreamProvider::class);

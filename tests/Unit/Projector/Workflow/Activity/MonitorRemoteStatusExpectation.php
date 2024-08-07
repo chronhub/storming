@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Workflow\Activity;
 
 use Mockery\MockInterface;
+use Provider\Event\ProjectionClosed;
+use Provider\Event\ProjectionDiscarded;
+use Provider\Event\ProjectionRestarted;
+use Provider\Event\ProjectionRevised;
+use Provider\Event\ProjectionStatusDisclosed;
+use Provider\Event\ProjectionSynchronized;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Workflow\Management\ProjectionClosed;
-use Storm\Projector\Workflow\Management\ProjectionDiscarded;
-use Storm\Projector\Workflow\Management\ProjectionRestarted;
-use Storm\Projector\Workflow\Management\ProjectionRevised;
-use Storm\Projector\Workflow\Management\ProjectionStatusDisclosed;
-use Storm\Projector\Workflow\Management\ProjectionSynchronized;
 use Storm\Projector\Workflow\Notification\Promise\CurrentStatus;
 use Storm\Projector\Workflow\Notification\Promise\IsSprintDaemonize;
 

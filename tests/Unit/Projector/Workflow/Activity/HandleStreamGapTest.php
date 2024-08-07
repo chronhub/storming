@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Workflow\Activity;
 
 use Closure;
+use Provider\Event\ProjectionStored;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Activity\HandleStreamGap;
-use Storm\Projector\Workflow\Management\ProjectionStored;
 use Storm\Projector\Workflow\Notification\Command\SleepOnGap;
 use Storm\Projector\Workflow\Notification\Promise\HasGap;
 use Storm\Projector\Workflow\Notification\Promise\IsBatchStreamReset;

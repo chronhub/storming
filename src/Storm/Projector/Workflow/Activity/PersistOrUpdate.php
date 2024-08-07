@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Projector\Workflow\Management\ProjectionLockUpdated;
-use Storm\Projector\Workflow\Management\ProjectionStored;
+use Storm\Projector\Provider\Events\ProjectionLockUpdated;
+use Storm\Projector\Provider\Events\ProjectionStored;
 use Storm\Projector\Workflow\Process;
 
 final readonly class PersistOrUpdate

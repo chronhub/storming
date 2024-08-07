@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
-use Storm\Projector\Workflow\Management\ProjectionRise;
+use Storm\Projector\Provider\Events\ProjectionRise;
 use Storm\Projector\Workflow\Process;
 
 final readonly class RisePersistentProjection

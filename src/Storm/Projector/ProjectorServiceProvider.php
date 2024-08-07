@@ -16,13 +16,13 @@ use Storm\Contract\Serializer\JsonSerializer;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Connector\InMemoryConnector;
 use Storm\Projector\Connector\SubscriptionFactoryResolver;
-use Storm\Projector\Repository\InMemoryProvider;
+use Storm\Projector\Repository\InMemoryProjectionProvider;
 
 class ProjectorServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     public array $singletons = [
         'chronicler.provider.in_memory' => InMemoryEventStreamProvider::class,
-        'projector.provider.in_memory' => InMemoryProvider::class,
+        'projector.provider.in_memory' => InMemoryProjectionProvider::class,
     ];
 
     protected string $projector = __DIR__.'/../../../config/projector.php';

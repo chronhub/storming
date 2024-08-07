@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Component;
 
-use Storm\Projector\Iterator\MergeStreamIterator;
+use Storm\Projector\Stream\Iterator\MergeStreamIterator;
 use Storm\Projector\Support\ExponentialSleep;
 
 class EventStreamBatch

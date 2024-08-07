@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
+use Storm\Projector\Provider\Events\ProjectionStored;
 use Storm\Projector\Provider\InteractWithProvider;
-use Storm\Projector\Workflow\Management\ProjectionStored;
 use Storm\Projector\Workflow\Notification\AfterHandleStreamGap;
 use Storm\Projector\Workflow\Notification\BeforeHandleStreamGap;
 use Storm\Projector\Workflow\Process;

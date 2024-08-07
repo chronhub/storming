@@ -6,10 +6,10 @@ namespace Storm\Projector;
 
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\ReadModelProjector;
-use Storm\Projector\Filter\ProjectionQueryFilter;
+use Storm\Projector\Provider\Events\ProjectionDiscarded;
+use Storm\Projector\Provider\Events\ProjectionRevised;
 use Storm\Projector\Provider\Subscriptor;
-use Storm\Projector\Workflow\Management\ProjectionDiscarded;
-use Storm\Projector\Workflow\Management\ProjectionRevised;
+use Storm\Projector\Stream\Filter\ProjectionQueryFilter;
 use Storm\Projector\Workflow\Process;
 
 final readonly class ProjectReadModel implements ReadModelProjector

@@ -9,7 +9,7 @@ use Iterator;
 use Storm\Clock\ClockFactory;
 use Storm\Contract\Message\EventHeader;
 use Storm\Contract\Message\Header;
-use Storm\Projector\Iterator\MergeStreamIterator;
+use Storm\Projector\Stream\Iterator\MergeStreamIterator;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 use Storm\Tests\Stubs\MergeStreamIteratorStub;
 

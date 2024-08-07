@@ -9,7 +9,7 @@ use InvalidArgumentException;
 use Iterator;
 use Storm\Chronicler\Exceptions\StreamNotFound;
 use Storm\Contract\Message\EventHeader;
-use Storm\Projector\Iterator\StreamIterator;
+use Storm\Projector\Stream\Iterator\StreamIterator;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 use Storm\Tests\Stubs\StreamEventsGeneratorStub;
 

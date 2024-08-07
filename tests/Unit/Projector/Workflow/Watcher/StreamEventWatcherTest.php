@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 
-use Storm\Projector\Iterator\MergeStreamIterator;
+use Storm\Projector\Stream\Iterator\MergeStreamIterator;
 use Storm\Projector\Support\ExponentialSleep;
 use Storm\Projector\Workflow\Component\EventStreamBatch;
 use Storm\Tests\Stubs\MergeStreamIteratorStub;

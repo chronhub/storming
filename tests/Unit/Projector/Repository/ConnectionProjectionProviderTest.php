@@ -24,7 +24,7 @@ use Storm\Projector\Repository\Data\StartData;
 use Storm\Projector\Repository\Data\StopData;
 use Storm\Projector\Repository\Data\UpdateLockData;
 use Storm\Projector\Repository\Data\UpdateStatusData;
-use Storm\Projector\Repository\DatabaseProvider;
+use Storm\Projector\Repository\DatabaseProjectionProvider;
 use Storm\Projector\Repository\Projection;
 
 beforeEach(function () {
@@ -44,7 +44,7 @@ dataset('update projection data', [
 ]);
 
 test('create projection with default table name', function (): void {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder)
@@ -68,7 +68,7 @@ test('create projection with default table name', function (): void {
 });
 
 test('create projection with custom table name', function (): void {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock, 'custom-table-name');
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock, 'custom-table-name');
     $this->connection->expects('table')
         ->with('custom-table-name')
         ->andReturn($this->builder)
@@ -91,7 +91,7 @@ test('create projection with custom table name', function (): void {
 });
 
 test('raise projection already exists exception when create projection', function (): void {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder);
@@ -107,7 +107,7 @@ test('raise projection already exists exception when create projection', functio
 })->throws(ProjectionAlreadyExists::class);
 
 test('raise exception when projection data argument is not create data instance', function (): void {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')->never();
 
     $projectionName = 'projection-name';
@@ -122,7 +122,7 @@ test('raise exception when projection data argument is not create data instance'
 })->throws(InvalidArgumentException::class, 'Invalid data provided, expected class '.CreateData::class);
 
 test('raise exception when fails to create projection', function () {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder)
@@ -148,7 +148,7 @@ test('raise exception when fails to create projection', function () {
 test('acquire lock', function (): void {
     $this->clock->expects('generate')->andReturn('point in time locked until');
 
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder);
@@ -167,7 +167,7 @@ test('acquire lock', function (): void {
 });
 
 test('raise exception when projection data not start data instance with acquire lock', function (): void {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')->never();
 
     $data = new UpdateStatusData('running');
@@ -178,7 +178,7 @@ test('raise exception when projection data not start data instance with acquire 
 test('raise projection not found exception when acquire lock', function (): void {
     $this->clock->expects('generate')->andReturn('point in time locked until');
 
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder)
@@ -203,7 +203,7 @@ test('raise projection not found exception when acquire lock', function (): void
 test('raise projection already running exception when acquire lock fails', function (): void {
     $this->clock->expects('generate')->andReturn('point in time locked until');
 
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder)
@@ -226,7 +226,7 @@ test('raise projection already running exception when acquire lock fails', funct
 })->throws(ProjectionAlreadyRunning::class);
 
 test('delete projection', function (): void {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder);
@@ -240,7 +240,7 @@ test('delete projection', function (): void {
 });
 
 test('raise projection not found exception when delete projection', function (): void {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder)
@@ -258,7 +258,7 @@ test('raise projection not found exception when delete projection', function ():
 })->throws(ProjectionNotFound::class, 'Projection projection-name not found');
 
 test('raise projection connection failed exception when delete projection fails', function (): void {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder)
@@ -276,7 +276,7 @@ test('raise projection connection failed exception when delete projection fails'
 })->throws(ProjectionConnectionFailed::class, 'Failed to delete projection with name projection-name');
 
 test('update projection', function (ProjectionData $updateData) {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder);
@@ -290,7 +290,7 @@ test('update projection', function (ProjectionData $updateData) {
 })->with('update projection data');
 
 test('raise projection not found when update projection', function (ProjectionData $updateData) {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder)
@@ -310,7 +310,7 @@ test('raise projection not found when update projection', function (ProjectionDa
     ->throws(ProjectionNotFound::class, 'Projection projection-name not found');
 
 test('raise projection connection failed when update projection fails', function (ProjectionData $updateData) {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder)
@@ -338,7 +338,7 @@ test('raise projection connection failed when update projection fails', function
     ->throws(ProjectionConnectionFailed::class, 'Failed to update projection with name projection-name');
 
 test('retrieve projection from array', function () {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder);
@@ -367,7 +367,7 @@ test('retrieve projection from array', function () {
 });
 
 test('retrieve projection from stdClass', function () {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder);
@@ -396,7 +396,7 @@ test('retrieve projection from stdClass', function () {
 });
 
 test('return null when projection not found', function () {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder);
@@ -412,7 +412,7 @@ test('return null when projection not found', function () {
 });
 
 test('filter by projection names', function (array $projectionNames, array $expected) {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder);
@@ -432,7 +432,7 @@ test('filter by projection names', function (array $projectionNames, array $expe
 ]);
 
 test('projection exists', function (bool $exists) {
-    $projectionProvider = new DatabaseProvider($this->connection, $this->clock);
+    $projectionProvider = new DatabaseProjectionProvider($this->connection, $this->clock);
     $this->connection->expects('table')
         ->with($projectionProvider::TABLE_NAME)
         ->andReturn($this->builder);

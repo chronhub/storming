@@ -21,14 +21,14 @@ use Storm\Projector\Repository\Data\StartData;
 use Storm\Projector\Repository\Data\StopData;
 use Storm\Projector\Repository\Data\UpdateLockData;
 use Storm\Projector\Repository\Data\UpdateStatusData;
-use Storm\Projector\Repository\InMemoryProvider;
+use Storm\Projector\Repository\InMemoryProjectionProvider;
 use Storm\Tests\Testing\ProjectionProviderTestingTrait;
 
 uses(ProjectionProviderTestingTrait::class);
 
 beforeEach(function () {
     $this->clock = mock(SystemClock::class);
-    $this->projectionProvider = new InMemoryProvider($this->clock);
+    $this->projectionProvider = new InMemoryProjectionProvider($this->clock);
 });
 
 dataset('projection data', [

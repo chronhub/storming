@@ -16,7 +16,7 @@ use Storm\Projector\Repository\Data\CreateData;
 use Storm\Projector\Repository\Data\ProjectionData;
 use Storm\Projector\Repository\Data\StartData;
 use Storm\Projector\Repository\Data\UpdateLockData;
-use Storm\Projector\Repository\DatabaseProvider;
+use Storm\Projector\Repository\DatabaseProjectionProvider;
 
 uses(RefreshDatabase::class);
 
@@ -24,7 +24,7 @@ beforeEach(function () {
     $connection = $this->app['db']->connection();
 
     $connection->getSchemaBuilder()->create(
-        DatabaseProvider::TABLE_NAME, function (Blueprint $table) {
+        DatabaseProjectionProvider::TABLE_NAME, function (Blueprint $table) {
             $table->string('name')->primary();
             $table->string('status');
             $table->string('state');
@@ -32,7 +32,7 @@ beforeEach(function () {
             $table->timestamp('locked_until')->nullable();
         });
 
-    $this->projectionProvider = new DatabaseProvider(
+    $this->projectionProvider = new DatabaseProjectionProvider(
         $connection,
         ClockFactory::create()
     );

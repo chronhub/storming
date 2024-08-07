@@ -9,7 +9,7 @@ use InvalidArgumentException;
 use Storm\Chronicler\Direction;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Message\EventHeader;
-use Storm\Projector\Filter\InMemoryLimitByOneQuery;
+use Storm\Projector\Stream\Filter\InMemoryLimitByOneQuery;
 use Storm\Stream\StreamPosition;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 use Storm\Tests\Stubs\StreamEventsGeneratorStub;

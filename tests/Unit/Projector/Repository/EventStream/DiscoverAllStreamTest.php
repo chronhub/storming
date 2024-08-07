@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Repository\EventStream;
 
 use Storm\Contract\Chronicler\EventStreamProvider;
-use Storm\Projector\Workflow\EventStream\DiscoverAllStream;
+use Storm\Projector\Stream\Query\DiscoverAllStream;
 
 beforeEach(function () {
     $this->provider = mock(EventStreamProvider::class);

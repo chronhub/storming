@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Scope;
 
+use Provider\Event\ProjectionClosed;
+use Provider\Event\StreamEventEmitted;
+use Provider\Event\StreamEventLinkedTo;
 use Scope\EmitterScope;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Scope\EmitterAccess;
-use Storm\Projector\Workflow\Management\ProjectionClosed;
-use Storm\Projector\Workflow\Management\StreamEventEmitted;
-use Storm\Projector\Workflow\Management\StreamEventLinkedTo;
 use Storm\Projector\Workflow\Notification\Promise\CurrentProcessedStream;
 
 beforeEach(function () {

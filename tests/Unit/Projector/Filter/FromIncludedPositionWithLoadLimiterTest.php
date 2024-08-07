@@ -8,7 +8,7 @@ use Filter\DatabaseProjectionQueryFilter;
 use Illuminate\Database\Query\Builder;
 use Storm\Contract\Projector\LoadLimiterProjectionQueryFilter;
 use Storm\Projector\Filter\FromIncludedPositionWithLoadLimiter;
-use Storm\Projector\Filter\LoadLimiter;
+use Storm\Projector\Stream\Filter\LoadLimiter;
 use Storm\Stream\StreamPosition;
 
 beforeEach(function () {

@@ -6,7 +6,7 @@ namespace Storm\Tests\Unit\Projector\Workflow;
 
 use InvalidArgumentException;
 use JsonSerializable;
-use Storm\Projector\Workflow\InMemoryEmittedStreams;
+use Storm\Projector\Stream\InMemoryEmittedStreams;
 
 test('default instance', function () {
     $instance = new InMemoryEmittedStreams(3);

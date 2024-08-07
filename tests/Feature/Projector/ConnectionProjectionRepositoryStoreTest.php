@@ -12,7 +12,7 @@ use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Repository\DatabaseProvider;
+use Storm\Projector\Repository\DatabaseProjectionProvider;
 use Storm\Projector\Repository\GenericRepository;
 use Storm\Projector\Repository\LockManager;
 use Storm\Projector\Repository\Projection;
@@ -28,7 +28,7 @@ beforeEach(function () {
     $connection = $this->app['db']->connection();
 
     $connection->getSchemaBuilder()->create(
-        DatabaseProvider::TABLE_NAME, function (Blueprint $table) {
+        DatabaseProjectionProvider::TABLE_NAME, function (Blueprint $table) {
             $table->string('name')->primary();
             $table->string('status');
             $table->string('state');
@@ -37,7 +37,7 @@ beforeEach(function () {
         });
 
     $this->clock = ClockFactory::create();
-    $this->projectionProvider = new DatabaseProvider($connection, $this->clock);
+    $this->projectionProvider = new DatabaseProjectionProvider($connection, $this->clock);
 
     $this->lock = new LockManager($this->clock, 1000, 1000);
     $this->serializer = (new JsonSerializerFactory())->create();

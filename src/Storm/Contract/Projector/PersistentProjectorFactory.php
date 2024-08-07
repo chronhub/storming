@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Projector;
 
-use Storm\Projector\Filter\ProjectionQueryFilter;
+use Storm\Projector\Stream\Filter\ProjectionQueryFilter;
 
 interface PersistentProjectorFactory extends ProjectorFactory
 {

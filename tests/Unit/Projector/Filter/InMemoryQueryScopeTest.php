@@ -7,8 +7,8 @@ namespace Storm\Tests\Unit\Projector\Filter;
 use Filter\ProjectionQueryFilter;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Projector\LoadLimiterProjectionQueryFilter;
-use Storm\Projector\Filter\InMemoryFromToPosition;
 use Storm\Projector\Filter\InMemoryQueryScope;
+use Storm\Projector\Stream\Filter\InMemoryFromToPosition;
 
 beforeEach(function () {
     $this->queryScope = new InMemoryQueryScope();

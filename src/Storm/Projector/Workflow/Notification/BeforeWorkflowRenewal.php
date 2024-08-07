@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Notification;
 
-use Storm\Projector\Workflow\EmitOnce;
+use Storm\Projector\Workflow\NotifyOnce;
 
-final readonly class BeforeWorkflowRenewal implements EmitOnce
+final readonly class BeforeWorkflowRenewal implements NotifyOnce
 {
     public function __construct(public bool $isSprintTerminated) {}
 }

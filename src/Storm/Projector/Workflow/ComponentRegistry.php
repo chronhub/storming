@@ -23,7 +23,7 @@ use Storm\Projector\Workflow\Component\UserState;
  * @method Contextualize         context()
  * @method EventStreamBatch      batch()
  * @method EventStreamDiscovery  discovery()
- * @method EventManager          dispatcher()
+ * @method Notifier              dispatcher()
  * @method HaltOn                haltOn()
  * @method Option                option()
  * @method ProcessedStream       stream()

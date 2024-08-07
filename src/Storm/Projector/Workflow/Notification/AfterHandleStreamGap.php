@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Notification;
 
-use Storm\Projector\Workflow\EmitOnce;
+use Storm\Projector\Workflow\NotifyOnce;
 
-final class AfterHandleStreamGap implements EmitOnce {}
+final class AfterHandleStreamGap implements NotifyOnce {}

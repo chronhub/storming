@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Activity;
 
 use Storm\Contract\Message\DomainEvent;
-use Storm\Projector\Iterator\MergeStreamIterator;
+use Storm\Projector\Stream\Iterator\MergeStreamIterator;
 use Storm\Projector\Workflow\Process;
 use Storm\Stream\StreamPosition;
 

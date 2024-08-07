@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Workflow\Activity;
 
+use Provider\Event\ProjectionRise;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Workflow\Activity\DiscoverRemoteStatus;
 use Storm\Projector\Workflow\Activity\RisePersistentProjection;
-use Storm\Projector\Workflow\Management\ProjectionRise;
 use Storm\Projector\Workflow\Notification\Promise\IsFirstWorkflowCycle;
 
 beforeEach(function () {

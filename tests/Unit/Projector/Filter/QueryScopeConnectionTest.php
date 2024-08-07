@@ -8,8 +8,8 @@ use Filter\DatabaseProjectionQueryFilter;
 use Filter\ProjectionQueryFilter;
 use Storm\Contract\Projector\LoadLimiterProjectionQueryFilter;
 use Storm\Projector\Filter\DatabaseQueryScope;
-use Storm\Projector\Filter\FromIncludedPosition;
 use Storm\Projector\Filter\FromIncludedPositionWithLoadLimiter;
+use Storm\Projector\Stream\Filter\FromIncludedPosition;
 
 beforeEach(function () {
     $this->queryScopeConnection = new DatabaseQueryScope();

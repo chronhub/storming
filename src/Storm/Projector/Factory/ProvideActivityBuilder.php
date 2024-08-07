@@ -6,13 +6,13 @@ namespace Storm\Projector\Factory;
 
 use Closure;
 use Storm\Contract\Chronicler\QueryFilter;
-use Storm\Projector\Filter\LoadLimiter;
 use Storm\Projector\Scope\ProjectorScope;
-use Storm\Projector\Workflow\Activity\CollectStreams;
+use Storm\Projector\Stream\CollectStreams;
+use Storm\Projector\Stream\Filter\LoadLimiter;
+use Storm\Projector\Stream\QueryFilterResolver;
+use Storm\Projector\Stream\StreamEventReactor;
 use Storm\Projector\Workflow\Activity\LoadStreams;
 use Storm\Projector\Workflow\Process;
-use Storm\Projector\Workflow\QueryFilterResolver;
-use Storm\Projector\Workflow\StreamEventReactor;
 
 use function array_map;
 

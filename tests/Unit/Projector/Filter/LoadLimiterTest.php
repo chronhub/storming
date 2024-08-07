@@ -6,7 +6,7 @@ namespace Storm\Tests\Unit\Projector\Filter;
 
 use InvalidArgumentException;
 use RuntimeException;
-use Storm\Projector\Filter\LoadLimiter;
+use Storm\Projector\Stream\Filter\LoadLimiter;
 
 test('default instance', function (int $value) {
     $filter = new LoadLimiter($value);
