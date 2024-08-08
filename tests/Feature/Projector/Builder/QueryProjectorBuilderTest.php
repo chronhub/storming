@@ -29,7 +29,7 @@ test('test query builder from partition', function () {
     BalanceEventStore::fromProjectionConnection($manager, new StreamName($stream1), $balanceId)
         ->withBalanceCreated(1, 250)
         ->withBalanceAdded(2, 50)
-        ->withBalanceNoOp(2)
+        ->withBalanceNoOp(3)
         ->withBalanceSubtracted(4, -250)
         ->withBalanceNoOp(5)
         ->withBalanceNoOp(6)
@@ -51,15 +51,15 @@ test('test query builder from partition', function () {
             $event = $scope->event();
 
             if ($event instanceof BalanceCreated) {
-                $scope->userState()->increment('balances');
+                $scope->userState()->increment('balances', $event->amount());
             }
 
             if ($event instanceof BalanceAdded) {
-                $scope->userState()->increment('balances');
+                $scope->userState()->increment('balances', $event->amount());
             }
 
             if ($event instanceof BalanceSubtracted) {
-                $scope->userState()->decrement('balances');
+                $scope->userState()->decrement('balances', $event->amount());
             }
 
             if ($event instanceof BalanceNoOp) {
@@ -74,6 +74,7 @@ test('test query builder from partition', function () {
     expect($queryProjector->getState())->toBeArray()
         ->and($queryProjector->getState()['balances'])->toBe(50)
         ->and($queryProjector->getState()['no_op'])->toBe([
+            BalanceNoOp::class,
             BalanceNoOp::class,
             BalanceNoOp::class,
             BalanceNoOp::class,
