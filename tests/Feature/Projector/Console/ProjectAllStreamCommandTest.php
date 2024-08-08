@@ -21,22 +21,19 @@ test('test emit all stream events to internal stream all', function () {
 
     /** @var ProjectorManagement $serviceManager */
     $serviceManager = app(ProjectorManagement::class);
-
     $manager = $serviceManager->connection($connection);
 
-    (new BalanceEventStore(
-        $manager->eventStore(),
-        $manager->clock(),
+    BalanceEventStore::fromProjectionConnection(
+        $manager,
         new StreamName($stream1),
         BalanceId::create()
-    ))->make(10);
+    )->make(10);
 
-    (new BalanceEventStore(
-        $manager->eventStore(),
-        $manager->clock(),
+    BalanceEventStore::fromProjectionConnection(
+        $manager,
         new StreamName($stream2),
         BalanceId::create()
-    ))->make(5);
+    )->make(5);
 
     Application::starting(function ($artisan) {
         $artisan->resolveCommands(ProjectAllStreamCommand::class);
