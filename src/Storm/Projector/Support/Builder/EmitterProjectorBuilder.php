@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Support\ProcessBuilder;
+namespace Storm\Projector\Support\Builder;
 
 use Storm\Contract\Projector\EmitterProjector;
 
-final class EmitterProjectorBuilderProcess extends ProjectionBuilderProcess
+final class EmitterProjectorBuilder extends ProjectorBuilder
 {
     private ?EmitterProjector $projector = null;
 
@@ -15,7 +15,7 @@ final class EmitterProjectorBuilderProcess extends ProjectionBuilderProcess
         $emitterProjector = $this->projectorManager->newEmitterProjector(
             $this->projectionName,
             $this->option,
-            $this->connection
+            $this->getConnection()
         );
 
         return $this->projector = $this->buildProjector($emitterProjector);

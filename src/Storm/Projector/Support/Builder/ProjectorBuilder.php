@@ -2,15 +2,15 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Support\ProcessBuilder;
+namespace Storm\Projector\Support\Builder;
 
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\EmitterProjector;
-use Storm\Contract\Projector\MonitoringManager;
 use Storm\Contract\Projector\Projector;
+use Storm\Contract\Projector\ProjectorManagement;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Contract\Projector\ReadModelProjector;
@@ -30,17 +30,15 @@ use function pcntl_signal_dispatch;
 /**
  * @template TScope of QueryProjectorScope|ReadModelScope|EmitterScope
  */
-abstract class ProjectionBuilderProcess
+abstract class ProjectorBuilder
 {
-    protected ?Application $app = null;
-
-    protected ?string $connection;
+    private ?string $connection;
 
     protected ?string $description = null;
 
     protected ?string $projectionName = null;
 
-    protected null|string|ProjectionQueryFilter|QueryFilter $queryFilter;
+    protected null|string|ProjectionQueryFilter|QueryFilter $queryFilter = null;
 
     /** @var Closure(): array|null */
     protected ?Closure $initialState = null;
@@ -70,8 +68,9 @@ abstract class ProjectionBuilderProcess
     protected array $haltOn = [];
 
     public function __construct(
+        protected ProjectorManagement $projectorManagement,
         protected ProjectorManagerInterface $projectorManager,
-        protected MonitoringManager $monitoringManager,
+        protected Application $app,
     ) {}
 
     /**
@@ -79,7 +78,7 @@ abstract class ProjectionBuilderProcess
      *
      * @return $this
      */
-    public function withConnection(string $connection): static
+    public function withConnection(?string $connection): static
     {
         $this->connection = $connection;
 
@@ -171,9 +170,9 @@ abstract class ProjectionBuilderProcess
      *
      * @return $this
      */
-    public function enableSignal(): static
+    public function enableSignal(bool $enable): static
     {
-        $this->pcntlDispatch = true;
+        $this->pcntlDispatch = $enable;
 
         return $this;
     }
@@ -266,22 +265,33 @@ abstract class ProjectionBuilderProcess
             $projector->initialize($this->initialState);
         }
 
-        $projector = $this->subscribeTo($projector);
+        foreach ($this->haltOn as $haltOn) {
+            $projector->haltOn($haltOn);
+        }
+
+        $this->configureQueryFilterIfNeeded();
+
+        $projector
+            ->filter($this->queryFilter)
+            ->when($this->reactors, $this->then);
+
+        return $this->subscribeTo($projector);
+    }
+
+    protected function configureQueryFilterIfNeeded(): void
+    {
+        if ($this->queryFilter === null) {
+            $this->queryFilter = $this->projectorManagement->connection($this->connection)->queryFilter();
+        }
 
         if (is_string($this->queryFilter)) {
             $this->queryFilter = $this->app[$this->queryFilter];
         }
-
-        return $projector
-            ->filter($this->queryFilter)
-            ->when($this->reactors, $this->then);
     }
 
-    public function setContainer(Application $app): static
+    protected function getConnection(): string
     {
-        $this->app = $app;
-
-        return $this;
+        return $this->connection ??= $this->projectorManagement->getDefaultDriver();
     }
 
     /**

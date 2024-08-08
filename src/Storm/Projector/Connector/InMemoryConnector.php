@@ -23,10 +23,16 @@ final readonly class InMemoryConnector implements Connector
             $options = $this->app[$options];
         }
 
+        $queryFilter = $config['query_filter'];
+        if (is_string($queryFilter)) {
+            $queryFilter = $this->app[$queryFilter];
+        }
+
         return new InMemoryConnectionManager(
             $this->app[$config['chronicler']],
             $this->app[$config['chronicler.provider']],
             $this->app[$config['provider']],
+            $queryFilter,
             $this->app[SystemClock::class],
             $this->app[$config['serializer']],
             $options,

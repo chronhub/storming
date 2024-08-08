@@ -51,6 +51,8 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
         $this->registerEventStoreService();
 
         $this->registerManagers();
+
+        $this->registerProjectionsConfigured();
     }
 
     public function provides(): array
@@ -107,5 +109,20 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
 
             return new IncrementalEventStore($provider);
         });
+    }
+
+    protected function registerProjectionsConfigured(): void
+    {
+        if (! config('projector.projections.auto_discovery', false)) {
+            return;
+        }
+
+        $projections = config('projector.projections.projection', []);
+
+        foreach ($projections as $key => $builds) {
+            foreach ($builds as $name => $projectionBuild) {
+                $this->app->bind('projection.'.$key.'.'.$name, $projectionBuild);
+            }
+        }
     }
 }

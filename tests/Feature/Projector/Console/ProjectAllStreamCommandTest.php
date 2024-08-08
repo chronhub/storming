@@ -46,6 +46,7 @@ test('test emit all stream events to internal stream all', function () {
 
     $this->artisan('projector:edge:all', [
         'connection' => 'in_memory-incremental',
+        'build' => 'projection.emitter.edge-all',
         '--signal' => false,
         '--in-background' => false,
     ])->run();

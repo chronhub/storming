@@ -4,11 +4,6 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Support\Console\Edges;
 
-use Illuminate\Support\Str;
-use Storm\Contract\Projector\EmitterProjector;
-use Storm\Contract\Projector\ProjectorManagerInterface;
-use Storm\Projector\Scope\EmitterScope;
-use Storm\Projector\Stream\Filter\InMemoryFromToPosition;
 use Symfony\Component\Console\Attribute\AsCommand;
 
 #[AsCommand(
@@ -19,43 +14,7 @@ final class ProjectByMessageNameCommand extends ProjectEdgeCommand
 {
     protected $signature = 'projector:edge:message-name
                             { connection            : The connection name }
-                            { --signal=true         : Trigger the command with signals } 
+                            { build                 : The build projection ID }
+                            { --signal=false        : Trigger the command with signals } 
                             { --in-background=false : Determine if the command should be run in the background }';
-
-    private ?EmitterProjector $projector;
-
-    public function __construct(
-        private readonly ProjectorManagerInterface $manager
-    ) {
-        parent::__construct();
-    }
-
-    public function handle(): int
-    {
-        $isDispatchSignal = $this->setupSignalHandler();
-
-        $this->projector = $this->manager->newEmitterProjector(
-            streamName: '$by_message_name',
-            options: ['signal' => $isDispatchSignal],
-            connection: $this->argument('connection'),
-        );
-
-        $this->projector
-            ->filter(new InMemoryFromToPosition())
-            ->subscribeToAll()
-            ->when([], function (EmitterScope $scope): void {
-                $event = $scope->event();
-                $eventClass = '$mn-'.Str::replace('\\', '_', $event::class);
-
-                $scope->linkTo($eventClass, $scope->event());
-            })
-            ->run($this->shouldRunInBackground());
-
-        return self::SUCCESS;
-    }
-
-    protected function getProjector(): EmitterProjector
-    {
-        return $this->projector;
-    }
 }

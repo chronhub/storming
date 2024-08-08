@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Support\ProcessBuilder;
+namespace Storm\Projector\Support\Builder;
 
 use Storm\Contract\Projector\QueryProjector;
 
-final class QueryProjectorBuilderProcess extends ProjectionBuilderProcess
+final class QueryProjectorBuilder extends ProjectorBuilder
 {
     private ?QueryProjector $projector = null;
 
@@ -14,7 +14,7 @@ final class QueryProjectorBuilderProcess extends ProjectionBuilderProcess
     {
         $queryProjector = $this->projectorManager->newQueryProjector(
             $this->option,
-            $this->connection
+            $this->getConnection()
         );
 
         return $this->projector = $this->buildProjector($queryProjector);

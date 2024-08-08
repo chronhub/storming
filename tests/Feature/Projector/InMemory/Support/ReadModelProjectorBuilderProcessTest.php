@@ -8,7 +8,7 @@ use Storm\Contract\Projector\ProjectorManagement;
 use Storm\Contract\Projector\ReadModelProjector;
 use Storm\Projector\Scope\ReadModelScope;
 use Storm\Projector\Stream\Filter\InMemoryFromToPosition;
-use Storm\Projector\Support\ProcessBuilder\ReadModelProjectorBuilderProcess;
+use Storm\Projector\Support\Builder\ReadModelProjectorBuilder;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
 use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceAdded;
@@ -30,8 +30,8 @@ beforeEach(function () {
 });
 
 test('build a read model projector process', function () {
-    /** @var ReadModelProjectorBuilderProcess $builder */
-    $builder = app(ReadModelProjectorBuilderProcess::class);
+    /** @var ReadModelProjectorBuilder $builder */
+    $builder = app(ReadModelProjectorBuilder::class);
 
     $readModel = new InMemoryReadModel();
 

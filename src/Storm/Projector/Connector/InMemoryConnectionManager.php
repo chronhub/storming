@@ -10,6 +10,7 @@ use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\ChroniclerDecorator;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Chronicler\InMemoryChronicler;
+use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Serializer\SymfonySerializer;
@@ -24,6 +25,7 @@ final class InMemoryConnectionManager implements ConnectionManager
         InMemoryChronicler $chronicler,
         private readonly EventStreamProvider $eventStreamProvider,
         private readonly ProjectionProvider $projectionProvider,
+        private readonly QueryFilter $queryFilter,
         private readonly SystemClock $clock,
         private readonly SymfonySerializer $serializer,
         private readonly Option|array $options,
@@ -60,6 +62,11 @@ final class InMemoryConnectionManager implements ConnectionManager
     public function projectionProvider(): ProjectionProvider
     {
         return $this->projectionProvider;
+    }
+
+    public function queryFilter(): QueryFilter
+    {
+        return $this->queryFilter;
     }
 
     public function serializer(): SymfonySerializer

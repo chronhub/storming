@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Support\ProcessBuilder;
+namespace Storm\Projector\Support\Builder;
 
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelProjector;
 
 use function is_string;
 
-final class ReadModelProjectorBuilderProcess extends ProjectionBuilderProcess
+final class ReadModelProjectorBuilder extends ProjectorBuilder
 {
     public ?ReadModelProjector $projector = null;
 
@@ -32,7 +32,7 @@ final class ReadModelProjectorBuilderProcess extends ProjectionBuilderProcess
             $this->projectionName,
             $this->readModel,
             $this->option,
-            $this->connection
+            $this->getConnection()
         );
 
         return $this->projector = $this->buildProjector($readModelProjector);

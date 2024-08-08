@@ -8,7 +8,6 @@ use Illuminate\Console\Application;
 use Storm\Contract\Projector\ProjectorManagement;
 use Storm\Projector\Support\Console\Edges\ProjectByPartitionCommand;
 use Storm\Stream\StreamName;
-use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\BalanceEventStore;
 
 use function json_decode;
@@ -21,22 +20,10 @@ test('test emit partitioned stream events to by partition stream', function () {
 
     /** @var ProjectorManagement $serviceManager */
     $serviceManager = app(ProjectorManagement::class);
-
     $manager = $serviceManager->connection($connection);
 
-    (new BalanceEventStore(
-        $manager->eventStore(),
-        $manager->clock(),
-        new StreamName($stream1),
-        BalanceId::create()
-    ))->make(10);
-
-    (new BalanceEventStore(
-        $manager->eventStore(),
-        $manager->clock(),
-        new StreamName($stream2),
-        BalanceId::create()
-    ))->make(5);
+    BalanceEventStore::fromProjectionConnection($manager, new StreamName($stream1))->make(10);
+    BalanceEventStore::fromProjectionConnection($manager, new StreamName($stream2))->make(5);
 
     Application::starting(function ($artisan) {
         $artisan->resolveCommands(ProjectByPartitionCommand::class);
@@ -46,6 +33,7 @@ test('test emit partitioned stream events to by partition stream', function () {
 
     $this->artisan('projector:edge:partition', [
         'connection' => 'in_memory-incremental',
+        'build' => 'projection.emitter.edge-partition',
         '--signal' => false,
         '--in-background' => false,
     ])->run();

@@ -8,7 +8,7 @@ use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\ProjectorManagement;
 use Storm\Projector\Scope\EmitterScope;
 use Storm\Projector\Stream\Filter\InMemoryFromToPosition;
-use Storm\Projector\Support\ProcessBuilder\EmitterProjectorBuilderProcess;
+use Storm\Projector\Support\Builder\EmitterProjectorBuilder;
 use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
@@ -28,8 +28,8 @@ beforeEach(function () {
 });
 
 test('build an emitter projector process', function () {
-    /** @var EmitterProjectorBuilderProcess $builder */
-    $builder = app(EmitterProjectorBuilderProcess::class);
+    /** @var EmitterProjectorBuilder $builder */
+    $builder = app(EmitterProjectorBuilder::class);
 
     $builder
         ->withConnection('in_memory-incremental')

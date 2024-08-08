@@ -8,7 +8,7 @@ use Storm\Contract\Projector\ProjectorManagement;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Projector\Scope\QueryProjectorScope;
 use Storm\Projector\Stream\Filter\InMemoryFromToPosition;
-use Storm\Projector\Support\ProcessBuilder\QueryProjectorBuilderProcess;
+use Storm\Projector\Support\Builder\QueryProjectorBuilder;
 use Storm\Stream\StreamName;
 use Storm\Tests\Domain\BalanceEventStore;
 
@@ -21,8 +21,8 @@ beforeEach(function () {
 });
 
 test('build a query projector process', function () {
-    /** @var QueryProjectorBuilderProcess $builder */
-    $builder = app(QueryProjectorBuilderProcess::class);
+    /** @var QueryProjectorBuilder $builder */
+    $builder = app(QueryProjectorBuilder::class);
 
     $builder
         ->withConnection('in_memory-incremental')

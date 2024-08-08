@@ -24,19 +24,17 @@ test('test emit all stream events to by message name stream and partition', func
 
     $manager = $serviceManager->connection($connection);
 
-    (new BalanceEventStore(
-        $manager->eventStore(),
-        $manager->clock(),
+    BalanceEventStore::fromProjectionConnection(
+        $manager,
         new StreamName($stream1),
         BalanceId::create()
-    ))->make(10);
+    )->make(10);
 
-    (new BalanceEventStore(
-        $manager->eventStore(),
-        $manager->clock(),
+    BalanceEventStore::fromProjectionConnection(
+        $manager,
         new StreamName($stream2),
         BalanceId::create()
-    ))->make(5);
+    )->make(5);
 
     Application::starting(function ($artisan) {
         $artisan->resolveCommands(ProjectByMessageNameCommand::class);
@@ -46,6 +44,7 @@ test('test emit all stream events to by message name stream and partition', func
 
     $this->artisan('projector:edge:message-name', [
         'connection' => 'in_memory-incremental',
+        'build' => 'projection.emitter.edge-message-name',
         '--signal' => false,
         '--in-background' => false,
     ])->run();
