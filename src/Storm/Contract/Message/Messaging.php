@@ -6,6 +6,9 @@ namespace Storm\Contract\Message;
 
 use Storm\Message\DomainType;
 
+/**
+ * @template TMessaging of Messaging
+ */
 interface Messaging
 {
     /**
