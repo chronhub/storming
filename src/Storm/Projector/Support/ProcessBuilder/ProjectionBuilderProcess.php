@@ -1,0 +1,292 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Storm\Projector\Support\ProcessBuilder;
+
+use Closure;
+use Illuminate\Contracts\Foundation\Application;
+use Storm\Contract\Chronicler\QueryFilter;
+use Storm\Contract\Message\DomainEvent;
+use Storm\Contract\Projector\EmitterProjector;
+use Storm\Contract\Projector\MonitoringManager;
+use Storm\Contract\Projector\Projector;
+use Storm\Contract\Projector\ProjectorManagerInterface;
+use Storm\Contract\Projector\QueryProjector;
+use Storm\Contract\Projector\ReadModelProjector;
+use Storm\Projector\Exception\RuntimeException;
+use Storm\Projector\Scope\EmitterScope;
+use Storm\Projector\Scope\QueryProjectorScope;
+use Storm\Projector\Scope\ReadModelScope;
+use Storm\Projector\Stream\Filter\ProjectionQueryFilter;
+
+use function extension_loaded;
+use function is_string;
+use function pcntl_signal_dispatch;
+
+/**
+ * @template TScope of QueryProjectorScope|ReadModelScope|EmitterScope
+ */
+abstract class ProjectionBuilderProcess
+{
+    protected ?Application $app = null;
+
+    protected ?string $connection;
+
+    protected ?string $description = null;
+
+    protected ?string $projectionName = null;
+
+    protected null|string|ProjectionQueryFilter|QueryFilter $queryFilter;
+
+    /** @var Closure(): array|null */
+    protected ?Closure $initialState = null;
+
+    /** @var array<Option::*, null|string|int|bool|array>|array */
+    protected array $options = [];
+
+    /** @var array<Closure> */
+    protected array $reactors = [];
+
+    /** @var (Closure(TScope): void)|null */
+    protected ?Closure $then = null;
+
+    /** @var array<string> */
+    protected array $fromStreams = [];
+
+    /** @var array<string> */
+    protected array $fromPartitions = [];
+
+    protected bool $fromAll = false;
+
+    protected bool $pcntlDispatch = false;
+
+    /**
+     * @var array<Closure>
+     */
+    protected array $haltOn = [];
+
+    public function __construct(
+        protected ProjectorManagerInterface $projectorManager,
+        protected MonitoringManager $monitoringManager,
+    ) {}
+
+    /**
+     * Set the connection to use for the projection.
+     *
+     * @return $this
+     */
+    public function withConnection(string $connection): static
+    {
+        $this->connection = $connection;
+
+        return $this;
+    }
+
+    /**
+     * Set the description for the projection.
+     *
+     * @return $this
+     */
+    public function withDescription(string $description): static
+    {
+        $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * Set the projection name for persistent projections only.
+     *
+     * @return $this
+     */
+    public function withProjectionName(string $projectionName): static
+    {
+        $this->projectionName = $projectionName;
+
+        return $this;
+    }
+
+    public function withQueryFilter(string|ProjectionQueryFilter|QueryFilter $queryFilter): static
+    {
+        $this->queryFilter = $queryFilter;
+
+        return $this;
+    }
+
+    /**
+     * @param  (Closure(): array) $initialState
+     * @return $this
+     */
+    public function withInitialState(Closure $initialState): static
+    {
+        $this->initialState = $initialState;
+
+        return $this;
+    }
+
+    /**
+     * @param  array<Option::*, null|string|int|bool|array> $options
+     * @return $this
+     */
+    public function withOptions(array $options): static
+    {
+        $this->options = $options;
+
+        return $this;
+    }
+
+    /**
+     * @param  array<Closure> $reactors
+     * @return $this
+     */
+    public function withReactors(array $reactors): static
+    {
+        $this->reactors = $reactors;
+
+        return $this;
+    }
+
+    /**
+     * @template TEvent of DomainEvent
+     *
+     * @phpstan-param Closure(TEvent): void $reactor
+     *
+     * @param  Closure(DomainEvent): void $reactor
+     * @return $this
+     */
+    public function withReactor(Closure $reactor): static
+    {
+        $this->reactors[] = $reactor;
+
+        return $this;
+    }
+
+    /**
+     * Enables the dispatching of signals to the process.
+     *
+     * @return $this
+     */
+    public function enableSignal(): static
+    {
+        $this->pcntlDispatch = true;
+
+        return $this;
+    }
+
+    /**
+     * Set the [then] reactors callback for the projection.
+     * Required when reactors are empty.
+     *
+     * @param  (Closure(TScope): void) $then
+     * @return $this
+     */
+    public function withThen(Closure $then): static
+    {
+        $this->then = $then;
+
+        return $this;
+    }
+
+    /**
+     * Subscribe to the given streams.
+     *
+     * @param  array<string> $streams
+     * @return $this
+     */
+    public function fromStreams(array $streams): static
+    {
+        $this->fromStreams = $streams;
+
+        return $this;
+    }
+
+    /**
+     * Subscribe to the given partitions.
+     *
+     * @param  array<string> $partitions
+     * @return $this
+     */
+    public function fromPartitions(array $partitions): static
+    {
+        $this->fromPartitions = $partitions;
+
+        return $this;
+    }
+
+    /**
+     * Subscribe to all streams without internal streams.
+     *
+     * @return $this
+     */
+    public function fromAll(): static
+    {
+        $this->fromAll = true;
+
+        return $this;
+    }
+
+    /**
+     * Let the projector factory raises exceptions when the subscription is not valid.
+     */
+    protected function subscribeTo(QueryProjector|EmitterProjector|ReadModelProjector $projector): QueryProjector|EmitterProjector|ReadModelProjector
+    {
+        if ($this->fromAll) {
+            return $projector->subscribeToAll();
+        }
+
+        if ($this->fromStreams !== []) {
+            return $projector->subscribeToStream(...$this->fromStreams);
+        }
+
+        if ($this->fromPartitions !== []) {
+            return $projector->subscribeToPartition(...$this->fromPartitions);
+        }
+
+        return $projector;
+    }
+
+    protected function buildProjector(QueryProjector|EmitterProjector|ReadModelProjector $projector): QueryProjector|EmitterProjector|ReadModelProjector
+    {
+        if ($this->pcntlDispatch) {
+            $this->options['signal'] = true;
+
+            if (! extension_loaded('pcntl')) {
+                throw new RuntimeException('The pcntl extension is required to dispatch signals');
+            }
+
+            pcntl_signal_dispatch();
+        }
+
+        if ($this->initialState) {
+            $projector->initialize($this->initialState);
+        }
+
+        $projector = $this->subscribeTo($projector);
+
+        if (is_string($this->queryFilter)) {
+            $this->queryFilter = $this->app[$this->queryFilter];
+        }
+
+        return $projector
+            ->filter($this->queryFilter)
+            ->when($this->reactors, $this->then);
+    }
+
+    public function setContainer(Application $app): static
+    {
+        $this->app = $app;
+
+        return $this;
+    }
+
+    /**
+     * Build the projector.
+     */
+    abstract public function build(): Projector;
+
+    /**
+     * Run the projector.
+     */
+    abstract public function run(bool $keepRunning = false): void;
+}

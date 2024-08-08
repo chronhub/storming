@@ -17,6 +17,8 @@ use function pcntl_async_signals;
 
 /**
  * checkMe not useful as it is
+ *
+ * @deprecated
  */
 abstract class ReadModelProjectionCommand extends Command implements SignalableCommandInterface
 {
@@ -57,7 +59,7 @@ abstract class ReadModelProjectionCommand extends Command implements SignalableC
         return [SIGINT, SIGTERM];
     }
 
-    public function handleSignal(int $signal)
+    public function handleSignal(int $signal): int
     {
         $this->info("Stopping read model projection: {$this->projectionName()}");
 
