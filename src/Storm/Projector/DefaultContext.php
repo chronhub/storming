@@ -7,42 +7,44 @@ namespace Storm\Projector;
 use Closure;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Chronicler\QueryFilter;
+use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Projector\Context;
 use Storm\Contract\Projector\ContextReader;
-use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Exception\ConfigurationViolation;
 use Storm\Projector\Scope\ProjectorScope;
 use Storm\Projector\Stream\Query\DiscoverAllStream;
 use Storm\Projector\Stream\Query\DiscoverPartition;
 use Storm\Projector\Stream\Query\DiscoverStream;
+use Storm\Projector\Workflow\Process;
 
 final class DefaultContext implements ContextReader
 {
-    /** @var null|callable(EventStreamProvider): array<string>|array */
-    private $query;
-
-    private ?Closure $userState = null;
-
-    /**
-     * @template THandlers of array<Closure>|array
-     * @template TThen of (Closure(ProjectorScope): void)|null
-     *
-     * @param Closure|null $reactors
-     */
-    private ?array $reactors = null;
+    private ?string $id = null;
 
     private ?QueryFilter $queryFilter = null;
 
-    private ?string $id = null;
+    /** @var null|callable(EventStreamProvider): array<string>|array */
+    private $query = null;
+
+    /** @var (Closure(): array)|null */
+    private ?Closure $userState = null;
 
     /**
-     * @var array<Closure>|array
+     * @template TEvent of DomainEvent
+     *
+     * @var array{array<Closure(TEvent): void>|array, (Closure(ProjectorScope): void)|null}|array
+     */
+    private array $reactors = [];
+
+    /**
+     * @var array<(Closure(Process): bool)>|array
      */
     private array $haltOn = [];
 
     public function initialize(Closure $userState): self
     {
         if ($this->userState instanceof Closure) {
-            throw new InvalidArgumentException('Projection already initialized');
+            throw ConfigurationViolation::message('Projection already initialized');
         }
 
         $this->userState = Closure::bind($userState, $this);
@@ -53,7 +55,7 @@ final class DefaultContext implements ContextReader
     public function withQueryFilter(QueryFilter $queryFilter): self
     {
         if ($this->queryFilter instanceof QueryFilter) {
-            throw new InvalidArgumentException('Projection query filter already set');
+            throw ConfigurationViolation::message('Projection query filter already set');
         }
 
         $this->queryFilter = $queryFilter;
@@ -64,7 +66,7 @@ final class DefaultContext implements ContextReader
     public function withId(string $id): Context
     {
         if ($this->id !== null) {
-            throw new InvalidArgumentException('Projection id already set');
+            throw ConfigurationViolation::message('Projection id already set');
         }
 
         $this->id = $id;
@@ -74,7 +76,7 @@ final class DefaultContext implements ContextReader
 
     public function subscribeToStream(string ...$streamNames): self
     {
-        $this->assertQueryNotSet();
+        $this->assertSubscriberNotSet();
 
         $this->query = new DiscoverStream($streamNames);
 
@@ -83,7 +85,7 @@ final class DefaultContext implements ContextReader
 
     public function subscribeToPartition(string ...$partitions): self
     {
-        $this->assertQueryNotSet();
+        $this->assertSubscriberNotSet();
 
         $this->query = new DiscoverPartition($partitions);
 
@@ -92,7 +94,7 @@ final class DefaultContext implements ContextReader
 
     public function subscribeToAll(): self
     {
-        $this->assertQueryNotSet();
+        $this->assertSubscriberNotSet();
 
         $this->query = new DiscoverAllStream();
 
@@ -101,12 +103,12 @@ final class DefaultContext implements ContextReader
 
     public function when(array $reactors, ?Closure $then = null): self
     {
-        if ($this->reactors !== null) {
-            throw new InvalidArgumentException('Projection reactors already set');
+        if ($this->reactors !== []) {
+            throw ConfigurationViolation::message('Projection reactors already set');
         }
 
         if ($reactors === [] && $then === null) {
-            throw new InvalidArgumentException('Projection reactors cannot be null when then callback is null');
+            throw ConfigurationViolation::message('Projection reactors cannot be null when then callback is null'); // @codeCoverageIgnore
         }
 
         $this->reactors = [$reactors, $then];
@@ -133,29 +135,20 @@ final class DefaultContext implements ContextReader
 
     public function reactors(): array
     {
-        if ($this->reactors === null) {
-            throw new InvalidArgumentException('Projection reactors not set');
-        }
-
-        return $this->reactors;
+        return $this->reactors
+            ?? throw ConfigurationViolation::message('Projection reactors not set');
     }
 
     public function query(): callable
     {
-        if ($this->query === null) {
-            throw new InvalidArgumentException('Projection subscriber not set');
-        }
-
-        return $this->query;
+        return $this->query
+            ?? throw ConfigurationViolation::message('Projection subscriber not set');
     }
 
     public function queryFilter(): QueryFilter
     {
-        if ($this->queryFilter === null) {
-            throw new InvalidArgumentException('Projection query filter not set');
-        }
-
-        return $this->queryFilter;
+        return $this->queryFilter
+            ?? throw ConfigurationViolation::message('Projection query filter not set');
     }
 
     public function id(): ?string
@@ -168,10 +161,10 @@ final class DefaultContext implements ContextReader
         return $this->haltOn;
     }
 
-    private function assertQueryNotSet(): void
+    private function assertSubscriberNotSet(): void
     {
         if ($this->query !== null) {
-            throw new InvalidArgumentException('Projection subscriber already set');
+            throw ConfigurationViolation::message('Projection subscriber already set');
         }
     }
 }

@@ -7,7 +7,7 @@ namespace Storm\Contract\Projector;
 use Closure;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Message\DomainEvent;
-use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Exception\ConfigurationViolation;
 use Storm\Projector\Scope\ProjectorScope;
 use Storm\Projector\Support\StopWhen;
 use Storm\Projector\Workflow\Process;
@@ -17,37 +17,34 @@ interface Context
     /**
      * Sets the optional callback to initialize the state.
      *
-     * @param Closure():array $userState
+     * @param  (Closure():array) $userState
+     * @return $this
      *
-     * @throws InvalidArgumentException When user state is already set
-     *
-     * <code>
-     *   $context->initialize(fn(): array => ['count' => 0]);
-     * </code>
+     * @throws ConfigurationViolation When user state is already set
      */
     public function initialize(Closure $userState): self;
 
     /**
      * Subscribe to the given streams.
      *
-     * @throws InvalidArgumentException When streams are already set
-     * @throws InvalidArgumentException When streams are empty
+     * @throws ConfigurationViolation When streams are already set
+     * @throws ConfigurationViolation When streams are empty
      */
     public function subscribeToStream(string ...$streamNames): self;
 
     /**
      * Subscribe to the given partitions.
      *
-     * @throws InvalidArgumentException When streams are already set
-     * @throws InvalidArgumentException When streams are empty
+     * @throws ConfigurationViolation When streams are already set
+     * @throws ConfigurationViolation When streams are empty
      */
     public function subscribeToPartition(string ...$partitions): self;
 
     /**
      * Subscribe to all streams.
      *
-     * @throws InvalidArgumentException When streams are already set
-     * @throws InvalidArgumentException When streams are empty
+     * @throws ConfigurationViolation When streams are already set
+     * @throws ConfigurationViolation When streams are empty
      */
     public function subscribeToAll(): self;
 
@@ -60,11 +57,13 @@ interface Context
      *
      * Note that all stream events will be considered as acked.
      *
-     * @param array<array<(Closure(DomainEvent): void)>> $reactors
-     * @param (Closure(ProjectorScope): void)|null       $then
+     * @template TEvent of DomainEvent
      *
-     * @throws InvalidArgumentException When reactors are already set
-     * @throws InvalidArgumentException When reactors are empty and then callback is null
+     * @param  array<Closure(TEvent): void>         $reactors
+     * @param  (Closure(ProjectorScope): void)|null $then
+     * @return $this
+     *
+     * @throws ConfigurationViolation When reactors are empty and then callback is null
      */
     public function when(array $reactors, ?Closure $then = null): self;
 
@@ -72,24 +71,30 @@ interface Context
      * Stop the projection when a condition is met.
      * Method can be chained.
      *
+     * @see StopWhen for some examples
+     *
      * @param  Closure(Process): bool $haltOn
      * @return $this
-     *
-     * @see StopWhen for some examples
      */
     public function haltOn(Closure $haltOn): self;
 
     /**
      * Sets the query filter to filter events.
+     * A Projection query filter is required for persistent projections.
      *
-     * @throws InvalidArgumentException When query filter is already set
+     * @see ProjectionQueryFilter
+     *
+     * @return $this
+     *
+     * @throws ConfigurationViolation When query filter is already set
      */
     public function withQueryFilter(QueryFilter $queryFilter): self;
 
     /**
      * Set a projection id to identify it.
+     * Note that a default id will be provided with the current projection class name.
      *
-     * Note that a default id will be provided with the projection class name
+     * @return $this
      */
     public function withId(string $id): self;
 }

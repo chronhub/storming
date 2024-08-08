@@ -7,14 +7,14 @@ namespace Storm\Contract\Projector;
 use Closure;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Chronicler\QueryFilter;
-use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Exception\ConfigurationViolation;
 
 interface ContextReader extends Context
 {
     /**
      * Get the callback to initialize the state.
      *
-     * @return Closure():array|null
+     * @return (Closure():array)|null
      */
     public function userState(): ?Closure;
 
@@ -26,7 +26,7 @@ interface ContextReader extends Context
     /**
      * Get the event handlers to be called when an event is received.
      *
-     * @throws InvalidArgumentException When reactors are not set
+     * @throws ConfigurationViolation When reactors are not set
      */
     public function reactors(): array;
 
@@ -35,14 +35,14 @@ interface ContextReader extends Context
      *
      * @return callable(EventStreamProvider): array<string>
      *
-     * @throws InvalidArgumentException When queries are not set
+     * @throws ConfigurationViolation When queries are not set
      */
     public function query(): callable;
 
     /**
      * Get the query filter to filter events.
      *
-     * @throws InvalidArgumentException When query filter is not set
+     * @throws ConfigurationViolation When query filter is not set
      */
     public function queryFilter(): QueryFilter;
 
