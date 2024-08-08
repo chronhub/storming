@@ -20,16 +20,11 @@ use Storm\Tests\Domain\BalanceEventStore;
 beforeEach(function () {
     /** @var ProjectorManagement $serviceManager */
     $serviceManager = app(ProjectorManagement::class);
-
     $manager = $serviceManager->connection('in_memory-incremental');
-
     $this->balanceId = BalanceId::create();
-    (new BalanceEventStore(
-        $manager->eventStore(),
-        $manager->clock(),
-        new StreamName('account1'),
-        $this->balanceId
-    ))->withBalanceCreated(1, 100)
+
+    BalanceEventStore::fromProjectionConnection($manager, new StreamName('account1'), $this->balanceId)
+        ->withBalanceCreated(1, 100)
         ->withBalanceAdded(2, 10)
         ->withBalanceSubtracted(3, 5);
 });

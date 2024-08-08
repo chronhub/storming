@@ -13,7 +13,7 @@ final class QueryProjectorBuilderProcess extends ProjectionBuilderProcess
     public function build(): QueryProjector
     {
         $queryProjector = $this->projectorManager->newQueryProjector(
-            $this->options,
+            $this->option,
             $this->connection
         );
 

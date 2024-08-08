@@ -14,7 +14,7 @@ final class EmitterProjectorBuilderProcess extends ProjectionBuilderProcess
     {
         $emitterProjector = $this->projectorManager->newEmitterProjector(
             $this->projectionName,
-            $this->options,
+            $this->option,
             $this->connection
         );
 

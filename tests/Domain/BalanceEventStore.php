@@ -10,6 +10,7 @@ use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\EventHeader;
 use Storm\Contract\Message\Header;
+use Storm\Projector\Connector\ConnectionManager;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceAdded;
@@ -30,6 +31,19 @@ class BalanceEventStore
         public StreamName $streamName,
         public BalanceId $balanceId,
     ) {}
+
+    public static function fromProjectionConnection(
+        ConnectionManager $connection,
+        StreamName $streamName,
+        ?BalanceId $balanceId = null
+    ): self {
+        return new self(
+            $connection->eventStore(),
+            $connection->clock(),
+            $streamName,
+            $balanceId ?? BalanceId::create()
+        );
+    }
 
     public function appendEvent(DomainEvent $event): void
     {

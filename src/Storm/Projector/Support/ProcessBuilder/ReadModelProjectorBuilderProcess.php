@@ -7,11 +7,13 @@ namespace Storm\Projector\Support\ProcessBuilder;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelProjector;
 
+use function is_string;
+
 final class ReadModelProjectorBuilderProcess extends ProjectionBuilderProcess
 {
-    protected ?ReadModelProjector $projector = null;
+    public ?ReadModelProjector $projector = null;
 
-    private ?ReadModel $readModel = null;
+    public null|string|ReadModel $readModel = null;
 
     public function withReadModel(string|ReadModel $readModel): self
     {
@@ -22,10 +24,14 @@ final class ReadModelProjectorBuilderProcess extends ProjectionBuilderProcess
 
     public function build(): ReadModelProjector
     {
+        if (is_string($this->readModel)) {
+            $this->readModel = $this->app[$this->readModel];
+        }
+
         $readModelProjector = $this->projectorManager->newReadModelProjector(
             $this->projectionName,
             $this->readModel,
-            $this->options,
+            $this->option,
             $this->connection
         );
 

@@ -12,7 +12,6 @@ use Storm\Projector\Support\ProcessBuilder\EmitterProjectorBuilderProcess;
 use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceAdded;
 use Storm\Tests\Domain\Balance\BalanceCreated;
-use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\Balance\BalanceSubtracted;
 use Storm\Tests\Domain\BalanceEventStore;
 
@@ -22,13 +21,8 @@ beforeEach(function () {
 
     $this->manager = $serviceManager->connection('in_memory-incremental');
 
-    $this->balanceId = BalanceId::create();
-    (new BalanceEventStore(
-        $this->manager->eventStore(),
-        $this->manager->clock(),
-        new StreamName('account1'),
-        $this->balanceId
-    ))->withBalanceCreated(1, 100)
+    BalanceEventStore::fromProjectionConnection($this->manager, new StreamName('account1'))
+        ->withBalanceCreated(1, 100)
         ->withBalanceAdded(2, 10)
         ->withBalanceSubtracted(3, 5);
 });

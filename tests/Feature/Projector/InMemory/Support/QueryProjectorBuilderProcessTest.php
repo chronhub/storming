@@ -10,21 +10,14 @@ use Storm\Projector\Scope\QueryProjectorScope;
 use Storm\Projector\Stream\Filter\InMemoryFromToPosition;
 use Storm\Projector\Support\ProcessBuilder\QueryProjectorBuilderProcess;
 use Storm\Stream\StreamName;
-use Storm\Tests\Domain\Balance\BalanceId;
 use Storm\Tests\Domain\BalanceEventStore;
 
 beforeEach(function () {
     /** @var ProjectorManagement $serviceManager */
     $serviceManager = app(ProjectorManagement::class);
-
     $manager = $serviceManager->connection('in_memory-incremental');
 
-    (new BalanceEventStore(
-        $manager->eventStore(),
-        $manager->clock(),
-        new StreamName('account1'),
-        BalanceId::create()
-    ))->make(10);
+    BalanceEventStore::fromProjectionConnection($manager, new StreamName('account1'))->make(10);
 });
 
 test('build a query projector process', function () {

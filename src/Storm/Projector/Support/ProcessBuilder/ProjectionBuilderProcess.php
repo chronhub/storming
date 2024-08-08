@@ -14,11 +14,14 @@ use Storm\Contract\Projector\Projector;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Contract\Projector\ReadModelProjector;
+use Storm\Projector\Exception\ConfigurationViolation;
 use Storm\Projector\Exception\RuntimeException;
+use Storm\Projector\Options\Option;
 use Storm\Projector\Scope\EmitterScope;
 use Storm\Projector\Scope\QueryProjectorScope;
 use Storm\Projector\Scope\ReadModelScope;
 use Storm\Projector\Stream\Filter\ProjectionQueryFilter;
+use Storm\Projector\Workflow\Process;
 
 use function extension_loaded;
 use function is_string;
@@ -43,7 +46,7 @@ abstract class ProjectionBuilderProcess
     protected ?Closure $initialState = null;
 
     /** @var array<Option::*, null|string|int|bool|array>|array */
-    protected array $options = [];
+    protected array $option = [];
 
     /** @var array<Closure> */
     protected array $reactors = [];
@@ -62,7 +65,7 @@ abstract class ProjectionBuilderProcess
     protected bool $pcntlDispatch = false;
 
     /**
-     * @var array<Closure>
+     * @var array<Closure(Process): bool>
      */
     protected array $haltOn = [];
 
@@ -126,18 +129,20 @@ abstract class ProjectionBuilderProcess
     }
 
     /**
-     * @param  array<Option::*, null|string|int|bool|array> $options
+     * @param  array<Option::*, null|string|int|bool|array>|array $option
      * @return $this
      */
-    public function withOptions(array $options): static
+    public function withOptions(array $option): static
     {
-        $this->options = $options;
+        $this->option = $option;
 
         return $this;
     }
 
     /**
-     * @param  array<Closure> $reactors
+     * @template TEvent of DomainEvent
+     *
+     * @param  array<(Closure(TEvent): void)> $reactors
      * @return $this
      */
     public function withReactors(array $reactors): static
@@ -150,9 +155,7 @@ abstract class ProjectionBuilderProcess
     /**
      * @template TEvent of DomainEvent
      *
-     * @phpstan-param Closure(TEvent): void $reactor
-     *
-     * @param  Closure(DomainEvent): void $reactor
+     * @param  Closure(TEvent): void $reactor
      * @return $this
      */
     public function withReactor(Closure $reactor): static
@@ -164,6 +167,7 @@ abstract class ProjectionBuilderProcess
 
     /**
      * Enables the dispatching of signals to the process.
+     * When enabled, the option `signal` will be set to true.
      *
      * @return $this
      */
@@ -249,7 +253,7 @@ abstract class ProjectionBuilderProcess
     protected function buildProjector(QueryProjector|EmitterProjector|ReadModelProjector $projector): QueryProjector|EmitterProjector|ReadModelProjector
     {
         if ($this->pcntlDispatch) {
-            $this->options['signal'] = true;
+            $this->option['signal'] = true;
 
             if (! extension_loaded('pcntl')) {
                 throw new RuntimeException('The pcntl extension is required to dispatch signals');
@@ -282,6 +286,8 @@ abstract class ProjectionBuilderProcess
 
     /**
      * Build the projector.
+     *
+     * @throws ConfigurationViolation when the projector is not configured correctly.
      */
     abstract public function build(): Projector;
 
