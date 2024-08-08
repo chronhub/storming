@@ -15,7 +15,6 @@ use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Contract\Projector\ReadModelProjector;
 use Storm\Projector\Exception\ConfigurationViolation;
-use Storm\Projector\Exception\RuntimeException;
 use Storm\Projector\Options\Option;
 use Storm\Projector\Scope\EmitterScope;
 use Storm\Projector\Scope\QueryProjectorScope;
@@ -23,9 +22,8 @@ use Storm\Projector\Scope\ReadModelScope;
 use Storm\Projector\Stream\Filter\ProjectionQueryFilter;
 use Storm\Projector\Workflow\Process;
 
-use function extension_loaded;
 use function is_string;
-use function pcntl_signal_dispatch;
+use function pcntl_async_signals;
 
 /**
  * @template TScope of QueryProjectorScope|ReadModelScope|EmitterScope
@@ -52,10 +50,10 @@ abstract class ProjectorBuilder
     /** @var (Closure(TScope): void)|null */
     protected ?Closure $then = null;
 
-    /** @var array<string> */
+    /** @var array<string>|array */
     protected array $fromStreams = [];
 
-    /** @var array<string> */
+    /** @var array<string>|array */
     protected array $fromPartitions = [];
 
     protected bool $fromAll = false;
@@ -254,11 +252,8 @@ abstract class ProjectorBuilder
         if ($this->pcntlDispatch) {
             $this->option['signal'] = true;
 
-            if (! extension_loaded('pcntl')) {
-                throw new RuntimeException('The pcntl extension is required to dispatch signals');
-            }
-
-            pcntl_signal_dispatch();
+            // checkMe use a process to call the signal handler
+            pcntl_async_signals(true);
         }
 
         if ($this->initialState) {

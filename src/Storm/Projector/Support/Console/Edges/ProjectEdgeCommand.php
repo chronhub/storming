@@ -10,8 +10,6 @@ use Storm\Contract\Projector\PersistentProjector;
 use Storm\Projector\Support\Builder\EmitterProjectorBuilder;
 use Symfony\Component\Console\Command\SignalableCommandInterface;
 
-use function assert;
-use function extension_loaded;
 use function pcntl_async_signals;
 
 abstract class ProjectEdgeCommand extends Command implements SignalableCommandInterface
@@ -68,9 +66,6 @@ abstract class ProjectEdgeCommand extends Command implements SignalableCommandIn
 
     protected function setupSignalHandler(): bool
     {
-        //fixMe phpstorm does not recognize the projector composer.json
-        assert(extension_loaded('pcntl'));
-
         if ($this->option('signal') === true) {
             pcntl_async_signals(true);
 
