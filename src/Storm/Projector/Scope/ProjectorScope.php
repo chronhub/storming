@@ -17,7 +17,7 @@ interface ProjectorScope
     /**
      * Return the current user state if it was set.
      */
-    public function userState(): ?UserStateScope;
+    public function userState(): ?UserState;
 
     /**
      * Stop the projection.

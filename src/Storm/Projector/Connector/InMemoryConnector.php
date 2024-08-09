@@ -17,7 +17,7 @@ final readonly class InMemoryConnector implements Connector
 
     public function connect(array $config): ConnectionManager
     {
-        $options = $config['options'];
+        $options = $config['options'] ?? [];
 
         if (is_string($options)) {
             $options = $this->app[$options];
@@ -29,6 +29,8 @@ final readonly class InMemoryConnector implements Connector
             $queryFilter = $this->app[$queryFilter];
         }
 
+        $useEvents = $config['dispatch_events'] ?? false;
+
         return new InMemoryConnectionManager(
             $this->app[$config['chronicler']],
             $this->app[$config['chronicler.provider']],
@@ -37,7 +39,7 @@ final readonly class InMemoryConnector implements Connector
             $this->app[SystemClock::class],
             $this->app[$config['serializer']],
             $options,
-            $config['dispatch_events'] === true ? $this->app['events'] : null,
+            $useEvents ? $this->app['events'] : null,
         );
     }
 }

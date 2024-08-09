@@ -6,7 +6,7 @@ namespace Storm\Contract\Projector;
 
 use Throwable;
 
-interface ReadModel extends StackedReadModel
+interface ReadModel
 {
     /**
      * Initializes the read model.

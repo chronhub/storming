@@ -51,17 +51,17 @@ test('test read model builder from partition', function () {
 
             if ($event instanceof BalanceCreated) {
                 $scope->userState()->increment('balances');
-                $scope->stack('insert', $event->id(), ['total' => $event->amount()]);
+                $scope->readModel()->insert($event->id(), ['total' => $event->amount()]);
             }
 
             if ($event instanceof BalanceAdded) {
                 $scope->userState()->increment('balances');
-                $scope->stack('increment', $event->id(), 'total', $event->amount());
+                $scope->readModel()->increment($event->id(), 'total', $event->amount());
             }
 
             if ($event instanceof BalanceSubtracted) {
                 $scope->userState()->decrement('balances');
-                $scope->stack('decrement', $event->id(), 'total', $event->amount());
+                $scope->readModel()->decrement($event->id(), 'total', $event->amount());
             }
         })->build();
 

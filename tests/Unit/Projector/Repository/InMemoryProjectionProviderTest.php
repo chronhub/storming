@@ -56,8 +56,7 @@ test('default instance', function () {
     expect($this->projectionProvider)->toBeInstanceOf(ProjectionProvider::class)
         ->and($this->projectionProvider->exists('stream1'))->toBeFalse()
         ->and($this->projectionProvider->retrieve('stream1'))->toBeNull()
-        ->and($this->projectionProvider->filterByNames('stream1'))->toBe([])
-        ->and($this->projectionProvider->attributes)->toBe(['name', 'status', 'state', 'checkpoint', 'locked_until']);
+        ->and($this->projectionProvider->filterByNames('stream1'))->toBe([]);
 });
 
 test('create projection', function () {

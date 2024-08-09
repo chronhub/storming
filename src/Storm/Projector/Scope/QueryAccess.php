@@ -9,12 +9,12 @@ use Storm\Projector\Workflow\Process;
 
 final class QueryAccess implements QueryProjectorScope
 {
-    use BoundScope;
+    use ScopeAccess;
 
     public function __construct(
         protected readonly Process $process,
         protected readonly SystemClock $clock,
-        public ?UserStateScope $userState = null,
+        public ?UserState $userState = null,
     ) {}
 
     public function stop(): void

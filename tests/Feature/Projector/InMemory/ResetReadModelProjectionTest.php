@@ -40,7 +40,7 @@ test('resets the read model projection', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor(), $this->getThenReactor())
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: false);
 
     $this->assertPartialProjectionState('total', 100);
@@ -83,15 +83,15 @@ test('resets from monitoring within the projection instance', function () {
     $reactors = [
         function (BalanceCreated $event) {
             $this->userState->set('total', $event->amount());
-            $this->stack('insert', $event->id(), ['total' => $event->amount()]);
+            $this->readModel()->insert($event->id(), ['total' => $event->amount()]);
         },
         function (BalanceAdded $event) {
             $this->userState->increment('total', $event->amount());
-            $this->stack('increment', $event->id(), 'total', $event->amount());
+            $this->readModel()->increment($event->id(), 'total', $event->amount());
         },
         function (BalanceSubtracted $event) {
             $this->userState->decrement('total', $event->amount());
-            $this->stack('decrement', $event->id(), 'total', $event->amount());
+            $this->readModel()->decrement($event->id(), 'total', $event->amount());
         },
     ];
 
@@ -108,7 +108,7 @@ test('resets from monitoring within the projection instance', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: false);
 
     expect($resetStatus)->toBe(ProjectionStatus::RESETTING->value);

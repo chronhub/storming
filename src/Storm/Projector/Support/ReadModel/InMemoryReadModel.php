@@ -4,37 +4,51 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Support\ReadModel;
 
-use Illuminate\Support\Collection;
+use Illuminate\Support\Traits\Macroable;
 use Storm\Contract\Projector\ReadModel;
 
 use function abs;
 
+/**
+ * @template T
+ *
+ * @mixin T
+ */
 final class InMemoryReadModel implements ReadModel
 {
-    use InteractWithStack;
+    use Macroable;
 
-    private bool $initialized = false;
+    protected array $container = [];
 
-    /** @var Collection<string, array> */
-    private Collection $container;
+    protected array $stack = [];
+
+    public function __construct()
+    {
+        self::mixin(new MixinInMemoryStack(), false);
+    }
 
     public function initialize(): void
     {
-        $this->container = new Collection();
-
-        $this->initialized = true;
+        $this->container = [];
     }
 
     public function isInitialized(): bool
     {
-        return $this->initialized;
+        return true;
+    }
+
+    public function persist(): void
+    {
+        foreach ($this->stack as [$method, $arguments]) {
+            $this->{$method}(...$arguments);
+        }
+
+        $this->stack = [];
     }
 
     public function reset(): void
     {
-        $this->container = new Collection();
-
-        $this->initialized = false;
+        $this->container = [];
     }
 
     public function down(): void
@@ -44,44 +58,39 @@ final class InMemoryReadModel implements ReadModel
 
     public function getContainer(): array
     {
-        return $this->container->all();
+        return $this->container;
+    }
+
+    /**
+     * Stack all operations.
+     */
+    protected function stack(string $method, mixed ...$arguments): void
+    {
+        $this->stack[] = [$method, $arguments];
     }
 
     protected function insert(string $id, array $data): void
     {
-        $this->container->put($id, $data);
+        $this->container[$id] = $data;
     }
 
     protected function update(string $id, string $field, mixed $value): void
     {
-        $data = $this->container->get($id);
-
-        $data[$field] = $value;
-
-        $this->container->put($id, $data);
+        $this->container[$id][$field] = $value;
     }
 
     protected function increment(string $id, string $field, int|float $value): void
     {
-        $this->adjust($id, $field, $value, true);
+        $this->container[$id][$field] += abs($value);
     }
 
     protected function decrement(string $id, string $field, int|float $value): void
     {
-        $this->adjust($id, $field, $value, false);
+        $this->container[$id][$field] -= abs($value);
     }
 
     protected function delete(string $id): void
     {
-        $this->container->forget($id);
-    }
-
-    private function adjust(string $id, string $field, int|float $value, bool $increment): void
-    {
-        $data = $this->container->get($id);
-
-        $increment ? $data[$field] += abs($value) : $data[$field] -= abs($value);
-
-        $this->container->put($id, $data);
+        unset($this->container[$id]);
     }
 }

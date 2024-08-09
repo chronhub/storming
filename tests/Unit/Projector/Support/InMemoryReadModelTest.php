@@ -7,8 +7,6 @@ namespace Storm\Tests\Unit\Projector\Support;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
 
-use function abs;
-
 beforeEach(function () {
     $this->readModel = new InMemoryReadModel();
 });
@@ -16,12 +14,12 @@ beforeEach(function () {
 test('default instance', function () {
     expect($this->readModel)->toBeInstanceOf(InMemoryReadModel::class)
         ->and($this->readModel)->toBeInstanceOf(ReadModel::class)
-        ->and($this->readModel->isInitialized())->toBeFalse()
+        ->and($this->readModel->isInitialized())->toBeTrue()
         ->and($this->readModel->getContainer())->toBeEmpty();
 });
 
 test('initialize', function () {
-    expect($this->readModel->isInitialized())->toBeFalse();
+    expect($this->readModel->isInitialized())->toBeTrue();
 
     $this->readModel->initialize();
 
@@ -31,7 +29,7 @@ test('initialize', function () {
 test('insert ', function () {
     $this->readModel->initialize();
 
-    $this->readModel->stack('insert', 'id', ['foo' => 'bar']);
+    $this->readModel->insert('id', ['foo' => 'bar']);
     $this->readModel->persist();
 
     expect($this->readModel->getContainer())->toBeArray()
@@ -43,72 +41,62 @@ test('insert ', function () {
 
 test('update', function () {
     expect($this->readModel->getContainer())->toBeEmpty()
-        ->and($this->readModel->isInitialized())->toBeFalse();
+        ->and($this->readModel->isInitialized())->toBeTrue();
 
-    $this->readModel->initialize();
-    expect($this->readModel->isInitialized())->toBeTrue();
-
-    $this->readModel->stack('insert', 'id', ['foo' => 'bar']);
+    $this->readModel->insert('id', ['foo' => 'bar']);
     $this->readModel->persist();
 
     expect($this->readModel->getContainer())->toBe(['id' => ['foo' => 'bar']]);
 
-    $this->readModel->stack('update', 'id', 'foo', 'baz');
+    $this->readModel->update('id', 'foo', 'baz');
     $this->readModel->persist();
 
     expect($this->readModel->getContainer())->toBe(['id' => ['foo' => 'baz']]);
 });
 
-test('increment and force positive number', function (int|float $value) {
+test('increment', function () {
     expect($this->readModel->getContainer())->toBeEmpty()
-        ->and($this->readModel->isInitialized())->toBeFalse();
+        ->and($this->readModel->isInitialized())->toBeTrue();
 
     $this->readModel->initialize();
     expect($this->readModel->isInitialized())->toBeTrue();
 
-    $this->readModel->stack('insert', 'id', ['foo' => 1]);
+    $this->readModel->insert('id', ['foo' => 1]);
     $this->readModel->persist();
 
     expect($this->readModel->getContainer())->toBe(['id' => ['foo' => 1]]);
 
-    $this->readModel->stack('increment', 'id', 'foo', $value);
+    $this->readModel->increment('id', 'foo', 1);
     $this->readModel->persist();
 
-    expect($this->readModel->getContainer())->toBe(['id' => ['foo' => abs($value) + 1]]);
-})
-    ->with([[1], [-1], [0.1], [-0.1]]);
+    expect($this->readModel->getContainer())->toBe(['id' => ['foo' => 2]]);
+});
 
-test('decrement and force negative number', function (int|float $value) {
+test('decrement', function () {
     expect($this->readModel->getContainer())->toBeEmpty()
-        ->and($this->readModel->isInitialized())->toBeFalse();
+        ->and($this->readModel->isInitialized())->toBeTrue();
 
-    $this->readModel->initialize();
-    expect($this->readModel->isInitialized())->toBeTrue();
-
-    $this->readModel->stack('insert', 'id', ['foo' => 1]);
+    $this->readModel->insert('id', ['foo' => 1]);
     $this->readModel->persist();
 
     expect($this->readModel->getContainer())->toBe(['id' => ['foo' => 1]]);
 
-    $this->readModel->stack('decrement', 'id', 'foo', $value);
+    $this->readModel->decrement('id', 'foo', -1);
     $this->readModel->persist();
 
-    expect($this->readModel->getContainer())->toBe(['id' => ['foo' => 1 - abs($value)]]);
-})->with([[1], [-1], [0.1], [-0.1]]);
+    expect($this->readModel->getContainer())->toBe(['id' => ['foo' => 0]]);
+});
 
 test('delete', function () {
     expect($this->readModel->getContainer())->toBeEmpty()
-        ->and($this->readModel->isInitialized())->toBeFalse();
+        ->and($this->readModel->isInitialized())->toBeTrue();
 
-    $this->readModel->initialize();
-    expect($this->readModel->isInitialized())->toBeTrue();
-
-    $this->readModel->stack('insert', 'id', ['foo' => 'bar']);
+    $this->readModel->insert('id', ['foo' => 'bar']);
     $this->readModel->persist();
 
     expect($this->readModel->getContainer())->toBe(['id' => ['foo' => 'bar']]);
 
-    $this->readModel->stack('delete', 'id');
+    $this->readModel->delete('id');
     $this->readModel->persist();
 
     expect($this->readModel->getContainer())->toBeEmpty();
@@ -116,12 +104,12 @@ test('delete', function () {
 
 test('reset', function () {
     expect($this->readModel->getContainer())->toBeEmpty()
-        ->and($this->readModel->isInitialized())->toBeFalse();
+        ->and($this->readModel->isInitialized())->toBeTrue();
 
     $this->readModel->initialize();
     expect($this->readModel->isInitialized())->toBeTrue();
 
-    $this->readModel->stack('insert', 'id', ['foo' => 'bar']);
+    $this->readModel->insert('id', ['foo' => 'bar']);
     $this->readModel->persist();
 
     expect($this->readModel->getContainer())->toBe(['id' => ['foo' => 'bar']]);
@@ -129,17 +117,14 @@ test('reset', function () {
     $this->readModel->reset();
 
     expect($this->readModel->getContainer())->toBeEmpty()
-        ->and($this->readModel->isInitialized())->toBeFalse();
+        ->and($this->readModel->isInitialized())->toBeTrue();
 });
 
 test('down', function () {
     expect($this->readModel->getContainer())->toBeEmpty()
-        ->and($this->readModel->isInitialized())->toBeFalse();
+        ->and($this->readModel->isInitialized())->toBeTrue();
 
-    $this->readModel->initialize();
-    expect($this->readModel->isInitialized())->toBeTrue();
-
-    $this->readModel->stack('insert', 'id', ['foo' => 'bar']);
+    $this->readModel->insert('id', ['foo' => 'bar']);
     $this->readModel->persist();
 
     expect($this->readModel->getContainer())->toBe(['id' => ['foo' => 'bar']]);
@@ -147,5 +132,5 @@ test('down', function () {
     $this->readModel->down();
 
     expect($this->readModel->getContainer())->toBeEmpty()
-        ->and($this->readModel->isInitialized())->toBeFalse();
+        ->and($this->readModel->isInitialized())->toBeTrue();
 });

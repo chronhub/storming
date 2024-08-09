@@ -69,7 +69,7 @@ test('order stream events across multiple streams', function () {
         ->initialize(fn (): array => ['total' => 0, 'streams' => []])
         ->subscribeToStream($b1, $b2, $b3)
         ->when($this->getReadModelReactor(), $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     $expectedOrderStreams = [

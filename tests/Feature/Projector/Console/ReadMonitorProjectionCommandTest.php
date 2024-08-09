@@ -4,20 +4,14 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector\Console;
 
-use Illuminate\Console\Application;
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\Repository\Data\CreateData;
 use Storm\Projector\Repository\Data\PersistData;
 use Storm\Projector\Repository\InMemoryProjectionProvider;
-use Storm\Projector\Support\Console\ReadMonitorProjectionCommand;
 
 use function json_encode;
 
 beforeEach(function () {
-    Application::starting(function ($artisan) {
-        $artisan->resolveCommands(ReadMonitorProjectionCommand::class);
-    });
-
     /** @var InMemoryProjectionProvider $provider */
     $provider = $this->app['projector.provider.in_memory'];
     $provider->createProjection('balance', new CreateData('running'));
@@ -32,8 +26,8 @@ beforeEach(function () {
     );
 
     $provider->updateProjection('balance', new PersistData(
-        json_encode(['balance' => 100], JSON_PRETTY_PRINT),
-        json_encode($this->checkpoint->jsonSerialize(), JSON_PRETTY_PRINT),
+        json_encode(['balance' => 100]),
+        json_encode([$this->checkpoint->jsonSerialize()]),
         '2024-01-01T00:00:00.000000'
     ));
 });
@@ -45,8 +39,11 @@ it('should display the status of a projection', function () {
         'projection' => 'balance',
     ]);
 
-    $command->expectsOutput('Status of projection balance: running')
-        ->assertExitCode(0)
+    $command
+        ->expectsOutputToContain('Operation: status')
+        ->expectsOutputToContain('Projection: balance')
+        ->expectsOutputToContain('running')
+        ->assertSuccessful()
         ->run();
 });
 
@@ -58,8 +55,10 @@ test('should display the state of a projection', function () {
     ]);
 
     $command
-        ->expectsOutput('State of projection balance: {"balance":100}')
-        ->assertExitCode(0)
+        ->expectsOutputToContain('Operation: state')
+        ->expectsOutputToContain('Projection: balance')
+        ->expectsTable(['Key', 'Value'], [['balance', 100]])
+        ->assertSuccessful()
         ->run();
 });
 
@@ -70,14 +69,21 @@ test('should display the checkpoint of a projection', function () {
         'projection' => 'balance',
     ]);
 
-    Application::starting(function ($artisan) {
-        $artisan->resolveCommands(ReadMonitorProjectionCommand::class);
-    });
-
     $command
-        ->expectsOutput('Checkpoint of projection balance: '.json_encode($this->checkpoint->jsonSerialize()))
-        ->assertExitCode(0)
-        ->run();
+        ->expectsOutputToContain('Operation: checkpoint')
+        ->expectsOutputToContain('Projection: balance')
+        ->expectsOutputToContain('Checkpoint #')
+        ->expectsTable(['Key', 'Value'], [
+            ['stream_name', 'balance'],
+            ['position', 1],
+            ['event_time', '2024-01-01T00:00:00.000000'],
+            ['created_at', '2024-01-01T00:00:00.000000'],
+            ['gaps', '[]'],
+            ['gap_type', 'null'],
+        ])
+        ->assertSuccessful();
+
+    $command->run();
 });
 
 test('should throw an exception if the connection is invalid', function () {
@@ -88,7 +94,7 @@ test('should throw an exception if the connection is invalid', function () {
     ]);
 
     $command->expectsOutputToContain('No connector named invalid found.')
-        ->assertExitCode(1)
+        ->assertFailed()
         ->run();
 });
 
@@ -99,8 +105,8 @@ test('should throw an exception if the operation is invalid', function () {
         'projection' => 'balance',
     ]);
 
-    $command->expectsOutputToContain('Invalid operation invalid for balance')
-        ->assertExitCode(1)
+    $command->expectsOutputToContain('Invalid operation [invalid] for projection [balance]')
+        ->assertFailed()
         ->run();
 });
 
@@ -112,6 +118,6 @@ test('should throw an exception if the projection does not exist', function () {
     ]);
 
     $command->expectsOutputToContain('Projection invalid not found')
-        ->assertExitCode(1)
+        ->assertFailed()
         ->run();
 });

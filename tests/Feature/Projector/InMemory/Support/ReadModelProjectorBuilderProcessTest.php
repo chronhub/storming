@@ -44,13 +44,13 @@ test('build a read model projector process', function () {
         ->fromStreams(['account1'])
         ->withReadModel($readModel)
         ->withReactor(function (BalanceCreated $event): void {
-            $this->stack('insert', $event->id(), ['total' => $event->amount()]);
+            $this->readModel->insert($event->id(), ['total' => $event->amount()]);
         })
         ->withReactor(function (BalanceAdded $event): void {
-            $this->stack('increment', $event->id(), 'total', $event->amount());
+            $this->readModel->increment($event->id(), 'total', $event->amount());
         })
         ->withReactor(function (BalanceSubtracted $event): void {
-            $this->stack('decrement', $event->id(), 'total', $event->amount());
+            $this->readModel->decrement($event->id(), 'total', $event->amount());
         })
         ->withThen(function (ReadModelScope $scope): void {
             $scope->userState()->push('events', $scope->event()::class);

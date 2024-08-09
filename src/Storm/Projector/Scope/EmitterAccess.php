@@ -13,12 +13,12 @@ use Storm\Projector\Workflow\Process;
 
 final class EmitterAccess implements EmitterScope
 {
-    use BoundScope;
+    use ScopeAccess;
 
     public function __construct(
         protected readonly Process $process,
         protected readonly SystemClock $clock,
-        public ?UserStateScope $userState = null,
+        public ?UserState $userState = null,
     ) {}
 
     public function emit(DomainEvent $event): void

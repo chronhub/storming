@@ -51,7 +51,7 @@ test('reads events from the beginning of the stream', function (?string $descrip
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor(), $this->getThenReactor())
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: false);
 
     $this->assertProjectionState(['total' => 100, 'events' => $this->expectedStateEvents]);
@@ -77,7 +77,7 @@ test('run projection again from last position kept in memory', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($reactors, $this->getThenReactor())
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: false);
 
     $this->assertProjectionState(['total' => 100, 'events' => $this->expectedStateEvents]);
@@ -123,7 +123,7 @@ test('read model scope with one processed event', function () {
     $this->projector
         ->subscribeToStream($streamName)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: false);
 
     expect($this->projector->getName())->toBe($projectionName);
@@ -146,7 +146,7 @@ test('reactors should never been called when no event is processed', function ()
     $this->projector
         ->subscribeToStream($streamName)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: false);
 
     $this->assertProjectionState([]);
@@ -170,7 +170,7 @@ test('does not detect gaps with no retry', function (bool $keepRunning) {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: $keepRunning);
 
     $this->assertProjectionState(['total' => 125, 'events' => $this->expectedStateEvents]);
@@ -198,7 +198,7 @@ test('detect gaps with setup retries and record gap', function (array $retries, 
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     $this->assertProjectionState(['total' => 100, 'events' => $this->expectedStateEvents]);
@@ -238,7 +238,7 @@ test('detect larger gaps with setup retries and record gap with range threshold'
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     $this->assertProjectionState(['total' => 100, 'events' => $this->expectedStateEvents]);
@@ -275,7 +275,7 @@ test('fails detect gaps with running once and setup retries', function (array $r
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream('account')
         ->when($this->getReadModelReactor(), $this->getThenReactor())
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: false);
 
     $this->assertProjectionState(['total' => 100, 'events' => [BalanceCreated::class]]);
@@ -310,7 +310,7 @@ test('called [then] callback even when stream event is not acknowledged', functi
         ->initialize(fn (): array => ['then called' => 0])
         ->subscribeToStream($streamName)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: false);
 
     $this->assertProjectionState(['then called' => 2]);
@@ -340,7 +340,7 @@ test('subscribe to all stream', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToAll()
         ->when($this->getReadModelReactor(), $this->getThenReactor())
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: false);
 
     $this->assertPartialProjectionState('total', 600);
@@ -373,7 +373,7 @@ test('load stream events with block size and load limiter', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToAll()
         ->when($this->getReadModelReactor(), $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     expect($this->projector->getState()['events'])->toHaveCount(1000);
@@ -404,7 +404,7 @@ test('stop projection from projector', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToAll()
         ->when($this->getReadModelReactor(), $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     expect($this->projector->getState()['events'])->toHaveCount(10);

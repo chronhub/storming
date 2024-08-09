@@ -38,7 +38,7 @@ test('stop projection when cycle reached', function (int $cycles) {
         ->subscribeToStream($streamName)
         ->when($this->getIncrementUserStateReactor(), $this->getThenReactor())
         ->haltOn(StopWhen::cycleReached($cycles))
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     $this->assertProjectionReport(cycle: $cycles, ackedEvent: 4, totalEvent: 4);
@@ -59,7 +59,7 @@ test('stop projection with expiration', function () {
         ->subscribeToStream($streamName)
         ->when($this->getIncrementUserStateReactor(), $this->getThenReactor())
         ->haltOn(StopWhen::timeExpired('2', 'seconds'))
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     $this->assertPartialProjectionReport(['acked_event' => 4, 'total_event' => 4]);
@@ -81,7 +81,7 @@ test('stop projection when recoverable gap detected', function (array $retries) 
         ->subscribeToStream($streamName)
         ->when($this->getIncrementUserStateReactor())
         ->haltOn(StopWhen::gapDetected(GapType::RECOVERABLE_GAP))
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     $this->assertPartialProjectionState('total', 100);
@@ -104,7 +104,7 @@ test('stop projection when unrecoverable gap detected', function (array $retries
         ->subscribeToStream($streamName)
         ->when($this->getIncrementUserStateReactor(), $this->getThenReactor())
         ->haltOn(StopWhen::gapDetected(GapType::UNRECOVERABLE_GAP))
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     $this->assertPartialProjectionState('total', 300);

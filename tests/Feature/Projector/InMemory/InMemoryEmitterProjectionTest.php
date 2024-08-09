@@ -47,7 +47,7 @@ test('emit stream event to event store under the projection name', function (str
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($this->getEmitterReactor(), $this->getThenReactor())
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(false);
 
     $this->assertProjectionExists($projectionName, true);
@@ -77,7 +77,7 @@ test('emitter scope with one processed event', function () {
     $this->projector
         ->subscribeToStream($eventStream)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(false);
 
     expect($this->projector->getName())->toBe($projectionName);
@@ -109,7 +109,7 @@ test('emit stream event with retries and gaps', function (array $retries, bool $
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(true);
 
     $this->assertProjectionExists($projectionName, true);
@@ -153,7 +153,7 @@ test('link event to a new stream', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(false);
 
     $this->assertStreamExists($emittedStream, true);
@@ -190,7 +190,7 @@ test('link event to a new stream with gaps', function (array $retries, bool $rec
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(true);
 
     $this->assertStreamExists($emittedStream, true);
@@ -250,7 +250,7 @@ test('internal position header of emitted event is position of original stream e
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(false);
 
     $this->assertProjectionExists($projectionName, true);
@@ -289,7 +289,7 @@ test('internal position header of link_to event is position of original stream e
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(true);
 
     $this->assertProjectionExists($projectionName, true);
@@ -324,7 +324,7 @@ test('stop projection from projector', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($eventStream)
         ->when($this->getEmitterReactor(), $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(true);
     $this->assertProjectionReport(cycle: 1, ackedEvent: 4, totalEvent: 4);
 });

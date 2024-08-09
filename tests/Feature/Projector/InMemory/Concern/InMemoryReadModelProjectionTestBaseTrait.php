@@ -56,17 +56,17 @@ trait InMemoryReadModelProjectionTestBaseTrait
             function (BalanceCreated $event) {
                 /** @var ReadModelScope $this */
                 $this->userState->increment('total', $event->amount());
-                $this->stack('insert', $event->id(), ['total' => $event->amount()]);
+                $this->readModel()->insert($event->id(), ['total' => $event->amount()]);
             },
             function (BalanceAdded $event) {
                 /** @var ReadModelScope $this */
                 $this->userState->increment('total', $event->amount());
-                $this->stack('increment', $event->id(), 'total', $event->amount());
+                $this->readModel()->increment($event->id(), 'total', $event->amount());
             },
             function (BalanceSubtracted $event) {
                 /** @var ReadModelScope $this */
                 $this->userState->decrement('total', $event->amount());
-                $this->stack('decrement', $event->id(), 'total', $event->amount());
+                $this->readModel()->decrement($event->id(), 'total', $event->amount());
             },
         ];
     }
@@ -121,7 +121,7 @@ trait InMemoryReadModelProjectionTestBaseTrait
 
     protected function assertReadModelDown(): void
     {
-        expect($this->readModel->isInitialized())->toBeFalse()
+        expect($this->readModel->isInitialized())->toBeTrue()
             ->and($this->readModel->getContainer())->toBeEmpty();
 
     }

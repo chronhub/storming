@@ -44,7 +44,9 @@ abstract class ProjectorBuilder
     /** @var array<Option::*, null|string|int|bool|array>|array */
     protected array $option = [];
 
-    /** @var array<Closure> */
+    /**
+     * @var array<(Closure(DomainEvent): void)>
+     */
     protected array $reactors = [];
 
     /** @var (Closure(TScope): void)|null */
@@ -137,9 +139,7 @@ abstract class ProjectorBuilder
     }
 
     /**
-     * @template TEvent of DomainEvent
-     *
-     * @param  array<(Closure(TEvent): void)> $reactors
+     * @param  array<(Closure(DomainEvent): void)> $reactors
      * @return $this
      */
     public function withReactors(array $reactors): static
@@ -150,9 +150,7 @@ abstract class ProjectorBuilder
     }
 
     /**
-     * @template TEvent of DomainEvent
-     *
-     * @param  Closure(TEvent): void $reactor
+     * @param  Closure(DomainEvent): void $reactor
      * @return $this
      */
     public function withReactor(Closure $reactor): static
@@ -252,7 +250,6 @@ abstract class ProjectorBuilder
         if ($this->pcntlDispatch) {
             $this->option['signal'] = true;
 
-            // checkMe use a process to call the signal handler
             pcntl_async_signals(true);
         }
 
@@ -297,7 +294,7 @@ abstract class ProjectorBuilder
     abstract public function build(): Projector;
 
     /**
-     * Run the projector.
+     * Conditionally build the projector and run it.
      */
     abstract public function run(bool $keepRunning = false): void;
 }

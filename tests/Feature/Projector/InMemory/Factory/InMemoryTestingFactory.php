@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Feature\Projector\InMemory\Factory;
 
 use Storm\Contract\Chronicler\Chronicler;
-use Storm\Contract\Chronicler\InMemoryQueryFilter;
+use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ConnectorResolver;
 use Storm\Contract\Projector\Monitoring;
@@ -14,32 +14,28 @@ use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Connector\ConnectionManager;
-use Storm\Projector\Stream\Filter\InMemoryFromToPosition;
 
 class InMemoryTestingFactory
 {
-    public InMemoryQueryFilter $inMemoryQueryFilter;
-
     protected ConnectionManager $connectionManager;
 
     public ?ProjectorManagerInterface $projectorManager = null;
 
-    public function createProjectorManager(string $connection = 'in_memory'): ProjectorManagerInterface
+    public function createProjectorManager(?string $connection = null): ProjectorManagerInterface
     {
         if ($this->projectorManager) {
             return $this->projectorManager;
         }
 
-        $this->setupQueryFilter();
+        if ($connection === null) {
+            $connection = 'in_memory';
+        }
 
-        $this->connectionManager = app(ConnectorResolver::class)->connection($connection);
+        $connectorResolver = app(ConnectorResolver::class);
+        $connectorResolver->setDefaultDriver($connection);
+        $this->connectionManager = $connectorResolver->connection($connection);
 
         return $this->projectorManager = app(ProjectorManagerInterface::class);
-    }
-
-    public function setupQueryFilter(): void
-    {
-        $this->inMemoryQueryFilter ??= new InMemoryFromToPosition();
     }
 
     public function getMonitor(string $connection = 'in_memory'): Monitoring
@@ -65,5 +61,10 @@ class InMemoryTestingFactory
     public function getSerializer(): SymfonySerializer
     {
         return $this->connectionManager->serializer();
+    }
+
+    public function getQueryFilter(): QueryFilter
+    {
+        return $this->connectionManager->queryFilter();
     }
 }

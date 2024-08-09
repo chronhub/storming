@@ -13,7 +13,7 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Scope\EventScope;
-use Storm\Projector\Scope\UserStateScope;
+use Storm\Projector\Scope\UserState;
 use Storm\Projector\Stream\StreamEventReactor;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamIncrements;
 use Storm\Projector\Workflow\Notification\Command\StreamEventAcked;
@@ -81,7 +81,7 @@ test('react on event acked', function (bool $stillRunning, ?GapType $gapType) {
     $reactors = function (EventScope $scope): void {
         $scope
             ->ack($this->event::class)
-            ->then(function (DomainEvent $event, ProjectorScope $projector, UserStateScope $userState) {
+            ->then(function (DomainEvent $event, ProjectorScope $projector, UserState $userState) {
                 $userState->increment(value: 5);
             });
     };

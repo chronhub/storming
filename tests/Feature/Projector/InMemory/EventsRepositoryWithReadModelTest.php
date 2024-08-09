@@ -73,7 +73,7 @@ test('dispatch created, started, released events on first run', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor(), $this->getThenReactor())
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: false);
 
     assertDefaultDispatchedEvents($projectionName);
@@ -99,7 +99,7 @@ test('dispatch reset event', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor(), $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: false);
 
     assertDefaultDispatchedEvents($projectionName);
@@ -132,7 +132,7 @@ test('dispatch restarted event when reset projection and running in background',
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor(), $thenReactor)
         ->haltOn(StopWhen::cycleReached(2))
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     assertDefaultDispatchedEvents($projectionName);
@@ -162,7 +162,7 @@ test('dispatch stop event', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor(), $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     assertDefaultDispatchedEvents($projectionName);
@@ -200,7 +200,7 @@ test('dispatch stop event on rise when discover stopping remote status', functio
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor(), $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     Event::assertDispatched(
@@ -231,7 +231,7 @@ test('dispatch delete without emitted events', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor(), $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     Event::assertDispatched(ProjectionCreated::class);
@@ -265,7 +265,7 @@ test('dispatch delete with emitted events', function () {
         ->initialize(fn (): array => ['total' => 0])
         ->subscribeToStream($streamName)
         ->when($this->getReadModelReactor(), $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(inBackground: true);
 
     Event::assertDispatched(ProjectionCreated::class);

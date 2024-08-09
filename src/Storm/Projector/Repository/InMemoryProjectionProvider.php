@@ -14,13 +14,14 @@ use Storm\Projector\Exception\ProjectionAlreadyRunning;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\Repository\Data\ProjectionData;
 
+use function array_flip;
 use function array_key_exists;
 use function array_merge;
-use function in_array;
 
 final readonly class InMemoryProjectionProvider implements ProjectionProvider
 {
-    public array $attributes;
+    /** @var array{'name', 'status', 'state', 'checkpoint', 'locked_until'} */
+    private array $attributes;
 
     /** @var Collection<string, ProjectionModel> */
     private Collection $projections;
@@ -74,11 +75,10 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
 
     public function filterByNames(string ...$projectionNames): array
     {
-        $byStreamNames = static fn (ProjectionModel $projection): bool => in_array(
-            $projection->name(), $projectionNames, true
-        );
-
-        return $this->projections->filter($byStreamNames)->keys()->toArray();
+        return $this->projections
+            ->keys()
+            ->only(array_flip($projectionNames))
+            ->toArray();
     }
 
     public function exists(string $projectionName): bool

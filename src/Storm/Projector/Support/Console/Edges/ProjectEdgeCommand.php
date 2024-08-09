@@ -31,12 +31,9 @@ abstract class ProjectEdgeCommand extends Command implements SignalableCommandIn
 
     protected function getProjectionBuilder(): EmitterProjectorBuilder
     {
-        $build = $this->argument('build');
-        $connection = $this->argument('connection');
+        $builder = $this->getLaravel()[$this->argument('build')];
 
-        $builder = $this->getLaravel()[$build];
-
-        return $builder($connection);
+        return $builder($this->argument('connection'));
     }
 
     public function handleSignal(int $signal): int

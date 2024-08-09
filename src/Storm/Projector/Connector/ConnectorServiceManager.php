@@ -40,6 +40,13 @@ final class ConnectorServiceManager implements ConnectorResolver
 
     public function addConnector(string $name, Closure $connector): void
     {
+        // prevent duplicate connectors as a connector
+        // which already have been resolved will not be re-resolved
+        // checkMe allow to purge an already resolved connector?
+        if (isset($this->connectors[$name])) {
+            throw ConfigurationViolation::message("Connector $name already exists.");
+        }
+
         $this->connectors[$name] = $connector;
     }
 
@@ -62,7 +69,7 @@ final class ConnectorServiceManager implements ConnectorResolver
     {
         $connector = $this->connectors[$name];
 
-        $this->app['config']->set('projector.default', $name);
+        //$this->setDefaultDriver($name); // checkMe do we need to do this?
 
         return $connector($this->app)->connect($config);
     }

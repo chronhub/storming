@@ -36,10 +36,6 @@ trait InMemoryEmitterProjectionTestBaseTrait
         array $options = [],
         ?string $connection = null,
     ): void {
-        if ($connection === null) {
-            $connection = 'in_memory';
-        }
-
         $this->projectorManager = $this->factory->createProjectorManager($connection);
         $this->projector = $this->projectorManager->newEmitterProjector($projectionName, $options);
 

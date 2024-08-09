@@ -47,7 +47,7 @@ test('should emit all stream events to event store under the projection name', f
         ->initialize(fn (): array => ['events' => []])
         ->subscribeToStream($stream1)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(false);
 
     $this->assertProjectionExists($projectionName, true);
@@ -89,7 +89,7 @@ test('should link to all stream events to event store under a stream name', func
         ->initialize(fn (): array => ['events' => []])
         ->subscribeToStream($stream1)
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(false);
 
     $this->assertProjectionExists($projectionName, true);
@@ -127,7 +127,7 @@ test('test emit internal stream to an incremental event store', function () {
         ->initialize(fn (): array => [$stream1 => 0, $stream2 => 0])
         ->subscribeToAll()
         ->when($reactors, $thenReactor)
-        ->filter($this->factory->inMemoryQueryFilter)
+        ->filter($this->factory->getQueryFilter())
         ->run(false);
 
     $this->assertProjectionState([$stream1 => 50, $stream2 => 100]);

@@ -12,7 +12,7 @@ use function is_callable;
 
 final class AllTrough implements ProjectorScopeFactory
 {
-    private UserStateScope $userStateScope;
+    private UserState $userStateScope;
 
     public function __construct(
         protected readonly ProjectorScope $projector,
@@ -23,7 +23,7 @@ final class AllTrough implements ProjectorScopeFactory
             throw new RuntimeException('Projector scope is not callable');
         }
 
-        $this->userStateScope = new UserStateScope();
+        $this->userStateScope = new UserState();
     }
 
     public function handle(DomainEvent $event, ?array $userState = null): ProjectorScope

@@ -7,7 +7,7 @@ namespace Storm\Projector\Scope;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
 
-trait BoundScope
+trait ScopeAccess
 {
     protected ?DomainEvent $event = null;
 
@@ -16,7 +16,7 @@ trait BoundScope
         return $this->event;
     }
 
-    public function userState(): ?UserStateScope
+    public function userState(): ?UserState
     {
         return $this->userState;
     }
@@ -36,7 +36,7 @@ trait BoundScope
      * checkMe it's sensitive to use this method
      *  either encapsulate again or use reflection
      */
-    public function __invoke(?DomainEvent $event, ?UserStateScope $userState = null): static
+    public function __invoke(?DomainEvent $event, ?UserState $userState = null): static
     {
         $this->event = $event;
         $this->userState = $userState;

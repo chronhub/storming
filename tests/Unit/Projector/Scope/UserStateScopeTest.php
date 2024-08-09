@@ -6,17 +6,17 @@ namespace Storm\Tests\Scope;
 
 use ArrayAccess;
 use Storm\Projector\Exception\InvalidArgumentException;
-use Storm\Projector\Scope\UserStateScope;
+use Storm\Projector\Scope\UserState;
 
 test('default instance', function () {
-    $state = new UserStateScope();
+    $state = new UserState();
 
     expect($state)->toBeInstanceOf(ArrayAccess::class)
         ->and($state->all())->toBeEmpty();
 });
 
 test('offset unset', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     expect($state->all())->toBe(['foo' => 'bar']);
 
     $state->offsetUnset('foo');
@@ -24,7 +24,7 @@ test('offset unset', function () {
     expect($state->all())->toBeEmpty();
 });
 test('has', function () {
-    $state = new UserStateScope();
+    $state = new UserState();
     expect($state->has('foo'))->toBeFalse();
 
     $state->set('foo', 'bar');
@@ -32,7 +32,7 @@ test('has', function () {
 });
 
 test('offset exists', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     expect($state->offsetExists('foo'))->toBeTrue();
 
     $state->offsetUnset('foo');
@@ -40,7 +40,7 @@ test('offset exists', function () {
 });
 
 test('string', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     expect($state->string('foo'))->toBe('bar');
 
     $state->set('foo', 123);
@@ -48,11 +48,11 @@ test('string', function () {
     expect($state->string('foo'));
 })->throws(InvalidArgumentException::class, 'User state value for key [foo] must be a string, integer given.');
 test('all', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     expect($state->all())->toBe(['foo' => 'bar']);
 });
 test('float', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     expect($state->float('foo'))->toBe(123.45);
 
     $state->set('foo', 123);
@@ -61,7 +61,7 @@ test('float', function () {
 })->throws(InvalidArgumentException::class, 'User state value for key [foo] must be a float, string given.');
 
 test('offset get', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     expect($state->offsetGet('foo'))->toBe('bar');
 
     $state->set('foo', 123);
@@ -70,7 +70,7 @@ test('offset get', function () {
 });
 
 test('set', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     $state->set('baz', 'bar');
 
     expect($state->get('foo'))->toBe('bar')
@@ -79,7 +79,7 @@ test('set', function () {
         ->and($state->all())->toBe(['foo' => 'bar', 'baz' => 'bar']);
 });
 test('integer', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     expect($state->integer('foo'))->toBe(123);
 
     $state->set('foo', 123);
@@ -87,7 +87,7 @@ test('integer', function () {
     expect($state->integer('foo'));
 })->throws(InvalidArgumentException::class, 'User state value for key [foo] must be an integer, string given.');
 test('boolean', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     expect($state->boolean('foo'))->toBeTrue();
 
     $state->set('foo', 123);
@@ -96,7 +96,7 @@ test('boolean', function () {
 })->throws(InvalidArgumentException::class, 'User state value for key [foo] must be a boolean, string given.');
 
 test('offset set', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     $state->offsetSet('baz', 'bar');
 
     expect($state->get('foo'))->toBe('bar')
@@ -105,7 +105,7 @@ test('offset set', function () {
         ->and($state->all())->toBe(['foo' => 'bar', 'baz' => 'bar']);
 });
 test('get', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     expect($state->get('foo'))->toBe('bar');
 
     $state->set('foo', 123);
@@ -115,7 +115,7 @@ test('get', function () {
 });
 
 test('push', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     $state->push('some', 'value');
     $state->push('some', 'another');
 
@@ -125,7 +125,7 @@ test('push', function () {
 });
 
 test('array', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     expect($state->array('foo'))->toBe(['bar']);
 
     $state->set('foo', 123);
@@ -134,7 +134,7 @@ test('array', function () {
 })->throws(InvalidArgumentException::class, 'User state value for key [foo] must be an array, string given.');
 
 test('prepend', function () {
-    $state = new UserStateScope(['foo' => 'bar']);
+    $state = new UserState(['foo' => 'bar']);
     $state->prepend('some', 'value');
     $state->prepend('some', 'another');
 
@@ -144,7 +144,7 @@ test('prepend', function () {
 });
 
 test('increment', function () {
-    $state = new UserStateScope(['foo' => 1]);
+    $state = new UserState(['foo' => 1]);
     $state->increment('foo');
 
     expect($state->get('foo'))->toBe(2);
@@ -157,7 +157,7 @@ test('increment', function () {
 })->throws(InvalidArgumentException::class, 'User state value for key [bar] must be an integer, NULL given.');
 
 test('decrement', function () {
-    $state = new UserStateScope(['foo' => 1]);
+    $state = new UserState(['foo' => 1]);
     $state->decrement('foo');
 
     expect($state->get('foo'))->toBe(0);

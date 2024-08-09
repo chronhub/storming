@@ -24,7 +24,7 @@ final class AckedOnly implements ProjectorScopeFactory
      */
     private array $boundReactors;
 
-    private UserStateScope $userStateScope;
+    private UserState $userStateScope;
 
     public function __construct(
         /** @var array<string, Closure> */
@@ -37,7 +37,7 @@ final class AckedOnly implements ProjectorScopeFactory
             throw new RuntimeException('Projector scope is not callable');
         }
 
-        $this->userStateScope = new UserStateScope();
+        $this->userStateScope = new UserState();
         $this->boundReactors = $this->bindReactors($reactors);
     }
 
