@@ -65,14 +65,14 @@ trait InteractWithProjection
 
     public function getState(): array
     {
-        return $this->subscriber->call(
+        return $this->manager->call(
             fn (Process $process) => $process->userState()->get()
         );
     }
 
     public function getReport(): ProjectionReport
     {
-        return $this->subscriber->call(
+        return $this->manager->call(
             fn (Process $process) => $process->compute()->report()
         );
     }

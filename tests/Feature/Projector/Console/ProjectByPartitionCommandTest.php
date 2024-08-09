@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Feature\Projector\Console;
 
 use Illuminate\Console\Application;
-use Storm\Contract\Projector\ProjectorManagement;
+use Storm\Contract\Projector\ConnectorResolver;
 use Storm\Projector\Support\Console\Edges\ProjectByPartitionCommand;
 use Storm\Stream\StreamName;
 use Storm\Tests\Domain\BalanceEventStore;
@@ -18,8 +18,8 @@ test('test emit partitioned stream events to by partition stream', function () {
     $stream1 = 'not_a_partition';
     $stream2 = 'balance-one';
 
-    /** @var ProjectorManagement $serviceManager */
-    $serviceManager = app(ProjectorManagement::class);
+    /** @var ConnectorResolver $serviceManager */
+    $serviceManager = app(ConnectorResolver::class);
     $manager = $serviceManager->connection($connection);
 
     BalanceEventStore::fromProjectionConnection($manager, new StreamName($stream1))->make(10);

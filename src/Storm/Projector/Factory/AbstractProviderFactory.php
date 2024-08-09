@@ -17,19 +17,19 @@ use Storm\Projector\Workflow\Process;
 
 abstract readonly class AbstractProviderFactory implements ProviderFactory
 {
-    public function __construct(protected ConnectionManager $manager) {}
+    public function __construct(protected ConnectionManager $connection) {}
 
     protected function createRepository(string $streamName, Option $options): Repository
     {
         $repository = new GenericRepository(
-            $this->manager->projectionProvider(),
+            $this->connection->projectionProvider(),
             $this->createLockManager($options),
-            $this->manager->serializer(),
+            $this->connection->serializer(),
             $streamName
         );
 
-        if ($this->manager->dispatcher() !== null) {
-            return new EventRepository($repository, $this->manager->dispatcher());
+        if ($this->connection->dispatcher() !== null) {
+            return new EventRepository($repository, $this->connection->dispatcher());
         }
 
         return $repository;
@@ -39,8 +39,8 @@ abstract readonly class AbstractProviderFactory implements ProviderFactory
     {
         $component = new Component(
             $options,
-            $this->manager->eventStreamProvider(),
-            $this->manager->clock()
+            $this->connection->eventStreamProvider(),
+            $this->connection->clock()
         );
 
         return new Process($component);
@@ -56,7 +56,7 @@ abstract readonly class AbstractProviderFactory implements ProviderFactory
     protected function createLockManager(Option $options): LockManager
     {
         return new LockManager(
-            $this->manager->clock(),
+            $this->connection->clock(),
             $options->getTimeout(),
             $options->getLockout()
         );

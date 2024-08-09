@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Feature\Projector\Console;
 
 use Illuminate\Console\Application;
-use Storm\Contract\Projector\ProjectorManagement;
+use Storm\Contract\Projector\ConnectorResolver;
 use Storm\Projector\Support\Console\Edges\ProjectByMessageNameCommand;
 use Storm\Stream\StreamName;
 use Storm\Tests\Domain\Balance\BalanceId;
@@ -19,8 +19,8 @@ test('test emit all stream events to by message name stream and partition', func
     $stream1 = 'account1';
     $stream2 = 'account2';
 
-    /** @var ProjectorManagement $serviceManager */
-    $serviceManager = app(ProjectorManagement::class);
+    /** @var ConnectorResolver $serviceManager */
+    $serviceManager = app(ConnectorResolver::class);
 
     $manager = $serviceManager->connection($connection);
 

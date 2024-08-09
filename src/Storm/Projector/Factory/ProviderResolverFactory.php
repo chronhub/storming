@@ -2,17 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Connector;
+namespace Storm\Projector\Factory;
 
+use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Exception\InvalidArgumentException;
-use Storm\Projector\Factory\EmitterProviderFactory;
-use Storm\Projector\Factory\ProviderFactory;
-use Storm\Projector\Factory\QueryProviderFactory;
-use Storm\Projector\Factory\ReadModelProviderFactory;
 
-class SubscriptionFactoryResolver
+class ProviderResolverFactory
 {
-    /** @var array<string, class-string<ProviderFactory>|ProviderFactory> */
+    /** @var array<string, string|class-string<ProviderFactory>|ProviderFactory> */
     protected array $factories = [
         'query' => QueryProviderFactory::class,
         'emitter' => EmitterProviderFactory::class,
@@ -24,7 +21,7 @@ class SubscriptionFactoryResolver
         $factory = $this->factories[$name] ?? null;
 
         if (! $factory) {
-            throw new InvalidArgumentException("Invalid provider factory type: $name");
+            throw new InvalidArgumentException("Subscription resolver factory $name not found");
         }
 
         if ($factory instanceof ProviderFactory) {
@@ -38,6 +35,7 @@ class SubscriptionFactoryResolver
         return new $this->factories[$name]($manager);
     }
 
+    // checkMe wip contracts tests
     public function addFactory(string $name, ProviderFactory|string $factory): void
     {
         $this->factories[$name] = $factory;

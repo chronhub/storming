@@ -6,28 +6,28 @@ namespace Storm\Projector\Factory;
 
 use Storm\Contract\Projector\ReadModel;
 use Storm\Projector\Options\Option;
-use Storm\Projector\Provider\GenericSubscription;
+use Storm\Projector\Provider\Manager;
 use Storm\Projector\Provider\ReadingModelProvider;
-use Storm\Projector\Provider\Subscriptor;
+use Storm\Projector\Provider\WorkflowManager;
 
 final readonly class ReadModelProviderFactory extends AbstractProviderFactory
 {
-    public function create(?string $streamName, ?ReadModel $readModel, Option $options): Subscriptor
+    public function create(?string $streamName, ?ReadModel $readModel, Option $options): Manager
     {
         $process = $this->createProcessManager($options);
 
-        $projectionRepository = $this->createRepository($streamName, $options);
+        $repository = $this->createRepository($streamName, $options);
 
-        $provider = new ReadingModelProvider($process, $projectionRepository, $readModel);
+        $provider = new ReadingModelProvider($process, $repository, $readModel);
         $this->subscribe($provider, $process);
 
         $activities = new ReadModelActivityFactory(
-            $this->manager->eventStore(),
+            $this->connection->eventStore(),
             $options,
-            $this->manager->clock(),
+            $this->connection->clock(),
             $readModel
         );
 
-        return new GenericSubscription($process, $activities);
+        return new WorkflowManager($process, $activities);
     }
 }

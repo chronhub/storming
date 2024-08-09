@@ -11,13 +11,14 @@ use Storm\Chronicler\InMemory\IncrementalEventStore;
 use Storm\Chronicler\InMemory\InMemoryEventStreamProvider;
 use Storm\Chronicler\InMemory\VersioningEventStore;
 use Storm\Contract\Chronicler\Chronicler;
+use Storm\Contract\Projector\ConnectorResolver;
 use Storm\Contract\Projector\MonitoringManager;
-use Storm\Contract\Projector\ProjectorManagement;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Serializer\JsonSerializer;
 use Storm\Contract\Serializer\SymfonySerializer;
+use Storm\Projector\Connector\ConnectorServiceManager;
 use Storm\Projector\Connector\InMemoryConnector;
-use Storm\Projector\Connector\SubscriptionFactoryResolver;
+use Storm\Projector\Factory\ProviderResolverFactory;
 use Storm\Projector\Repository\InMemoryProjectionProvider;
 
 class ProjectorServiceProvider extends ServiceProvider implements DeferrableProvider
@@ -25,7 +26,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
     public array $singletons = [
         'chronicler.provider.in_memory' => InMemoryEventStreamProvider::class,
         'projector.provider.in_memory' => InMemoryProjectionProvider::class,
-        SubscriptionFactoryResolver::class,
+        ProviderResolverFactory::class,
         ProjectorManagerInterface::class => ProjectorManager::class,
         MonitoringManager::class => MonitorManager::class,
     ];
@@ -65,14 +66,14 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
             'projector.serializer.json',
             'projector.manager',
             ProjectorManagerInterface::class,
-            ProjectorManagement::class,
+            ConnectorResolver::class,
         ];
     }
 
     protected function registerManagers(): void
     {
-        $this->app->singleton(ProjectorManagement::class, function (Application $app) {
-            $projector = new ProjectorServiceManager($app);
+        $this->app->singleton(ConnectorResolver::class, function (Application $app) {
+            $projector = new ConnectorServiceManager($app);
 
             $projector->addConnector('in_memory', fn (Application $app) => new InMemoryConnector($app));
             $projector->addConnector('in_memory-incremental', fn (Application $app) => new InMemoryConnector($app));

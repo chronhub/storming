@@ -29,5 +29,5 @@ interface ConnectionManager
 
     public function dispatcher(): ?Dispatcher;
 
-    public function toProjectionOption(array $options = []): Option;
+    public function toOption(array $options = []): Option;
 }

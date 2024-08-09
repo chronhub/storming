@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector\Builder;
 
-use Storm\Contract\Projector\ProjectorManagement;
+use Storm\Contract\Projector\ConnectorResolver;
 use Storm\Contract\Projector\ReadModelProjector;
 use Storm\Projector\Scope\ReadModelScope;
 use Storm\Projector\Support\Builder\ReadModelProjectorBuilder;
@@ -25,8 +25,8 @@ test('test read model builder from partition', function () {
     $projectionName = 'balances';
     $stream1 = 'account-balance';
 
-    /** @var ProjectorManagement $serviceManager */
-    $serviceManager = app(ProjectorManagement::class);
+    /** @var ConnectorResolver $serviceManager */
+    $serviceManager = app(ConnectorResolver::class);
     $manager = $serviceManager->connection($connection);
 
     $balanceId = BalanceId::create();

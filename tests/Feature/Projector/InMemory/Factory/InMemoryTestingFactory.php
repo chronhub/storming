@@ -7,10 +7,10 @@ namespace Storm\Tests\Feature\Projector\InMemory\Factory;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\InMemoryQueryFilter;
 use Storm\Contract\Clock\SystemClock;
+use Storm\Contract\Projector\ConnectorResolver;
 use Storm\Contract\Projector\Monitoring;
 use Storm\Contract\Projector\MonitoringManager;
 use Storm\Contract\Projector\ProjectionProvider;
-use Storm\Contract\Projector\ProjectorManagement;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Connector\ConnectionManager;
@@ -32,7 +32,7 @@ class InMemoryTestingFactory
 
         $this->setupQueryFilter();
 
-        $this->connectionManager = app(ProjectorManagement::class)->connection($connection);
+        $this->connectionManager = app(ConnectorResolver::class)->connection($connection);
 
         return $this->projectorManager = app(ProjectorManagerInterface::class);
     }

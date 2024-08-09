@@ -8,7 +8,7 @@ use Closure;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\InteractWithProjection;
-use Storm\Projector\Provider\Subscriptor;
+use Storm\Projector\Provider\Manager;
 use Storm\Projector\Workflow\Notification\Promise\CurrentUserState;
 use Storm\Projector\Workflow\Notification\Promise\GetProjectionReport;
 
@@ -16,14 +16,14 @@ use function get_class;
 
 beforeEach(function () {
     $this->context = $context = mock(ContextReader::class);
-    $this->subscriber = $subscriber = mock(Subscriptor::class);
+    $this->subscriber = $subscriber = mock(Manager::class);
     $this->projector = new class($context, $subscriber)
     {
         use InteractWithProjection;
 
         public function __construct(
             protected ContextReader $context,
-            protected Subscriptor $subscriber
+            protected Manager $subscriber
         ) {}
 
         public function callDescribeIfNeeded(): void

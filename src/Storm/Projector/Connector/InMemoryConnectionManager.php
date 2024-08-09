@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Storm\Projector\Connector;
 
 use Illuminate\Contracts\Events\Dispatcher;
-use RuntimeException;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\ChroniclerDecorator;
 use Storm\Contract\Chronicler\EventStreamProvider;
@@ -14,8 +13,12 @@ use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Serializer\SymfonySerializer;
+use Storm\Projector\Exception\ConfigurationViolation;
 use Storm\Projector\Options\Option;
-use Storm\Projector\Options\ProjectionOptionResolver;
+use Storm\Projector\Options\OptionResolver;
+
+use function get_class;
+use function sprintf;
 
 final class InMemoryConnectionManager implements ConnectionManager
 {
@@ -36,15 +39,17 @@ final class InMemoryConnectionManager implements ConnectionManager
         }
 
         if (! $chronicler instanceof InMemoryChronicler) {
-            throw new RuntimeException('Chronicler must be an instance of InMemoryChronicler');
+            throw ConfigurationViolation::message(
+                sprintf('Chronicler must be an instance of %s, got %s', InMemoryChronicler::class, get_class($chronicler))
+            );
         }
 
         $this->chronicler = $chronicler;
     }
 
-    public function toProjectionOption(array $options = []): Option
+    public function toOption(array $options = []): Option
     {
-        $resolver = new ProjectionOptionResolver($this->options);
+        $resolver = new OptionResolver($this->options);
 
         return $resolver($options);
     }

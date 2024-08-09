@@ -8,10 +8,9 @@ use Closure;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Projector\Exception\RuntimeException;
 
-use function is_array;
 use function is_callable;
 
-final class AlwaysAckScopeFactory implements ProjectorScopeFactory
+final class AllTrough implements ProjectorScopeFactory
 {
     private UserStateScope $userStateScope;
 
@@ -29,14 +28,10 @@ final class AlwaysAckScopeFactory implements ProjectorScopeFactory
 
     public function handle(DomainEvent $event, ?array $userState = null): ProjectorScope
     {
-        $userStateScope = is_array($userState) ? $this->userStateScope->setState($userState) : null;
-
-        $boundEvent = $this->bindReactor(function (): void {});
+        $userStateScope = $userState ? $this->userStateScope->setState($userState) : null;
 
         ($this->projector)($event, $userStateScope);
-
-        $boundEvent($this->projector);
-
+        $this->bindReactor(fn () => null)($this->projector);
         ($this->callback)($this->projector);
 
         return $this->projector;

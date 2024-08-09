@@ -8,11 +8,15 @@ use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Connector\Connector;
+use Storm\Projector\Exception\ConfigurationViolation;
 
-interface ProjectorManagement
+interface ConnectorResolver
 {
     /**
      * Create a connection to the projector.
+     *
+     * @throws ConfigurationViolation when no connection is found
+     * @throws ConfigurationViolation when no configuration is found for the connection
      */
     public function connection(?string $name = null): ConnectionManager;
 
@@ -32,4 +36,9 @@ interface ProjectorManagement
      * Get the default connection name from the config.
      */
     public function getDefaultDriver(): string;
+
+    /*
+     * Set the default connection name in the config.
+     */
+    public function setDefaultDriver(string $name): void;
 }

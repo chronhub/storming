@@ -7,7 +7,7 @@ namespace Storm\Projector;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\QueryProjector;
-use Storm\Projector\Provider\Subscriptor;
+use Storm\Projector\Provider\Manager;
 use Storm\Projector\Workflow\Input\ResetSnapshot;
 use Storm\Projector\Workflow\Process;
 
@@ -16,7 +16,7 @@ final readonly class ProjectQuery implements QueryProjector
     use InteractWithProjection;
 
     public function __construct(
-        protected Subscriptor $subscriber,
+        protected Manager $manager,
         protected ContextReader $context,
     ) {}
 
@@ -24,19 +24,19 @@ final readonly class ProjectQuery implements QueryProjector
     {
         $this->describeIfNeeded();
 
-        $this->subscriber->start($this->context, $inBackground);
+        $this->manager->start($this->context, $inBackground);
     }
 
     public function stop(): void
     {
-        $this->subscriber->call(
+        $this->manager->call(
             fn (Process $process) => $process->sprint()->halt()
         );
     }
 
     public function reset(): void
     {
-        $this->subscriber->call(
+        $this->manager->call(
             fn (Process $process) => $process->call(new ResetSnapshot())
         );
     }

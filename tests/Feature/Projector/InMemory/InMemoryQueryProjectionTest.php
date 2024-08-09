@@ -399,7 +399,6 @@ test('stop projection from query projector', function () {
 
     $projector = $this->projector;
     $thenReactor = function (QueryProjectorScope $scope) use ($projector): void {
-        dump($scope->userState()->integer('events'));
         if ($scope->userState()->integer('events') === 4) {
             $projector->stop();
         }

@@ -7,21 +7,21 @@ namespace Storm\Projector\Factory;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Projector\Options\Option;
 use Storm\Projector\Provider\EmittingProvider;
-use Storm\Projector\Provider\GenericSubscription;
-use Storm\Projector\Provider\Subscriptor;
+use Storm\Projector\Provider\Manager;
+use Storm\Projector\Provider\WorkflowManager;
 use Storm\Projector\Stream\EmittedStream;
 use Storm\Projector\Stream\InMemoryEmittedStreams;
 
 final readonly class EmitterProviderFactory extends AbstractProviderFactory
 {
-    public function create(?string $streamName, ?ReadModel $readModel, Option $options): Subscriptor
+    public function create(?string $streamName, ?ReadModel $readModel, Option $options): Manager
     {
         $process = $this->createProcessManager($options);
 
         $provider = new EmittingProvider(
             $process,
             $this->createRepository($streamName, $options),
-            $this->manager->eventStore(),
+            $this->connection->eventStore(),
             new InMemoryEmittedStreams($options->getCacheSize()),
             new EmittedStream(),
             $options->getSleepEmitterOnFirstCommit()
@@ -30,11 +30,11 @@ final readonly class EmitterProviderFactory extends AbstractProviderFactory
         $this->subscribe($provider, $process);
 
         $activities = new EmitterActivityFactory(
-            $this->manager->eventStore(),
+            $this->connection->eventStore(),
             $options,
-            $this->manager->clock()
+            $this->connection->clock()
         );
 
-        return new GenericSubscription($process, $activities);
+        return new WorkflowManager($process, $activities);
     }
 }

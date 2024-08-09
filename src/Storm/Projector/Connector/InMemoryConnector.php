@@ -24,6 +24,7 @@ final readonly class InMemoryConnector implements Connector
         }
 
         $queryFilter = $config['query_filter'];
+
         if (is_string($queryFilter)) {
             $queryFilter = $this->app[$queryFilter];
         }

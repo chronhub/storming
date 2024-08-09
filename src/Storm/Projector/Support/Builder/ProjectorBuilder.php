@@ -8,9 +8,9 @@ use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Message\DomainEvent;
+use Storm\Contract\Projector\ConnectorResolver;
 use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\Projector;
-use Storm\Contract\Projector\ProjectorManagement;
 use Storm\Contract\Projector\ProjectorManagerInterface;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Contract\Projector\ReadModelProjector;
@@ -66,7 +66,7 @@ abstract class ProjectorBuilder
     protected array $haltOn = [];
 
     public function __construct(
-        protected ProjectorManagement $projectorManagement,
+        protected ConnectorResolver $projectorManagement,
         protected ProjectorManagerInterface $projectorManager,
         protected Application $app,
     ) {}

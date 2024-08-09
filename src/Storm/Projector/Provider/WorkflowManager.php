@@ -18,7 +18,7 @@ use Throwable;
 /**
  * @phpstan-import-type TExceptionHandler from WorkflowInterface
  */
-final readonly class GenericSubscription implements Subscriptor
+final readonly class WorkflowManager implements Manager
 {
     public function __construct(
         private Process $process,
@@ -31,7 +31,7 @@ final readonly class GenericSubscription implements Subscriptor
 
         $activities = ($this->activityFactory)($this->process);
 
-        $this->newWorkflow($activities)->execute();
+        $this->createWorkflow($activities)->execute();
     }
 
     public function call(callable $callback): mixed
@@ -39,12 +39,12 @@ final readonly class GenericSubscription implements Subscriptor
         return $callback($this->process);
     }
 
-    private function newWorkflow(array $activities): WorkflowInterface
+    private function createWorkflow(array $activities): WorkflowInterface
     {
         $workflow = Workflow::create($this->process, $activities);
 
         if ($this->activityFactory instanceof PersistentActivityFactory) {
-            $exceptionHandler = $this->persistentExceptionHandler();
+            $exceptionHandler = $this->getPersistentExceptionHandler();
 
             $workflow->withExceptionHandler($exceptionHandler);
         }
@@ -68,7 +68,7 @@ final readonly class GenericSubscription implements Subscriptor
      *
      * @return TExceptionHandler
      */
-    private function persistentExceptionHandler(): callable
+    private function getPersistentExceptionHandler(): callable
     {
         return function (Process $process, ?Throwable $exception): void {
             if ($exception instanceof ProjectionAlreadyRunning) {

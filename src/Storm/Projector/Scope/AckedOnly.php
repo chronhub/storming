@@ -15,7 +15,7 @@ use function is_a;
 use function is_array;
 use function is_callable;
 
-final class AckScopeFactory implements ProjectorScopeFactory
+final class AckedOnly implements ProjectorScopeFactory
 {
     use ReflectsClosures;
 
@@ -67,7 +67,7 @@ final class AckScopeFactory implements ProjectorScopeFactory
 
     /**
      * @throws ReflectionException
-     * @throws InvalidArgumentException when event reactor is not a subclass of DomainEvent
+     * @throws InvalidArgumentException when event reactor is not a subclass of domain event
      * @throws InvalidArgumentException when event reactor already registered
      */
     private function bindReactors(array $reactors): array

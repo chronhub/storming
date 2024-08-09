@@ -9,7 +9,7 @@ use Options\ProjectionOptionImmutable;
 use Storm\Projector\Options\DefaultOption;
 use Storm\Projector\Options\InMemoryFixedOption;
 use Storm\Projector\Options\InMemoryOption;
-use Storm\Projector\Options\ProjectionOptionResolver;
+use Storm\Projector\Options\OptionResolver;
 
 test('return constructed options if immutable', function () {
     $immutableOption = new InMemoryFixedOption();
@@ -17,7 +17,7 @@ test('return constructed options if immutable', function () {
     expect($immutableOption)->toBeInstanceOf(ProjectionOptionImmutable::class)
         ->and($immutableOption)->getSignal()->toBeFalse();
 
-    $resolver = new ProjectionOptionResolver($immutableOption);
+    $resolver = new OptionResolver($immutableOption);
 
     $options = $resolver(['signal' => true]);
 
@@ -31,7 +31,7 @@ test('merge options with projection option constructed', function () {
         ->and($mutableOption)->not->toBeInstanceOf(ProjectionOptionImmutable::class)
         ->and($mutableOption)->getSignal()->toBeFalse();
 
-    $resolver = new ProjectionOptionResolver($mutableOption);
+    $resolver = new OptionResolver($mutableOption);
 
     $options = $resolver(['signal' => true]);
 
@@ -41,7 +41,7 @@ test('merge options with projection option constructed', function () {
 });
 
 test('return default option instance with empty array constructed', function () {
-    $resolver = new ProjectionOptionResolver([]);
+    $resolver = new OptionResolver([]);
 
     $options = $resolver();
 
@@ -51,7 +51,7 @@ test('return default option instance with empty array constructed', function () 
 test('return default option instance with empty array constructed and merge options', function () {
     expect(new InMemoryOption())->getSignal()->toBeFalse();
 
-    $resolver = new ProjectionOptionResolver([]);
+    $resolver = new OptionResolver([]);
 
     $options = $resolver(['signal' => true]);
 
@@ -62,7 +62,7 @@ test('return default option instance with empty array constructed and merge opti
 test('assert live options is prioritized', function () {
     expect(new InMemoryOption())->getSignal()->toBeFalse();
 
-    $resolver = new ProjectionOptionResolver(['signal' => false]);
+    $resolver = new OptionResolver(['signal' => false]);
 
     $options = $resolver(['signal' => true]);
 

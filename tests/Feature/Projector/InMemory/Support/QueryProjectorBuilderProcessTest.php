@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector\InMemory\Support;
 
-use Storm\Contract\Projector\ProjectorManagement;
+use Storm\Contract\Projector\ConnectorResolver;
 use Storm\Contract\Projector\QueryProjector;
 use Storm\Projector\Scope\QueryProjectorScope;
 use Storm\Projector\Stream\Filter\InMemoryFromToPosition;
@@ -13,8 +13,8 @@ use Storm\Stream\StreamName;
 use Storm\Tests\Domain\BalanceEventStore;
 
 beforeEach(function () {
-    /** @var ProjectorManagement $serviceManager */
-    $serviceManager = app(ProjectorManagement::class);
+    /** @var ConnectorResolver $serviceManager */
+    $serviceManager = app(ConnectorResolver::class);
     $manager = $serviceManager->connection('in_memory-incremental');
 
     BalanceEventStore::fromProjectionConnection($manager, new StreamName('account1'))->make(10);

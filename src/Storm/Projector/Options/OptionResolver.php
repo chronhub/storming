@@ -7,7 +7,7 @@ namespace Storm\Projector\Options;
 use function array_merge;
 use function get_class;
 
-final readonly class ProjectionOptionResolver
+final readonly class OptionResolver
 {
     public function __construct(private Option|array $options = []) {}
 

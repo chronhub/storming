@@ -6,12 +6,12 @@ namespace Storm\Projector\Factory;
 
 use Storm\Contract\Projector\ReadModel;
 use Storm\Projector\Options\Option;
-use Storm\Projector\Provider\Subscriptor;
+use Storm\Projector\Provider\Manager;
 
 interface ProviderFactory
 {
     /**
-     * Create a new subscription.
+     * Create a new workflow manager.
      */
-    public function create(?string $streamName, ?ReadModel $readModel, Option $options): Subscriptor;
+    public function create(?string $streamName, ?ReadModel $readModel, Option $options): Manager;
 }

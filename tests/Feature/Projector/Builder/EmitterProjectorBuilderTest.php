@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Feature\Projector\Builder;
 
+use Storm\Contract\Projector\ConnectorResolver;
 use Storm\Contract\Projector\EmitterProjector;
-use Storm\Contract\Projector\ProjectorManagement;
 use Storm\Projector\Scope\EmitterScope;
 use Storm\Projector\Support\Builder\EmitterProjectorBuilder;
 use Storm\Stream\StreamName;
@@ -17,8 +17,8 @@ test('test emitter builder from partition', function () {
     $stream1 = 'account-one';
     $stream2 = 'account-two';
 
-    /** @var ProjectorManagement $serviceManager */
-    $serviceManager = app(ProjectorManagement::class);
+    /** @var ConnectorResolver $serviceManager */
+    $serviceManager = app(ConnectorResolver::class);
     $manager = $serviceManager->connection($connection);
 
     BalanceEventStore::fromProjectionConnection($manager, new StreamName($stream1))->make(10);
@@ -54,8 +54,8 @@ test('test emitter builder from all streams and filter internal streams starting
     $stream1 = 'account_one';
     $stream2 = '$account_two';
 
-    /** @var ProjectorManagement $serviceManager */
-    $serviceManager = app(ProjectorManagement::class);
+    /** @var ConnectorResolver $serviceManager */
+    $serviceManager = app(ConnectorResolver::class);
     $manager = $serviceManager->connection($connection);
 
     BalanceEventStore::fromProjectionConnection($manager, new StreamName($stream1))->make(10);
@@ -92,8 +92,8 @@ test('test emitter builder from streams', function () {
     $stream1 = 'account_one';
     $stream2 = 'account-two';
 
-    /** @var ProjectorManagement $serviceManager */
-    $serviceManager = app(ProjectorManagement::class);
+    /** @var ConnectorResolver $serviceManager */
+    $serviceManager = app(ConnectorResolver::class);
     $manager = $serviceManager->connection($connection);
 
     BalanceEventStore::fromProjectionConnection($manager, new StreamName($stream1))->make(10);

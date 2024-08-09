@@ -8,10 +8,10 @@ use Storm\Contract\Projector\ContextReader;
 use Storm\Projector\Workflow\Process;
 use Throwable;
 
-interface Subscriptor
+interface Manager
 {
     /**
-     * Start subscription
+     * Start the projection.
      *
      * @throws Throwable
      */

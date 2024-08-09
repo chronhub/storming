@@ -4,6 +4,11 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Support\ReadModel;
 
+use Storm\Contract\Projector\ReadModel;
+
+/**
+ * @phpstan-require-implements ReadModel
+ */
 trait InteractWithStack
 {
     /** @var array<array{string, array}>|array */

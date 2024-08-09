@@ -2,20 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector;
+namespace Storm\Projector\Connector;
 
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
-use Storm\Contract\Projector\ProjectorManagement;
-use Storm\Projector\Connector\ConnectionManager;
-use Storm\Projector\Connector\Connector;
-use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Contract\Projector\ConnectorResolver;
+use Storm\Projector\Exception\ConfigurationViolation;
 
 use function is_array;
 
-final class ProjectorServiceManager implements ProjectorManagement
+final class ConnectorServiceManager implements ConnectorResolver
 {
-    /** @var array<string, Connector|Closure(Application): Connector> */
+    /** @var array<string, Closure(Application): Connector>|array */
     protected array $connectors = [];
 
     /** @var array<string, ConnectionManager>|array */
@@ -32,7 +30,7 @@ final class ProjectorServiceManager implements ProjectorManagement
         }
 
         if (! isset($this->connectors[$name])) {
-            throw new InvalidArgumentException("No connector named $name found.");
+            throw ConfigurationViolation::message("No connector named $name found.");
         }
 
         $config = $this->getConfiguration($name);
@@ -55,6 +53,11 @@ final class ProjectorServiceManager implements ProjectorManagement
         return config('projector.default');
     }
 
+    public function setDefaultDriver(string $name): void
+    {
+        $this->app['config']->set('projector.default', $name);
+    }
+
     private function resolveConnector(string $name, array $config): ConnectionManager
     {
         $connector = $this->connectors[$name];
@@ -69,7 +72,7 @@ final class ProjectorServiceManager implements ProjectorManagement
         $config = config("projector.connection.$name");
 
         if (! is_array($config) || $config === []) {
-            throw new InvalidArgumentException("No configuration found for connector $name.");
+            throw ConfigurationViolation::message("No configuration found for connector $name.");
         }
 
         return $config;
