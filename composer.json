@@ -1,0 +1,72 @@
+{
+  "name": "chronhub/storming",
+  "description": "foundation",
+  "keywords": ["foundation"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "steph bug",
+      "email": "chronhubgit@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^8.3",
+    "composer-runtime-api": "^2.2",
+    "laravel/framework": "11.x-dev",
+    "react/promise": "^3.x-dev",
+    "symfony/clock": "^6.4",
+    "symfony/property-access": "7.1.x-dev",
+    "symfony/serializer": "^v6.4",
+    "symfony/uid": "^7.2.x-dev",
+    "ext-pdo": "*"
+  },
+  "replace": {
+    "chronhub/aggregate": "self.version",
+    "chronhub/chronicler": "self.version",
+    "chronhub/clock": "self.version",
+    "chronhub/contract": "self.version",
+    "chronhub/message": "self.version",
+    "chronhub/projector": "self.version",
+    "chronhub/serializer": "self.version",
+    "chronhub/story": "self.version",
+    "chronhub/stream": "self.version",
+    "chronhub/support": "self.version"
+  },
+  "require-dev": {
+    "ext-posix": "*",
+    "ext-pcntl": "*",
+    "doctrine/dbal": "^3.9",
+    "laravel/pint": "^v1.1",
+    "pestphp/pest": "2.x-dev",
+    "pestphp/pest-plugin-type-coverage": "2.x-dev",
+    "larastan/larastan": "^2.x-dev",
+    "orchestra/testbench": "^9.x-dev",
+    "phpstan/phpstan": "^1.1",
+    "roave/security-advisories": "dev-latest"
+  },
+  "autoload": {
+    "psr-4": {
+      "Storm\\": "src/Storm/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Storm\\Tests\\": "tests"
+    },
+    "files": [
+      "./tests/functions.php"
+    ]
+  },
+  "scripts": {
+    "pint": "vendor/bin/pint"
+  },
+  "config": {
+    "optimize-autoloader": false,
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true,
+      "pestphp/pest-plugin": true
+    }
+  },
+  "minimum-stability": "dev"
+}

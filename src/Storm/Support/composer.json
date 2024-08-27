@@ -1,0 +1,28 @@
+{
+  "name": "chronhub/support",
+  "description": "storm support",
+  "keywords": ["foundation"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "steph bug",
+      "email": "chronhubgit@gmail.com"
+    }
+  ],
+  "require": {
+    "php": "^8.3",
+    "chronhub/contract": "main"
+  },
+  "autoload": {
+    "psr-4": {
+      "Storm\\Support\\": ""
+    }
+  },
+  "config": {
+    "sort-packages": true,
+    "allow-plugins": {
+      "dealerdirect/phpcodesniffer-composer-installer": true
+    }
+  },
+  "minimum-stability": "dev"
+}

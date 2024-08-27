@@ -1,0 +1,558 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Projection Provider API",
+    "version": "1.0.0",
+    "description": "API for managing projections"
+  },
+  "paths": {
+    "/projections": {
+      "post": {
+        "summary": "Create a new projection",
+        "operationId": "createProjection",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectionCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/201"
+          },
+          "409": {
+            "$ref": "#/components/responses/409"
+          }
+        }
+      },
+      "put": {
+        "summary": "Update a projection",
+        "operationId": "persistProjection",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectionPersist"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/201"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update a projection with status and lockedUntil",
+        "operationId": "updateProjection",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectionUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "$ref": "#/components/responses/201"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
+      }
+    },
+    "/projections/{projectionName}/release": {
+      "patch": {
+        "summary": "Release a lock on a projection",
+        "operationId": "releaseLock",
+        "parameters": [
+          {
+            "name": "projectionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectionRelease"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/201"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
+      }
+    },
+    "/projections/{projectionName}/reset": {
+      "put": {
+        "summary": "Reset a projection",
+        "operationId": "resetProjection",
+        "parameters": [
+          {
+            "name": "projectionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectionReset"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/201"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
+      }
+    },
+
+    "/projections/{projectionName}/lock": {
+      "post": {
+        "summary": "Acquire a lock on a projection",
+        "operationId": "acquireLock",
+        "parameters": [
+          {
+            "name": "projectionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ProjectionData"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/201"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "409": {
+            "$ref": "#/components/responses/419"
+          }
+        }
+      }
+    },
+    "/projections/{projectionName}": {
+      "delete": {
+        "summary": "Delete an existing projection",
+        "operationId": "deleteProjection",
+        "parameters": [
+          {
+            "name": "projectionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "$ref": "#/components/responses/204"
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          },
+          "500": {
+            "$ref": "#/components/responses/500"
+          }
+        }
+      },
+      "get": {
+        "summary": "Retrieve a projection",
+        "operationId": "retrieve",
+        "parameters": [
+          {
+            "name": "projectionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Projection retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectionModel"
+                }
+              }
+            }
+          },
+          "404": {
+            "$ref": "#/components/responses/404"
+          }
+        }
+      }
+    },
+    "/projections/filter": {
+      "get": {
+        "summary": "Filter projections by names",
+        "operationId": "filterByNames",
+        "parameters": [
+          {
+            "name": "names",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Filtered projection names",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/projections/{projectionName}/exists": {
+      "get": {
+        "summary": "Check if a projection exists",
+        "operationId": "exists",
+        "parameters": [
+          {
+            "name": "projectionName",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Existence check result",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "components": {
+
+    "schemas": {
+      "ProjectionName": {
+        "description": "The name of the projection",
+        "type": "string"
+      },
+
+      "ProjectionCreate": {
+        "type": "object",
+        "properties": {
+          "projectionName": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "required": ["status"],
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/ProjectionStatus"
+              }
+            }
+          }
+        }
+      },
+      "ProjectionPersist": {
+        "type": "object",
+        "properties": {
+          "projectionName": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "required": ["state", "checkpoint", "lockedUntil"],
+            "properties": {
+              "state": {
+                "$ref": "#/components/schemas/ProjectionState"
+              },
+              "checkpoint": {
+                "$ref": "#/components/schemas/ProjectionCheckpoint"
+              },
+              "lockedUntil": {
+                "$ref": "#/components/schemas/ProjectionLockedUntil"
+              }
+            }
+          }
+        }
+      },
+      "ProjectionUpdate": {
+        "type": "object",
+        "properties": {
+          "projectionName": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "required": ["status", "lockedUntil"],
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/ProjectionStatus"
+              },
+              "lockedUntil": {
+                "$ref": "#/components/schemas/ProjectionLockedUntil"
+              }
+            }
+          }
+        }
+      },
+      "ProjectionRelease": {
+        "type": "object",
+        "properties": {
+          "projectionName": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "required": ["status"],
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/ProjectionStatus"
+              }
+            }
+          }
+        }
+      },
+      "ProjectionReset": {
+        "type": "object",
+        "properties": {
+          "projectionName": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object",
+            "required": ["status", "state", "checkpoint"],
+            "properties": {
+              "status": {
+                "$ref": "#/components/schemas/ProjectionStatus"
+              },
+              "state": {
+                "$ref": "#/components/schemas/ProjectionState"
+              },
+              "checkpoint": {
+                "$ref": "#/components/schemas/ProjectionLockedUntil"
+              }
+            }
+          }
+        }
+      },
+      "ProjectionData": {
+        "type": "object",
+        "required": ["status", "state", "checkpoint", "lockedUntil"],
+        "properties": {
+          "status": {
+            "$ref": "#/components/schemas/ProjectionStatus"
+          },
+          "state": {
+            "$ref": "#/components/schemas/ProjectionState"
+          },
+          "checkpoint": {
+            "$ref": "#/components/schemas/ProjectionCheckpoint"
+          },
+          "lockedUntil": {
+            "$ref": "#/components/schemas/ProjectionLockedUntil"
+          }
+        }
+      },
+      "ProjectionModel": {
+        "type": "object",
+        "properties": {
+
+        }
+      },
+      "ProjectionStatus": {
+        "enum": ["idle", "running", "stopping", "resetting", "deleting", "deleting_with_emitted_events"],
+        "type": "string"
+      },
+
+      "ProjectionState": {
+        "description": "The user defined state of the projection",
+        "type": "string"
+      },
+      "ProjectionCheckpoint": {
+        "description": "The checkpoint of the projection",
+        "type": "string"
+      },
+      "ProjectionLockedUntil": {
+        "description": "The timestamp until which the projection is locked",
+        "type": "string",
+        "format": "date-time"
+      },
+
+      "SuccessMessage": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+
+      "FailureMessage": {
+        "description": "The failure message",
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+
+      "Error": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "responses": {
+      "Success": {
+        "description": "Resource operation successful",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SuccessMessage"
+            }
+          }
+        }
+      },
+      "Failure": {
+        "description": "Resource operation failed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/FailureMessage"
+            }
+          }
+        }
+      },
+      "201": {
+        "description": "Operation successful",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/SuccessMessage"
+            }
+          }
+        }
+      },
+      "204": {
+        "description": "Operation successful"
+      },
+      "404": {
+        "description": "Projection not found",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "409": {
+        "description": "Projection already exists",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "419": {
+        "description": "Conflict occurred",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      },
+      "500": {
+        "description": "Operation failed",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Error"
+            }
+          }
+        }
+      }
+    }
+  }
+}

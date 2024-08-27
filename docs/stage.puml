@@ -1,0 +1,61 @@
+@startuml
+
+skinparam classFontSize 12
+skinparam classAttributeFontSize 12
+
+class Stage {
+  +beforeProcessing(workflowContext: WorkflowContext): void
+  +afterProcessing(workflowContext: WorkflowContext): void
+  #renew(workflowContext: WorkflowContext, isSprintTerminated: boolean): void
+  #resetOnCycleRenewed(workflowContext: WorkflowContext): void
+  #resetOnTermination(workflowContext: WorkflowContext): void
+  #forgetOnCycleRenewed(workflowContext: WorkflowContext): void
+  #forgetOnTermination(workflowContext: WorkflowContext): void
+}
+
+class WorkflowContext {
+  +conditionallyStartWorkflow(): void
+  +emit(eventClass: string): void
+  +isSprintTerminated(): boolean
+  +incrementWorkflowCycle(): void
+  +stat(): Stat
+  +time(): Time
+  +forgetListener(listenerType: string): void
+}
+
+class Stat {
+  +processed(): StatItem
+  +cycle(): StatItem
+  +main(): StatItem
+  +acked(): StatItem
+}
+
+class StatItem {
+  +reset(): void
+}
+
+class Time {
+  +reset(): void
+}
+
+enum GapType {
+  RECOVERABLE_GAP->value
+  UNRECOVERABLE_GAP->value
+}
+
+class ShouldTerminateWorkflow
+class BeforeWorkflowRenewal
+class WorkflowRenewed
+class ResetOnlyOnceEmittedEvent
+
+Stage --> WorkflowContext: uses
+WorkflowContext --> Stat: has
+WorkflowContext --> Time: has
+Stat --> StatItem: contains
+Stage ..> ShouldTerminateWorkflow: emits
+Stage ..> BeforeWorkflowRenewal: emits
+Stage ..> WorkflowRenewed: emits
+Stage ..> ResetOnlyOnceEmittedEvent: emits
+Stage ..> GapType: emits
+
+@enduml

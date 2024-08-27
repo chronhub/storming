@@ -1,0 +1,35 @@
+@startuml
+
+skinparam state {
+  BackgroundColor LightBlue
+  BorderColor DarkBlue
+  FontName Arial
+}
+
+[*] --> Idle
+
+state Idle
+state Processing
+state Renewing
+state Terminated
+
+Idle --> Processing : beforeProcessing()
+Processing --> Renewing : afterProcessing()
+Renewing --> Idle : WorkflowRenewed
+Renewing --> Terminated : ShouldTerminateWorkflow
+
+state Renewing {
+  state "Reset Cycle" as ResetCycle
+  state "Increment Cycle" as IncrementCycle
+  state "Forget Listeners" as ForgetListeners
+
+  [*] --> ResetCycle
+  ResetCycle --> IncrementCycle : [!isSprintTerminated]
+  ResetCycle --> ForgetListeners : [isSprintTerminated]
+  IncrementCycle --> ForgetListeners
+  ForgetListeners --> [*]
+}
+
+Terminated --> [*]
+
+@enduml
