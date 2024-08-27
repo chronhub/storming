@@ -13,7 +13,7 @@ use Illuminate\Database\QueryException;
 use PDO;
 use PDOException;
 use Storm\Chronicler\Direction;
-use Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Storm\Chronicler\Exceptions\ConfigurationViolation;
 use Storm\Chronicler\Exceptions\StreamNotFound;
 use Storm\Contract\Aggregate\AggregateIdentity;
 use Storm\Contract\Chronicler\DatabaseChronicler;
@@ -36,7 +36,7 @@ final readonly class PgsqlEventStore implements DatabaseChronicler
         private string $streamTable = 'stream_event',
     ) {
         if ($this->connection->getDriverName() !== 'pgsql') {
-            throw new InvalidArgumentException('Only pgsql driver is supported');
+            throw new ConfigurationViolation('Only pgsql driver is supported');
         }
     }
 

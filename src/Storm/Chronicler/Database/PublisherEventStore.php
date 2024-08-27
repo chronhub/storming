@@ -7,7 +7,7 @@ namespace Storm\Chronicler\Database;
 use Generator;
 use Illuminate\Database\Connection;
 use Storm\Chronicler\Direction;
-use Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Storm\Chronicler\Exceptions\ConfigurationViolation;
 use Storm\Chronicler\Tracker\Listener;
 use Storm\Chronicler\Tracker\ListenerOnce;
 use Storm\Chronicler\Tracker\ProvideEvents;
@@ -33,7 +33,7 @@ final readonly class PublisherEventStore implements DatabaseChronicler, Eventabl
         callable $publisherSubscriber
     ) {
         if ($this->chronicler instanceof ChroniclerDecorator) {
-            throw new InvalidArgumentException(
+            throw new ConfigurationViolation(
                 'A chronicler decorator is not allowed for event store '.self::class
             );
         }
