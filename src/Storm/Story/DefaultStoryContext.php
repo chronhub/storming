@@ -29,7 +29,7 @@ final class DefaultStoryContext implements StoryContext
         private readonly MessageStoryResolver $resolver,
     ) {
         $this->pipeline = new Pipeline($this->container);
-        $this->setDecorator(); // fixMe on dispatch middleware
+        $this->setDecorator();
     }
 
     public function __invoke(array|object $payload, ?object $job = null): ?PromiseInterface
