@@ -11,7 +11,7 @@ use Storm\Projector\Exception\ConfigurationViolation;
 
 final class ProviderFactoryResolver implements ProviderFactoryRegistry
 {
-    /** @var array<string, class-string<ProviderFactory>|(Closure(ConnectionManager, Application): ProviderFactory)|ProviderFactory>|array */
+    /** @var array<string, (Closure(ConnectionManager, Application): ProviderFactory)|ProviderFactory>|array */
     private array $factories = [];
 
     public function __construct(private readonly Application $app) {}
@@ -32,7 +32,7 @@ final class ProviderFactoryResolver implements ProviderFactoryRegistry
             return $factory($connectionManager, $this->app);
         }
 
-        return new $factory($connectionManager);
+        throw new ConfigurationViolation("Provider factory $name not supported");
     }
 
     public function register(string $name, Closure|ProviderFactory $factory): void

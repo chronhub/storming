@@ -28,32 +28,32 @@ final class ManageProjector implements ProjectorManager
     public function __construct(
         private readonly Container $container,
         private readonly ConnectorManager $connectorResolver,
-        private readonly ProviderFactoryRegistry $provider,
+        private readonly ProviderFactoryRegistry $registry,
     ) {}
 
-    public function query(array $options = [], ?string $connection = null): QueryProjector
+    public function query(array $options = [], ?string $connection = null, ?string $name = null): QueryProjector
     {
         [$connector, $optionInstance] = $this->handleConnectionWithMergedOptions($connection, $options);
 
-        $manager = $this->provider
-            ->resolve('query', $connector)
+        $manager = $this->registry
+            ->resolve($name ?? 'query', $connector)
             ->create(null, null, $optionInstance);
 
         return new ProjectQuery($manager, new DefaultContext);
     }
 
-    public function emitter(string $streamName, array $options = [], ?string $connection = null): EmitterProjector
+    public function emitter(string $streamName, array $options = [], ?string $connection = null, ?string $name = null): EmitterProjector
     {
         [$connector, $optionInstance] = $this->handleConnectionWithMergedOptions($connection, $options);
 
-        $manager = $this->provider
-            ->resolve('emitter', $connector)
+        $manager = $this->registry
+            ->resolve($name ?? 'emitter', $connector)
             ->create($streamName, null, $optionInstance);
 
         return new ProjectEmitter($manager, new DefaultContext, $streamName);
     }
 
-    public function readModel(string $streamName, string|ReadModel $readModel, array $options = [], ?string $connection = null): ReadModelProjector
+    public function readModel(string $streamName, string|ReadModel $readModel, array $options = [], ?string $connection = null, ?string $name = null): ReadModelProjector
     {
         [$connector, $optionInstance] = $this->handleConnectionWithMergedOptions($connection, $options);
 
@@ -61,8 +61,8 @@ final class ManageProjector implements ProjectorManager
             $readModel = $this->configureReadModel($connector, $readModel);
         }
 
-        $manager = $this->provider
-            ->resolve('read_model', $connector)
+        $manager = $this->registry
+            ->resolve($name ?? 'read_model', $connector)
             ->create($streamName, $readModel, $optionInstance);
 
         return new ProjectReadModel($manager, new DefaultContext, $streamName);

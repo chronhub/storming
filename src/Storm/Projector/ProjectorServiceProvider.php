@@ -8,11 +8,13 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
 use Storm\Contract\Projector\ProjectorManager;
+use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Connector\ConnectorManager;
 use Storm\Projector\Connector\DatabaseConnector;
 use Storm\Projector\Connector\InMemoryConnector;
 use Storm\Projector\Connector\ManageConnector;
 use Storm\Projector\Factory\EmitterProviderFactory;
+use Storm\Projector\Factory\ProviderFactory;
 use Storm\Projector\Factory\ProviderFactoryRegistry;
 use Storm\Projector\Factory\ProviderFactoryResolver;
 use Storm\Projector\Factory\QueryProviderFactory;
@@ -71,9 +73,17 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
         $this->app->singleton(ProviderFactoryRegistry::class, function (Application $app) {
             $registry = new ProviderFactoryResolver($app);
 
-            $registry->register('query', QueryProviderFactory::class);
-            $registry->register('emitter', EmitterProviderFactory::class);
-            $registry->register('read_model', ReadModelProviderFactory::class);
+            $registry->register('query', function (ConnectionManager $manager): ProviderFactory {
+                return new QueryProviderFactory($manager);
+            });
+
+            $registry->register('emitter', function (ConnectionManager $manager): ProviderFactory {
+                return new EmitterProviderFactory($manager);
+            });
+
+            $registry->register('read_model', function (ConnectionManager $manager): ProviderFactory {
+                return new ReadModelProviderFactory($manager);
+            });
 
             return $registry;
         });
