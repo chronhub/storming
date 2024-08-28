@@ -44,7 +44,7 @@ final class DefaultContext implements ContextReader
     public function initialize(Closure $userState): self
     {
         if ($this->userState instanceof Closure) {
-            throw ConfigurationViolation::message('Projection already initialized');
+            throw ConfigurationViolation::withMessage('Projection already initialized');
         }
 
         $this->userState = Closure::bind($userState, $this);
@@ -55,7 +55,7 @@ final class DefaultContext implements ContextReader
     public function withQueryFilter(QueryFilter $queryFilter): self
     {
         if ($this->queryFilter instanceof QueryFilter) {
-            throw ConfigurationViolation::message('Projection query filter already set');
+            throw ConfigurationViolation::withMessage('Projection query filter already set');
         }
 
         $this->queryFilter = $queryFilter;
@@ -66,7 +66,7 @@ final class DefaultContext implements ContextReader
     public function withId(string $id): Context
     {
         if ($this->id !== null) {
-            throw ConfigurationViolation::message('Projection id already set');
+            throw ConfigurationViolation::withMessage('Projection id already set');
         }
 
         $this->id = $id;
@@ -96,7 +96,7 @@ final class DefaultContext implements ContextReader
     {
         $this->assertSubscriberNotSet();
 
-        $this->query = new DiscoverAllStream();
+        $this->query = new DiscoverAllStream;
 
         return $this;
     }
@@ -104,11 +104,11 @@ final class DefaultContext implements ContextReader
     public function when(array $reactors, ?Closure $then = null): self
     {
         if ($this->reactors !== []) {
-            throw ConfigurationViolation::message('Projection reactors already set');
+            throw ConfigurationViolation::withMessage('Projection reactors already set');
         }
 
         if ($reactors === [] && $then === null) {
-            throw ConfigurationViolation::message('Projection reactors cannot be null when then callback is null'); // @codeCoverageIgnore
+            throw ConfigurationViolation::withMessage('Projection reactors cannot be null when then callback is null'); // @codeCoverageIgnore
         }
 
         $this->reactors = [$reactors, $then];
@@ -136,19 +136,19 @@ final class DefaultContext implements ContextReader
     public function reactors(): array
     {
         return $this->reactors
-            ?? throw ConfigurationViolation::message('Projection reactors not set');
+            ?? throw ConfigurationViolation::withMessage('Projection reactors not set');
     }
 
     public function query(): callable
     {
         return $this->query
-            ?? throw ConfigurationViolation::message('Projection subscriber not set');
+            ?? throw ConfigurationViolation::withMessage('Projection subscriber not set');
     }
 
     public function queryFilter(): QueryFilter
     {
         return $this->queryFilter
-            ?? throw ConfigurationViolation::message('Projection query filter not set');
+            ?? throw ConfigurationViolation::withMessage('Projection query filter not set');
     }
 
     public function id(): ?string
@@ -164,7 +164,7 @@ final class DefaultContext implements ContextReader
     private function assertSubscriberNotSet(): void
     {
         if ($this->query !== null) {
-            throw ConfigurationViolation::message('Projection subscriber already set');
+            throw ConfigurationViolation::withMessage('Projection subscriber already set');
         }
     }
 }

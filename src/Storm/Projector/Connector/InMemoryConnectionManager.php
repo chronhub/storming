@@ -39,7 +39,7 @@ final readonly class InMemoryConnectionManager implements ConnectionManager
         }
 
         if (! $chronicler instanceof InMemoryChronicler) {
-            throw ConfigurationViolation::message(sprintf(
+            throw ConfigurationViolation::withMessage(sprintf(
                 'Chronicler must be an instance of %s, got %s', InMemoryChronicler::class, get_class($chronicler))
             );
         }

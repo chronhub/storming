@@ -37,7 +37,7 @@ final class ManageConnector implements ConnectorManager
         }
 
         if (! isset($this->connectors[$name])) {
-            throw ConfigurationViolation::message("No connector named $name found.");
+            throw ConfigurationViolation::withMessage("No connector named $name found.");
         }
 
         $config = $this->getConfiguration($name);
@@ -48,7 +48,7 @@ final class ManageConnector implements ConnectorManager
     public function addConnector(string $name, Closure $connector): void
     {
         if (isset($this->connectors[$name])) {
-            throw ConfigurationViolation::message("Connector $name already exists.");
+            throw ConfigurationViolation::withMessage("Connector $name already exists.");
         }
 
         $this->connectors[$name] = $connector;
@@ -81,7 +81,7 @@ final class ManageConnector implements ConnectorManager
         $config = config("projector.connection.$name");
 
         if (! is_array($config) || $config === []) {
-            throw ConfigurationViolation::message("No configuration found for connector $name.");
+            throw ConfigurationViolation::withMessage("No configuration found for connector $name.");
         }
 
         return $config;

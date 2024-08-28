@@ -39,7 +39,7 @@ final readonly class DatabaseConnectionManager implements ConnectionManager
         }
 
         if (! $chronicler instanceof DatabaseChronicler) {
-            throw ConfigurationViolation::message(sprintf(
+            throw ConfigurationViolation::withMessage(sprintf(
                 'Chronicler must be an instance of %s, got %s', DatabaseChronicler::class, get_class($chronicler)
             ));
         }

@@ -48,7 +48,7 @@ final readonly class DatabaseConnector implements Connector
         $eventStore = $this->projectorBridge->getEventStore($config['chronicler']);
 
         if (! $eventStore instanceof DatabaseChronicler) {
-            throw ConfigurationViolation::message(sprintf(
+            throw ConfigurationViolation::withMessage(sprintf(
                 'Chronicler must be an instance of %s, got %s', DatabaseChronicler::class, get_class($eventStore)
             ));
         }

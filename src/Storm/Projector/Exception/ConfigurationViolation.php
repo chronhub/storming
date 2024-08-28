@@ -6,7 +6,7 @@ namespace Storm\Projector\Exception;
 
 class ConfigurationViolation extends RuntimeException
 {
-    public static function message(string $message): self
+    public static function withMessage(string $message): self
     {
         return new static($message);
     }
