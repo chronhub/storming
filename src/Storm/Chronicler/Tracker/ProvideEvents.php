@@ -10,6 +10,7 @@ use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\EventableChronicler;
 use Storm\Contract\Chronicler\EventableTransactionalChronicler;
 use Storm\Contract\Chronicler\QueryFilter;
+use Storm\Contract\Chronicler\TransactionalChronicler;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
 
@@ -82,8 +83,7 @@ final class ProvideEvents
             });
     }
 
-    // todo transactional event store
-    public static function withTransactionalEvent(EventableTransactionalChronicler $chronicler, StreamTracker $streamTracker): void
+    public static function withTransactionalEvent(TransactionalChronicler $chronicler, StreamTracker $streamTracker): void
     {
         $streamTracker->subscribe(
             EventableTransactionalChronicler::BEGIN_TRANSACTION,

@@ -25,7 +25,7 @@ final readonly class PublisherConnector implements Connector
 
     public function connect(array $config): ConnectionManager
     {
-        $connector = $this->app[PgsqlConnector::class];
+        $connector = $this->app[TransactionalConnector::class];
 
         $manager = $connector->connect($config);
         $eventStore = $manager->create();
