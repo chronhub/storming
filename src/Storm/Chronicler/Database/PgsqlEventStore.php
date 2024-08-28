@@ -52,8 +52,8 @@ final readonly class PgsqlEventStore implements DatabaseChronicler
             $this->query()->useWritePdo()->insert($streamEvents);
         } catch (Exception|Error $originalException) {
 
-            // Table inheritance and trigger function could cause issues,
-            // when raising exception, so we need to handle it separately.
+            // checkMe, it depends on PDO attr error mode, which should be set to throw exception
+            //   default mode in php >= 8 is ERRMODE_EXCEPTION
 
             $message = $originalException->getMessage();
             $code = $originalException->getCode();
