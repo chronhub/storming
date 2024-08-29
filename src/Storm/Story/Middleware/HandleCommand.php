@@ -134,6 +134,8 @@ final class HandleCommand
     /**
      * Checks if the command and the event store support transactional.
      *
+     * todo add to scanner when decorator attribute set
+     *
      * @phpstan-assert-if-true TransactionalChronicler $this->chronicler
      */
     private function isTransactionalCommand(DomainCommand $command): bool
