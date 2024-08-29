@@ -11,6 +11,7 @@ use Storm\Contract\Message\DomainEvent;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Exception\RuntimeException;
 
+use function array_key_exists;
 use function is_a;
 use function is_array;
 use function is_callable;
@@ -19,9 +20,7 @@ final class AckedOnly implements ProjectorScopeFactory
 {
     use ReflectsClosures;
 
-    /**
-     * @var array<string, Closure>
-     */
+    /** @var array<string, Closure> */
     private array $boundReactors;
 
     private UserState $userStateScope;
@@ -37,8 +36,9 @@ final class AckedOnly implements ProjectorScopeFactory
             throw new RuntimeException('Projector scope is not callable');
         }
 
-        $this->userStateScope = new UserState();
-        $this->boundReactors = $this->bindReactors($reactors);
+        $this->userStateScope = new UserState;
+        $this->boundReactors = [];
+        $this->bindReactors($reactors);
     }
 
     public function handle(DomainEvent $event, ?array $userState = null): ProjectorScope
@@ -70,10 +70,8 @@ final class AckedOnly implements ProjectorScopeFactory
      * @throws InvalidArgumentException when event reactor is not a subclass of domain event
      * @throws InvalidArgumentException when event reactor already registered
      */
-    private function bindReactors(array $reactors): array
+    private function bindReactors(array $reactors): void
     {
-        $boundReactors = [];
-
         foreach ($reactors as $reactor) {
             $eventClass = $this->firstClosureParameterType($reactor);
 
@@ -81,16 +79,14 @@ final class AckedOnly implements ProjectorScopeFactory
                 throw new InvalidArgumentException("Event reactor $eventClass must be a subclass of ".DomainEvent::class);
             }
 
-            if (isset($this->boundReactors[$eventClass])) {
+            if (array_key_exists($eventClass, $this->boundReactors)) {
                 throw new InvalidArgumentException("Event reactor $eventClass already registered");
             }
 
-            $boundReactors[$eventClass] = function (ProjectorScope $bindScope) use ($reactor) {
+            $this->boundReactors[$eventClass] = function (ProjectorScope $bindScope) use ($reactor) {
                 $boundReactor = Closure::bind($reactor, $bindScope);
                 $boundReactor($bindScope->event());
             };
         }
-
-        return $boundReactors;
     }
 }
