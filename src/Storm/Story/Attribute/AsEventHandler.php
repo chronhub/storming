@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Storm\Story\Attribute;
 
 use Attribute;
-use Illuminate\Contracts\Support\Arrayable;
 use Storm\Story\DefaultStoryContext;
 use Storm\Story\StoryContext;
 

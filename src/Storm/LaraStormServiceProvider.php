@@ -6,10 +6,9 @@ namespace Storm;
 
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
-use Storm\Aggregate\AggregateEventReleaser;
 use Storm\Contract\Message\MessageDecorator;
 use Storm\Message\ChainMessageDecorator;
-use Storm\Story\DefaultStoryContext;
+use Storm\Message\DefaultChainMessageDecorator;
 
 use function array_map;
 
@@ -30,19 +29,8 @@ class LaraStormServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom($this->configPath, 'storm');
 
-        /**
-         * @see DefaultStoryContext
-         */
-        $this->app->singleton('storm.message_decorator.chain', function (): MessageDecorator {
-            $config = config('storm.decorators.message', []);
-            $decorators = array_map(fn (string $decorator) => $this->app[$decorator], $config);
+        $this->app->singleton('storm.message_decorator.chain', DefaultChainMessageDecorator::class);
 
-            return new ChainMessageDecorator(...$decorators);
-        });
-
-        /**
-         * @see AggregateEventReleaser
-         */
         $this->app->singleton('storm.event_decorator.chain', function (Application $app): MessageDecorator {
             $config = config('storm.decorators.event', []);
             $decorators = array_map(fn (string $decorator) => $app[$decorator], $config);

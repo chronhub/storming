@@ -9,10 +9,21 @@ return [
      */
     'decorators' => [
 
+        /**
+         * Default chain message decorator for the CQRS pattern.
+         *
+         * It provides EventType, EventSymfonyId and EventTime decorators.
+         * It will be set on the AsHeader attribute when the property is not set,
+         * or if the attribute is missing.
+         * Also, the attribute allows you to add extra headers per message.
+         *
+         * Note that a [domain] event, which does not interact with the domain model,
+         * should be considered as a message.
+         *
+         * @see \Storm\Message\DefaultChainMessageDecorator
+         */
         'message' => [
-            \Storm\Message\Decorator\EventTime::class,
-            \Storm\Message\Decorator\EventSymfonyId::class,
-            \Storm\Message\Decorator\EventType::class,
+            'default' => 'storm.message_decorator.chain',
         ],
 
         'event' => [
