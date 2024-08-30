@@ -18,6 +18,7 @@ final class InMemoryLimitByOneQuery implements InMemoryQueryFilter, ProjectionQu
 
     public function apply(): callable
     {
+        // checkMe be consistent with load limiter
         return fn (DomainEvent $event): bool => $this->extractInternalPosition($event)
             ->equalsTo($this->streamPosition->value);
     }

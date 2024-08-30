@@ -15,6 +15,9 @@ final readonly class QueryFilterResolver
 {
     public function __construct(private QueryFilter $queryFilter) {}
 
+    // fixMe Load limiter should be optional,as it could be inconsistent between the option
+    //  and his implementation
+    //  allow null in projection options
     public function __invoke(string $streamName, StreamPosition $streamPosition, LoadLimiter $loadLimiter): QueryFilter
     {
         $queryFilter = $this->queryFilter;
@@ -24,6 +27,7 @@ final readonly class QueryFilterResolver
         }
 
         if ($queryFilter instanceof LoadLimiterQueryFilter) {
+            // todo raise exception if loadLimiter is null
             $queryFilter->setLoadLimiter($loadLimiter);
         }
 
