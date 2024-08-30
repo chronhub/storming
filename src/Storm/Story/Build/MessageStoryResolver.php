@@ -113,11 +113,9 @@ readonly class MessageStoryResolver
             $extra = $instance->decorators;
         }
 
-        if (is_string($decorator)) {
-            return $this->resolveMessageDecorators(array_merge([$decorator], $extra));
-        }
+        $decorator ??= config('storm.decorators.message.default');
 
-        return $this->resolveMessageDecorators(array_merge([config('storm.decorators.message.default')], $extra));
+        return $this->resolveMessageDecorators(array_merge([$decorator], $extra));
     }
 
     /**
