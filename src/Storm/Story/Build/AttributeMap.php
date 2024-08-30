@@ -11,7 +11,7 @@ use ReflectionException;
 use ReflectionMethod;
 use ReflectionNamedType;
 use RuntimeException;
-use Storm\Story\Attribute\AsCommanderHandler;
+use Storm\Story\Attribute\AsCommandHandler;
 use Storm\Story\Attribute\AsEventHandler;
 use Storm\Story\Attribute\AsQueryHandler;
 use Storm\Story\Exception\StoryViolation;
@@ -31,7 +31,7 @@ class AttributeMap
     protected array $metadata = [];
 
     protected array $attributes = [
-        AsCommanderHandler::class,
+        AsCommandHandler::class,
         AsEventHandler::class,
         AsQueryHandler::class,
     ];
@@ -96,7 +96,7 @@ class AttributeMap
     protected function getAllAttributes(ReflectionClass $reflection): array
     {
         $attributes = [
-            ...$reflection->getAttributes(AsCommanderHandler::class),
+            ...$reflection->getAttributes(AsCommandHandler::class),
             ...$reflection->getAttributes(AsQueryHandler::class),
             ...$this->createEventAttributes($reflection),
         ];
@@ -151,7 +151,7 @@ class AttributeMap
         }
 
         $metadata = match ($instance::class) {
-            AsCommanderHandler::class => $this->createCommandInfo($instance, $messageHandler),
+            AsCommandHandler::class => $this->createCommandInfo($instance, $messageHandler),
             AsQueryHandler::class => $this->createQueryInfo($instance, $messageHandler),
             AsEventHandler::class => $this->createEventInfo($instance, $messageHandler),
             default => throw new RuntimeException('Invalid attribute type '.get_class($instance)),
@@ -164,7 +164,7 @@ class AttributeMap
         }
     }
 
-    protected function createCommandInfo(AsCommanderHandler $attribute, string $messageHandler): MessageHandlerMetadata
+    protected function createCommandInfo(AsCommandHandler $attribute, string $messageHandler): MessageHandlerMetadata
     {
         return new MessageHandlerMetadata(
             type: MessageType::getType($attribute->handles),
@@ -243,7 +243,7 @@ class AttributeMap
      * @throws StoryViolation      when no parameters are found
      * @throws StoryViolation      when the first parameter is not a named type
      */
-    protected function getFirstParameterOfHandlerMethod(AsEventHandler|AsQueryHandler|AsCommanderHandler $attribute, string $messageHandler): string
+    protected function getFirstParameterOfHandlerMethod(AsEventHandler|AsQueryHandler|AsCommandHandler $attribute, string $messageHandler): string
     {
         $reflection = new ReflectionMethod($messageHandler, $attribute->method);
         $parameters = $reflection->getParameters();

@@ -53,12 +53,11 @@ final readonly class DefaultStoryContext implements StoryContext
     {
         $message = $this->messageFactory->createMessageFrom($payload);
 
-        $decorators = $this->messageResolver->getMessageDecorator($message->type());
-        $onDispatch = [new DecorateMessage(...$decorators)];
+        $messageDecorator = $this->messageResolver->getMessageDecorator();
 
         return $this->pipeline
-            ->send($payload)
-            ->through($onDispatch)
+            ->send($message)
+            ->through([new DecorateMessage(...$messageDecorator)])
             ->thenReturn();
     }
 

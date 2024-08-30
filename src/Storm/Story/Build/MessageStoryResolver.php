@@ -4,13 +4,9 @@ declare(strict_types=1);
 
 namespace Storm\Story\Build;
 
-use Arr;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Contracts\Support\Arrayable;
 use JsonSerializable;
-use ReflectionClass;
-use Storm\Contract\Message\MessageDecorator;
-use Storm\Story\Attribute\AsHeader;
 use Storm\Story\Exception\MessageNotFound;
 use Storm\Story\Exception\StoryException;
 use Storm\Story\Middleware\HandleCommand;
@@ -20,8 +16,6 @@ use Storm\Story\StoryContext;
 use Storm\Story\StoryServiceProvider;
 use Storm\Story\Support\MessageType;
 
-use function array_map;
-use function array_merge;
 use function is_array;
 use function is_callable;
 use function is_string;
@@ -91,31 +85,13 @@ readonly class MessageStoryResolver
     }
 
     /**
-     * Get the message decorators for the given message.
-     *
-     * todo add to scanner
+     * Get the message decorator for the given message.
      */
-    public function getMessageDecorator(string $message): array
+    public function getMessageDecorator(): array
     {
-        $ref = new ReflectionClass($message);
-        $attributes = $ref->getAttributes(AsHeader::class);
+        $decorator = config('storm.decorators.message');
 
-        $decorator = null;
-        $extra = [];
-        if ($attributes !== []) {
-            /** @var AsHeader $instance */
-            $instance = $attributes[0]->newInstance();
-
-            if (is_string($instance->default)) {
-                $decorator = $instance->default;
-            }
-
-            $extra = $instance->decorators;
-        }
-
-        $decorator ??= config('storm.decorators.message.default');
-
-        return $this->resolveMessageDecorators(array_merge([$decorator], $extra));
+        return [$this->container[$decorator]];
     }
 
     /**
@@ -160,17 +136,6 @@ readonly class MessageStoryResolver
         }
 
         throw new StoryException("Invalid string $property for message $message, must return an iterable value");
-    }
-
-    /**
-     * @return array<MessageDecorator>
-     */
-    protected function resolveMessageDecorators(array $messageDecorators): array
-    {
-        return array_map(
-            static fn (string $decorator): MessageDecorator => $this->container[$decorator],
-            Arr::flatten($messageDecorators)
-        );
     }
 
     /**

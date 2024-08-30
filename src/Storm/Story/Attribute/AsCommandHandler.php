@@ -9,7 +9,7 @@ use Storm\Story\DefaultStoryContext;
 use Storm\Story\StoryContext;
 
 #[Attribute(Attribute::TARGET_CLASS)]
-class AsCommanderHandler
+class AsCommandHandler
 {
     public function __construct(
 
@@ -53,8 +53,7 @@ class AsCommanderHandler
         /**
          * The story context ID to be used when calling the handler.
          *
-         * Configure yourself a story context,
-         * It must be bound to the container.
+         * Configure yourself a story context, It must be bound to the container.
          *
          * @var string|null
          */

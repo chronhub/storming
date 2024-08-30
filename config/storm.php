@@ -5,42 +5,37 @@ declare(strict_types=1);
 return [
 
     /**
-     * Message and event decorators.
+     * Message and event decorators configuration.
      */
     'decorators' => [
 
         /**
          * Default chain message decorator for the CQRS pattern.
          *
-         * It provides EventType, EventSymfonyId and EventTime decorators.
-         * It will be set on the AsHeader attribute when the property is not set,
-         * or if the attribute is missing.
-         * Also, the attribute allows you to add extra headers per message.
-         *
-         * Note that a [domain] event, which does not interact with the domain model,
-         * should be considered as a message.
+         * Provides EventType, EventSymfonyId, and EventTime headers decorators.
          *
          * @see \Storm\Message\DefaultChainMessageDecorator
          */
-        'message' => [
-            'default' => 'storm.message_decorator.chain',
-        ],
+        'message' => 'storm.message_decorator.chain',
 
-        'event' => [
-            \Storm\Message\Decorator\EventTime::class,
-            \Storm\Message\Decorator\EventSymfonyId::class,
-            \Storm\Message\Decorator\EventType::class,
-        ],
-
+        /**
+         * Default chain event decorator for domain events produced by aggregates.
+         *
+         * By default, it just applies the same decorators as the message decorator above,
+         * for the event type, event ID and event time headers.
+         *
+         * @see \Storm\Message\DefaultChainMessageDecorator
+         */
+        'event' => 'storm.event_decorator.chain',
     ],
 
     /**
      * Default serializer configuration.
      *
-     * Fixed keys as they will be merged with other configurations.
-     * Also, encode and decode options are not merged.
+     * Fixed keys are used as they will be merged with other configurations.
+     * Encode and decode options are not merged.
      *
-     * @see \Storm\Serializer\\Storm\Serializer\SerializerFactory
+     * @see \Storm\Serializer\SerializerFactory
      */
     'serializer' => [
 
@@ -53,8 +48,6 @@ return [
                 \Symfony\Component\Serializer\Normalizer\UidNormalizer::class,
             ],
             'context' => [],
-            'encode_options' => null,
-            'decode_options' => null,
         ],
 
         'messaging' => [
@@ -67,7 +60,13 @@ return [
     ],
 
     /**
-     * List of directories to scan for message handlers
+     * List of directories to scan for attributes.
+     *
+     * @see \Storm\Story\Attribute\AsCommandHandler
+     * @see \Storm\Story\Attribute\AsEventHandler
+     * @see \Storm\Story\Attribute\AsQueryHandler
+     * @see \Storm\Story\Attribute\Transactional
+     * @see \Storm\Story\Attribute\AsHeader
      */
     'scan' => [],
 ];
