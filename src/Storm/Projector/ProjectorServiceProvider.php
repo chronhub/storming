@@ -37,9 +37,6 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
             );
 
             $this->commands(config('projector.console.commands', []));
-
-            //fixMe remove when storm install is available
-            $this->loadMigrationsFrom(__DIR__.'/../../../migrations');
         }
     }
 
