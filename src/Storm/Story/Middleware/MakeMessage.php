@@ -8,6 +8,9 @@ use Closure;
 use Storm\Contract\Message\MessageFactory;
 use Storm\Message\Message;
 
+/**
+ * @deprecated
+ */
 final readonly class MakeMessage
 {
     public function __construct(private MessageFactory $messageFactory) {}
