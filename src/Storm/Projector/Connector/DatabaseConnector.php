@@ -8,6 +8,8 @@ use Illuminate\Contracts\Foundation\Application;
 use Storm\Chronicler\EventStoreBridge;
 use Storm\Contract\Chronicler\DatabaseChronicler;
 use Storm\Contract\Clock\SystemClock;
+use Storm\Contract\Projector\ProjectionProvider;
+use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Exception\ConfigurationViolation;
 use Storm\Projector\Repository\DatabaseProjectionProvider;
 use Storm\Serializer\SerializerFactory;
@@ -21,6 +23,7 @@ final readonly class DatabaseConnector implements Connector
         private Application $app,
         private SerializerFactory $serializerFactory,
         private EventStoreBridge $projectorBridge,
+        private SystemClock $clock,
     ) {}
 
     /**
@@ -37,14 +40,24 @@ final readonly class DatabaseConnector implements Connector
      */
     public function connect(array $config): ConnectionManager
     {
-        $clock = $this->app[SystemClock::class];
-        $connection = $this->app['db']->connection($config['connection']);
-        $projectionProvider = new DatabaseProjectionProvider(
-            $connection,
-            $clock,
-            $config['table_name'] ?? DatabaseProjectionProvider::TABLE_NAME
-        );
+        $eventStore = $this->getDatabaseEventStore($config);
+        $projectionProvider = $this->getDatabaseProjectionProvider($config);
+        $projectorSerializer = $this->getProjectorSerializer($config);
 
+        return new DatabaseConnectionManager(
+            $eventStore,
+            $eventStore->getEventStreamProvider(),
+            $projectionProvider,
+            $this->app[$config['query_filter']],
+            $this->clock,
+            $projectorSerializer,
+            $this->app[$config['options']],
+            ($config['dispatch_events'] ?? false) === true ? $this->app['events'] : null,
+        );
+    }
+
+    private function getDatabaseEventStore(array $config): DatabaseChronicler
+    {
         $eventStore = $this->projectorBridge->getEventStore($config['chronicler']);
 
         if (! $eventStore instanceof DatabaseChronicler) {
@@ -53,17 +66,24 @@ final readonly class DatabaseConnector implements Connector
             ));
         }
 
+        return $eventStore;
+    }
+
+    private function getDatabaseProjectionProvider(array $config): ProjectionProvider
+    {
+        $connection = $this->app['db']->connection($config['connection']);
+
+        return new DatabaseProjectionProvider(
+            $connection,
+            $this->clock,
+            $config['table_name'] ?? DatabaseProjectionProvider::TABLE_NAME
+        );
+    }
+
+    private function getProjectorSerializer(array $config): SymfonySerializer
+    {
         $configSerializer = $this->app['config']->get('projector.serializer.'.$config['serializer']);
 
-        return new DatabaseConnectionManager(
-            $eventStore,
-            $eventStore->getEventStreamProvider(),
-            $projectionProvider,
-            $this->app[$config['query_filter']],
-            $clock,
-            $this->serializerFactory->create($configSerializer),
-            $this->app[$config['options']],
-            ($config['dispatch_events'] ?? false) === true ? $this->app['events'] : null,
-        );
+        return $this->serializerFactory->create($configSerializer);
     }
 }

@@ -17,16 +17,18 @@ return [
         'pgsql' => [
             'connection' => 'pgsql',
             'table_name' => null,
-            /**
-             * Key from the chronicler.store.connection config
-             */
             'chronicler' => 'pgsql', // key in chronicler.store.connection
-            /**
-             *  todo
-             *   The event store allows access to his event stream provider,
-             *   if overridden, it would be used for api calls.
-             */
             //'event_stream_provider' => 'pgsql',
+            'query_filter' => FromIncludedPosition::class,
+            'options' => DefaultOption::class,
+            'serializer' => 'json',
+            'dispatch_events' => false,
+        ],
+
+        'hybrid' => [
+            'connection' => 'mysql',
+            'table_name' => null,
+            'chronicler' => 'pgsql', // key in chronicler.store.connection
             'query_filter' => FromIncludedPosition::class,
             'options' => DefaultOption::class,
             'serializer' => 'json',
@@ -68,6 +70,7 @@ return [
 
     /**
      * All the projection builds here.
+     *
      * When auto discovery is enabled,
      * it will produce abstract as 'projection.emitter.edge-all'
      */
