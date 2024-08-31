@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create(
-            'outbox_events',
+            'outbox_stream_events',
             static function (Blueprint $table): void {
                 $table->id();
                 $table->uuid('event_id')->unique();
@@ -23,6 +23,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        Schema::dropIfExists('outbox_events');
+        Schema::dropIfExists('outbox_stream_events');
     }
 };
