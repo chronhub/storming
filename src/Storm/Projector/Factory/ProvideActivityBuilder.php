@@ -38,7 +38,7 @@ trait ProvideActivityBuilder
         $collectStreams = new CollectStreams(
             $this->chronicler,
             new QueryFilterResolver($queryFilter),
-            $optionLoadLimiter ?: new LoadLimiter($optionLoadLimiter),
+            $optionLoadLimiter === null ?: new LoadLimiter($optionLoadLimiter),
         );
 
         return new LoadStreams($collectStreams, $this->clock);
