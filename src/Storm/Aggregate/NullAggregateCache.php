@@ -20,7 +20,9 @@ final class NullAggregateCache implements AggregateCache
         return false;
     }
 
+    /** @codeCoverageIgnore */
     public function put(AggregateRoot $aggregateRoot): void {}
 
+    /** @codeCoverageIgnore */
     public function forget(AggregateIdentity $aggregateIdentity): void {}
 }
