@@ -143,12 +143,12 @@ interface Option extends JsonSerializable
      *
      * Zero means no limit and will be converted to PHP_INT_MAX
      *
-     * @return int<0, max>
+     * @return int<0, max>|null
      *
      * @see LoadLimiterProjectionQueryFilter
      * @see LoadLimiter
      */
-    public function getLoadLimiter(): int;
+    public function getLoadLimiter(): ?int;
 
     /**
      * Discover new event streams after each workflow renewal.

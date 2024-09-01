@@ -33,10 +33,12 @@ trait ProvideActivityBuilder
      */
     protected function createStreamLoader(QueryFilter $queryFilter): LoadStreams
     {
+        $optionLoadLimiter = $this->option->getLoadLimiter();
+
         $collectStreams = new CollectStreams(
             $this->chronicler,
-            new LoadLimiter($this->option->getLoadLimiter()),
-            new QueryFilterResolver($queryFilter)
+            new QueryFilterResolver($queryFilter),
+            $optionLoadLimiter ?: new LoadLimiter($optionLoadLimiter),
         );
 
         return new LoadStreams($collectStreams, $this->clock);

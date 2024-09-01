@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector\Stream;
 
 use Storm\Contract\Chronicler\QueryFilter;
+use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Stream\Filter\LoadLimiter;
 use Storm\Projector\Stream\Filter\LoadLimiterQueryFilter;
 use Storm\Projector\Stream\Filter\ProjectionQueryFilter;
@@ -15,10 +16,7 @@ final readonly class QueryFilterResolver
 {
     public function __construct(private QueryFilter $queryFilter) {}
 
-    // fixMe Load limiter should be optional,as it could be inconsistent between the option
-    //  and his implementation
-    //  allow null in projection options
-    public function __invoke(string $streamName, StreamPosition $streamPosition, LoadLimiter $loadLimiter): QueryFilter
+    public function __invoke(string $streamName, StreamPosition $streamPosition, ?LoadLimiter $loadLimiter = null): QueryFilter
     {
         $queryFilter = $this->queryFilter;
 
@@ -27,7 +25,10 @@ final readonly class QueryFilterResolver
         }
 
         if ($queryFilter instanceof LoadLimiterQueryFilter) {
-            // todo raise exception if loadLimiter is null
+            if ($loadLimiter === null) {
+                throw new InvalidArgumentException('Query filter implements a load limiter contract, therefore, no load limiter provided');
+            }
+
             $queryFilter->setLoadLimiter($loadLimiter);
         }
 

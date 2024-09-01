@@ -15,7 +15,7 @@ final class DefaultOption implements Option
         protected readonly array $sleep = [10000, 5, 1000000],
         protected readonly int $timeout = 10000,
         protected readonly int $lockout = 1000000,
-        protected readonly int $loadLimiter = 1000,
+        protected readonly ?int $loadLimiter = 1000,
         protected readonly int $sleepEmitterOnFirstCommit = 1000,
         protected readonly bool $onlyOnceDiscovery = false,
         array|string $retries = [],

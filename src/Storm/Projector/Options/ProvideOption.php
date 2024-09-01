@@ -32,8 +32,8 @@ trait ProvideOption
 
     protected readonly bool $recordGap;
 
-    /** @var int<0, max> */
-    protected readonly int $loadLimiter;
+    /** @var int<0, max>|null */
+    protected readonly ?int $loadLimiter;
 
     protected readonly ?string $detectionWindows;
 
@@ -82,7 +82,7 @@ trait ProvideOption
         return $this->recordGap;
     }
 
-    public function getLoadLimiter(): int
+    public function getLoadLimiter(): ?int
     {
         return $this->loadLimiter;
     }

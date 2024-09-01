@@ -4,14 +4,16 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Stream\Filter;
 
-use InvalidArgumentException;
-use RuntimeException;
+use Storm\Projector\Exception\InvalidArgumentException;
 
 final readonly class LoadLimiter
 {
     /** @var positive-int */
     public int $value;
 
+    /**
+     * @throws InvalidArgumentException when value is less than 0
+     */
     public function __construct(int $value)
     {
         if ($value < 0) {
@@ -29,6 +31,8 @@ final readonly class LoadLimiter
      * Get the maximum position for the given position.
      *
      * @return positive-int
+     *
+     * @throws InvalidArgumentException when the given position is greater than PHP_INT_MAX
      */
     public function maxPosition(int $position): int
     {
@@ -37,7 +41,7 @@ final readonly class LoadLimiter
         }
 
         if (PHP_INT_MAX - $this->value < $position) {
-            throw new RuntimeException('LoadLimiter value + given position is greater than PHP_INT_MAX');
+            throw new InvalidArgumentException('LoadLimiter value + given position is greater than PHP_INT_MAX');
         }
 
         return $this->value + $position;

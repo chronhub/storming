@@ -15,7 +15,7 @@ final class InMemoryOption implements Option
         protected readonly array $sleep = [1000, 1, 10000],
         protected readonly int $timeout = 1,
         protected readonly int $lockout = 0,
-        protected readonly int $loadLimiter = 100,
+        protected readonly ?int $loadLimiter = 100,
         protected readonly int $sleepEmitterOnFirstCommit = 0,
         array|string $retries = [],
         protected readonly bool $recordGap = false,

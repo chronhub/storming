@@ -16,13 +16,13 @@ use Storm\Stream\StreamPosition;
 
 class CollectStreams
 {
-    /** @var callable(string, StreamPosition, LoadLimiter): QueryFilter */
+    /** @var callable(string, StreamPosition, ?LoadLimiter): QueryFilter */
     private $queryFilterResolver;
 
     public function __construct(
         private readonly Chronicler $chronicler,
-        private readonly LoadLimiter $loadLimiter,
-        callable $queryFilterResolver
+        callable $queryFilterResolver,
+        private readonly ?LoadLimiter $loadLimiter = null,
     ) {
         $this->queryFilterResolver = $queryFilterResolver;
     }
@@ -35,7 +35,7 @@ class CollectStreams
      */
     public function fromCheckpoints(array $checkpoints): ?Collection
     {
-        $streamEvents = new Collection();
+        $streamEvents = new Collection;
 
         foreach ($checkpoints as $checkpoint) {
             $streamName = $checkpoint->streamName;
