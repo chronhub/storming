@@ -32,7 +32,11 @@ final readonly class DefaultAggregateRepository implements AggregateRepository
     public function retrieve(AggregateIdentity $aggregateId): ?AggregateRoot
     {
         if ($this->cache->has($aggregateId)) {
-            return $this->cache->get($aggregateId);
+            $aggregate = $this->cache->get($aggregateId);
+
+            $this->setClockOnAggregate($aggregate);
+
+            return $aggregate;
         }
 
         $aggregate = $this->reconstituteAggregate($aggregateId);
@@ -95,14 +99,19 @@ final readonly class DefaultAggregateRepository implements AggregateRepository
 
             $aggregate = $aggregateType::reconstitute($aggregateId, $history);
 
-            if ($this->clock && $aggregate instanceof ClockAware) {
-                $aggregate->setClock($this->clock);
-            }
+            $this->setClockOnAggregate($aggregate);
 
             return $aggregate;
 
         } catch (StreamNotFound) {
             return null;
+        }
+    }
+
+    private function setClockOnAggregate(AggregateRoot $aggregate): void
+    {
+        if ($this->clock && $aggregate instanceof ClockAware) {
+            $aggregate->setClock($this->clock);
         }
     }
 }

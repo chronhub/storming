@@ -10,6 +10,7 @@ use Storm\Contract\Aggregate\AggregateIdentity;
 use Storm\Contract\Aggregate\AggregateRoot;
 
 use function get_class;
+use function sha1;
 use function sprintf;
 
 final readonly class DefaultAggregateCache implements AggregateCache
@@ -33,7 +34,6 @@ final readonly class DefaultAggregateCache implements AggregateCache
 
     public function put(AggregateRoot $aggregateRoot): void
     {
-        // todo unset clock if set
         $this->store->put($this->cacheKey($aggregateRoot->identity()), $aggregateRoot, $this->cacheTtl);
     }
 
@@ -49,7 +49,7 @@ final readonly class DefaultAggregateCache implements AggregateCache
 
     private function cacheKey(AggregateIdentity $aggregateIdentity): string
     {
-        return sprintf('%s::%s::%s',
+        return sprintf(sha1('%s::%s::%s'),
             $this->cacheKeyPrefix,
             get_class($aggregateIdentity),
             $aggregateIdentity->toString()
