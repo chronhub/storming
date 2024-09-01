@@ -11,6 +11,8 @@ use Storm\Contract\Aggregate\AggregateRepository;
 use Storm\Contract\Aggregate\AggregateRoot;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\QueryFilter;
+use Storm\Contract\Clock\ClockAware;
+use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\EventHeader;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
@@ -18,9 +20,10 @@ use Storm\Stream\StreamName;
 final readonly class GenericAggregateRepository implements AggregateRepository
 {
     public function __construct(
-        protected Chronicler $chronicler,
-        protected StreamName $streamName,
-        protected AggregateEventReleaser $eventReleaser,
+        private Chronicler $chronicler,
+        private StreamName $streamName,
+        private AggregateEventReleaser $eventReleaser,
+        private SystemClock $clock,
     ) {}
 
     public function retrieve(AggregateIdentity $aggregateId): ?AggregateRoot
@@ -70,7 +73,14 @@ final readonly class GenericAggregateRepository implements AggregateRepository
             /** @var AggregateRoot $aggregateType */
             $aggregateType = $firstEvent->header(EventHeader::AGGREGATE_TYPE);
 
-            return $aggregateType::reconstitute($aggregateId, $history);
+            $aggregate = $aggregateType::reconstitute($aggregateId, $history);
+
+            if ($aggregate instanceof ClockAware) {
+                $aggregate->setClock($this->clock);
+            }
+
+            return $aggregate;
+
         } catch (StreamNotFound) {
             return null;
         }
