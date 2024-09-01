@@ -134,7 +134,8 @@ final class HandleCommand
     /**
      * Checks if the command and the event store support transactional.
      *
-     * todo add to scanner when decorator attribute set
+     * checkMe till no other attribute on command, we keep the reflection here
+     *  it can interfere with process manager or saga, we will care when there is a need
      *
      * @phpstan-assert-if-true TransactionalChronicler $this->chronicler
      */
