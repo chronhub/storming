@@ -23,7 +23,7 @@ final readonly class GenericAggregateRepository implements AggregateRepository
         private Chronicler $chronicler,
         private StreamName $streamName,
         private AggregateEventReleaser $eventReleaser,
-        private SystemClock $clock,
+        private ?SystemClock $clock = null,
     ) {}
 
     public function retrieve(AggregateIdentity $aggregateId): ?AggregateRoot
@@ -75,7 +75,7 @@ final readonly class GenericAggregateRepository implements AggregateRepository
 
             $aggregate = $aggregateType::reconstitute($aggregateId, $history);
 
-            if ($aggregate instanceof ClockAware) {
+            if ($this->clock && $aggregate instanceof ClockAware) {
                 $aggregate->setClock($this->clock);
             }
 
