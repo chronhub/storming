@@ -6,6 +6,7 @@ namespace Storm\Aggregate;
 
 use Generator;
 use Storm\Chronicler\Exceptions\StreamNotFound;
+use Storm\Contract\Aggregate\AggregateCache;
 use Storm\Contract\Aggregate\AggregateIdentity;
 use Storm\Contract\Aggregate\AggregateRepository;
 use Storm\Contract\Aggregate\AggregateRoot;
@@ -16,6 +17,7 @@ use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\EventHeader;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
+use Throwable;
 
 final readonly class DefaultAggregateRepository implements AggregateRepository
 {
@@ -23,12 +25,23 @@ final readonly class DefaultAggregateRepository implements AggregateRepository
         private Chronicler $chronicler,
         private StreamName $streamName,
         private AggregateEventReleaser $eventReleaser,
+        private AggregateCache $cache,
         private ?SystemClock $clock = null,
     ) {}
 
     public function retrieve(AggregateIdentity $aggregateId): ?AggregateRoot
     {
-        return $this->reconstituteAggregate($aggregateId);
+        if ($this->cache->has($aggregateId)) {
+            return $this->cache->get($aggregateId);
+        }
+
+        $aggregate = $this->reconstituteAggregate($aggregateId);
+
+        if ($aggregate instanceof AggregateRoot) {
+            $this->cache->put($aggregate);
+        }
+
+        return $aggregate;
     }
 
     public function retrieveFiltered(AggregateIdentity $aggregateId, QueryFilter $queryFilter): ?AggregateRoot
@@ -53,7 +66,14 @@ final readonly class DefaultAggregateRepository implements AggregateRepository
             return;
         }
 
-        $this->chronicler->append(new Stream($this->streamName, $events));
+        try {
+            $this->chronicler->append(new Stream($this->streamName, $events));
+            $this->cache->put($aggregateRoot);
+        } catch (Throwable $e) {
+            $this->cache->forget($aggregateRoot->identity());
+
+            throw $e;
+        }
     }
 
     /**
