@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace Storm\Projector\Stream\Filter;
 
 use Illuminate\Database\Query\Builder;
+use Storm\Stream\StreamName;
 use Storm\Stream\StreamPosition;
-
-use function str_contains;
 
 final class FromIncludedPosition implements DatabaseProjectionQueryFilter, LoadLimiterQueryFilter, StreamNameAwareQueryFilter
 {
@@ -15,14 +14,13 @@ final class FromIncludedPosition implements DatabaseProjectionQueryFilter, LoadL
 
     private ?LoadLimiter $loadLimiter;
 
-    // fixMe checkpoint should hold an instance  of StreamName
-    private ?string $streamName;
+    private ?StreamName $streamName;
 
     public function apply(): callable
     {
         return function (Builder $query): void {
             $query
-                ->when(str_contains($this->streamName, '-'),
+                ->when($this->streamName->hasPartition(),
                     function (Builder $query): void {
                         $query
                             ->whereNotNull('internal_position')
@@ -45,7 +43,7 @@ final class FromIncludedPosition implements DatabaseProjectionQueryFilter, LoadL
         $this->loadLimiter = $loadLimiter;
     }
 
-    public function setStreamName(string $streamName): void
+    public function setStreamName(StreamName $streamName): void
     {
         $this->streamName = $streamName;
     }

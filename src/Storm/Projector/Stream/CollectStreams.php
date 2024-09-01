@@ -16,7 +16,7 @@ use Storm\Stream\StreamPosition;
 
 class CollectStreams
 {
-    /** @var callable(string, StreamPosition, ?LoadLimiter): QueryFilter */
+    /** @var callable(StreamName, StreamPosition, ?LoadLimiter): QueryFilter */
     private $queryFilterResolver;
 
     public function __construct(
@@ -30,22 +30,22 @@ class CollectStreams
     /**
      * Collects the stream events from the given checkpoints.
      *
-     * @param  array<string, Checkpoint>               $checkpoints
-     * @return null|Collection<string, StreamIterator>
+     * @param array<string, Checkpoint> $checkpoints
+     * @return null|Collection{array{StreamIterator, string}}
      */
     public function fromCheckpoints(array $checkpoints): ?Collection
     {
         $streamEvents = new Collection;
 
         foreach ($checkpoints as $checkpoint) {
-            $streamName = $checkpoint->streamName;
+            $streamName = new StreamName($checkpoint->streamName);
             $streamPosition = new StreamPosition($checkpoint->position + 1);
             $queryFilter = ($this->queryFilterResolver)($streamName, $streamPosition, $this->loadLimiter);
 
             try {
-                $events = $this->chronicler->retrieveFiltered(new StreamName($streamName), $queryFilter);
+                $events = $this->chronicler->retrieveFiltered($streamName, $queryFilter);
 
-                $streamEvents->push([new StreamIterator($events), $streamName]);
+                $streamEvents->push([new StreamIterator($events), $streamName->name]);
             } catch (StreamNotFound) {
                 continue;
             }

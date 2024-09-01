@@ -10,13 +10,14 @@ use Storm\Projector\Stream\Filter\LoadLimiter;
 use Storm\Projector\Stream\Filter\LoadLimiterQueryFilter;
 use Storm\Projector\Stream\Filter\ProjectionQueryFilter;
 use Storm\Projector\Stream\Filter\StreamNameAwareQueryFilter;
+use Storm\Stream\StreamName;
 use Storm\Stream\StreamPosition;
 
 final readonly class QueryFilterResolver
 {
     public function __construct(private QueryFilter $queryFilter) {}
 
-    public function __invoke(string $streamName, StreamPosition $streamPosition, ?LoadLimiter $loadLimiter = null): QueryFilter
+    public function __invoke(StreamName $streamName, StreamPosition $streamPosition, ?LoadLimiter $loadLimiter = null): QueryFilter
     {
         $queryFilter = $this->queryFilter;
 
