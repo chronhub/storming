@@ -22,7 +22,7 @@ final class RepositoryManager implements Manager
 
     public function __construct(private readonly Application $app) {}
 
-    public function create(string $name, string $connector): AggregateRepository
+    public function create(string $name, ?string $connector = null): AggregateRepository
     {
         if (isset($this->repositories[$name])) {
             return $this->repositories[$name];
@@ -30,7 +30,7 @@ final class RepositoryManager implements Manager
 
         $config = $this->getConfig($name);
 
-        return $this->repositories[$name] = $this->resolve($config, $connector);
+        return $this->repositories[$name] = $this->resolve($config, $connector ?? 'default');
     }
 
     public function addConnector(string $name, Closure $connector): void
@@ -56,7 +56,7 @@ final class RepositoryManager implements Manager
 
     private function getConfig(string $name): array
     {
-        $config = $this->app['config']->get("storm.aggregates.$name");
+        $config = $this->app['config']->get("aggregates.repositories.$name");
 
         if (! is_array($config) || $config === []) {
             throw new InvalidArgumentException("No config found for aggregate key [$name]");

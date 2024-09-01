@@ -14,7 +14,7 @@ interface Manager
     /**
      * Create a new aggregate repository instance.
      */
-    public function create(string $name, string $connector): AggregateRepository;
+    public function create(string $name, ?string $connector = null): AggregateRepository;
 
     /**
      * Add a new aggregate repository connector.
