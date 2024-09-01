@@ -6,8 +6,8 @@ namespace Storm\Tests\Unit\Aggregate;
 
 use Generator;
 use Storm\Aggregate\AggregateEventReleaser;
+use Storm\Aggregate\DefaultAggregateRepository;
 use Storm\Aggregate\GenericAggregateId;
-use Storm\Aggregate\GenericAggregateRepository;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Message\EventHeader;
@@ -26,7 +26,7 @@ beforeEach(function () {
     $this->streamName = new StreamName('test');
     $this->aggregateId = GenericAggregateId::fromString('407eec69-c268-49f3-8f27-3e5fefc8c15d');
     $this->eventReleaser = new AggregateEventReleaser(new NoOpMessageDecorator);
-    $this->aggregateRepository = new GenericAggregateRepository(
+    $this->aggregateRepository = new DefaultAggregateRepository(
         $this->chronicler,
         $this->streamName,
         $this->eventReleaser

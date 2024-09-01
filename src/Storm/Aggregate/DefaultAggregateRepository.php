@@ -17,7 +17,7 @@ use Storm\Contract\Message\EventHeader;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
 
-final readonly class GenericAggregateRepository implements AggregateRepository
+final readonly class DefaultAggregateRepository implements AggregateRepository
 {
     public function __construct(
         private Chronicler $chronicler,

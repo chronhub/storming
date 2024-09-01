@@ -13,15 +13,16 @@ use Storm\Contract\Chronicler\QueryFilter;
 use Throwable;
 
 use function get_class;
+use function sha1;
 use function sprintf;
 
-final readonly class GenericAggregateRepositoryCache implements AggregateRepository
+final readonly class RepositoryCache implements AggregateRepository
 {
     public function __construct(
         private AggregateRepository $aggregateRepository,
         private Repository $cache,
-        private string $cachePrefix = 'aggregate',
-        private int $cacheTtl = 3600,
+        private string $cachePrefix,
+        private int $cacheTtl,
     ) {}
 
     public function retrieve(AggregateIdentity $aggregateId): ?AggregateRoot
@@ -62,7 +63,7 @@ final readonly class GenericAggregateRepositoryCache implements AggregateReposit
 
     private function cacheKey(AggregateIdentity $aggregateId): string
     {
-        return sprintf('%s::%s::%s',
+        return sprintf(sha1('%s::%s::%s'),
             $this->cachePrefix,
             get_class($aggregateId),
             $aggregateId->toString()
