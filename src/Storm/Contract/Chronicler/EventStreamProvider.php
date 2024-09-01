@@ -34,7 +34,6 @@ interface EventStreamProvider
      * Fetch all stream names.
      *
      * Internally, it filters out streams with stream name prefix.
-     * checkMe with pgsql standard strategy, it should not be used.
      *
      * @see StreamName::INTERNAL_PREFIX
      *
