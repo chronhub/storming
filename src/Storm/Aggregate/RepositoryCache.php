@@ -10,7 +10,6 @@ use Storm\Contract\Aggregate\AggregateIdentity;
 use Storm\Contract\Aggregate\AggregateRepository;
 use Storm\Contract\Aggregate\AggregateRoot;
 use Storm\Contract\Chronicler\QueryFilter;
-use Throwable;
 
 use function get_class;
 use function sha1;
@@ -34,21 +33,18 @@ final readonly class RepositoryCache implements AggregateRepository
             return $aggregate;
         }
 
-        return $this->aggregateRepository->retrieve($aggregateId);
+        $aggregate = $this->aggregateRepository->retrieve($aggregateId);
+
+        if ($aggregate instanceof AggregateRoot) {
+            $this->cache->put($cacheKey, $aggregate, $this->cacheTtl);
+        }
+
+        return $aggregate;
     }
 
     public function store(AggregateRoot $aggregateRoot): void
     {
-        $cacheKey = $this->cacheKey($aggregateRoot->identity());
-
-        try {
-            $this->aggregateRepository->store($aggregateRoot);
-            $this->cache->put($cacheKey, $aggregateRoot, $this->cacheTtl);
-        } catch (Throwable $exception) {
-            $this->cache->forget($cacheKey);
-
-            throw $exception;
-        }
+        $this->aggregateRepository->store($aggregateRoot);
     }
 
     public function retrieveFiltered(AggregateIdentity $aggregateId, QueryFilter $queryFilter): ?AggregateRoot
