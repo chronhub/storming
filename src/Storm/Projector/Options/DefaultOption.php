@@ -12,7 +12,7 @@ final class DefaultOption implements Option
         protected readonly bool $signal = false,
         protected readonly int $cacheSize = 1000,
         protected readonly int $blockSize = 1000,
-        protected readonly array $sleep = [10000, 5, 1000000],
+        protected readonly array $sleep = [1000, 5, 50000],
         protected readonly int $timeout = 10000,
         protected readonly int $lockout = 1000000,
         protected readonly ?int $loadLimiter = 1000,

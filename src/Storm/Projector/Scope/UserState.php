@@ -61,7 +61,7 @@ class UserState implements ArrayAccess
 
     public function increment(string $key, int $step = 1): self
     {
-        $value = $this->integer($key, null);
+        $value = $this->integer($key);
 
         $value += abs($step);
 
@@ -72,7 +72,7 @@ class UserState implements ArrayAccess
 
     public function decrement(string $key, int $step = 1): self
     {
-        $value = $this->integer($key, null);
+        $value = $this->integer($key);
 
         $value -= abs($step);
 

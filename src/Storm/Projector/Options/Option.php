@@ -93,7 +93,7 @@ interface Option extends JsonSerializable
      *
      * Base sleep time in millisecond
      * Factor is the multiplier for the base sleep time
-     * Max is the maximum sleep time in microsecond
+     * Max is the maximum sleep time in millisecond
      *
      * @return array{
      *     base: positive-int,
