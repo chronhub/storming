@@ -37,7 +37,7 @@ final class AckedOnly implements ProjectorScopeFactory
             throw new RuntimeException('Projector scope is not callable');
         }
 
-        $this->userStateScope = new UserState();
+        $this->userStateScope = new UserState;
         $this->boundReactors = $this->bindReactors($reactors);
     }
 

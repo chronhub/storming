@@ -96,7 +96,7 @@ final class DefaultContext implements ContextReader
     {
         $this->assertSubscriberNotSet();
 
-        $this->query = new DiscoverAllStream();
+        $this->query = new DiscoverAllStream;
 
         return $this;
     }

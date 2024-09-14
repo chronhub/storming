@@ -35,7 +35,7 @@ class CollectStreams
      */
     public function fromCheckpoints(array $checkpoints): ?Collection
     {
-        $streamEvents = new Collection();
+        $streamEvents = new Collection;
 
         foreach ($checkpoints as $checkpoint) {
             $streamName = $checkpoint->streamName;

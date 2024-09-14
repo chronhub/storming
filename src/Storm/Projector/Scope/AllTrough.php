@@ -23,7 +23,7 @@ final class AllTrough implements ProjectorScopeFactory
             throw new RuntimeException('Projector scope is not callable');
         }
 
-        $this->userStateScope = new UserState();
+        $this->userStateScope = new UserState;
     }
 
     public function handle(DomainEvent $event, ?array $userState = null): ProjectorScope
