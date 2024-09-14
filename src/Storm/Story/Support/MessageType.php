@@ -113,6 +113,8 @@ class MessageType
 
     public static function getEventTypeFromArray(array $payload): string
     {
+        // CheckMe: should depends on message factory, we just fit the current implementation
+        //  see also message converter
         return $payload['header'][Header::EVENT_TYPE];
     }
 

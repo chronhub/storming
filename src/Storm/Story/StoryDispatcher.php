@@ -8,27 +8,28 @@ use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use React\Promise\PromiseInterface;
 use Storm\Contract\Message\DomainQuery;
+use Storm\Contract\Message\MessageFactory;
 use Storm\Contract\Message\Messaging;
 use Storm\Contract\Story\Story;
 use Storm\Message\Message;
 use Storm\Story\Build\MessageStoryResolver;
-use Storm\Story\Support\MessageType;
 
 use function is_a;
 
 final readonly class StoryDispatcher implements Story
 {
     public function __construct(
+        private MessageFactory $messageFactory,
         private MessageStoryResolver $storyResolver,
         private Dispatcher $dispatcher,
     ) {}
 
     public function relay(object|array $payload): ?PromiseInterface
     {
-        $subject = MessageType::getClassFrom($payload);
+        $message = $this->messageFactory->createMessageFrom($payload);
+        $context = $this->storyResolver->getContext($message->type());
 
-        $context = $this->storyResolver->getContext($subject);
-        $message = $context->buildMessage($payload);
+        $message = $context->buildMessage($message);
 
         if ($this->shouldBeHandleSync($message->type())) {
             return $context($message->event());

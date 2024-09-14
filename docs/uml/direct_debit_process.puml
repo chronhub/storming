@@ -1,0 +1,38 @@
+@startuml
+participant Client
+participant API
+participant CommandHandler
+participant AggregateRoot
+participant EventStore
+participant ProjectionHandler
+participant ReadModel
+participant RecurringPaymentService
+
+' Initial Authorization
+Client -> API: Setup Recurring Direct Debit
+API -> CommandHandler: Create AuthorizeRecurringDirectDebitCommand
+CommandHandler -> AggregateRoot: Apply AuthorizeRecurringDirectDebitCommand
+AggregateRoot -> AggregateRoot: Validate Command
+AggregateRoot -> EventStore: Store RecurringDirectDebitAuthorizedEvent
+EventStore -> ProjectionHandler: Publish RecurringDirectDebitAuthorizedEvent
+ProjectionHandler -> ReadModel: Update ReadModel with Recurring Direct Debit Info
+API -> Client: Return Success Response
+
+note over Client, RecurringPaymentService
+  Later, when it's time for the recurring direct debit
+end note
+
+' Automatic Execution
+RecurringPaymentService -> CommandHandler: Create ExecuteRecurringDirectDebitCommand
+CommandHandler -> AggregateRoot: Apply ExecuteRecurringDirectDebitCommand
+AggregateRoot -> AggregateRoot: Check Authorization and Account Status
+AggregateRoot -> EventStore: Store RecurringDirectDebitExecutedEvent
+EventStore -> ProjectionHandler: Publish RecurringDirectDebitExecutedEvent
+ProjectionHandler -> ReadModel: Update ReadModel (Balance, Transaction History)
+
+note over Client, RecurringPaymentService
+  Optionally, notify the client of the execution
+end note
+
+API -> Client: Send Notification (if configured)
+@enduml

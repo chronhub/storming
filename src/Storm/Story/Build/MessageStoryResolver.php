@@ -85,6 +85,16 @@ readonly class MessageStoryResolver
     }
 
     /**
+     * Get the message decorator for the given message.
+     */
+    public function getMessageDecorator(): array
+    {
+        $decorator = config('storm.decorators.message');
+
+        return [$this->container[$decorator]];
+    }
+
+    /**
      * Get the middleware for the given message.
      */
     public function getMiddleware(string $message): array

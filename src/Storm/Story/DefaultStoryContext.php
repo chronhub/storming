@@ -7,40 +7,33 @@ namespace Storm\Story;
 use Illuminate\Contracts\Container\Container;
 use Illuminate\Pipeline\Pipeline;
 use React\Promise\PromiseInterface;
+use Storm\Contract\Message\MessageFactory;
 use Storm\Contract\Serializer\MessageSerializer;
 use Storm\Message\Message;
 use Storm\Story\Build\MessageStoryResolver;
 use Storm\Story\Exception\MessageNotHandled;
 use Storm\Story\Middleware\DecorateMessage;
-use Storm\Story\Middleware\MakeMessage;
 
-use function is_array;
-
-final class DefaultStoryContext implements StoryContext
+final readonly class DefaultStoryContext implements StoryContext
 {
-    /** @var array<string|object> */
-    private array $onDispatch = [];
-
     private Pipeline $pipeline;
 
     public function __construct(
-        private readonly Container $container,
-        private readonly MessageSerializer $serializer,
-        private readonly MessageStoryResolver $resolver,
+        private Container $container,
+        private MessageFactory $messageFactory,
+        private MessageSerializer $serializer,
+        private MessageStoryResolver $messageResolver,
     ) {
         $this->pipeline = new Pipeline($this->container);
-        $this->setDecorator(); // fixMe on dispatch middleware
     }
 
     public function __invoke(array|object $payload, ?object $job = null): ?PromiseInterface
     {
-        if (is_array($payload)) {
-            $payload = $this->serializer->deserialize($payload);
-        }
+        $message = $this->messageFactory->createMessageFrom($payload);
 
         return $this->handleMessage(
-            $message = $this->buildMessage($payload),
-            $this->resolver->getHandlers($message->type()),
+            $this->buildMessage($message),
+            $this->messageResolver->getHandlers($message->type()),
             $job
         );
     }
@@ -50,17 +43,21 @@ final class DefaultStoryContext implements StoryContext
         $payload = $this->serializer->serializeMessage($message);
 
         return new MessageJob(
-            $this->resolver->getContextId($message->type()),
+            $this->messageResolver->getContextId($message->type()),
             $payload->jsonSerialize(),
-            $queue ?? $this->resolver->getQueue($message->type()),
+            $queue ?? $this->messageResolver->getQueue($message->type()),
         );
     }
 
     public function buildMessage(array|object $payload): Message
     {
+        $message = $this->messageFactory->createMessageFrom($payload);
+
+        $messageDecorator = $this->messageResolver->getMessageDecorator();
+
         return $this->pipeline
-            ->send($payload)
-            ->through($this->onDispatch)
+            ->send($message)
+            ->through([new DecorateMessage(...$messageDecorator)])
             ->thenReturn();
     }
 
@@ -68,7 +65,7 @@ final class DefaultStoryContext implements StoryContext
     {
         return $this->pipeline
             ->send(new Draft($message->event(), $handlers, $job))
-            ->through($this->resolver->getMiddleware($message->type()))
+            ->through($this->messageResolver->getMiddleware($message->type()))
             ->then(function (Draft $draft) {
                 if (! $draft->isHandled()) {
                     throw MessageNotHandled::withMessage($draft->getMessage());
@@ -76,13 +73,5 @@ final class DefaultStoryContext implements StoryContext
 
                 return $draft;
             })->getPromise();
-    }
-
-    private function setDecorator(): void
-    {
-        $this->onDispatch = [
-            MakeMessage::class,
-            new DecorateMessage($this->container['storm.message_decorator.chain']),
-        ];
     }
 }

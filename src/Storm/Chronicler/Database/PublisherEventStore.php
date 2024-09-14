@@ -7,38 +7,30 @@ namespace Storm\Chronicler\Database;
 use Generator;
 use Illuminate\Database\Connection;
 use Storm\Chronicler\Direction;
-use Storm\Chronicler\Exceptions\InvalidArgumentException;
 use Storm\Chronicler\Tracker\Listener;
 use Storm\Chronicler\Tracker\ListenerOnce;
 use Storm\Chronicler\Tracker\ProvideEvents;
 use Storm\Chronicler\Tracker\StreamTracker;
 use Storm\Contract\Aggregate\AggregateIdentity;
 use Storm\Contract\Chronicler\Chronicler;
-use Storm\Contract\Chronicler\ChroniclerDecorator;
 use Storm\Contract\Chronicler\DatabaseChronicler;
 use Storm\Contract\Chronicler\EventableChronicler;
 use Storm\Contract\Chronicler\EventableTransactionalChronicler;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Chronicler\QueryFilter;
+use Storm\Contract\Chronicler\TransactionalChronicler;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
 
 final readonly class PublisherEventStore implements DatabaseChronicler, EventableTransactionalChronicler
 {
-    use TransactionalStoreTrait;
-
     public function __construct(
-        private DatabaseChronicler $chronicler,
+        private TransactionalChronicler&DatabaseChronicler $chronicler,
         private StreamTracker $streamTracker,
         callable $publisherSubscriber
     ) {
-        if ($this->chronicler instanceof ChroniclerDecorator) {
-            throw new InvalidArgumentException(
-                'A chronicler decorator is not allowed for event store '.self::class
-            );
-        }
-
         ProvideEvents::withEvent($this->chronicler, $streamTracker, $publisherSubscriber);
+        ProvideEvents::withTransactionalEvent($this->chronicler, $this->streamTracker);
     }
 
     public function append(Stream $stream): void
@@ -110,5 +102,30 @@ final readonly class PublisherEventStore implements DatabaseChronicler, Eventabl
     public function getConnection(): Connection
     {
         return $this->chronicler->getConnection();
+    }
+
+    public function beginTransaction(): void
+    {
+        $this->streamTracker->disclose(EventableTransactionalChronicler::BEGIN_TRANSACTION);
+    }
+
+    public function commitTransaction(): void
+    {
+        $this->streamTracker->disclose(EventableTransactionalChronicler::COMMIT_TRANSACTION);
+    }
+
+    public function rollbackTransaction(): void
+    {
+        $this->streamTracker->disclose(EventableTransactionalChronicler::ROLLBACK_TRANSACTION);
+    }
+
+    public function transactional(callable $callback): bool|array|string|int|float|object
+    {
+        return $this->chronicler->transactional($callback);
+    }
+
+    public function inTransaction(): bool
+    {
+        return $this->chronicler->inTransaction();
     }
 }

@@ -93,7 +93,7 @@ interface Option extends JsonSerializable
      *
      * Base sleep time in millisecond
      * Factor is the multiplier for the base sleep time
-     * Max is the maximum sleep time in microsecond
+     * Max is the maximum sleep time in millisecond
      *
      * @return array{
      *     base: positive-int,
@@ -143,12 +143,12 @@ interface Option extends JsonSerializable
      *
      * Zero means no limit and will be converted to PHP_INT_MAX
      *
-     * @return int<0, max>
+     * @return int<0, max>|null
      *
      * @see LoadLimiterProjectionQueryFilter
      * @see LoadLimiter
      */
-    public function getLoadLimiter(): int;
+    public function getLoadLimiter(): ?int;
 
     /**
      * Discover new event streams after each workflow renewal.

@@ -11,7 +11,7 @@ use Storm\Projector\Exception\ConfigurationViolation;
 
 final class ProviderFactoryResolver implements ProviderFactoryRegistry
 {
-    /** @var array<string, string|class-string<ProviderFactory>|(Closure(ConnectionManager, Application): ProviderFactory)|ProviderFactory>|array */
+    /** @var array<string, (Closure(ConnectionManager, Application): ProviderFactory)|ProviderFactory>|array */
     private array $factories = [];
 
     public function __construct(private readonly Application $app) {}
@@ -21,7 +21,7 @@ final class ProviderFactoryResolver implements ProviderFactoryRegistry
         $factory = $this->factories[$name] ?? null;
 
         if (! $factory) {
-            throw ConfigurationViolation::message("Provider factory $name not found");
+            throw new ConfigurationViolation("Provider factory $name not found");
         }
 
         if ($factory instanceof ProviderFactory) {
@@ -32,22 +32,10 @@ final class ProviderFactoryResolver implements ProviderFactoryRegistry
             return $factory($connectionManager, $this->app);
         }
 
-        // checkMe remove
-        if ($this->app->bound($factory)) {
-            /** @var ProviderFactory $concrete */
-            $concrete = $this->app[$factory];
-
-            if ($concrete instanceof ProviderConnectionAware) {
-                $concrete->setConnection($connectionManager);
-            }
-
-            return $concrete;
-        }
-
-        return new $factory($connectionManager);
+        throw new ConfigurationViolation("Provider factory $name not supported");
     }
 
-    public function register(string $name, string|Closure|ProviderFactory $factory): void
+    public function register(string $name, Closure|ProviderFactory $factory): void
     {
         $this->factories[$name] = $factory;
     }

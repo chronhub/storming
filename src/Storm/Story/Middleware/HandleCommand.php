@@ -23,57 +23,6 @@ use function count;
 use function get_class;
 use function sprintf;
 
-/**
- * Command Execution and Exception Handling Strategy
- *
- * 1. Failure Handling:
- *    a. Immediate Failure: Commands fail on the first execution attempt.
- *    b. Nuanced Approach: Consider categorizing exceptions for differentiated handling.
- *
- * 2. Exception Sources:
- *    a. Domain Logic: Most exceptions from business rule violations.
- *    b. Infrastructure: Database issues, external service failures, etc.
- *    c. Concurrency: Race conditions, duplicate executions.
- *
- * 3. Retry Considerations:
- *    a. Avoid automatic retries for domain logic exceptions.
- *    b. Consider retries for transient infrastructure issues.
- *    c. Implement idempotency for safely retryable commands.
- *
- * 4. Concurrency Handling:
- *    a. Pay special attention to race conditions and duplicates.
- *    b. Consider using version-based conflict resolution strategies.
- *
- * 5. Event Sourcing Implications:
- *    a. Ensure event stream integrity and correct ordering.
- *    b. Consider compensating events for certain failure scenarios.
- *    c. Implement event publishing as part of the command handling process.
- *
- * 6. Consistency and Boundaries:
- *    a. Respect aggregate boundaries for consistency guarantees.
- *    b. Consider eventual consistency for cross-aggregate operations.
- *
- * 7. Error Recovery Strategies:
- *    a. Implement compensating actions for certain types of failures.
- *    b. Provide mechanisms for manual intervention and recovery.
- *
- * 8. Logging and Monitoring:
- *    a. Log all command failures with detailed context.
- *    b. Implement comprehensive monitoring for command execution patterns.
- *
- * 9. Performance Considerations:
- *    a. Balance between immediate failure and retry attempts.
- *    b. Consider the impact of exception handling on system performance.
- *
- * 10. Developer Responsibilities:
- *     a. Analyze and address recurring exceptions.
- *     b. Regularly review and update exception handling strategies.
- *     c. Ensure proper error reporting and alerting mechanisms are in place.
- *
- * Note: The current implementation fails immediately and throws exceptions.
- * Consider refining this approach based on specific system requirements and
- * the nature of commands being processed.
- */
 final class HandleCommand
 {
     private Chronicler|EventableChronicler|EventableTransactionalChronicler $chronicler;
@@ -184,6 +133,9 @@ final class HandleCommand
 
     /**
      * Checks if the command and the event store support transactional.
+     *
+     * checkMe till no other attribute on command, we keep the reflection here
+     *  it can interfere with process manager or saga, we will care when there is a need
      *
      * @phpstan-assert-if-true TransactionalChronicler $this->chronicler
      */

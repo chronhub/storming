@@ -93,7 +93,7 @@ final readonly class PointInTime
      *
      * @see CarbonImmutable::add()
      */
-    public function add(string|DateInterval $interval, int|float $unit): self
+    public function add(string|DateInterval $interval, int|float $unit = 1): self
     {
         return new self($this->carbon->add($interval, $unit));
     }
@@ -103,7 +103,7 @@ final readonly class PointInTime
      *
      * @see CarbonImmutable::sub()
      */
-    public function sub(string|DateInterval $interval, int|float $unit): self
+    public function sub(string|DateInterval $interval, int|float $unit = 1): self
     {
         return new self($this->carbon->sub($interval, $unit));
     }

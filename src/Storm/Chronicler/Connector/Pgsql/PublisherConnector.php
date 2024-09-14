@@ -9,7 +9,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Queue\Queueable;
 use Storm\Chronicler\Connector\ConnectionManager;
 use Storm\Chronicler\Connector\Connector;
-use Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Storm\Chronicler\Exceptions\ConfigurationViolation;
 use Storm\Chronicler\Tracker\PublishStreamEventOnAppend;
 use Storm\Chronicler\Tracker\Tracker;
 use Storm\Contract\Chronicler\DatabaseChronicler;
@@ -25,13 +25,13 @@ final readonly class PublisherConnector implements Connector
 
     public function connect(array $config): ConnectionManager
     {
-        $connector = $this->app[PgsqlConnector::class];
+        $connector = $this->app[TransactionalConnector::class];
 
         $manager = $connector->connect($config);
         $eventStore = $manager->create();
 
         if (! $eventStore instanceof DatabaseChronicler) {
-            throw new InvalidArgumentException('The event store must be a database chronicler');
+            throw new ConfigurationViolation('The event store must be a database chronicler');
         }
 
         return new PublisherConnection(
@@ -47,7 +47,7 @@ final readonly class PublisherConnector implements Connector
         $job = $queue['job'] ?? null;
 
         if (! is_string($job) || ! class_exists($job) || ! in_array(Queueable::class, class_uses($job))) {
-            throw new InvalidArgumentException('Invalid job class');
+            throw new ConfigurationViolation('Invalid job class');
         }
 
         return new PublishStreamEventOnAppend(

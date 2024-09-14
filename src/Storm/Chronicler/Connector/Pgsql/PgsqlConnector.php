@@ -9,7 +9,7 @@ use Storm\Chronicler\Connector\ConnectionManager;
 use Storm\Chronicler\Connector\Connector;
 use Storm\Chronicler\Database\LazyQueryLoader;
 use Storm\Chronicler\Database\StandardStreamPersistence;
-use Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Storm\Chronicler\Exceptions\ConfigurationViolation;
 use Storm\Contract\Chronicler\DatabaseQueryLoader;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Serializer\SymfonySerializer;
@@ -28,7 +28,7 @@ final readonly class PgsqlConnector implements Connector
     public function connect(array $config): ConnectionManager
     {
         if ($config['connection'] !== 'pgsql') {
-            throw new InvalidArgumentException('Only pgsql connection is supported');
+            throw new ConfigurationViolation('Only pgsql connection is supported');
         }
 
         $connection = $this->app['db']->connection('pgsql');
@@ -51,7 +51,7 @@ final readonly class PgsqlConnector implements Connector
         $provider = $this->app['config']->get('chronicler.provider.connection.'.$key);
 
         if (! is_string($provider)) {
-            throw new InvalidArgumentException("Invalid provider key $key configuration");
+            throw new ConfigurationViolation("Invalid provider key $key configuration");
         }
 
         return $this->app[$provider];
@@ -71,13 +71,13 @@ final readonly class PgsqlConnector implements Connector
         $key = $config['serializer'];
 
         if (! is_string($key)) {
-            throw new InvalidArgumentException('Invalid serializer configuration in connector '.self::class);
+            throw new ConfigurationViolation('Invalid serializer configuration in connector '.self::class);
         }
 
         $serializer = $this->app['config']->get("chronicler.serializer.$key");
 
         if (blank($serializer)) {
-            throw new InvalidArgumentException("Invalid serializer configuration key [$key] in connector ".self::class);
+            throw new ConfigurationViolation("Invalid serializer configuration key [$key] in connector ".self::class);
         }
 
         return $this->serializerFactory->create($serializer);

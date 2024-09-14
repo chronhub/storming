@@ -39,6 +39,15 @@ return [
                 'loader' => null,
             ],
 
+            // todo
+            'outbox' => [
+                'connection' => 'pgsql',
+                'table_name' => null,
+                'provider' => 'pgsql',
+                'serializer' => 'json',
+                'loader' => null,
+            ],
+
             'publisher' => [
                 'connection' => 'pgsql',
                 'table_name' => null,

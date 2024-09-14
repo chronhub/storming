@@ -7,7 +7,7 @@ namespace Storm\Chronicler\Connector\Pgsql;
 use Illuminate\Contracts\Foundation\Application;
 use Storm\Chronicler\Connector\ConnectionManager;
 use Storm\Chronicler\Connector\Connector;
-use Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Storm\Chronicler\Exceptions\ConfigurationViolation;
 use Storm\Contract\Chronicler\DatabaseChronicler;
 
 final readonly class TransactionalConnector implements Connector
@@ -22,7 +22,7 @@ final readonly class TransactionalConnector implements Connector
         $eventStore = $manager->create();
 
         if (! $eventStore instanceof DatabaseChronicler) {
-            throw new InvalidArgumentException('The event store must be a database chronicler');
+            throw new ConfigurationViolation('The event store must be a database chronicler');
         }
 
         return new TransactionalConnection($eventStore);

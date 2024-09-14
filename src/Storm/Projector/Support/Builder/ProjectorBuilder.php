@@ -231,7 +231,7 @@ trait ProjectorBuilder
      * @param  array<string> $streams
      * @return $this
      */
-    public function fromStreams(array $streams): static
+    public function fromStreams(string ...$streams): static
     {
         $this->fromStreams = $streams;
 
@@ -244,7 +244,7 @@ trait ProjectorBuilder
      * @param  array<string> $partitions
      * @return $this
      */
-    public function fromPartitions(array $partitions): static
+    public function fromPartitions(string ...$partitions): static
     {
         $this->fromPartitions = $partitions;
 

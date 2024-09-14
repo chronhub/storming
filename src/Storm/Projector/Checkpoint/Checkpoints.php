@@ -17,9 +17,8 @@ final class Checkpoints implements Arrayable, Countable, JsonSerializable
 {
     private Collection $collection;
 
-    public function __construct(
-        public readonly bool $recordGaps
-    ) {
+    public function __construct(public readonly bool $recordGaps)
+    {
         $this->collection = new Collection;
     }
 

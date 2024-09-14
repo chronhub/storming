@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Serializer;
 
 use InvalidArgumentException;
+use RuntimeException;
 use Storm\Contract\Message\Header;
 use Storm\Contract\Message\Messaging;
 use Storm\Contract\Serializer\SymfonySerializer;
@@ -22,7 +23,7 @@ final class MessagingNormalizer implements DenormalizerInterface, NormalizerInte
     protected function serializer(): SymfonySerializer
     {
         if (! $this->serializer instanceof SymfonySerializer) {
-            throw new InvalidArgumentException('Serializer is not set or invalid');
+            throw new RuntimeException('Serializer is not set or invalid');
         }
 
         return $this->serializer;

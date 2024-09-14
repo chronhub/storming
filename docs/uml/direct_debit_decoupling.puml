@@ -1,0 +1,33 @@
+@startuml
+participant "Scheduling Service" as Scheduler
+participant "Authorization Repository" as AuthRepo
+participant "Direct Debit Service" as DDService
+participant CommandHandler
+participant "Account Aggregate" as Aggregate
+participant EventStore
+participant ProjectionHandler
+participant ReadModel
+
+Scheduler -> AuthRepo: Fetch Due Recurring Direct Debits
+AuthRepo --> Scheduler: Return Authorized Debits
+
+loop for each due debit
+    Scheduler -> DDService: Execute Recurring Direct Debit
+    DDService -> AuthRepo: Fetch Authorization Details
+    AuthRepo --> DDService: Return Authorization
+    DDService -> CommandHandler: Create ExecuteRecurringDirectDebitCommand
+    CommandHandler -> Aggregate: Apply ExecuteRecurringDirectDebitCommand
+    Aggregate -> Aggregate: Validate Command & Authorization
+    alt Valid and Sufficient Funds
+        Aggregate -> EventStore: Store DirectDebitExecutedEvent
+        EventStore -> ProjectionHandler: Publish DirectDebitExecutedEvent
+        ProjectionHandler -> ReadModel: Update Account Balance
+        DDService <-- CommandHandler: Execution Successful
+    else Invalid or Insufficient Funds
+        Aggregate -> EventStore: Store DirectDebitFailedEvent
+        EventStore -> ProjectionHandler: Publish DirectDebitFailedEvent
+        ProjectionHandler -> ReadModel: Update Failed Attempts
+        DDService <-- CommandHandler: Execution Failed
+    end
+end
+@enduml

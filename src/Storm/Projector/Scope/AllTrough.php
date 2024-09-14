@@ -8,6 +8,7 @@ use Closure;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Projector\Exception\RuntimeException;
 
+use function is_array;
 use function is_callable;
 
 final class AllTrough implements ProjectorScopeFactory
@@ -28,7 +29,7 @@ final class AllTrough implements ProjectorScopeFactory
 
     public function handle(DomainEvent $event, ?array $userState = null): ProjectorScope
     {
-        $userStateScope = $userState ? $this->userStateScope->setState($userState) : null;
+        $userStateScope = is_array($userState) ? $this->userStateScope->setState($userState) : null;
 
         ($this->projector)($event, $userStateScope);
         $this->bindReactor(fn () => null)($this->projector);

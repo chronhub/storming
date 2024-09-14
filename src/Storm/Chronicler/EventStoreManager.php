@@ -7,6 +7,7 @@ namespace Storm\Chronicler;
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
 use Storm\Chronicler\Connector\Connector;
+use Storm\Chronicler\Exceptions\ConfigurationViolation;
 use Storm\Chronicler\Exceptions\InvalidArgumentException;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\ChroniclerManager;
@@ -51,7 +52,7 @@ final class EventStoreManager implements ChroniclerManager
         $connector = $this->connectors[$name]($this->app, $config);
 
         if (! $connector instanceof Connector) {
-            throw new InvalidArgumentException('Connector must return an instance of '.Connector::class.' interface.');
+            throw new ConfigurationViolation('Connector must return an instance of '.Connector::class.' interface.');
         }
 
         return $connector->connect($config)->create();
@@ -62,7 +63,7 @@ final class EventStoreManager implements ChroniclerManager
         $config = $this->app['config']->get("chronicler.store.connection.$name");
 
         if (! is_array($config) || $config === []) {
-            throw new InvalidArgumentException("No event store configuration found for $name.");
+            throw new ConfigurationViolation("No event store configuration found for $name.");
         }
 
         return $config;

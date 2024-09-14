@@ -29,11 +29,11 @@ class ExponentialSleep
         public readonly float $factor = 2,
 
         /**
-         * The maximum sleep time in microseconds.
+         * The maximum sleep time in milliseconds.
          *
          * @var positive-int
          */
-        public readonly int $max = 1000000,
+        public readonly int $max = 50000,
     ) {
         $this->assertValidSleep();
 
@@ -45,18 +45,18 @@ class ExponentialSleep
      */
     public function sleep(): void
     {
-        usleep($this->sleepTime);
+        usleep($this->sleepTime * 1000);
     }
 
     /**
      * Increment the sleep time by the growth factor.
      *
-     * When the current sleep time is greater than the max sleep time,
+     * When the current sleep time exceeds the max sleep time,
      * the sleep time will be reset to the base sleep time.
      */
     public function increment(): void
     {
-        $this->sleepTime = $this->sleepTime > $this->max
+        $this->sleepTime = $this->sleepTime >= $this->max
             ? $this->base
             : min((int) ($this->sleepTime * $this->factor), $this->max);
     }

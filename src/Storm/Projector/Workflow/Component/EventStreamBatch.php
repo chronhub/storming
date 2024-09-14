@@ -11,15 +11,21 @@ class EventStreamBatch
 {
     protected ?MergeStreamIterator $iterator = null;
 
-    public function __construct(
-        protected ExponentialSleep $sleepTime
-    ) {}
+    protected bool $wasEmpty = true;
+
+    public function __construct(protected ExponentialSleep $sleepTime) {}
 
     public function set(?MergeStreamIterator $iterator): void
     {
         $this->iterator = $iterator;
 
-        $iterator !== null ? $this->sleepTime->reset() : $this->sleepTime->increment();
+        if ($iterator !== null) {
+            $this->wasEmpty = false;
+            $this->sleepTime->reset();
+        } else {
+            $this->wasEmpty = true;
+            $this->sleepTime->increment();
+        }
     }
 
     public function pull(): ?MergeStreamIterator
@@ -37,5 +43,10 @@ class EventStreamBatch
     public function sleep(): void
     {
         $this->sleepTime->sleep();
+    }
+
+    public function wasEmpty(): bool
+    {
+        return $this->wasEmpty;
     }
 }

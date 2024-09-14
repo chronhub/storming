@@ -23,15 +23,9 @@ interface ProviderFactoryRegistry
      *
      * It will override any existing provider factory with the same name.
      *
-     * First, when using bound factories resolved through the container,
-     * you should ensure that the factory implements ProviderConnectionAware contract
-     * to set the connection manager.
-     *
-     * @see ProviderConnectionAware
-     *
-     * @param string|(Closure(ConnectionManager, Application): ProviderFactory)|ProviderFactory $factory
+     * @param (Closure(ConnectionManager, Application): ProviderFactory)|ProviderFactory $factory
      */
-    public function register(string $name, string|Closure|ProviderFactory $factory): void;
+    public function register(string $name, Closure|ProviderFactory $factory): void;
 
     /**
      * Check if name registers a provider factory.

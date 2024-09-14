@@ -39,6 +39,8 @@ class StopWhen
      *
      * @param  positive-int            $cycle
      * @return Closure(TProcess): bool
+     *
+     * @throws InvalidArgumentException when the cycle is less than 1
      */
     public static function cycleReached(int $cycle): Closure
     {
@@ -59,7 +61,7 @@ class StopWhen
      *
      * @see CarbonImmutable::add()
      *
-     * @example $date->add(15, 'minutes') // 15 minutes
+     * @example $date->add('minutes', 15) // 15 minutes
      * @example $date->add(CarbonInterval::days(4)) // 4 days
      * @example $date->add('hour', 3) // 3 hours
      *
@@ -71,6 +73,18 @@ class StopWhen
             $expiredAt = $process->time()->getStartedTime()->add($interval, $unit);
 
             return $process->time()->getCurrentTime()->isGreaterThan($expiredAt);
+        };
+    }
+
+    /**
+     * Stop the projection when no stream events have been loaded.
+     *
+     * @return Closure(TProcess): bool
+     */
+    public static function emptyBatch(): Closure
+    {
+        return function (Process $process): bool {
+            return $process->batch()->wasEmpty();
         };
     }
 

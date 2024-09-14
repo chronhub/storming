@@ -34,12 +34,14 @@ final readonly class DatabaseConnectionManager implements ConnectionManager
         private Option|array $options,
         private ?Dispatcher $dispatcher = null,
     ) {
+        // Use the real instance of your event store,
+        // no decorator as transaction, eventable, publisher ...
         while ($chronicler instanceof ChroniclerDecorator) {
             $chronicler = $chronicler->innerChronicler();
         }
 
         if (! $chronicler instanceof DatabaseChronicler) {
-            throw ConfigurationViolation::message(sprintf(
+            throw ConfigurationViolation::withMessage(sprintf(
                 'Chronicler must be an instance of %s, got %s', DatabaseChronicler::class, get_class($chronicler)
             ));
         }

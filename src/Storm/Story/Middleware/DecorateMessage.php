@@ -10,11 +10,18 @@ use Storm\Message\Message;
 
 final readonly class DecorateMessage
 {
-    public function __construct(private MessageDecorator $messageDecorator) {}
+    private array $messageDecorators;
+
+    public function __construct(MessageDecorator ...$messageDecorators)
+    {
+        $this->messageDecorators = $messageDecorators;
+    }
 
     public function __invoke(Message $message, Closure $next): Message
     {
-        $message = $this->messageDecorator->decorate($message);
+        foreach ($this->messageDecorators as $messageDecorator) {
+            $message = $messageDecorator->decorate($message);
+        }
 
         return $next($message);
     }

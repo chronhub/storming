@@ -13,7 +13,7 @@ final class InMemoryFixedOption implements OptionImmutable
         $this->signal = false;
         $this->cacheSize = 100;
         $this->blockSize = 1;
-        $this->sleep = [1000, 1, 10000];
+        $this->sleep = [100, 1, 1000];
         $this->timeout = 1;
         $this->lockout = 0;
         $this->loadLimiter = 100;

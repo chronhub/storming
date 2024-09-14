@@ -10,8 +10,6 @@ use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelProjector;
 use Storm\Projector\Connector\ConnectorManager;
 
-use function is_string;
-
 class ReadModelProjectorBuilder
 {
     use ProjectorBuilder;
@@ -52,12 +50,6 @@ class ReadModelProjectorBuilder
 
     public function build(): ReadModelProjector
     {
-        if (is_string($this->readModel)) {
-            // fixMe ne need the laravel db configuration
-            //  here we use the default
-            $this->readModel = $this->app[$this->readModel];
-        }
-
         $readModelProjector = $this->projectorManager->readModel(
             $this->projectionName,
             $this->readModel,

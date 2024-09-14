@@ -7,6 +7,7 @@ namespace Storm\Chronicler\Database;
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Builder;
 use Storm\Chronicler\EventStream;
+use Storm\Chronicler\Exceptions\InvalidArgumentException;
 use Storm\Contract\Chronicler\EventStreamProvider;
 
 final readonly class EventStreamDatabaseProvider implements EventStreamProvider
@@ -20,6 +21,10 @@ final readonly class EventStreamDatabaseProvider implements EventStreamProvider
 
     public function createStream(string $streamName, ?string $streamTable, ?string $partition = null): bool
     {
+        if ($streamTable === null) {
+            throw new InvalidArgumentException('Stream table name cannot be null for database event stream provider');
+        }
+
         $eventStream = new EventStream($streamName, $streamTable, $partition);
 
         return $this->query()->insert($eventStream->jsonSerialize());

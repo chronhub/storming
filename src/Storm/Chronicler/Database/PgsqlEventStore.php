@@ -13,7 +13,7 @@ use Illuminate\Database\QueryException;
 use PDO;
 use PDOException;
 use Storm\Chronicler\Direction;
-use Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Storm\Chronicler\Exceptions\ConfigurationViolation;
 use Storm\Chronicler\Exceptions\StreamNotFound;
 use Storm\Contract\Aggregate\AggregateIdentity;
 use Storm\Contract\Chronicler\DatabaseChronicler;
@@ -36,7 +36,7 @@ final readonly class PgsqlEventStore implements DatabaseChronicler
         private string $streamTable = 'stream_event',
     ) {
         if ($this->connection->getDriverName() !== 'pgsql') {
-            throw new InvalidArgumentException('Only pgsql driver is supported');
+            throw new ConfigurationViolation('Only pgsql driver is supported');
         }
     }
 
@@ -50,32 +50,25 @@ final readonly class PgsqlEventStore implements DatabaseChronicler
 
         try {
             $this->query()->useWritePdo()->insert($streamEvents);
-        } catch (Exception|Error $originalException) {
+        } catch (Exception $originalException) {
 
-            // Table inheritance and trigger function could cause issues,
-            // when raising exception, so we need to handle it separately.
+            // Depends on PDO attr error mode, which should be set to exception,
+            // Check if the exception is a QueryException or PDOException
+            $pdoException = $originalException instanceof PDOException
+                ? $originalException
+                : ($originalException->getPrevious() instanceof PDOException
+                    ? $originalException->getPrevious()
+                    : null);
 
-            $message = $originalException->getMessage();
-            $code = $originalException->getCode();
-
-            logger()->error('Pgsql database exception', [
-                'message' => $message,
-                'code' => $code,
-                'trace' => $originalException->getTraceAsString(),
-            ]);
-
-            $previousException = $originalException->getPrevious();
-
-            if (! $previousException instanceof PDOException) {
+            if ($pdoException === null) {
                 throw $originalException;
             }
 
-            $code = $previousException->getCode();
-            $message = $previousException->getMessage();
-            match ($code) {
-                '42P01' => throw StreamNotFound::withStreamName($stream->name, $previousException),
-                '23000', '23505', 23000, 23505 => throw new DatabaseConcurrencyFailure($message, (int) $code, $previousException),
-                default => throw new DatabaseQueryFailure($message, (int) $code, $previousException)
+            // Handle the specific PDO exception codes
+            match ($pdoException->getCode()) {
+                '42P01' => throw StreamNotFound::withStreamName($stream->name, $pdoException),
+                '23000', '23505', 23000, 23505 => throw new DatabaseConcurrencyFailure($pdoException->getMessage(), (int) $pdoException->getCode(), $pdoException),
+                default => throw new DatabaseQueryFailure($pdoException->getMessage(), (int) $pdoException->getCode(), $pdoException)
             };
         }
     }

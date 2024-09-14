@@ -6,26 +6,46 @@ namespace Storm\Aggregate;
 
 use Generator;
 use Storm\Chronicler\Exceptions\StreamNotFound;
+use Storm\Contract\Aggregate\AggregateCache;
 use Storm\Contract\Aggregate\AggregateIdentity;
 use Storm\Contract\Aggregate\AggregateRepository;
 use Storm\Contract\Aggregate\AggregateRoot;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\QueryFilter;
+use Storm\Contract\Clock\ClockAware;
+use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\EventHeader;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
+use Throwable;
 
-final readonly class GenericAggregateRepository implements AggregateRepository
+final readonly class DefaultAggregateRepository implements AggregateRepository
 {
     public function __construct(
-        protected Chronicler $chronicler,
-        protected StreamName $streamName,
-        protected AggregateEventReleaser $eventReleaser,
+        private Chronicler $chronicler,
+        private StreamName $streamName,
+        private AggregateEventReleaser $eventReleaser,
+        private AggregateCache $cache,
+        private ?SystemClock $clock = null,
     ) {}
 
     public function retrieve(AggregateIdentity $aggregateId): ?AggregateRoot
     {
-        return $this->reconstituteAggregate($aggregateId);
+        if ($this->cache->has($aggregateId)) {
+            $aggregate = $this->cache->get($aggregateId);
+
+            $this->setClockOnAggregate($aggregate);
+
+            return $aggregate;
+        }
+
+        $aggregate = $this->reconstituteAggregate($aggregateId);
+
+        if ($aggregate instanceof AggregateRoot) {
+            $this->cache->put($aggregate);
+        }
+
+        return $aggregate;
     }
 
     public function retrieveFiltered(AggregateIdentity $aggregateId, QueryFilter $queryFilter): ?AggregateRoot
@@ -50,7 +70,14 @@ final readonly class GenericAggregateRepository implements AggregateRepository
             return;
         }
 
-        $this->chronicler->append(new Stream($this->streamName, $events));
+        try {
+            $this->chronicler->append(new Stream($this->streamName, $events));
+            $this->cache->put($aggregateRoot);
+        } catch (Throwable $e) {
+            $this->cache->forget($aggregateRoot->identity());
+
+            throw $e;
+        }
     }
 
     /**
@@ -70,9 +97,21 @@ final readonly class GenericAggregateRepository implements AggregateRepository
             /** @var AggregateRoot $aggregateType */
             $aggregateType = $firstEvent->header(EventHeader::AGGREGATE_TYPE);
 
-            return $aggregateType::reconstitute($aggregateId, $history);
+            $aggregate = $aggregateType::reconstitute($aggregateId, $history);
+
+            $this->setClockOnAggregate($aggregate);
+
+            return $aggregate;
+
         } catch (StreamNotFound) {
             return null;
+        }
+    }
+
+    private function setClockOnAggregate(AggregateRoot $aggregate): void
+    {
+        if ($this->clock && $aggregate instanceof ClockAware) {
+            $aggregate->setClock($this->clock);
         }
     }
 }
