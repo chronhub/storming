@@ -12,12 +12,12 @@
   "require": {
     "php": "^8.3",
     "composer-runtime-api": "^2.2",
-    "laravel/framework": "11.x-dev",
-    "react/promise": "^3.x-dev",
+    "laravel/framework": "^11.1",
+    "react/promise": "^v3.2",
     "symfony/clock": "^6.4",
-    "symfony/property-access": "7.1.x-dev",
+    "symfony/property-access": "7.1",
     "symfony/serializer": "^v6.4",
-    "symfony/uid": "^7.2.x-dev",
+    "symfony/uid": "^v7.1",
     "ext-pdo": "*"
   },
   "replace": {
@@ -37,10 +37,10 @@
     "ext-pcntl": "*",
     "doctrine/dbal": "^3.9",
     "laravel/pint": "^v1.1",
-    "pestphp/pest": "2.x-dev",
-    "pestphp/pest-plugin-type-coverage": "2.x-dev",
-    "larastan/larastan": "^2.x-dev",
-    "orchestra/testbench": "^9.x-dev",
+    "pestphp/pest": "3.*",
+    "pestphp/pest-plugin-type-coverage": "3.*",
+    "larastan/larastan": "^v2.9",
+    "orchestra/testbench": "^v9.4",
     "phpstan/phpstan": "^1.1",
     "roave/security-advisories": "dev-latest"
   },
@@ -68,5 +68,5 @@
       "pestphp/pest-plugin": true
     }
   },
-  "minimum-stability": "dev"
+  "minimum-stability": "stable"
 }
