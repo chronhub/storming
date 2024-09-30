@@ -6,6 +6,7 @@ namespace Storm\Clock;
 
 use Carbon\CarbonImmutable;
 use Carbon\Exceptions\InvalidFormatException;
+use Carbon\Unit;
 use Closure;
 use DateInterval;
 use DateTimeImmutable;
@@ -23,7 +24,9 @@ final readonly class PointInTime
 
     final public const string DATE_TIME_ZONE = 'UTC';
 
-    private function __construct(private CarbonImmutable $carbon) {}
+    private function __construct(
+        private CarbonImmutable $carbon
+    ) {}
 
     /**
      * Create a new point in time from the current time.
@@ -53,6 +56,22 @@ final readonly class PointInTime
         $carbon = Carbon::createFromFormat(self::DATE_TIME_FORMAT, $dateTime, self::timeZone());
 
         return new self($carbon->toImmutable());
+    }
+
+    /**
+     * Create a new point in time from the current time starting from the given unit.
+     */
+    public static function startOf(Unit $unit): self
+    {
+        return new self(CarbonImmutable::now()->startOf($unit));
+    }
+
+    /**
+     * Create a new point in time from the current time ending at the given unit.
+     */
+    public static function endOf(Unit $unit): self
+    {
+        return new self(CarbonImmutable::now()->endOf($unit));
     }
 
     public function isEqualTo(PointInTime|string $pointInTime): bool
