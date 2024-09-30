@@ -40,11 +40,10 @@ final readonly class StandardStreamPersistence implements StreamPersistence
      */
     private function normalizeEvent(DomainEvent $event, string $streamName): array
     {
-        return $this->serializer->normalize($event, null, $this->getContext($streamName));
-    }
-
-    private function getContext(string $streamName): array
-    {
-        return ['strategy' => self::STRATEGY_NAME, 'streamName' => $streamName];
+        return $this->serializer->normalize(
+            $event,
+            null,
+            ['strategy' => self::STRATEGY_NAME, 'streamName' => $streamName]
+        );
     }
 }

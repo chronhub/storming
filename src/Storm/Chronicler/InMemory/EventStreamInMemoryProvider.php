@@ -16,9 +16,7 @@ use function str_starts_with;
 
 final readonly class EventStreamInMemoryProvider implements EventStreamProvider
 {
-    /**
-     * @var Collection{string, string|null}
-     */
+    /** @var Collection{string, string|null} */
     private Collection $eventStreams;
 
     public function __construct()

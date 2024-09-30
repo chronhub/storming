@@ -66,7 +66,6 @@ return [
      * @see \Storm\Story\Attribute\AsEventHandler
      * @see \Storm\Story\Attribute\AsQueryHandler
      * @see \Storm\Story\Attribute\Transactional
-     * @see \Storm\Story\Attribute\AsHeader
      */
     'scan' => [],
 ];
