@@ -9,7 +9,6 @@ use Storm\Aggregate\DefaultAggregateRepository;
 use Storm\Contract\Aggregate\AggregateCache;
 use Storm\Contract\Aggregate\AggregateRepository;
 use Storm\Contract\Chronicler\Chronicler;
-use Storm\Contract\Clock\SystemClock;
 use Storm\Stream\StreamName;
 
 final readonly class GenericConnection implements ConnectionManager
@@ -19,7 +18,6 @@ final readonly class GenericConnection implements ConnectionManager
         private StreamName $streamName,
         private AggregateEventReleaser $releaser,
         private AggregateCache $cache,
-        private ?SystemClock $clock,
     ) {}
 
     public function create(): AggregateRepository
@@ -29,7 +27,6 @@ final readonly class GenericConnection implements ConnectionManager
             $this->streamName,
             $this->releaser,
             $this->cache,
-            $this->clock,
         );
     }
 }

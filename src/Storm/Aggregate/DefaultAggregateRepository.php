@@ -12,8 +12,6 @@ use Storm\Contract\Aggregate\AggregateRepository;
 use Storm\Contract\Aggregate\AggregateRoot;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\QueryFilter;
-use Storm\Contract\Clock\ClockAware;
-use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\EventHeader;
 use Storm\Stream\Stream;
 use Storm\Stream\StreamName;
@@ -26,17 +24,12 @@ final readonly class DefaultAggregateRepository implements AggregateRepository
         private StreamName $streamName,
         private AggregateEventReleaser $eventReleaser,
         private AggregateCache $cache,
-        private ?SystemClock $clock = null,
     ) {}
 
     public function retrieve(AggregateIdentity $aggregateId): ?AggregateRoot
     {
         if ($this->cache->has($aggregateId)) {
-            $aggregate = $this->cache->get($aggregateId);
-
-            $this->setClockOnAggregate($aggregate);
-
-            return $aggregate;
+            return $this->cache->get($aggregateId);
         }
 
         $aggregate = $this->reconstituteAggregate($aggregateId);
@@ -73,10 +66,10 @@ final readonly class DefaultAggregateRepository implements AggregateRepository
         try {
             $this->chronicler->append(new Stream($this->streamName, $events));
             $this->cache->put($aggregateRoot);
-        } catch (Throwable $e) {
+        } catch (Throwable $exception) {
             $this->cache->forget($aggregateRoot->identity());
 
-            throw $e;
+            throw $exception;
         }
     }
 
@@ -97,21 +90,9 @@ final readonly class DefaultAggregateRepository implements AggregateRepository
             /** @var AggregateRoot $aggregateType */
             $aggregateType = $firstEvent->header(EventHeader::AGGREGATE_TYPE);
 
-            $aggregate = $aggregateType::reconstitute($aggregateId, $history);
-
-            $this->setClockOnAggregate($aggregate);
-
-            return $aggregate;
-
+            return $aggregateType::reconstitute($aggregateId, $history);
         } catch (StreamNotFound) {
             return null;
-        }
-    }
-
-    private function setClockOnAggregate(AggregateRoot $aggregate): void
-    {
-        if ($this->clock && $aggregate instanceof ClockAware) {
-            $aggregate->setClock($this->clock);
         }
     }
 }

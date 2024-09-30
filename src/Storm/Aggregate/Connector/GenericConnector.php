@@ -9,7 +9,6 @@ use Storm\Aggregate\AggregateEventReleaser;
 use Storm\Aggregate\DefaultAggregateCache;
 use Storm\Aggregate\NullAggregateCache;
 use Storm\Contract\Aggregate\AggregateCache;
-use Storm\Contract\Clock\SystemClock;
 use Storm\Stream\StreamName;
 
 use function is_array;
@@ -18,7 +17,6 @@ final readonly class GenericConnector implements Connector
 {
     public function __construct(
         private Container $container,
-        private SystemClock $clock,
     ) {}
 
     public function connect(array $config): ConnectionManager
@@ -30,7 +28,6 @@ final readonly class GenericConnector implements Connector
             $this->container[$config['event_decorator']],
         );
 
-        $clock = $config['use_clock'] === true ? $this->clock : null;
         $cache = $this->initializeCache($streamName, $config);
 
         return new GenericConnection(
@@ -38,7 +35,6 @@ final readonly class GenericConnector implements Connector
             $streamName,
             $eventReleaser,
             $cache,
-            $clock,
         );
     }
 
