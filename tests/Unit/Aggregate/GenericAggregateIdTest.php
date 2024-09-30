@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Aggregate;
 
-use Storm\Aggregate\GenericAggregateId;
+use Storm\Aggregate\Identity\GenericAggregateId;
 use Storm\Contract\Aggregate\AggregateIdentity;
 use Symfony\Component\Uid\Uuid;
 

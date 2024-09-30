@@ -7,7 +7,7 @@ namespace Storm\Tests\Unit\Aggregate;
 use Generator;
 use Storm\Aggregate\AggregateEventReleaser;
 use Storm\Aggregate\DefaultAggregateRepository;
-use Storm\Aggregate\GenericAggregateId;
+use Storm\Aggregate\Identity\GenericAggregateId;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\QueryFilter;
 use Storm\Contract\Message\EventHeader;

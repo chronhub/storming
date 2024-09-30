@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Aggregate;
+namespace Storm\Aggregate\Identity;
 
 use Storm\Contract\Aggregate\AggregateIdentity;
 use Symfony\Component\Uid\Uuid;
@@ -12,9 +12,9 @@ use Symfony\Component\Uid\Uuid;
  *
  * @property-read Uuid $id
  */
-trait UuidV4Generator
+trait AggregateIdentityV4Generator
 {
-    use AggregateIdTrait;
+    use AggregateIdentityTrait;
 
     public static function create(): self
     {

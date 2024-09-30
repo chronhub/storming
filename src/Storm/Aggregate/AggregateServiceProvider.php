@@ -7,9 +7,10 @@ namespace Storm\Aggregate;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
-use Storm\Aggregate\Connector\GenericConnector;
+use Storm\Aggregate\Factory\DefaultAggregateFactory;
+use Storm\Contract\Aggregate\AggregateManager;
 
-class RepositoryServiceProvider extends ServiceProvider implements DeferrableProvider
+class AggregateServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     protected string $configPath = __DIR__.'/../../../config/aggregates.php';
 
@@ -26,9 +27,9 @@ class RepositoryServiceProvider extends ServiceProvider implements DeferrablePro
     {
         $this->mergeConfigFrom($this->configPath, 'aggregates');
 
-        $this->app->singleton(Manager::class, function (Application $app): Manager {
-            $manager = new RepositoryManager($app);
-            $manager->addConnector('default', fn (Application $app) => $app[GenericConnector::class]);
+        $this->app->singleton(AggregateManager::class, function (Application $app): AggregateManager {
+            $manager = new DefaultAggregateManager($app);
+            $manager->addFactory('default', fn (Application $app) => $app[DefaultAggregateFactory::class]);
 
             return $manager;
         });
@@ -36,6 +37,6 @@ class RepositoryServiceProvider extends ServiceProvider implements DeferrablePro
 
     public function provides(): array
     {
-        return [Manager::class];
+        return [AggregateManager::class];
     }
 }

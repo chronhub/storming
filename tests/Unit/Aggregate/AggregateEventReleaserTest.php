@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Aggregate;
 
 use Storm\Aggregate\AggregateEventReleaser;
-use Storm\Aggregate\GenericAggregateId;
+use Storm\Aggregate\Identity\GenericAggregateId;
 use Storm\Contract\Message\EventHeader;
 use Storm\Contract\Message\MessageDecorator;
 use Storm\Message\Decorator\NoOpMessageDecorator;

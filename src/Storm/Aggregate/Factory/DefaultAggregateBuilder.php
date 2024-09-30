@@ -2,16 +2,17 @@
 
 declare(strict_types=1);
 
-namespace Storm\Aggregate\Connector;
+namespace Storm\Aggregate\Factory;
 
 use Storm\Aggregate\AggregateEventReleaser;
 use Storm\Aggregate\DefaultAggregateRepository;
+use Storm\Contract\Aggregate\AggregateBuilder;
 use Storm\Contract\Aggregate\AggregateCache;
 use Storm\Contract\Aggregate\AggregateRepository;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Stream\StreamName;
 
-final readonly class GenericConnection implements ConnectionManager
+final readonly class DefaultAggregateBuilder implements AggregateBuilder
 {
     public function __construct(
         private Chronicler $chronicler,

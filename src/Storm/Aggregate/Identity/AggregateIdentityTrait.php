@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Aggregate;
+namespace Storm\Aggregate\Identity;
 
 use Storm\Contract\Aggregate\AggregateIdentity;
 use Symfony\Component\Uid\Uuid;
@@ -10,9 +10,11 @@ use Symfony\Component\Uid\Uuid;
 /**
  * @phpstan-require-implements AggregateIdentity
  */
-trait AggregateIdTrait
+trait AggregateIdentityTrait
 {
-    protected function __construct(public readonly Uuid $id) {}
+    protected function __construct(
+        public readonly Uuid $id
+    ) {}
 
     public static function fromString(string $aggregateId): static
     {

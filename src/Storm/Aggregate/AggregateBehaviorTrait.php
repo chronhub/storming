@@ -22,7 +22,9 @@ trait AggregateBehaviorTrait
     /** @var array<DomainEvent> */
     private array $recordedEvents = [];
 
-    protected function __construct(private readonly AggregateIdentity $identity) {}
+    protected function __construct(
+        private readonly AggregateIdentity $identity
+    ) {}
 
     public function identity(): AggregateIdentity
     {

@@ -2,24 +2,26 @@
 
 declare(strict_types=1);
 
-namespace Storm\Aggregate\Connector;
+namespace Storm\Aggregate\Factory;
 
 use Illuminate\Contracts\Container\Container;
 use Storm\Aggregate\AggregateEventReleaser;
-use Storm\Aggregate\DefaultAggregateCache;
-use Storm\Aggregate\NullAggregateCache;
+use Storm\Aggregate\Cache\DefaultAggregateCache;
+use Storm\Aggregate\Cache\NullAggregateCache;
+use Storm\Contract\Aggregate\AggregateBuilder;
 use Storm\Contract\Aggregate\AggregateCache;
+use Storm\Contract\Aggregate\AggregateFactory;
 use Storm\Stream\StreamName;
 
 use function is_array;
 
-final readonly class GenericConnector implements Connector
+final readonly class DefaultAggregateFactory implements AggregateFactory
 {
     public function __construct(
         private Container $container,
     ) {}
 
-    public function connect(array $config): ConnectionManager
+    public function make(array $config): AggregateBuilder
     {
         $eventStore = $this->container[$config['chronicler']];
         $streamName = new StreamName($config['stream_name']);
@@ -30,7 +32,7 @@ final readonly class GenericConnector implements Connector
 
         $cache = $this->initializeCache($streamName, $config);
 
-        return new GenericConnection(
+        return new DefaultAggregateBuilder(
             $eventStore,
             $streamName,
             $eventReleaser,
@@ -52,6 +54,8 @@ final readonly class GenericConnector implements Connector
         $store = $this->container['cache']->store($config['store'] ?? null);
         $cachePrefix = $cacheConfig['prefix'] ?? $streamName->name;
         $cacheTtl = $cacheConfig['ttl'] ?? 3600;
+
+        // todo: set max cache size but need cluster support or use tags
 
         return new DefaultAggregateCache($store, $cachePrefix, $cacheTtl);
     }

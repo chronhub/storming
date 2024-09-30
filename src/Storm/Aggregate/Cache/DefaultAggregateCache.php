@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Aggregate;
+namespace Storm\Aggregate\Cache;
 
 use Illuminate\Contracts\Cache\Repository;
 use Storm\Contract\Aggregate\AggregateCache;
@@ -17,7 +17,7 @@ final readonly class DefaultAggregateCache implements AggregateCache
 {
     public function __construct(
         private Repository $store,
-        private string $cacheKeyPrefix,
+        private string $cachePrefix,
         private int $cacheTtl,
     ) {}
 
@@ -34,7 +34,6 @@ final readonly class DefaultAggregateCache implements AggregateCache
 
     public function put(AggregateRoot $aggregateRoot): void
     {
-        // checkMe do we need to unset the clock before serialization?
         $this->store->put($this->cacheKey($aggregateRoot->identity()), $aggregateRoot, $this->cacheTtl);
     }
 
@@ -51,7 +50,7 @@ final readonly class DefaultAggregateCache implements AggregateCache
     private function cacheKey(AggregateIdentity $aggregateIdentity): string
     {
         $key = sprintf('%s::%s::%s',
-            $this->cacheKeyPrefix,
+            $this->cachePrefix,
             get_class($aggregateIdentity),
             $aggregateIdentity->toString()
         );

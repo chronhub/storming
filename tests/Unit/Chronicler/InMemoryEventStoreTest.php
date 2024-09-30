@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Chronicler;
 
 use Generator;
-use Storm\Aggregate\GenericAggregateId;
+use Storm\Aggregate\Identity\GenericAggregateId;
 use Storm\Chronicler\Direction;
 use Storm\Chronicler\Exceptions\NoStreamEventReturn;
 use Storm\Chronicler\Exceptions\StreamNotFound;

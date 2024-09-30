@@ -16,7 +16,9 @@ use function reset;
 
 final readonly class AggregateEventReleaser
 {
-    public function __construct(private MessageDecorator $messageDecorator) {}
+    public function __construct(
+        private MessageDecorator $messageDecorator
+    ) {}
 
     /**
      * Release events from aggregate.

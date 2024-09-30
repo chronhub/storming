@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Aggregate;
+namespace Storm\Aggregate\Cache;
 
 use Storm\Contract\Aggregate\AggregateCache;
 use Storm\Contract\Aggregate\AggregateIdentity;

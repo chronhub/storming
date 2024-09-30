@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Storm\Aggregate;
+namespace Storm\Aggregate\Identity;
 
 use Storm\Contract\Aggregate\AggregateIdentity;
 
 final readonly class GenericAggregateId implements AggregateIdentity
 {
-    use UuidV4Generator;
+    use AggregateIdentityV4Generator;
 }
