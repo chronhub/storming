@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Connector\Pgsql;
+namespace Storm\Chronicler\Factory\Pgsql;
 
 use Illuminate\Contracts\Foundation\Application;
-use Storm\Chronicler\Connector\ConnectionManager;
-use Storm\Chronicler\Connector\Connector;
 use Storm\Chronicler\Exceptions\ConfigurationViolation;
+use Storm\Chronicler\Factory\ConnectionManager;
+use Storm\Chronicler\Factory\Connector;
 use Storm\Contract\Chronicler\DatabaseChronicler;
 
 final readonly class TransactionalConnector implements Connector

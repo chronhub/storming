@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Connector\Pgsql;
+namespace Storm\Chronicler\Factory\Pgsql;
 
-use Storm\Chronicler\Connector\ConnectionManager;
 use Storm\Chronicler\Database\PublisherEventStore;
+use Storm\Chronicler\Factory\ConnectionManager;
 use Storm\Chronicler\Tracker\StreamTracker;
 use Storm\Contract\Chronicler\DatabaseChronicler;
 use Storm\Contract\Chronicler\EventableTransactionalChronicler;

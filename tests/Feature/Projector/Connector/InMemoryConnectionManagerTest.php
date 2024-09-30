@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Feature\Projector\Connector;
 
 use Illuminate\Contracts\Events\Dispatcher;
-use Storm\Chronicler\InMemory\EventStreamInMemoryProvider;
+use Storm\Chronicler\InMemory\InMemoryEventStreamProvider;
 use Storm\Chronicler\InMemory\VersioningEventStore;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\ChroniclerDecorator;
@@ -47,7 +47,7 @@ test('can resolve a connector from a configuration', function () {
     expect($connector)->toBeInstanceOf(InMemoryConnectionManager::class)
         ->and($connector->eventStore())->toBeInstanceOf(InMemoryChronicler::class)
         ->and($connector->eventStore())->tobeInstanceOf(VersioningEventStore::class)
-        ->and($connector->eventStreamProvider())->toBeInstanceOf(EventStreamInMemoryProvider::class)
+        ->and($connector->eventStreamProvider())->toBeInstanceOf(InMemoryEventStreamProvider::class)
         ->and($connector->projectionProvider())->toBeInstanceOf(InMemoryProjectionProvider::class)
         ->and($connector->queryFilter())->toBeInstanceOf(InMemoryQueryFilter::class)
         ->and($connector->queryFilter())->toBeInstanceOf(InMemoryFromToPosition::class)

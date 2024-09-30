@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Connector\Pgsql;
+namespace Storm\Chronicler\Factory\Pgsql;
 
 use Illuminate\Contracts\Foundation\Application;
-use Storm\Chronicler\Connector\ConnectionManager;
-use Storm\Chronicler\Connector\Connector;
 use Storm\Chronicler\Database\LazyQueryLoader;
 use Storm\Chronicler\Database\StandardStreamPersistence;
 use Storm\Chronicler\Exceptions\ConfigurationViolation;
+use Storm\Chronicler\Factory\ConnectionManager;
+use Storm\Chronicler\Factory\Connector;
 use Storm\Contract\Chronicler\DatabaseQueryLoader;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Serializer\SymfonySerializer;

@@ -6,9 +6,9 @@ namespace Storm\Chronicler;
 
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
-use Storm\Chronicler\Connector\Connector;
 use Storm\Chronicler\Exceptions\ConfigurationViolation;
 use Storm\Chronicler\Exceptions\InvalidArgumentException;
+use Storm\Chronicler\Factory\Connector;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Chronicler\ChroniclerManager;
 

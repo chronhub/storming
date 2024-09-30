@@ -5,43 +5,45 @@ declare(strict_types=1);
 namespace Storm\Chronicler\InMemory;
 
 use Closure;
-use Illuminate\Support\Collection;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Stream\StreamName;
 
+use function array_filter;
+use function array_key_exists;
+use function array_keys;
 use function in_array;
 use function is_null;
 use function is_string;
 use function str_starts_with;
 
-final readonly class EventStreamInMemoryProvider implements EventStreamProvider
+final class InMemoryEventStreamProvider implements EventStreamProvider
 {
-    /** @var Collection{string, string|null} */
-    private Collection $eventStreams;
+    /** @var array{string, string|null}|array */
+    private array $eventStreams;
 
     public function __construct()
     {
-        $this->eventStreams = new Collection;
+        $this->eventStreams = [];
     }
 
     public function createStream(string $streamName, ?string $streamTable, ?string $partition = null): bool
     {
-        if ($this->eventStreams->has($streamName)) {
+        if (array_key_exists($streamName, $this->eventStreams)) {
             return false;
         }
 
-        $this->eventStreams->put($streamName, $partition);
+        $this->eventStreams[$streamName] = $partition;
 
         return true;
     }
 
     public function deleteStream(string $streamName): bool
     {
-        if (! $this->eventStreams->has($streamName)) {
+        if (! array_key_exists($streamName, $this->eventStreams)) {
             return false;
         }
 
-        $this->eventStreams->forget($streamName);
+        unset($this->eventStreams[$streamName]);
 
         return true;
     }
@@ -69,17 +71,23 @@ final readonly class EventStreamInMemoryProvider implements EventStreamProvider
     public function all(): array
     {
         return $this->pluckKeys(
-            static fn (?string $category, string $streamName) => ! str_starts_with($streamName, StreamName::INTERNAL_PREFIX)
+            static fn (?string $partition, string $streamName) => ! str_starts_with($streamName, StreamName::INTERNAL_PREFIX)
         );
     }
 
     public function hasRealStreamName(string $streamName): bool
     {
-        return $this->eventStreams->has($streamName);
+        return array_key_exists($streamName, $this->eventStreams);
     }
 
     private function pluckKeys(Closure $callback): array
     {
-        return $this->eventStreams->filter($callback)->keys()->toArray();
+        return array_keys(
+            array_filter(
+                $this->eventStreams,
+                $callback,
+                ARRAY_FILTER_USE_BOTH
+            )
+        );
     }
 }

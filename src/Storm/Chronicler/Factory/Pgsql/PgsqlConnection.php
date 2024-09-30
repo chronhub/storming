@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Connector\Pgsql;
+namespace Storm\Chronicler\Factory\Pgsql;
 
 use Illuminate\Database\Connection;
-use Storm\Chronicler\Connector\ConnectionManager;
 use Storm\Chronicler\Database\PgsqlEventStore;
+use Storm\Chronicler\Factory\ConnectionManager;
 use Storm\Contract\Chronicler\DatabaseChronicler;
 use Storm\Contract\Chronicler\DatabaseQueryLoader;
 use Storm\Contract\Chronicler\EventStreamProvider;

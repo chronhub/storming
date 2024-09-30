@@ -7,9 +7,9 @@ namespace Storm\Chronicler;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\Support\DeferrableProvider;
 use Illuminate\Support\ServiceProvider;
-use Storm\Chronicler\Connector\Pgsql\PgsqlConnector;
-use Storm\Chronicler\Connector\Pgsql\PublisherConnector;
 use Storm\Chronicler\Database\EventStreamDatabaseProvider;
+use Storm\Chronicler\Factory\Pgsql\PgsqlConnector;
+use Storm\Chronicler\Factory\Pgsql\PublisherConnector;
 use Storm\Contract\Chronicler\ChroniclerManager;
 use Storm\Contract\Chronicler\EventStreamProvider;
 

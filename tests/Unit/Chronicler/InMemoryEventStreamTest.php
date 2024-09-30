@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Chronicler;
 
-use Storm\Chronicler\InMemory\EventStreamInMemoryProvider;
+use Storm\Chronicler\InMemory\InMemoryEventStreamProvider;
 use Storm\Stream\StreamName;
 
 dataset('stream names', [
@@ -14,7 +14,7 @@ dataset('stream names', [
 ]);
 
 beforeEach(function (): void {
-    $this->eventStreamProvider = new EventStreamInMemoryProvider;
+    $this->eventStreamProvider = new InMemoryEventStreamProvider;
 });
 
 afterEach(function (): void {

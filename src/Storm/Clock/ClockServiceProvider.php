@@ -18,6 +18,6 @@ class ClockServiceProvider extends ServiceProvider implements DeferrableProvider
 
     public function provides(): array
     {
-        return [SystemClock::class];
+        return [SystemClock::class, 'storm.clock'];
     }
 }

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Connector\Pgsql;
+namespace Storm\Chronicler\Factory\Pgsql;
 
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Foundation\Queue\Queueable;
-use Storm\Chronicler\Connector\ConnectionManager;
-use Storm\Chronicler\Connector\Connector;
 use Storm\Chronicler\Exceptions\ConfigurationViolation;
+use Storm\Chronicler\Factory\ConnectionManager;
+use Storm\Chronicler\Factory\Connector;
 use Storm\Chronicler\Tracker\PublishStreamEventOnAppend;
 use Storm\Chronicler\Tracker\Tracker;
 use Storm\Contract\Chronicler\DatabaseChronicler;
@@ -31,7 +31,7 @@ final readonly class PublisherConnector implements Connector
         $eventStore = $manager->create();
 
         if (! $eventStore instanceof DatabaseChronicler) {
-            throw new ConfigurationViolation('The event store must be a database chronicler');
+            throw new ConfigurationViolation('The event store must be a database chronicler instance.');
         }
 
         return new PublisherConnection(

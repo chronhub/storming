@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Connector;
+namespace Storm\Chronicler\Factory;
 
 use Storm\Contract\Chronicler\Chronicler;
 

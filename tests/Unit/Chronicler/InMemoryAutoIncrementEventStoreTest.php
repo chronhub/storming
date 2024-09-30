@@ -24,7 +24,7 @@ use function iterator_to_array;
 use function range;
 
 beforeEach(function () {
-    $this->eventStreamProvider = new EventStreamInMemoryProvider;
+    $this->eventStreamProvider = new InMemoryEventStreamProvider;
     $this->eventStore = new IncrementalEventStore($this->eventStreamProvider);
     $this->aggregateId = GenericAggregateId::fromString(Uuid::v4()->jsonSerialize());
 });

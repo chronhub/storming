@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Storm\Chronicler\Connector\Pgsql;
+namespace Storm\Chronicler\Factory\Pgsql;
 
-use Storm\Chronicler\Connector\ConnectionManager;
 use Storm\Chronicler\Database\PgsqlTransactionalEventStore;
+use Storm\Chronicler\Factory\ConnectionManager;
 use Storm\Contract\Chronicler\DatabaseChronicler;
 
 final readonly class TransactionalConnection implements ConnectionManager

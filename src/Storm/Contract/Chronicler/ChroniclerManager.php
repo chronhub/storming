@@ -6,7 +6,7 @@ namespace Storm\Contract\Chronicler;
 
 use Closure;
 use Illuminate\Contracts\Foundation\Application;
-use Storm\Chronicler\Connector\Connector;
+use Storm\Chronicler\Factory\Connector;
 
 interface ChroniclerManager
 {
