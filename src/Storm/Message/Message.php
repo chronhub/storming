@@ -24,9 +24,9 @@ final class Message
     {
         $this->validateEvent($event);
 
-        ! $event instanceof Messaging
-            ? $this->initializeNonMessagingEvent($event, $headers)
-            : $this->initializeMessagingEvent($event, $headers);
+        $event instanceof Messaging
+           ? $this->initializeMessagingEvent($event, $headers)
+           : $this->initializeNonMessagingEvent($event, $headers);
     }
 
     /**

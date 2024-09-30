@@ -22,7 +22,9 @@ final class EventStoreManager implements ChroniclerManager
     /** @var array<string, Chronicler>|array */
     private array $connections = [];
 
-    public function __construct(private Application $app) {}
+    public function __construct(
+        private Application $app
+    ) {}
 
     public function create(string $name): Chronicler
     {

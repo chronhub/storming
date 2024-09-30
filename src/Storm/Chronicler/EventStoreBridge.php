@@ -9,7 +9,9 @@ use Storm\Contract\Chronicler\ChroniclerManager;
 
 class EventStoreBridge
 {
-    public function __construct(protected ChroniclerManager $manager) {}
+    public function __construct(
+        protected ChroniclerManager $manager
+    ) {}
 
     public function getEventStore(string $name): Chronicler
     {
