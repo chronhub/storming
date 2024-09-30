@@ -11,7 +11,6 @@ use Closure;
 use DateInterval;
 use DateTimeImmutable;
 use DateTimeZone;
-use Illuminate\Support\Carbon;
 
 use function is_string;
 use function preg_match;
@@ -53,9 +52,9 @@ final readonly class PointInTime
      */
     public static function fromString(string $dateTime): self
     {
-        $carbon = Carbon::createFromFormat(self::DATE_TIME_FORMAT, $dateTime, self::timeZone());
+        $carbon = CarbonImmutable::createFromFormat(self::DATE_TIME_FORMAT, $dateTime, self::timeZone());
 
-        return new self($carbon->toImmutable());
+        return new self($carbon);
     }
 
     /**
@@ -76,11 +75,7 @@ final readonly class PointInTime
 
     public function isEqualTo(PointInTime|string $pointInTime): bool
     {
-        if (is_string($pointInTime)) {
-            $pointInTime = self::fromString($pointInTime);
-        }
-
-        return $this->carbon->eq($pointInTime->carbon);
+        return $this->carbon->eq($this->toPointInTime($pointInTime)->carbon);
     }
 
     /**
@@ -88,11 +83,7 @@ final readonly class PointInTime
      */
     public function isGreaterThan(PointInTime|string $pointInTime): bool
     {
-        if (is_string($pointInTime)) {
-            $pointInTime = self::fromString($pointInTime);
-        }
-
-        return $this->carbon->gt($pointInTime->carbon);
+        return $this->carbon->gt($this->toPointInTime($pointInTime)->carbon);
     }
 
     /**
@@ -100,11 +91,7 @@ final readonly class PointInTime
      */
     public function isLessThan(PointInTime|string $pointInTime): bool
     {
-        if (is_string($pointInTime)) {
-            $pointInTime = self::fromString($pointInTime);
-        }
-
-        return $this->carbon->lt($pointInTime->carbon);
+        return $this->carbon->lt($this->toPointInTime($pointInTime)->carbon);
     }
 
     /**
@@ -148,11 +135,7 @@ final readonly class PointInTime
      */
     public function compare(self|string $pointInTime, Closure $callback): bool
     {
-        if (is_string($pointInTime)) {
-            $pointInTime = self::fromString($pointInTime);
-        }
-
-        return $callback($this->carbon, $pointInTime);
+        return $callback($this->carbon, $this->toPointInTime($pointInTime));
     }
 
     /**
@@ -204,10 +187,19 @@ final readonly class PointInTime
     }
 
     /**
-     * Return the time zone.
+     * Return the UTC time zone.
      */
     public static function timeZone(): DateTimeZone
     {
         return new DateTimeZone(self::DATE_TIME_ZONE);
+    }
+
+    private function toPointInTime(string|PointInTime $pointInTime): PointInTime
+    {
+        if (is_string($pointInTime)) {
+            $pointInTime = self::fromString($pointInTime);
+        }
+
+        return $pointInTime;
     }
 }
