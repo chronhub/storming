@@ -33,9 +33,9 @@ final readonly class PointInTime
      */
     public static function now(): self
     {
-        $carbon = Carbon::now(self::timeZone());
+        $carbon = CarbonImmutable::now(self::timeZone());
 
-        return new self($carbon->toImmutable());
+        return new self($carbon);
     }
 
     /**
@@ -61,17 +61,17 @@ final readonly class PointInTime
     /**
      * Create a new point in time from the current time starting from the given unit.
      */
-    public static function startOf(Unit $unit): self
+    public function startOf(Unit $unit): self
     {
-        return new self(CarbonImmutable::now()->startOf($unit));
+        return new self($this->carbon->startOf($unit));
     }
 
     /**
      * Create a new point in time from the current time ending at the given unit.
      */
-    public static function endOf(Unit $unit): self
+    public function endOf(Unit $unit): self
     {
-        return new self(CarbonImmutable::now()->endOf($unit));
+        return new self($this->carbon->endOf($unit));
     }
 
     public function isEqualTo(PointInTime|string $pointInTime): bool
