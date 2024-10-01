@@ -64,7 +64,7 @@ class LockManager
     public function current(): string
     {
         if ($this->lockedUntil === null) {
-            throw new RuntimeException('Lock is not acquired');
+            throw new RuntimeException('Projection lock is not acquired');
         }
 
         return $this->lockedUntil->format();

@@ -14,7 +14,9 @@ final class ProviderFactoryResolver implements ProviderFactoryRegistry
     /** @var array<string, (Closure(ConnectionManager, Application): ProviderFactory)|ProviderFactory>|array */
     private array $factories = [];
 
-    public function __construct(private readonly Application $app) {}
+    public function __construct(
+        private readonly Application $app
+    ) {}
 
     public function resolve(string $name, ConnectionManager $connectionManager): ProviderFactory
     {

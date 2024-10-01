@@ -44,15 +44,9 @@ trait InteractWithProvider
         $this->process->status()->set($idleStatus);
         $this->process->sprint()->halt();
 
-        // fixes the stats for the current projection.
-        // checkMe , either a better implementation of signal handler in workflow
-        // to terminate all the processes gracefully, or better channel to communicate
-        // within the workflow.
-
-        //fixMe stopping from a projection scope will trigger twice
-        // exception: Listener Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal
-        // marked as once has already been emitted
-        // dummy hack, does not work either
+        // Attempt to fix the metrics for the current projection,
+        // when the projection is stopped upfront from a signal handled by Symfony.
+        // This is a workaround till a better signal handling is implemented.
         if (! $this->process->dispatcher()->wasEmittedOnce(BeforeWorkflowRenewal::class)) {
             $this->process->dispatch(new BeforeWorkflowRenewal(true));
         }

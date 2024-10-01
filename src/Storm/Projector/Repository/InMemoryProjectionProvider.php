@@ -28,7 +28,7 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
 
     public function __construct(private SystemClock $clock)
     {
-        $this->projections = new Collection();
+        $this->projections = new Collection;
         $this->attributes = ['name', 'status', 'state', 'checkpoint', 'locked_until'];
     }
 
@@ -133,7 +133,7 @@ final readonly class InMemoryProjectionProvider implements ProjectionProvider
     /**
      * Assert that the projection has changes on update.
      *
-     * @throws InMemoryProjectionFailed
+     * @throws InMemoryProjectionFailed when no changes are provided
      */
     private function assertHasChangesOnUpdate(array $data, string $projectionName): void
     {
