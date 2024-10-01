@@ -39,12 +39,12 @@ final readonly class ReadModelActivityFactory implements PersistentActivityFacto
         );
 
         return [
-            fn (): callable => new RisePersistentProjection(),
+            fn (): callable => new RisePersistentProjection,
             fn (): callable => $streamEventLoader,
             fn (): callable => new HandleStreamEvent($eventProcessor),
-            fn (): callable => new HandleStreamGap(),
-            fn (): callable => new PersistOrUpdate(),
-            fn (): callable => new DispatchSignal(),
+            fn (): callable => new HandleStreamGap,
+            fn (): callable => new PersistOrUpdate,
+            fn (): callable => new DispatchSignal,
             fn (): callable => new RefreshPersistentProjection($this->option->getOnlyOnceDiscovery()),
         ];
     }

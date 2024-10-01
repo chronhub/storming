@@ -37,12 +37,12 @@ final readonly class EmitterActivityFactory implements PersistentActivityFactory
         );
 
         return [
-            fn (): callable => new RisePersistentProjection(),
+            fn (): callable => new RisePersistentProjection,
             fn (): callable => $streamEventLoader,
             fn (): callable => new HandleStreamEvent($eventProcessor),
-            fn (): callable => new HandleStreamGap(),
-            fn (): callable => new PersistOrUpdate(),
-            fn (): callable => new DispatchSignal(),
+            fn (): callable => new HandleStreamGap,
+            fn (): callable => new PersistOrUpdate,
+            fn (): callable => new DispatchSignal,
             fn (): callable => new RefreshPersistentProjection($this->option->getOnlyOnceDiscovery()),
         ];
     }

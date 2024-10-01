@@ -14,7 +14,7 @@ final readonly class RefreshQueryProjection
     public function __invoke(Process $process): void
     {
         if (! $this->onlyOnceDiscovery) {
-            $process->call(new DiscoverEventStream());
+            $process->call(new DiscoverEventStream);
         }
     }
 }

@@ -20,6 +20,6 @@ final class HandleQueryStreamGap
             $process->recognition()->sleepOnGap();
         }
 
-        $process->dispatch(new AfterHandleStreamGap());
+        $process->dispatch(new AfterHandleStreamGap);
     }
 }

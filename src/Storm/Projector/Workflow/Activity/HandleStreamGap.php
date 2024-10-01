@@ -32,7 +32,7 @@ final class HandleStreamGap
             $isBatchStreamReset = $process->metrics()->isReset('processed');
 
             if (! $isBatchStreamReset) {
-                $process->dispatch(new ProjectionStored());
+                $process->dispatch(new ProjectionStored);
             }
         }
 

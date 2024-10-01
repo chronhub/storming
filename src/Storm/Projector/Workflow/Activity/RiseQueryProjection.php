@@ -12,7 +12,7 @@ final readonly class RiseQueryProjection
     public function __invoke(Process $projection): void
     {
         if ($projection->metrics()->isFirstCycle()) {
-            $projection->call(new DiscoverEventStream());
+            $projection->call(new DiscoverEventStream);
         }
     }
 }

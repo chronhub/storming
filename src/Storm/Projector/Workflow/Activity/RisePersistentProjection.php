@@ -25,7 +25,7 @@ final readonly class RisePersistentProjection
                 return false;
             }
 
-            $process->dispatch(new ProjectionRise());
+            $process->dispatch(new ProjectionRise);
         }
 
         return true;

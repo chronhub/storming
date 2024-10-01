@@ -30,7 +30,7 @@ final readonly class RefreshPersistentProjection
          * after the first discovery on rising projection
          */
         if (! $this->onlyOnceDiscovery) {
-            $process->call(new DiscoverEventStream());
+            $process->call(new DiscoverEventStream);
         }
     }
 }
