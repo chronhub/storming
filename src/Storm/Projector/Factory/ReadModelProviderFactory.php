@@ -7,8 +7,8 @@ namespace Storm\Projector\Factory;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Projector\Options\Option;
 use Storm\Projector\Provider\Manager;
+use Storm\Projector\Provider\ProcessManager;
 use Storm\Projector\Provider\ReadingModelProvider;
-use Storm\Projector\Provider\WorkflowManager;
 
 final readonly class ReadModelProviderFactory extends AbstractProviderFactory
 {
@@ -28,6 +28,6 @@ final readonly class ReadModelProviderFactory extends AbstractProviderFactory
             $readModel
         );
 
-        return new WorkflowManager($process, $activities);
+        return new ProcessManager($process, $activities);
     }
 }

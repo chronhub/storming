@@ -7,8 +7,8 @@ namespace Storm\Projector\Factory;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Projector\Options\Option;
 use Storm\Projector\Provider\Manager;
+use Storm\Projector\Provider\ProcessManager;
 use Storm\Projector\Provider\QueryingProvider;
-use Storm\Projector\Provider\WorkflowManager;
 
 final readonly class QueryProviderFactory extends AbstractProviderFactory
 {
@@ -25,6 +25,6 @@ final readonly class QueryProviderFactory extends AbstractProviderFactory
         $provider = new QueryingProvider($process);
         $this->subscribe($provider, $process);
 
-        return new WorkflowManager($process, $activities);
+        return new ProcessManager($process, $activities);
     }
 }

@@ -8,7 +8,7 @@ use Storm\Contract\Projector\ReadModel;
 use Storm\Projector\Options\Option;
 use Storm\Projector\Provider\EmittingProvider;
 use Storm\Projector\Provider\Manager;
-use Storm\Projector\Provider\WorkflowManager;
+use Storm\Projector\Provider\ProcessManager;
 use Storm\Projector\Stream\EmittedStream;
 use Storm\Projector\Stream\InMemoryEmittedStreams;
 
@@ -23,7 +23,7 @@ final readonly class EmitterProviderFactory extends AbstractProviderFactory
             $this->createRepository($streamName, $options),
             $this->connection->eventStore(),
             new InMemoryEmittedStreams($options->getCacheSize()),
-            new EmittedStream(),
+            new EmittedStream,
             $options->getSleepEmitterOnFirstCommit()
         );
 
@@ -35,6 +35,6 @@ final readonly class EmitterProviderFactory extends AbstractProviderFactory
             $this->connection->clock()
         );
 
-        return new WorkflowManager($process, $activities);
+        return new ProcessManager($process, $activities);
     }
 }
