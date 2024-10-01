@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Support\Providers;
 
 use Illuminate\Support\AggregateServiceProvider;
-use Storm\Aggregate\AggregateServiceProvider;
+use Storm\Aggregate\RepositoryServiceProvider;
 use Storm\Chronicler\ChroniclerServiceProvider;
 use Storm\Clock\ClockServiceProvider;
 use Storm\LaraStormServiceProvider;
@@ -22,7 +22,7 @@ class StormServiceProvider extends AggregateServiceProvider
         SerializerServiceProvider::class,
         MessageServiceProvider::class,
         StoryServiceProvider::class,
-        AggregateServiceProvider::class,
+        RepositoryServiceProvider::class,
         ChroniclerServiceProvider::class,
         ProjectorServiceProvider::class,
     ];

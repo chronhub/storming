@@ -10,7 +10,7 @@ use Illuminate\Support\ServiceProvider;
 use Storm\Aggregate\Factory\DefaultAggregateFactory;
 use Storm\Contract\Aggregate\AggregateManager;
 
-class AggregateServiceProvider extends ServiceProvider implements DeferrableProvider
+class RepositoryServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     protected string $configPath = __DIR__.'/../../../config/aggregates.php';
 
