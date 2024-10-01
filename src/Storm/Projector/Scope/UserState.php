@@ -19,6 +19,7 @@ use function is_int;
 use function is_string;
 use function sprintf;
 
+// todo change name, user state already exists in the projector
 class UserState implements ArrayAccess
 {
     public function __construct(protected array $state = []) {}

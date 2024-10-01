@@ -8,6 +8,8 @@ use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Projector\Options\Option;
 use Storm\Projector\Scope\EmitterAccess;
+use Storm\Projector\Workflow\Activity\AfterProcessing;
+use Storm\Projector\Workflow\Activity\BeforeProcessing;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
 use Storm\Projector\Workflow\Activity\HandleStreamEvent;
 use Storm\Projector\Workflow\Activity\HandleStreamGap;
@@ -37,6 +39,7 @@ final readonly class EmitterActivityFactory implements PersistentActivityFactory
         );
 
         return [
+            fn (): callable => new BeforeProcessing,
             fn (): callable => new RisePersistentProjection,
             fn (): callable => $streamEventLoader,
             fn (): callable => new HandleStreamEvent($eventProcessor),
@@ -44,6 +47,7 @@ final readonly class EmitterActivityFactory implements PersistentActivityFactory
             fn (): callable => new PersistOrUpdate,
             fn (): callable => new DispatchSignal,
             fn (): callable => new RefreshPersistentProjection($this->option->getOnlyOnceDiscovery()),
+            fn (): callable => new AfterProcessing,
         ];
     }
 }

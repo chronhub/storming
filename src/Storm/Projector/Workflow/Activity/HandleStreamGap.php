@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
+use Closure;
 use Storm\Projector\Provider\Events\ProjectionStored;
 use Storm\Projector\Provider\InteractWithProvider;
 use Storm\Projector\Workflow\Notification\AfterHandleStreamGap;
@@ -20,7 +21,7 @@ final class HandleStreamGap
      *
      * @see InteractWithProvider@persistWhenThresholdIsReached
      */
-    public function __invoke(Process $process): void
+    public function __invoke(Process $process, Closure $next): Closure|bool
     {
         $process->dispatch(BeforeHandleStreamGap::class);
 
@@ -37,5 +38,7 @@ final class HandleStreamGap
         }
 
         $process->dispatch(AfterHandleStreamGap::class);
+
+        return $next($process);
     }
 }

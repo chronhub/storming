@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
+use Closure;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Projector\Stream\Iterator\MergeStreamIterator;
 use Storm\Projector\Workflow\Process;
@@ -21,14 +22,19 @@ final class HandleStreamEvent
         $this->eventReactor = $eventReactor;
     }
 
-    public function __invoke(Process $process): void
+    public function __invoke(Process $process, Closure $next): Closure|bool
     {
         $streams = $process->batch()->pull();
 
-        if (! $streams instanceof MergeStreamIterator) {
-            return;
+        if ($streams instanceof MergeStreamIterator) {
+            $this->handle($process, $streams);
         }
 
+        return $next($process);
+    }
+
+    private function handle(Process $process, MergeStreamIterator $streams): void
+    {
         while ($streams->valid()) {
             $process->stream()->set($streams->streamName());
 

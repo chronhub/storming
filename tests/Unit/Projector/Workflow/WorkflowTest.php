@@ -88,7 +88,7 @@ test('raise exception with exception handler set', function () {
 
     $workflow = Workflow::create($this->hub, $this->stage, $activities);
 
-    $workflow->withExceptionHandler(fn (Throwable $exception, NotificationHub $hub) => throw new Exception(
+    $workflow->withProcessReleaser(fn (Throwable $exception, NotificationHub $hub) => throw new Exception(
         $exception->getMessage(),
         $exception->getCode(),
         $exception
