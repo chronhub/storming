@@ -63,7 +63,9 @@ final readonly class DatabaseProjectionProvider implements ProjectionProvider
 
         $success = $this->query()
             ->where('name', $projectionName)
-            ->whereRaw('locked_until IS NULL OR locked_until < ?', [$this->clock->generate()])
+            ->where(function (Builder $query): void {
+                $query->whereRaw('locked_until IS NULL OR locked_until < ?', [$this->clock->generate()]);
+            })
             ->update([
                 'status' => $data->status,
                 'locked_until' => $data->lockedUntil,
