@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
+use Closure;
 use Illuminate\Support\Collection;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Projector\Stream\CollectStreams;
@@ -17,7 +18,7 @@ final readonly class LoadStreams
         private SystemClock $clock,
     ) {}
 
-    public function __invoke(Process $process): void
+    public function __invoke(Process $process, Closure $next): Closure|bool
     {
         $checkpoints = $process->recognition()->toArray();
 
@@ -28,5 +29,7 @@ final readonly class LoadStreams
         }
 
         $process->batch()->set($eventStreams);
+
+        return $next($process);
     }
 }

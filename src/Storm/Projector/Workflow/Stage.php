@@ -11,6 +11,9 @@ use Storm\Projector\Workflow\Notification\ResetOnlyOnceEmittedEvent;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
 use Storm\Projector\Workflow\Notification\WorkflowRenewed;
 
+/**
+ * @deprecated
+ */
 class Stage
 {
     public function __construct(protected readonly Process $process) {}

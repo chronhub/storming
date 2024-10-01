@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
+use Closure;
 use Storm\Projector\Workflow\Input\DiscoverEventStream;
 use Storm\Projector\Workflow\Process;
 
@@ -18,7 +19,7 @@ final readonly class RefreshPersistentProjection
         $this->onRise = false;
     }
 
-    public function __invoke(Process $process): void
+    public function __invoke(Process $process, Closure $next): Closure|bool
     {
         /**
          * Discover the remote status which may have changed during the projection
@@ -30,7 +31,9 @@ final readonly class RefreshPersistentProjection
          * after the first discovery on rising projection
          */
         if (! $this->onlyOnceDiscovery) {
-            $process->call(new DiscoverEventStream());
+            $process->call(new DiscoverEventStream);
         }
+
+        return $next($process);
     }
 }

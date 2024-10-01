@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow;
 
+use Illuminate\Pipeline\Pipeline;
 use Throwable;
 
 /**
@@ -12,23 +13,24 @@ use Throwable;
 final class Workflow implements WorkflowInterface
 {
     /** @var TExceptionHandler|callable|null */
-    private $exceptionHandler = null;
+    private $processReleaser = null;
+
+    private Pipeline $pipeline;
 
     /** @param array<callable(Process): mixed> $activities */
     protected function __construct(
         private Process $process,
         private readonly array $activities,
-        private readonly Stage $stage,
-    ) {}
+    ) {
+        $this->pipeline = new Pipeline(app());
+    }
 
     /**
      * Creates a new workflow.
      */
     public static function create(Process $process, array $activities): self
     {
-        $stage = new Stage($process);
-
-        return new self($process, $activities, $stage);
+        return new self($process, $activities);
     }
 
     public function execute(): void
@@ -44,10 +46,10 @@ final class Workflow implements WorkflowInterface
         }
     }
 
-    public function withExceptionHandler(callable $exceptionHandler): self
+    public function withProcessReleaser(callable $processReleaser): self
     {
-        if (! $this->exceptionHandler) {
-            $this->exceptionHandler = $exceptionHandler;
+        if (! $this->processReleaser) {
+            $this->processReleaser = $processReleaser;
         }
 
         return $this;
@@ -56,23 +58,13 @@ final class Workflow implements WorkflowInterface
     private function loop(): void
     {
         do {
-            $this->stage->beforeProcessing();
-
-            $this->run();
-
-            $this->stage->afterProcessing();
-        } while (! $this->process->isSprintTerminated());
-    }
-
-    private function run(): void
-    {
-        foreach ($this->activities as $activity) {
-            $shouldKeepRunning = $activity($this->process);
-
-            if ($shouldKeepRunning === false) {
-                break;
-            }
-        }
+            $isSprintTerminated = $this->pipeline
+                ->send($this->process)
+                ->through($this->activities)
+                ->then(function (Process $process) {
+                    return $process->isSprintTerminated();
+                });
+        } while (! $isSprintTerminated);
     }
 
     /**
@@ -82,12 +74,12 @@ final class Workflow implements WorkflowInterface
      */
     private function handleException(?Throwable $exception): void
     {
-        if (! $exception) {
-            return;
+        if (! $this->processReleaser && $exception) {
+            throw $exception;
         }
 
-        $this->exceptionHandler
-            ? ($this->exceptionHandler)($this->process, $exception)
-            : throw $exception;
+        if ($this->processReleaser) {
+            ($this->processReleaser)($this->process, $exception);
+        }
     }
 }

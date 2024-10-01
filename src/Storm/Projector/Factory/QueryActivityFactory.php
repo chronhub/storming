@@ -8,6 +8,8 @@ use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Projector\Options\Option;
 use Storm\Projector\Scope\QueryAccess;
+use Storm\Projector\Workflow\Activity\AfterProcessing;
+use Storm\Projector\Workflow\Activity\BeforeProcessing;
 use Storm\Projector\Workflow\Activity\DispatchSignal;
 use Storm\Projector\Workflow\Activity\HandleQueryStreamGap;
 use Storm\Projector\Workflow\Activity\HandleStreamEvent;
@@ -37,13 +39,15 @@ final readonly class QueryActivityFactory implements ActivityFactory
         );
 
         return [
-            fn (): callable => new RiseQueryProjection(),
+            fn (): callable => new BeforeProcessing,
+            fn (): callable => new RiseQueryProjection,
             fn (): callable => $streamEventLoader,
             fn (): callable => new HandleStreamEvent($eventProcessor),
-            fn (): callable => new HandleQueryStreamGap(),
-            fn (): callable => new SleepForQuery(),
-            fn (): callable => new DispatchSignal(),
+            fn (): callable => new HandleQueryStreamGap,
+            fn (): callable => new SleepForQuery,
+            fn (): callable => new DispatchSignal,
             fn (): callable => new RefreshQueryProjection($this->option->getOnlyOnceDiscovery()),
+            fn (): callable => new AfterProcessing,
         ];
     }
 }

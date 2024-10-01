@@ -44,9 +44,9 @@ final readonly class WorkflowManager implements Manager
         $workflow = Workflow::create($this->process, $activities);
 
         if ($this->activityFactory instanceof PersistentActivityFactory) {
-            $exceptionHandler = $this->getPersistentExceptionHandler();
+            $processReleaser = $this->getProcessReleaser();
 
-            $workflow->withExceptionHandler($exceptionHandler);
+            $workflow->withProcessReleaser($processReleaser);
         }
 
         return $workflow;
@@ -64,11 +64,9 @@ final readonly class WorkflowManager implements Manager
     }
 
     /**
-     * Returns the exception handler for persistent projection.
-     *
-     * @return TExceptionHandler
+     * When a process is terminated, we attempt to release the lock.
      */
-    private function getPersistentExceptionHandler(): callable
+    private function getProcessReleaser(): callable
     {
         return function (Process $process, ?Throwable $exception): void {
             // Prevent freed the projection when another instance

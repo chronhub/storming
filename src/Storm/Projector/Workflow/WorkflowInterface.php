@@ -21,7 +21,7 @@ interface WorkflowInterface
     /**
      * Sets the exception handler.
      *
-     * @param TExceptionHandler $exceptionHandler
+     * @param TExceptionHandler $processReleaser
      */
-    public function withExceptionHandler(callable $exceptionHandler): WorkflowInterface;
+    public function withProcessReleaser(callable $processReleaser): WorkflowInterface;
 }

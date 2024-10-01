@@ -9,7 +9,9 @@ namespace Storm\Projector\Workflow;
  */
 class Process
 {
-    public function __construct(protected readonly ComponentRegistry $component) {}
+    public function __construct(
+        protected readonly ComponentRegistry $component
+    ) {}
 
     public function dispatch(string|object $event, mixed ...$arguments): void
     {
