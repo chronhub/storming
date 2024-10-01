@@ -13,7 +13,9 @@ class EventStreamBatch
 
     protected bool $wasEmpty = true;
 
-    public function __construct(protected ExponentialSleep $sleepTime) {}
+    public function __construct(
+        protected ExponentialSleep $sleepTime
+    ) {}
 
     public function set(?MergeStreamIterator $iterator): void
     {

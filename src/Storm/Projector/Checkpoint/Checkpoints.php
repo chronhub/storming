@@ -6,20 +6,24 @@ namespace Storm\Projector\Checkpoint;
 
 use Countable;
 use Illuminate\Contracts\Support\Arrayable;
-use Illuminate\Support\Collection;
 use JsonSerializable;
 use Storm\Projector\Exception\CheckpointViolation;
+
+use function array_key_exists;
+use function array_map;
+use function count;
 
 /**
  * @phpstan-import-type CheckpointArray from Checkpoint
  */
 final class Checkpoints implements Arrayable, Countable, JsonSerializable
 {
-    private Collection $collection;
+    private array $saves;
 
-    public function __construct(public readonly bool $recordGaps)
-    {
-        $this->collection = new Collection;
+    public function __construct(
+        public readonly bool $recordGaps
+    ) {
+        $this->saves = [];
     }
 
     /**
@@ -27,7 +31,7 @@ final class Checkpoints implements Arrayable, Countable, JsonSerializable
      */
     public function save(Checkpoint $checkpoint): Checkpoint
     {
-        $this->collection->put($checkpoint->streamName, $checkpoint);
+        $this->saves[$checkpoint->streamName] = $checkpoint;
 
         return $checkpoint;
     }
@@ -41,7 +45,7 @@ final class Checkpoints implements Arrayable, Countable, JsonSerializable
     {
         $this->assertCheckpointGapConsistent($checkpoint);
 
-        $this->collection->put($checkpoint->streamName, $checkpoint);
+        $this->saves[$checkpoint->streamName] = $checkpoint;
 
         return $checkpoint;
     }
@@ -51,7 +55,7 @@ final class Checkpoints implements Arrayable, Countable, JsonSerializable
      */
     public function has(string $streamName): bool
     {
-        return $this->collection->has($streamName);
+        return array_key_exists($streamName, $this->saves);
     }
 
     /**
@@ -61,7 +65,7 @@ final class Checkpoints implements Arrayable, Countable, JsonSerializable
      */
     public function get(string $streamName): Checkpoint
     {
-        $checkpoint = $this->collection->get($streamName);
+        $checkpoint = $this->saves[$streamName] ?? null;
 
         if (! $checkpoint instanceof Checkpoint) {
             throw CheckpointViolation::streamNotTracked($streamName);
@@ -75,7 +79,7 @@ final class Checkpoints implements Arrayable, Countable, JsonSerializable
      */
     public function flush(): void
     {
-        $this->collection = new Collection;
+        $this->saves = [];
     }
 
     /**
@@ -85,7 +89,7 @@ final class Checkpoints implements Arrayable, Countable, JsonSerializable
      */
     public function toArray(): array
     {
-        return $this->collection->toArray();
+        return $this->saves;
     }
 
     /**
@@ -96,13 +100,16 @@ final class Checkpoints implements Arrayable, Countable, JsonSerializable
      */
     public function jsonSerialize(): array
     {
-        if (! $this->recordGaps) {
-            $excludeGaps = fn (Checkpoint $checkpoint) => CheckpointFactory::noGap($checkpoint);
+        $saves = $this->saves;
 
-            return $this->collection->map($excludeGaps)->jsonSerialize();
+        if (! $this->recordGaps) {
+            $saves = array_map(
+                fn (Checkpoint $checkpoint) => CheckpointFactory::noGap($checkpoint),
+                $saves
+            );
         }
 
-        return $this->collection->jsonSerialize();
+        return array_map(fn (Checkpoint $checkpoint) => $checkpoint->jsonSerialize(), $saves);
     }
 
     /**
@@ -110,7 +117,7 @@ final class Checkpoints implements Arrayable, Countable, JsonSerializable
      */
     public function count(): int
     {
-        return $this->collection->count();
+        return count($this->saves);
     }
 
     /**

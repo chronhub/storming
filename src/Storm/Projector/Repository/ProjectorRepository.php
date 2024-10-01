@@ -20,7 +20,7 @@ use Storm\Projector\Repository\Data\StartData;
 use Storm\Projector\Repository\Data\StopData;
 use Storm\Projector\Repository\Data\UpdateLockData;
 
-final readonly class GenericRepository implements Repository
+final readonly class ProjectorRepository implements Repository
 {
     public function __construct(
         private ProjectionProvider $provider,

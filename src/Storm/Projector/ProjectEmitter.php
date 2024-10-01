@@ -48,8 +48,7 @@ final readonly class ProjectEmitter implements EmitterProjector
     {
         $this->manager->call(fn (Process $process) => $process->dispatch(
             new ProjectionDiscarded($deleteEmittedEvents),
-        )
-        );
+        ));
     }
 
     public function filter(ProjectionQueryFilter $queryFilter): static

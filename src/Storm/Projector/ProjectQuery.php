@@ -34,8 +34,7 @@ final readonly class ProjectQuery implements QueryProjector
 
     public function reset(): void
     {
-        $this->manager->call(fn (Process $process) => $process->call(new ResetSnapshot)
-        );
+        $this->manager->call(fn (Process $process) => $process->call(new ResetSnapshot));
     }
 
     public function filter(QueryFilter $queryFilter): static

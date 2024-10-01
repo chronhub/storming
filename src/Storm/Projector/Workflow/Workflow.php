@@ -82,10 +82,12 @@ final class Workflow implements WorkflowInterface
      */
     private function handleException(?Throwable $exception): void
     {
-        if ($this->exceptionHandler) {
-            ($this->exceptionHandler)($this->process, $exception);
-        } elseif ($exception) {
-            throw $exception;
+        if (! $exception) {
+            return;
         }
+
+        $this->exceptionHandler
+            ? ($this->exceptionHandler)($this->process, $exception)
+            : throw $exception;
     }
 }

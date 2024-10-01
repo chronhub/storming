@@ -314,7 +314,7 @@ trait ProjectorBuilder
     {
         // Get the default query filter configured
         if (! $this->queryFilter) {
-            $this->queryFilter = $this->projectorManagement->connection(
+            $this->queryFilter = $this->connector->connection(
                 $this->getConnectionName()
             )->queryFilter();
         }
@@ -326,7 +326,7 @@ trait ProjectorBuilder
 
     protected function getConnectionName(): string
     {
-        return $this->connectionName ??= $this->projectorManagement->getDefaultDriver();
+        return $this->connectionName ??= $this->connector->getDefaultDriver();
     }
 
     /**

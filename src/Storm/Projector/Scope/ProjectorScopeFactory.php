@@ -11,5 +11,5 @@ interface ProjectorScopeFactory
     /**
      * Process the event and return the projector scope
      */
-    public function handle(DomainEvent $event, ?array $userState = null): ProjectorScope;
+    public function handle(DomainEvent $event, ?array $initState = null): ProjectorScope;
 }

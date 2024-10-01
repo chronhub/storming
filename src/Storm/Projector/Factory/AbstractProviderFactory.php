@@ -10,18 +10,20 @@ use Storm\Projector\Options\Option;
 use Storm\Projector\Provider\Provider;
 use Storm\Projector\Provider\ProviderEventMap;
 use Storm\Projector\Repository\EventRepository;
-use Storm\Projector\Repository\GenericRepository;
 use Storm\Projector\Repository\LockManager;
+use Storm\Projector\Repository\ProjectorRepository;
 use Storm\Projector\Workflow\Component;
 use Storm\Projector\Workflow\Process;
 
 abstract readonly class AbstractProviderFactory implements ProviderFactory
 {
-    public function __construct(protected ConnectionManager $connection) {}
+    public function __construct(
+        protected ConnectionManager $connection
+    ) {}
 
     protected function createRepository(string $streamName, Option $options): Repository
     {
-        $repository = new GenericRepository(
+        $repository = new ProjectorRepository(
             $this->connection->projectionProvider(),
             $this->createLockManager($options),
             $this->connection->serializer(),
@@ -48,7 +50,7 @@ abstract readonly class AbstractProviderFactory implements ProviderFactory
 
     protected function subscribe(Provider $management, Process $process): void
     {
-        $map = new ProviderEventMap();
+        $map = new ProviderEventMap;
 
         $map->subscribeTo($management, $process);
     }

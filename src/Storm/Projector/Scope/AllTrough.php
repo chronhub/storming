@@ -27,9 +27,9 @@ final class AllTrough implements ProjectorScopeFactory
         $this->userStateScope = new UserState;
     }
 
-    public function handle(DomainEvent $event, ?array $userState = null): ProjectorScope
+    public function handle(DomainEvent $event, ?array $initState = null): ProjectorScope
     {
-        $userStateScope = is_array($userState) ? $this->userStateScope->setState($userState) : null;
+        $userStateScope = is_array($initState) ? $this->userStateScope->setState($initState) : null;
 
         ($this->projector)($event, $userStateScope);
         $this->bindReactor(fn () => null)($this->projector);

@@ -27,8 +27,9 @@ final class ReadMonitorProjectionCommand extends Command
                             { operation : state|status|checkpoint }
                             { projection : The name of the projection to monitor }';
 
-    public function __construct(private readonly ProjectorManager $manager)
-    {
+    public function __construct(
+        private readonly ProjectorManager $manager
+    ) {
         parent::__construct();
     }
 
@@ -64,11 +65,9 @@ final class ReadMonitorProjectionCommand extends Command
         $this->line("<info>Projection:</info> $projection\n");
 
         if (is_array($result)) {
-            if ($operation === 'checkpoint') {
-                $this->displayCheckpoint($result);
-            } else {
-                $this->displayTable($result);
-            }
+            $operation === 'checkpoint'
+                ? $this->displayCheckpoint($result)
+                : $this->displayTable($result);
         } else {
             $this->info($result);
         }

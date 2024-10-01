@@ -10,7 +10,9 @@ use Storm\Contract\Projector\ReadModel;
 
 abstract class ReadModelConnection implements ReadModel
 {
-    public function __construct(protected readonly Connection $connection) {}
+    public function __construct(
+        protected readonly Connection $connection
+    ) {}
 
     public function initialize(): void
     {

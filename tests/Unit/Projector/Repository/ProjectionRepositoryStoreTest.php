@@ -15,26 +15,26 @@ use Storm\Projector\Repository\Data\StartAgainData;
 use Storm\Projector\Repository\Data\StartData;
 use Storm\Projector\Repository\Data\StopData;
 use Storm\Projector\Repository\Data\UpdateLockData;
-use Storm\Projector\Repository\GenericRepository;
 use Storm\Projector\Repository\LockManager;
 use Storm\Projector\Repository\Projection;
+use Storm\Projector\Repository\ProjectorRepository;
 use Storm\Serializer\JsonSerializerFactory;
 use Storm\Tests\Stubs\ProjectionSnapshotStub;
 
 beforeEach(function () {
     $this->provider = mock(ProjectionProvider::class);
     $this->lockManager = mock(LockManager::class);
-    $this->serializer = (new JsonSerializerFactory())->create();
+    $this->serializer = (new JsonSerializerFactory)->create();
     $this->streamName = 'stream1';
 
-    $this->projectionStore = new GenericRepository(
+    $this->projectionStore = new ProjectorRepository(
         $this->provider,
         $this->lockManager,
         $this->serializer,
         $this->streamName
     );
 
-    $this->projectionSnapshotStub = new ProjectionSnapshotStub();
+    $this->projectionSnapshotStub = new ProjectionSnapshotStub;
 });
 
 test('create projection with status', function (ProjectionStatus $status) {

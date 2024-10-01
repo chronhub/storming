@@ -34,16 +34,14 @@ final readonly class ProjectReadModel implements ReadModelProjector
     {
         $this->manager->call(fn (Process $process) => $process->dispatch(
             new ProjectionClosed,
-        ),
-        );
+        ));
     }
 
     public function reset(): void
     {
         $this->manager->call(fn (Process $process) => $process->dispatch(
             new ProjectionRevised
-        )
-        );
+        ));
     }
 
     public function delete(bool $deleteEmittedEvents): void

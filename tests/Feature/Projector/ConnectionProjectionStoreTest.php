@@ -10,9 +10,9 @@ use Storm\Clock\ClockFactory;
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Repository\DatabaseProjectionProvider;
-use Storm\Projector\Repository\GenericRepository;
 use Storm\Projector\Repository\LockManager;
 use Storm\Projector\Repository\ProjectionSnapshot;
+use Storm\Projector\Repository\ProjectorRepository;
 use Storm\Serializer\JsonSerializerFactory;
 
 uses(RefreshDatabase::class);
@@ -40,7 +40,7 @@ beforeEach(function () {
 
 test('load snapshot', function () {
     $lockManager = new LockManager($this->clock, 1000, 1000);
-    $store = new GenericRepository(
+    $store = new ProjectorRepository(
         $this->projectionProvider,
         $lockManager,
         $this->serializer,

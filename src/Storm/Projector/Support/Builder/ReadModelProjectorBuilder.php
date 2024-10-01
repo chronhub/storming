@@ -19,7 +19,7 @@ class ReadModelProjectorBuilder
     public null|string|ReadModel $readModel = null;
 
     public function __construct(
-        protected ConnectorManager $projectorManagement,
+        protected ConnectorManager $connector,
         protected ProjectorManager $projectorManager,
         protected Application $app,
     ) {}

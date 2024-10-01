@@ -16,7 +16,7 @@ class QueryProjectorBuilder
     public ?QueryProjector $projector = null;
 
     public function __construct(
-        protected ConnectorManager $projectorManagement,
+        protected ConnectorManager $connector,
         protected ProjectorManager $projectorManager,
         protected Application $app,
     ) {}
