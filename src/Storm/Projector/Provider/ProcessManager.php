@@ -8,6 +8,7 @@ use Illuminate\Pipeline\Pipeline;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
 use Storm\Projector\Factory\ActivityFactory;
+use Storm\Projector\Factory\PersistentActivityFactory;
 use Storm\Projector\Provider\Events\ProjectionFreed;
 use Storm\Projector\Workflow\Input\RestoreUserState;
 use Storm\Projector\Workflow\Process;
@@ -28,9 +29,11 @@ final class ProcessManager implements Manager
     {
         $this->prepare($context, $keepRunning);
 
-        $activities = ($this->activityFactory)($this->process);
+        $this->pipeline->through(
+            ($this->activityFactory)($this->process)
+        );
 
-        $this->execute($activities);
+        $this->execute();
     }
 
     public function call(callable $callback): mixed
@@ -40,21 +43,24 @@ final class ProcessManager implements Manager
 
     private function prepare(ContextReader $context, bool $keepRunning): void
     {
+        // Configure context
         $this->process->context()->set($context);
         $this->process->call(new RestoreUserState);
 
+        // Subscribe the process to the context
         $this->process->subscribe($this->process, $context);
 
+        // Configure sprint
         $this->process->sprint()->runInBackground($keepRunning);
         $this->process->sprint()->continue();
     }
 
-    private function execute(array $activities): void
+    private function execute(): void
     {
         $exceptionOccurred = null;
 
         try {
-            $this->loop($activities);
+            $this->loop();
         } catch (Throwable $exception) {
             $exceptionOccurred = $exception;
         } finally {
@@ -62,12 +68,11 @@ final class ProcessManager implements Manager
         }
     }
 
-    private function loop(array $activities): void
+    private function loop(): void
     {
         do {
             $isSprintTerminated = $this->pipeline
                 ->send($this->process)
-                ->through($activities)
                 ->then(fn (Process $process): bool => $process->isSprintTerminated());
         } while (! $isSprintTerminated);
     }
@@ -79,8 +84,8 @@ final class ProcessManager implements Manager
      */
     private function releaseProcess(?Throwable $exception): void
     {
-        // Prevent freed the projection when another instance
-        // of the same projection is running, or the lock is still active.
+        // Prevent freed a persistent projection when another instance
+        // is running, or the lock is still active.
         if ($exception instanceof ProjectionAlreadyRunning) {
             throw $exception;
         }
@@ -90,7 +95,9 @@ final class ProcessManager implements Manager
                 throw $exception;
             }
         } finally {
-            $this->process->dispatch(new ProjectionFreed);
+            if ($this->activityFactory instanceof PersistentActivityFactory) {
+                $this->process->dispatch(new ProjectionFreed);
+            }
         }
     }
 }
