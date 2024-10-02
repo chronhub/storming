@@ -9,8 +9,8 @@ use stdClass;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
+use Storm\Projector\Projection\AgentManager;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Provider\AgentManager;
 use Storm\Projector\Workflow\Component;
 use TypeError;
 
@@ -74,12 +74,12 @@ test('capture event with callable and return result', function () {
 });
 
 test('capture event with non callable object and return same object', function () {
-    $object = new stdClass();
+    $object = new stdClass;
     expect($this->subscriptionManager->capture($object))->toBe($object);
 });
 
 test('dynamic call to watcher manager', function () {
-    $this->watchers->expects('foo')->andReturns(new stdClass());
+    $this->watchers->expects('foo')->andReturns(new stdClass);
 
     $result = $this->subscriptionManager->__call('foo', []);
     expect($result)->toBeInstanceOf(stdClass::class);

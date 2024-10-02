@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Repository;
 
-use Storm\Projector\Repository\Projection;
-use Storm\Projector\Repository\ProjectionFactory;
+use Storm\Projector\Storage\Projection;
+use Storm\Projector\Storage\ProjectionFactory;
 use Storm\Tests\Stubs\DummyProjectionModel;
 
 beforeEach(function () {

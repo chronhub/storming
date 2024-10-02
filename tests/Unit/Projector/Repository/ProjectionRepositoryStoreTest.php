@@ -7,17 +7,17 @@ namespace Storm\Tests\Unit\Projector\Repository;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Repository\Data\CreateData;
-use Storm\Projector\Repository\Data\PersistData;
-use Storm\Projector\Repository\Data\ReleaseData;
-use Storm\Projector\Repository\Data\ResetData;
-use Storm\Projector\Repository\Data\StartAgainData;
-use Storm\Projector\Repository\Data\StartData;
-use Storm\Projector\Repository\Data\StopData;
-use Storm\Projector\Repository\Data\UpdateLockData;
-use Storm\Projector\Repository\LockManager;
-use Storm\Projector\Repository\Projection;
-use Storm\Projector\Repository\ProjectorRepository;
+use Storm\Projector\Storage\Data\CreateData;
+use Storm\Projector\Storage\Data\PersistData;
+use Storm\Projector\Storage\Data\ReleaseData;
+use Storm\Projector\Storage\Data\ResetData;
+use Storm\Projector\Storage\Data\StartAgainData;
+use Storm\Projector\Storage\Data\StartData;
+use Storm\Projector\Storage\Data\StopData;
+use Storm\Projector\Storage\Data\UpdateLockData;
+use Storm\Projector\Storage\LockManager;
+use Storm\Projector\Storage\Projection;
+use Storm\Projector\Storage\ProjectionRepository;
 use Storm\Serializer\JsonSerializerFactory;
 use Storm\Tests\Stubs\ProjectionSnapshotStub;
 
@@ -27,7 +27,7 @@ beforeEach(function () {
     $this->serializer = (new JsonSerializerFactory)->create();
     $this->streamName = 'stream1';
 
-    $this->projectionStore = new ProjectorRepository(
+    $this->projectionStore = new ProjectionRepository(
         $this->provider,
         $this->lockManager,
         $this->serializer,

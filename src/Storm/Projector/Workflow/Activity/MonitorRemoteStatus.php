@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
+use Storm\Projector\Projection\Events\ProjectionClosed;
+use Storm\Projector\Projection\Events\ProjectionDiscarded;
+use Storm\Projector\Projection\Events\ProjectionRestarted;
+use Storm\Projector\Projection\Events\ProjectionRevised;
+use Storm\Projector\Projection\Events\ProjectionStatusDisclosed;
+use Storm\Projector\Projection\Events\ProjectionSynchronized;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Provider\Events\ProjectionClosed;
-use Storm\Projector\Provider\Events\ProjectionDiscarded;
-use Storm\Projector\Provider\Events\ProjectionRestarted;
-use Storm\Projector\Provider\Events\ProjectionRevised;
-use Storm\Projector\Provider\Events\ProjectionStatusDisclosed;
-use Storm\Projector\Provider\Events\ProjectionSynchronized;
 use Storm\Projector\Workflow\Process;
 
 /**
@@ -25,7 +25,7 @@ trait MonitorRemoteStatus
      */
     protected function discloseRemoteStatus(Process $process): bool
     {
-        $process->dispatch(new ProjectionStatusDisclosed());
+        $process->dispatch(new ProjectionStatusDisclosed);
 
         $currentStatus = $process->status()->get();
 
@@ -44,10 +44,10 @@ trait MonitorRemoteStatus
     protected function onStopping(Process $process): bool
     {
         if ($this->onRise) {
-            $process->dispatch(new ProjectionSynchronized());
+            $process->dispatch(new ProjectionSynchronized);
         }
 
-        $process->dispatch(new ProjectionClosed());
+        $process->dispatch(new ProjectionClosed);
 
         return $this->onRise;
     }
@@ -60,10 +60,10 @@ trait MonitorRemoteStatus
      */
     protected function onResetting(Process $process): false
     {
-        $process->dispatch(new ProjectionRevised());
+        $process->dispatch(new ProjectionRevised);
 
         if (! $this->onRise && $process->sprint()->inBackground()) {
-            $process->dispatch(new ProjectionRestarted());
+            $process->dispatch(new ProjectionRestarted);
         }
 
         return false;

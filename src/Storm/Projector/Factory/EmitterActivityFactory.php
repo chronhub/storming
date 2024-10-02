@@ -20,7 +20,7 @@ use Storm\Projector\Workflow\Process;
 
 final readonly class EmitterActivityFactory implements PersistentActivityFactory
 {
-    use ProvideActivityBuilder;
+    use ActivityBuilderTrait;
 
     public function __construct(
         protected Chronicler $chronicler,

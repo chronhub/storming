@@ -13,12 +13,12 @@ use Storm\Projector\Connector\ConnectorManager;
 use Storm\Projector\Connector\DatabaseConnector;
 use Storm\Projector\Connector\InMemoryConnector;
 use Storm\Projector\Connector\ManageConnector;
-use Storm\Projector\Factory\EmitterProviderFactory;
-use Storm\Projector\Factory\ProviderFactory;
-use Storm\Projector\Factory\ProviderFactoryRegistry;
-use Storm\Projector\Factory\ProviderFactoryResolver;
-use Storm\Projector\Factory\QueryProviderFactory;
-use Storm\Projector\Factory\ReadModelProviderFactory;
+use Storm\Projector\Factory\EmitterFactory;
+use Storm\Projector\Factory\Factory;
+use Storm\Projector\Factory\ProviderResolver;
+use Storm\Projector\Factory\QueryFactory;
+use Storm\Projector\Factory\ReadModelFactory;
+use Storm\Projector\Factory\Registry;
 
 class ProjectorServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -67,19 +67,19 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
 
     protected function registerFactories(): void
     {
-        $this->app->singleton(ProviderFactoryRegistry::class, function (Application $app) {
-            $registry = new ProviderFactoryResolver($app);
+        $this->app->singleton(Registry::class, function (Application $app) {
+            $registry = new ProviderResolver($app);
 
-            $registry->register('query', function (ConnectionManager $manager): ProviderFactory {
-                return new QueryProviderFactory($manager);
+            $registry->register('query', function (ConnectionManager $manager): Factory {
+                return new QueryFactory($manager);
             });
 
-            $registry->register('emitter', function (ConnectionManager $manager): ProviderFactory {
-                return new EmitterProviderFactory($manager);
+            $registry->register('emitter', function (ConnectionManager $manager): Factory {
+                return new EmitterFactory($manager);
             });
 
-            $registry->register('read_model', function (ConnectionManager $manager): ProviderFactory {
-                return new ReadModelProviderFactory($manager);
+            $registry->register('read_model', function (ConnectionManager $manager): Factory {
+                return new ReadModelFactory($manager);
             });
 
             return $registry;
@@ -106,7 +106,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
         return [
             'projector.manager',
             ProjectorManager::class,
-            ProviderFactoryRegistry::class,
+            Registry::class,
             ConnectorManager::class,
         ];
     }

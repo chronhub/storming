@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Subscription;
 
 use stdClass;
-use Storm\Projector\Provider\HubManager;
+use Storm\Projector\Projection\HubManager;
 use Storm\Projector\Workflow\ComponentRegistry;
 
 use function get_class;
@@ -87,7 +87,7 @@ test('do nothing if hook does not exists on trigger', function () {
     $handler = getDummyHookHandler($expected);
 
     $this->hub->addHook(get_class($hook), $handler);
-    $this->hub->trigger(new stdClass());
+    $this->hub->trigger(new stdClass);
 
     expect($expected)->toBeEmpty();
 });

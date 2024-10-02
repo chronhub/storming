@@ -7,17 +7,17 @@ namespace Storm\Tests\Feature\Projector\InMemory;
 use Exception;
 use Illuminate\Support\Facades\Event;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Repository\Data\CreateData;
-use Storm\Projector\Repository\Events\ProjectionCreated;
-use Storm\Projector\Repository\Events\ProjectionDeleted;
-use Storm\Projector\Repository\Events\ProjectionDeletedWithEvents;
-use Storm\Projector\Repository\Events\ProjectionReleased;
-use Storm\Projector\Repository\Events\ProjectionReset;
-use Storm\Projector\Repository\Events\ProjectionRestarted;
-use Storm\Projector\Repository\Events\ProjectionStarted;
-use Storm\Projector\Repository\Events\ProjectionStopped;
-use Storm\Projector\Repository\ProjectionSnapshot;
 use Storm\Projector\Scope\ReadModelScope;
+use Storm\Projector\Storage\Data\CreateData;
+use Storm\Projector\Storage\Events\ProjectionCreated;
+use Storm\Projector\Storage\Events\ProjectionDeleted;
+use Storm\Projector\Storage\Events\ProjectionDeletedWithEvents;
+use Storm\Projector\Storage\Events\ProjectionReleased;
+use Storm\Projector\Storage\Events\ProjectionReset;
+use Storm\Projector\Storage\Events\ProjectionRestarted;
+use Storm\Projector\Storage\Events\ProjectionStarted;
+use Storm\Projector\Storage\Events\ProjectionStopped;
+use Storm\Projector\Storage\ProjectionSnapshot;
 use Storm\Projector\Support\ReadModel\InMemoryReadModel;
 use Storm\Projector\Support\StopWhen;
 use Storm\Tests\Feature\Projector\InMemory\Concern\InMemoryProjectionExpectationTrait;
@@ -30,8 +30,8 @@ uses(
 );
 
 beforeEach(function () {
-    $this->factory = new InMemoryTestingFactory();
-    $this->readModel = new InMemoryReadModel();
+    $this->factory = new InMemoryTestingFactory;
+    $this->readModel = new InMemoryReadModel;
 
     $this->app['config']->set('projector.connection.in_memory.dispatch_events', true);
 });

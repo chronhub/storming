@@ -10,7 +10,7 @@ use Storm\Contract\Projector\ProjectorMonitor;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Exception\ProjectionFailed;
 use Storm\Projector\Exception\ProjectionNotFound;
-use Storm\Projector\Repository\Data\UpdateStatusData;
+use Storm\Projector\Storage\Data\UpdateStatusData;
 use Throwable;
 
 final readonly class Monitor implements ProjectorMonitor

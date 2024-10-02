@@ -10,8 +10,8 @@ use Scope\ReadModelScope;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ReadModel;
-use Storm\Projector\Provider\ReadModelProvider;
-use Storm\Projector\Provider\ReadModelSubscription;
+use Storm\Projector\Projection\ReadModelProjection;
+use Storm\Projector\Projection\ReadModelSubscription;
 use Storm\Projector\Workflow\Component\Sprint;
 use Storm\Projector\Workflow\ComponentRegistry;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
@@ -26,7 +26,7 @@ beforeEach(function () {
     $this->activities = mock(ActivityFactory::class);
     $this->projectorScope = mock(ReadModelScope::class);
     $this->hub = mock(NotificationHub::class);
-    $this->management = mock(ReadModelProvider::class);
+    $this->management = mock(ReadModelProjection::class);
     $this->subscriptor = mock(ComponentRegistry::class);
     $this->readModel = mock(ReadModel::class);
 

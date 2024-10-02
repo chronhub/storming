@@ -15,7 +15,7 @@ use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelProjector;
 use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Connector\ConnectorManager;
-use Storm\Projector\Factory\ProviderFactoryRegistry;
+use Storm\Projector\Factory\Registry;
 use Storm\Projector\Options\Option;
 
 use function is_string;
@@ -28,7 +28,7 @@ final class ManageProjector implements ProjectorManager
     public function __construct(
         private readonly Container $container,
         private readonly ConnectorManager $connectorResolver,
-        private readonly ProviderFactoryRegistry $registry,
+        private readonly Registry $registry,
     ) {}
 
     public function query(array $options = [], ?string $connection = null, ?string $name = null): QueryProjector

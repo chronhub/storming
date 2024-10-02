@@ -11,16 +11,16 @@ use Mockery\MockInterface;
 use RuntimeException;
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Repository\EventRepository;
-use Storm\Projector\Repository\Events\ProjectionCreated;
-use Storm\Projector\Repository\Events\ProjectionDeleted;
-use Storm\Projector\Repository\Events\ProjectionDeletedWithEvents;
-use Storm\Projector\Repository\Events\ProjectionError;
-use Storm\Projector\Repository\Events\ProjectionReleased;
-use Storm\Projector\Repository\Events\ProjectionReset;
-use Storm\Projector\Repository\Events\ProjectionRestarted;
-use Storm\Projector\Repository\Events\ProjectionStarted;
-use Storm\Projector\Repository\Events\ProjectionStopped;
+use Storm\Projector\Storage\EventRepository;
+use Storm\Projector\Storage\Events\ProjectionCreated;
+use Storm\Projector\Storage\Events\ProjectionDeleted;
+use Storm\Projector\Storage\Events\ProjectionDeletedWithEvents;
+use Storm\Projector\Storage\Events\ProjectionError;
+use Storm\Projector\Storage\Events\ProjectionReleased;
+use Storm\Projector\Storage\Events\ProjectionReset;
+use Storm\Projector\Storage\Events\ProjectionRestarted;
+use Storm\Projector\Storage\Events\ProjectionStarted;
+use Storm\Projector\Storage\Events\ProjectionStopped;
 use Storm\Tests\Stubs\ProjectionSnapshotStub;
 use Throwable;
 
@@ -29,7 +29,7 @@ beforeEach(function () {
     $this->repository = mock(Repository::class);
     $this->eventDispatcher = mock(Dispatcher::class);
     $this->eventDispatcherRepository = new EventRepository($this->repository, $this->eventDispatcher);
-    $this->projectionResultStub = new ProjectionSnapshotStub();
+    $this->projectionResultStub = new ProjectionSnapshotStub;
 });
 
 dataset('exceptions', [new Exception('error message'), new RuntimeException('error message')]);

@@ -12,7 +12,7 @@ use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Options\Option;
-use Storm\Projector\Repository\EventRepository;
+use Storm\Projector\Storage\EventRepository;
 
 interface ConnectionManager
 {

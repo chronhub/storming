@@ -12,7 +12,7 @@ use Storm\Projector\Exception\ProjectionFailed;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\Monitor;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Repository\Data\UpdateStatusData;
+use Storm\Projector\Storage\Data\UpdateStatusData;
 
 use function json_encode;
 

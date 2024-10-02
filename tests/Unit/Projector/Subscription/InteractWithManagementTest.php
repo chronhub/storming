@@ -6,8 +6,8 @@ namespace Storm\Tests\Unit\Projector\Subscription;
 
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\Repository;
+use Storm\Projector\Projection\InteractWithProvider;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Provider\InteractWithProvider;
 use Storm\Projector\Workflow\Notification\Command\CheckpointReset;
 use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
 

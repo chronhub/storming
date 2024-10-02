@@ -7,10 +7,10 @@ namespace Storm\Tests\Unit\Projector\Subscription;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\Repository;
+use Storm\Projector\Projection\ReadingModelProjection;
+use Storm\Projector\Projection\ReadModelProjection;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Provider\ReadingModelProvider;
-use Storm\Projector\Provider\ReadModelProvider;
-use Storm\Projector\Repository\ProjectionSnapshot;
+use Storm\Projector\Storage\ProjectionSnapshot;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamReset;
 use Storm\Projector\Workflow\Notification\Command\CheckpointReset;
 use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;
@@ -24,7 +24,7 @@ beforeEach(function () {
     $this->repository = mock(Repository::class);
     $this->expectation = new ManagementExpectation($this->repository, $this->hub);
     $this->readModel = mock(ReadModel::class);
-    $this->management = new ReadingModelProvider($this->hub, $this->repository, $this->readModel);
+    $this->management = new ReadingModelProjection($this->hub, $this->repository, $this->readModel);
 });
 
 dataset('checkpoints', [[[]], [[1, 5, 20]], [[1000, 5000]]]);
@@ -33,7 +33,7 @@ dataset('should create projection', [[false], [true]]);
 dataset('should init read model', [[false], [true]]);
 
 test('default instance', function () {
-    expect($this->management)->toBeInstanceOf(ReadModelProvider::class);
+    expect($this->management)->toBeInstanceOf(ReadModelProjection::class);
 });
 
 test('rise projection', function (bool $alreadyCreated, bool $initReadModel, ProjectionStatus $currentStatus) {

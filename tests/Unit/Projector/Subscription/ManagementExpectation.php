@@ -9,7 +9,7 @@ use Mockery\MockInterface;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Repository\ProjectionSnapshot;
+use Storm\Projector\Storage\ProjectionSnapshot;
 use Storm\Projector\Workflow\Notification\Command\CheckpointUpdated;
 use Storm\Projector\Workflow\Notification\Command\SprintContinue;
 use Storm\Projector\Workflow\Notification\Command\SprintStopped;
@@ -59,7 +59,7 @@ class ManagementExpectation
 
     public function assertSynchronize(): void
     {
-        $result = (new ProjectionSnapshotStub())->fromDefault();
+        $result = (new ProjectionSnapshotStub)->fromDefault();
 
         $this->repository->expects('loadSnapshot')->andReturn($result);
         $this->hub->expects('emit')->with(CheckpointUpdated::class, $result->checkpoint);

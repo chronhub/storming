@@ -20,7 +20,7 @@ use Storm\Projector\Workflow\Process;
 
 final readonly class QueryActivityFactory implements ActivityFactory
 {
-    use ProvideActivityBuilder;
+    use ActivityBuilderTrait;
 
     public function __construct(
         protected Chronicler $chronicler,

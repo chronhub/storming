@@ -22,7 +22,7 @@ use Storm\Projector\Exception\ConfigurationViolation;
 use Storm\Projector\Options\InMemoryFixedOption;
 use Storm\Projector\Options\InMemoryOption;
 use Storm\Projector\Options\Option;
-use Storm\Projector\Repository\InMemoryProjectionProvider;
+use Storm\Projector\Storage\InMemoryProjectionProvider;
 use Storm\Projector\Stream\Filter\InMemoryFromToPosition;
 
 beforeEach(function () {

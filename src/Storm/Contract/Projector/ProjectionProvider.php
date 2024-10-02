@@ -8,7 +8,7 @@ use Storm\Projector\Exception\ProjectionAlreadyExists;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
 use Storm\Projector\Exception\ProjectionFailed;
 use Storm\Projector\Exception\ProjectionNotFound;
-use Storm\Projector\Repository\Data\ProjectionData;
+use Storm\Projector\Storage\Data\ProjectionData;
 
 interface ProjectionProvider
 {
