@@ -23,7 +23,7 @@ use Storm\Projector\Workflow\Component\HaltOn;
 use Storm\Projector\Workflow\Component\InMemoryCheckpoint;
 use Storm\Projector\Workflow\Component\Metrics;
 use Storm\Projector\Workflow\Component\ProcessedStream;
-use Storm\Projector\Workflow\Component\Runner;
+use Storm\Projector\Workflow\Component\Sprint;
 use Storm\Projector\Workflow\Component\StatusHolder;
 use Storm\Projector\Workflow\Component\Timer;
 use Storm\Projector\Workflow\Component\UserState;
@@ -39,20 +39,20 @@ final class Component implements ComponentRegistry
         protected SystemClock $clock
     ) {
         $this->components = [
-            'context' => new Contextualize(),
+            'context' => new Contextualize,
             'discovery' => new EventStreamDiscovery($eventStreamProvider),
-            'dispatcher' => new Notify(),
+            'dispatcher' => new Notify,
             'option' => $option,
-            'stream' => new ProcessedStream(),
+            'stream' => new ProcessedStream,
             'recognition' => $this->checkpointRecognition($option),
-            'compute' => new Computation(),
+            'compute' => new Computation,
             'metrics' => new Metrics($option->getBlockSize()),
-            'status' => new StatusHolder(),
-            'sprint' => new Runner(),
-            'stop' => new HaltOn(),
+            'status' => new StatusHolder,
+            'sprint' => new Sprint,
+            'stop' => new HaltOn,
             'batch' => $this->batchStreamEvent($option),
             'time' => new Timer($clock),
-            'userState' => new UserState(),
+            'userState' => new UserState,
         ];
     }
 
@@ -99,7 +99,7 @@ final class Component implements ComponentRegistry
             $checkpoints,
             $this->clock,
             new GapDetector($retries),
-            new GapRecorder(),
+            new GapRecorder,
         );
     }
 }

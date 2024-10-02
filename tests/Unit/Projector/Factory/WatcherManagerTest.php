@@ -17,7 +17,7 @@ use Storm\Projector\Workflow\Component\Computation;
 use Storm\Projector\Workflow\Component\EventStreamBatch;
 use Storm\Projector\Workflow\Component\EventStreamDiscovery;
 use Storm\Projector\Workflow\Component\HaltOn;
-use Storm\Projector\Workflow\Component\Runner;
+use Storm\Projector\Workflow\Component\Sprint;
 use Storm\Projector\Workflow\Component\Timer;
 use Storm\Projector\Workflow\Component\UserState;
 
@@ -44,7 +44,7 @@ beforeEach(function () {
  */
 dataset('watchers', [
     'batch stream watcher' => ['streamEvent', EventStreamBatch::class, false],
-    'sprint watcher' => ['sprint', Runner::class, false],
+    'sprint watcher' => ['sprint', Sprint::class, false],
     'stop watcher' => ['stop', HaltOn::class, true],
     'event stream watcher' => ['discovery', EventStreamDiscovery::class, false],
     'time watcher' => ['time', Timer::class, false],

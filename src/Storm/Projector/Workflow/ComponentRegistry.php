@@ -14,7 +14,7 @@ use Storm\Projector\Workflow\Component\EventStreamDiscovery;
 use Storm\Projector\Workflow\Component\HaltOn;
 use Storm\Projector\Workflow\Component\Metrics;
 use Storm\Projector\Workflow\Component\ProcessedStream;
-use Storm\Projector\Workflow\Component\Runner;
+use Storm\Projector\Workflow\Component\Sprint;
 use Storm\Projector\Workflow\Component\StatusHolder;
 use Storm\Projector\Workflow\Component\Timer;
 use Storm\Projector\Workflow\Component\UserState;
@@ -29,7 +29,7 @@ use Storm\Projector\Workflow\Component\UserState;
  * @method ProcessedStream       stream()
  * @method CheckpointRecognition recognition()
  * @method Computation           compute()
- * @method Runner                sprint()
+ * @method Sprint                sprint()
  * @method Metrics               metrics()
  * @method StatusHolder          status()
  * @method Timer                 time()

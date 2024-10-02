@@ -10,7 +10,7 @@ use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\Provider\EmitterProvider;
 use Storm\Projector\Provider\EmitterSubscription;
-use Storm\Projector\Workflow\Component\Runner;
+use Storm\Projector\Workflow\Component\Sprint;
 use Storm\Projector\Workflow\ComponentRegistry;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
@@ -55,7 +55,7 @@ test('start projection once', function (bool $keepRunning) {
     $this->hub->expects('emit')->with(UserStateRestored::class);
 
     // setup watchers
-    $sprintWatcher = mock(Runner::class);
+    $sprintWatcher = mock(Sprint::class);
     $this->subscriptor->expects('sprint')->andReturn($sprintWatcher)->twice();
     $sprintWatcher->expects('runInBackground')->with($keepRunning);
     $sprintWatcher->expects('continue');

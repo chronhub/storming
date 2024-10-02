@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Checkpoint;
 
+use Storm\Projector\Exception\LogicException;
+
 interface GapRecognition
 {
     /**
@@ -36,6 +38,8 @@ interface GapRecognition
 
     /**
      * Sleep when a gap is detected.
+     *
+     * @throws LogicException when no gap is detected or no retry left.
      */
     public function sleep(): void;
 

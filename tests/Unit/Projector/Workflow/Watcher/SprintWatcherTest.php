@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 
-use Storm\Projector\Workflow\Component\Runner;
+use Storm\Projector\Workflow\Component\Sprint;
 
 use function method_exists;
 
 beforeEach(function () {
-    $this->watcher = new Runner();
+    $this->watcher = new Sprint;
 });
 
 test('default instance', function () {

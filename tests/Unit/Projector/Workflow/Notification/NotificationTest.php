@@ -21,7 +21,7 @@ use Storm\Projector\Workflow\Component;
 use Storm\Projector\Workflow\Component\Computation;
 use Storm\Projector\Workflow\Component\EventStreamBatch;
 use Storm\Projector\Workflow\Component\EventStreamDiscovery;
-use Storm\Projector\Workflow\Component\Runner;
+use Storm\Projector\Workflow\Component\Sprint;
 use Storm\Projector\Workflow\Component\Timer;
 use Storm\Projector\Workflow\Component\UserState;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
@@ -95,7 +95,7 @@ beforeEach(function () {
 
     $this->streamEventWatcher = mock(EventStreamBatch::class);
     $this->recognitionWatcher = mock(CheckpointRecognition::class);
-    $this->sprintWatcher = mock(Runner::class);
+    $this->sprintWatcher = mock(Sprint::class);
     $this->timeWatcher = mock(Timer::class);
     $this->userStateWatcher = mock(UserState::class);
     $this->eventStreamWatcher = mock(EventStreamDiscovery::class);
@@ -109,7 +109,7 @@ describe('notify stream event', function () {
         $this->subscriptor->expects('batch')->andReturn($this->streamEventWatcher);
         $this->streamEventWatcher->expects('sleep');
 
-        $notification = new BatchStreamSleep();
+        $notification = new BatchStreamSleep;
 
         $notification($this->subscriptor);
     });
@@ -126,7 +126,7 @@ describe('notify report processed', function () {
 
         $this->reportWatcher->expects('processed')->andReturn($processed);
 
-        $notification = new BatchStreamReset();
+        $notification = new BatchStreamReset;
 
         $notification($this->subscriptor);
 
@@ -146,7 +146,7 @@ describe('notify report processed', function () {
 
         $this->reportWatcher->expects('processed')->andReturn($processed);
 
-        $notification = new IsBatchStreamReset();
+        $notification = new IsBatchStreamReset;
 
         $result = $notification($this->subscriptor);
 
@@ -167,7 +167,7 @@ describe('notify report processed', function () {
 
         $this->reportWatcher->expects('processed')->andReturn($processed);
 
-        $notification = new IsBatchStreamLimitReached();
+        $notification = new IsBatchStreamLimitReached;
 
         $result = $notification($this->subscriptor);
 
@@ -217,7 +217,7 @@ describe('notify checkpoint', function () {
 
         $this->recognitionWatcher->expects('resets');
 
-        $notification = new CheckpointReset();
+        $notification = new CheckpointReset;
 
         $notification($this->subscriptor);
     });
@@ -249,7 +249,7 @@ describe('notify checkpoint', function () {
 
         $this->recognitionWatcher->expects('toArray')->andReturn($checkpoints);
 
-        $notification = new CurrentCheckpoint();
+        $notification = new CurrentCheckpoint;
         $result = $notification($this->subscriptor);
 
         expect($result)->toBe($checkpoints);
@@ -265,7 +265,7 @@ describe('notify checkpoint', function () {
 
         $this->recognitionWatcher->expects('jsonSerialize')->andReturn($checkpoints);
 
-        $notification = new CurrentFilteredCheckpoint();
+        $notification = new CurrentFilteredCheckpoint;
         $result = $notification($this->subscriptor);
 
         expect($result)->toBe($checkpoints);
@@ -304,7 +304,7 @@ describe('notify checkpoint', function () {
 
         $this->recognitionWatcher->expects('hasGap')->andReturn($hasGap);
 
-        $notification = new HasGap();
+        $notification = new HasGap;
 
         $result = $notification($this->subscriptor);
 
@@ -316,7 +316,7 @@ describe('notify checkpoint', function () {
 
         $this->recognitionWatcher->expects('sleepOnGap');
 
-        $notification = new SleepOnGap();
+        $notification = new SleepOnGap;
 
         $notification($this->subscriptor);
     });
@@ -324,13 +324,13 @@ describe('notify checkpoint', function () {
 
 describe('notify workflow', function () {
     test('before cycle renewed', function () {
-        $notification = new BeforeWorkflowRenewal();
+        $notification = new BeforeWorkflowRenewal;
 
         expect($notification)->not->toBeCallable();
     });
 
     test('cycle began', function () {
-        $notification = new WorkflowBegan();
+        $notification = new WorkflowBegan;
 
         expect($notification)->not->toBeCallable();
     });
@@ -338,7 +338,7 @@ describe('notify workflow', function () {
     test('increment cycle', function () {
         $this->subscriptor->expects('compute')->andReturn($this->reportWatcher);
 
-        $cycle = new CycleMetric();
+        $cycle = new CycleMetric;
 
         expect($cycle->current())->toBe(0);
         $cycle->next();
@@ -347,7 +347,7 @@ describe('notify workflow', function () {
 
         $this->reportWatcher->expects('cycle')->andReturn($cycle);
 
-        $notification = new WorkflowCycleIncremented();
+        $notification = new WorkflowCycleIncremented;
 
         $notification($this->subscriptor);
 
@@ -357,7 +357,7 @@ describe('notify workflow', function () {
     test('current cycle', function (int $currentCycle) {
         $this->subscriptor->expects('compute')->andReturn($this->reportWatcher);
 
-        $cycle = new CycleMetric();
+        $cycle = new CycleMetric;
         expect($cycle->current())->toBe(0);
 
         while ($cycle->current() < $currentCycle) {
@@ -366,7 +366,7 @@ describe('notify workflow', function () {
 
         $this->reportWatcher->expects('cycle')->andReturn($cycle);
 
-        $notification = new CurrentWorkflowCycle();
+        $notification = new CurrentWorkflowCycle;
 
         $result = $notification($this->subscriptor);
 
@@ -376,7 +376,7 @@ describe('notify workflow', function () {
     test('reset cycle', function () {
         $this->subscriptor->expects('compute')->andReturn($this->reportWatcher);
 
-        $cycle = new CycleMetric();
+        $cycle = new CycleMetric;
         $this->reportWatcher->expects('cycle')->andReturn($cycle);
 
         expect($cycle->current())->toBe(0);
@@ -384,7 +384,7 @@ describe('notify workflow', function () {
         $cycle->next();
         expect($cycle->current())->toBe(2);
 
-        $notification = new WorkflowCycleReset();
+        $notification = new WorkflowCycleReset;
 
         $notification($this->subscriptor);
 
@@ -394,11 +394,11 @@ describe('notify workflow', function () {
     test('start cycle', function () {
         $this->subscriptor->expects('compute')->andReturn($this->reportWatcher);
 
-        $cycle = new CycleMetric();
+        $cycle = new CycleMetric;
         $this->reportWatcher->expects('cycle')->andReturn($cycle);
         expect($cycle->current())->toBe(0);
 
-        $notification = new WorkflowStarted();
+        $notification = new WorkflowStarted;
 
         $notification($this->subscriptor);
 
@@ -408,7 +408,7 @@ describe('notify workflow', function () {
     test('check is cycle started', function (bool $isCycleStarted) {
         $this->subscriptor->expects('compute')->andReturn($this->reportWatcher);
 
-        $cycle = new CycleMetric();
+        $cycle = new CycleMetric;
         $this->reportWatcher->expects('cycle')->andReturn($cycle);
         expect($cycle->current())->toBe(0);
 
@@ -417,7 +417,7 @@ describe('notify workflow', function () {
             expect($cycle->current())->toBe(1);
         }
 
-        $notification = new IsWorkflowStarted();
+        $notification = new IsWorkflowStarted;
 
         $result = $notification($this->subscriptor);
 
@@ -427,7 +427,7 @@ describe('notify workflow', function () {
     test('check is first cycle', function (bool $isFirstCycle) {
         $this->subscriptor->expects('compute')->andReturn($this->reportWatcher);
 
-        $cycle = new CycleMetric();
+        $cycle = new CycleMetric;
         $this->reportWatcher->expects('cycle')->andReturn($cycle);
         expect($cycle->current())->toBe(0);
 
@@ -436,7 +436,7 @@ describe('notify workflow', function () {
             expect($cycle->current())->toBe(1);
         }
 
-        $notification = new IsFirstWorkflowCycle();
+        $notification = new IsFirstWorkflowCycle;
 
         $result = $notification($this->subscriptor);
 
@@ -448,7 +448,7 @@ describe('notify main counter', function () {
     test('current main counter', function (int $currentMainCounter) {
         $this->subscriptor->expects('compute')->andReturn($this->reportWatcher);
 
-        $mainCounter = new MainMetric();
+        $mainCounter = new MainMetric;
         $this->reportWatcher->expects('main')->andReturn($mainCounter);
 
         expect($mainCounter->current())->toBe(0);
@@ -456,7 +456,7 @@ describe('notify main counter', function () {
             $mainCounter->increment();
         }
 
-        $notification = new CurrentMainCount();
+        $notification = new CurrentMainCount;
         $result = $notification($this->subscriptor);
 
         expect($result)->toBe($currentMainCounter);
@@ -465,7 +465,7 @@ describe('notify main counter', function () {
     test('keep main counter on stop', function (bool $keepMainCounter) {
         $this->subscriptor->expects('compute')->andReturn($this->reportWatcher);
 
-        $mainCounter = new MainMetric();
+        $mainCounter = new MainMetric;
         $this->reportWatcher->expects('main')->andReturn($mainCounter);
 
         expect($mainCounter->isDoNotReset())->toBeFalse();
@@ -481,7 +481,7 @@ describe('notify main counter', function () {
     test('reset main counter', function () {
         $this->subscriptor->expects('compute')->andReturn($this->reportWatcher);
 
-        $mainCounter = new MainMetric();
+        $mainCounter = new MainMetric;
         $this->reportWatcher->expects('main')->andReturn($mainCounter);
 
         expect($mainCounter->current())->toBe(0);
@@ -489,7 +489,7 @@ describe('notify main counter', function () {
         $mainCounter->increment();
         expect($mainCounter->current())->toBe(2);
 
-        $notification = new MainCounterReset();
+        $notification = new MainCounterReset;
 
         $notification($this->subscriptor);
 
@@ -502,7 +502,7 @@ describe('notify sprint', function () {
         $this->subscriptor->expects('sprint')->andReturn($this->sprintWatcher);
         $this->sprintWatcher->expects('inBackground')->andReturn($keepRunning);
 
-        $notification = new IsSprintDaemonize();
+        $notification = new IsSprintDaemonize;
 
         $result = $notification($this->subscriptor);
 
@@ -513,7 +513,7 @@ describe('notify sprint', function () {
         $this->subscriptor->expects('sprint')->andReturn($this->sprintWatcher);
         $this->sprintWatcher->expects('inProgress')->andReturn($isSprintRunning);
 
-        $notification = new IsSprintRunning();
+        $notification = new IsSprintRunning;
 
         $result = $notification($this->subscriptor);
 
@@ -524,7 +524,7 @@ describe('notify sprint', function () {
         $this->subscriptor->expects('sprint')->andReturn($this->sprintWatcher);
         $this->sprintWatcher->expects('continue');
 
-        $notification = new SprintContinue();
+        $notification = new SprintContinue;
 
         $notification($this->subscriptor);
     });
@@ -533,7 +533,7 @@ describe('notify sprint', function () {
         $this->subscriptor->expects('sprint')->andReturn($this->sprintWatcher);
         $this->sprintWatcher->expects('halt');
 
-        $notification = new SprintStopped();
+        $notification = new SprintStopped;
 
         $notification($this->subscriptor);
     });
@@ -541,7 +541,7 @@ describe('notify sprint', function () {
     test('sprint terminated', function () {
         $this->subscriptor->shouldNotReceive('watcher');
 
-        $notification = new SprintTerminated();
+        $notification = new SprintTerminated;
 
         expect($notification)->not->toBeCallable();
     });
@@ -552,7 +552,7 @@ describe('notify sprint', function () {
         $this->sprintWatcher->shouldReceive('inBackground')->andReturn($inBackground);
         $this->sprintWatcher->shouldReceive('inProgress')->andReturn($inProgress);
 
-        $notification = new IsSprintTerminated();
+        $notification = new IsSprintTerminated;
 
         $result = $notification($this->subscriptor);
 
@@ -568,7 +568,7 @@ describe('notify timer', function () {
         $this->subscriptor->expects('time')->andReturn($this->timeWatcher);
         $this->timeWatcher->expects('reset');
 
-        $notification = new TimeReset();
+        $notification = new TimeReset;
 
         $notification($this->subscriptor);
     });
@@ -577,7 +577,7 @@ describe('notify timer', function () {
         $this->subscriptor->expects('time')->andReturn($this->timeWatcher);
         $this->timeWatcher->expects('start');
 
-        $notification = new TimeStarted();
+        $notification = new TimeStarted;
 
         $notification($this->subscriptor);
     });
@@ -586,7 +586,7 @@ describe('notify timer', function () {
         $this->subscriptor->expects('time')->andReturn($this->timeWatcher);
         $this->timeWatcher->expects('isStarted')->andReturn($isTimeStarted);
 
-        $notification = new IsTimeStarted();
+        $notification = new IsTimeStarted;
 
         $result = $notification($this->subscriptor);
 
@@ -599,7 +599,7 @@ describe('notify timer', function () {
         $this->subscriptor->expects('time')->andReturn($this->timeWatcher);
         $this->timeWatcher->expects('getStartedTime')->andReturn($startedTime);
 
-        $notification = new CurrentStartedTime();
+        $notification = new CurrentStartedTime;
 
         $result = $notification($this->subscriptor);
 
@@ -610,7 +610,7 @@ describe('notify timer', function () {
         $this->subscriptor->expects('time')->andReturn($this->timeWatcher);
         $this->timeWatcher->expects('getElapsedTime')->andReturn($elapsedTime);
 
-        $notification = new CurrentElapsedTime();
+        $notification = new CurrentElapsedTime;
 
         $result = $notification($this->subscriptor);
 
@@ -622,7 +622,7 @@ describe('notify timer', function () {
         $this->subscriptor->expects('time')->andReturn($this->timeWatcher);
         $this->timeWatcher->expects('getCurrentTime')->andReturn($currentTime);
 
-        $notification = new CurrentTime();
+        $notification = new CurrentTime;
 
         $result = $notification($this->subscriptor);
 
@@ -634,7 +634,7 @@ describe('notify status', function () {
     test('current status', function (ProjectionStatus $status) {
         $this->subscriptor->expects('currentStatus')->andReturn($status);
 
-        $notification = new CurrentStatus();
+        $notification = new CurrentStatus;
 
         $result = $notification($this->subscriptor);
 
@@ -669,7 +669,7 @@ describe('notify user state', function () {
         $this->subscriptor->expects('userState')->andReturn($this->userStateWatcher);
         $this->userStateWatcher->expects('get')->andReturn($userState);
 
-        $notification = new CurrentUserState();
+        $notification = new CurrentUserState;
 
         $result = $notification($this->subscriptor);
 
@@ -683,7 +683,7 @@ describe('notify user state', function () {
         $return = $isInitialized ? fn () => [] : null;
         $context->expects('userState')->andReturn($return);
 
-        $notification = new IsUserStateInitialized();
+        $notification = new IsUserStateInitialized;
 
         $result = $notification($this->subscriptor);
 
@@ -710,7 +710,7 @@ describe('notify user state', function () {
         $context->expects('userState')->andReturn($return);
         $this->userStateWatcher->expects('init')->with($return);
 
-        $notification = new UserStateRestored();
+        $notification = new UserStateRestored;
         $notification($this->subscriptor);
     })->with('boolean');
 });
@@ -718,7 +718,7 @@ describe('notify user state', function () {
 describe('notify acked event', function () {
     test('stream event acked', function (string $event) {
         $this->subscriptor->expects('compute')->andReturn($this->reportWatcher);
-        $ackedCounter = new AckedMetric();
+        $ackedCounter = new AckedMetric;
         $this->reportWatcher->expects('acked')->andReturn($ackedCounter);
 
         $notification = new StreamEventAcked($event);
@@ -730,7 +730,7 @@ describe('notify acked event', function () {
 
     test('reset acked event', function () {
         $this->subscriptor->expects('compute')->andReturn($this->reportWatcher);
-        $ackedCounter = new AckedMetric();
+        $ackedCounter = new AckedMetric;
         $this->reportWatcher->expects('acked')->andReturn($ackedCounter);
 
         $ackedCounter->increment(SomeEvent::class);
@@ -738,7 +738,7 @@ describe('notify acked event', function () {
 
         expect($ackedCounter->getEvents())->toBe([SomeEvent::class, AnotherEvent::class]);
 
-        $notification = new StreamEventAckedReset();
+        $notification = new StreamEventAckedReset;
 
         $notification($this->subscriptor);
 
@@ -750,7 +750,7 @@ describe('interact with subscriptor', function () {
     test('get current processed stream', function (string $streamName) {
         $this->subscriptor->expects('getProcessedStream')->andReturn($streamName);
 
-        $notification = new CurrentProcessedStream();
+        $notification = new CurrentProcessedStream;
 
         $result = $notification($this->subscriptor);
 
@@ -774,7 +774,7 @@ describe('interact with subscriptor', function () {
         $this->subscriptor->expects('discovery')->andReturn($this->eventStreamWatcher);
 
         $this->eventStreamWatcher->expects('discover')->with($query)->andReturn(['stream1']);
-        $notification = new EventStreamDiscovered();
+        $notification = new EventStreamDiscovered;
 
         $this->subscriptor->expects('recognition')->andReturn($this->recognitionWatcher);
         $this->recognitionWatcher->expects('track')->with('stream1');
@@ -786,11 +786,11 @@ describe('interact with subscriptor', function () {
         $this->subscriptor->expects('batch')->andReturn($this->streamEventWatcher);
         $this->streamEventWatcher->expects('pull')->andReturn($iterator);
 
-        $notification = new PullBatchStream();
+        $notification = new PullBatchStream;
         $result = $notification($this->subscriptor);
 
         expect($result)->toBe($iterator);
-    })->with([[null], [(new MergeStreamIteratorStub())->getMergeStreams()]]);
+    })->with([[null], [(new MergeStreamIteratorStub)->getMergeStreams()]]);
 
     test('set stream iterator', function (?MergeStreamIterator $iterator) {
         $this->subscriptor->expects('batch')->andReturn($this->streamEventWatcher);
@@ -799,7 +799,7 @@ describe('interact with subscriptor', function () {
         $notification = new BatchStreamSet($iterator);
 
         $notification($this->subscriptor);
-    })->with([[null], [(new MergeStreamIteratorStub())->getMergeStreams()]]);
+    })->with([[null], [(new MergeStreamIteratorStub)->getMergeStreams()]]);
 });
 
 describe('notify stream discovery', function () {
@@ -807,7 +807,7 @@ describe('notify stream discovery', function () {
         $this->subscriptor->expects('discovery')->andReturn($this->eventStreamWatcher);
         $this->eventStreamWatcher->expects('newEventStreams')->andReturn($streams);
 
-        $notification = new CurrentNewEventStreams();
+        $notification = new CurrentNewEventStreams;
 
         $result = $notification($this->subscriptor);
 
@@ -815,7 +815,7 @@ describe('notify stream discovery', function () {
     })->with([[['stream1']], [['stream2', 'stream3']]]);
 
     test('no event stream discovered', function () {
-        $notification = new NoEventStreamDiscovered();
+        $notification = new NoEventStreamDiscovered;
 
         expect($notification)->not->toBeCallable();
     });
@@ -824,7 +824,7 @@ describe('notify stream discovery', function () {
         $this->subscriptor->expects('discovery')->andReturn($this->eventStreamWatcher);
         $this->eventStreamWatcher->expects('hasEventStreams')->andReturn($hasEventStreams);
 
-        $notification = new HasEventStreamDiscovered();
+        $notification = new HasEventStreamDiscovered;
 
         $result = $notification($this->subscriptor);
 
@@ -843,7 +843,7 @@ describe('notify stream discovery', function () {
         $this->subscriptor->expects('discovery')->andReturn($this->eventStreamWatcher);
         $this->eventStreamWatcher->expects('resetNewEventStreams');
 
-        $notification = new NewEventStreamReset();
+        $notification = new NewEventStreamReset;
 
         $notification($this->subscriptor);
     });
@@ -854,7 +854,7 @@ test('notify is process blank', function (bool $isBatchCounterReset, bool $hasAc
 
     $processedCounter = new ProcessedMetric(1000);
     $this->reportWatcher->expects('processed')->andReturn($processedCounter);
-    $ackedCounter = new AckedMetric();
+    $ackedCounter = new AckedMetric;
     $this->reportWatcher->shouldReceive('acked')->andReturn($ackedCounter);
 
     if (! $isBatchCounterReset) {
@@ -865,7 +865,7 @@ test('notify is process blank', function (bool $isBatchCounterReset, bool $hasAc
         $ackedCounter->increment(AnotherEvent::class);
     }
 
-    $notification = new IsBatchStreamBlank();
+    $notification = new IsBatchStreamBlank;
     $result = $notification($this->subscriptor);
 
     ! $isBatchCounterReset
@@ -878,13 +878,13 @@ test('notify batch incremented', function () {
 
     $processedCounter = new ProcessedMetric(1000);
     $this->reportWatcher->expects('processed')->andReturn($processedCounter);
-    $mainCounter = new MainMetric();
+    $mainCounter = new MainMetric;
     $this->reportWatcher->expects('main')->andReturn($mainCounter);
 
     expect($mainCounter->current())->toBe(0)
         ->and($processedCounter->count())->toBe(0);
 
-    $notification = new BatchStreamIncrements();
+    $notification = new BatchStreamIncrements;
     $notification($this->subscriptor);
 
     expect($mainCounter->current())->toBe(1)
@@ -895,7 +895,7 @@ test('get projection report', function (array $report) {
     $this->subscriptor->expects('compute')->andReturn($this->reportWatcher);
     $this->reportWatcher->expects('report')->andReturn($report);
 
-    $notification = new GetProjectionReport();
+    $notification = new GetProjectionReport;
     $result = $notification($this->subscriptor);
 
     expect($result)->toBe($report);

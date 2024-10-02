@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Checkpoint;
 
-use Storm\Projector\Exception\InvalidArgumentException;
-use Storm\Projector\Exception\RuntimeException;
+use Storm\Projector\Exception\ConfigurationViolation;
+use Storm\Projector\Exception\LogicException;
 
 use function array_key_exists;
 use function count;
@@ -24,7 +24,7 @@ final class GapDetector implements GapRecognition
     public function __construct(public readonly array $retriesInMs)
     {
         if (count($retriesInMs) < 2) {
-            throw new InvalidArgumentException('At least two retries are required to match our gap detection logic');
+            throw ConfigurationViolation::withMessage('At least two retries are required to match our gap detection logic');
         }
     }
 
@@ -42,7 +42,7 @@ final class GapDetector implements GapRecognition
     public function sleep(): void
     {
         if (! $this->gapDetected || ! $this->hasRetry()) {
-            throw new RuntimeException('No gap detected or no retries left');
+            throw new LogicException('No gap detected or no retries left');
         }
 
         usleep($this->retriesInMs[$this->retries]);

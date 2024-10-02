@@ -16,7 +16,9 @@ use function pcntl_signal_dispatch;
 
 readonly class StreamEventReactor
 {
-    public function __construct(protected ProjectorScopeFactory $projectorScope) {}
+    public function __construct(
+        protected ProjectorScopeFactory $projectorScope
+    ) {}
 
     public function __invoke(Process $process, string $streamName, DomainEvent $event, StreamPosition $expectedPosition): bool
     {

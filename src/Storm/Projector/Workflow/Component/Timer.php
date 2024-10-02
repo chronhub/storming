@@ -12,7 +12,9 @@ class Timer
 {
     protected ?PointInTime $startTime = null;
 
-    public function __construct(protected readonly SystemClock $clock) {}
+    public function __construct(
+        protected readonly SystemClock $clock
+    ) {}
 
     /**
      * @throws RuntimeException when the timer is already started
