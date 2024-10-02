@@ -10,10 +10,10 @@ use Storm\Projector\Factory\Component\Components;
 /**
  * @mixin Components
  */
-class Process
+readonly class Process
 {
     public function __construct(
-        protected readonly ComponentManager $components
+        protected ComponentManager $components
     ) {}
 
     public function dispatch(string|object $event, mixed ...$arguments): void
