@@ -12,7 +12,7 @@ use Storm\Contract\Clock\SystemClock;
 use Storm\Projector\Checkpoint\Checkpoints;
 use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Exception\CheckpointViolation;
-use Storm\Projector\Workflow\Component\InMemoryCheckpoint;
+use Storm\Projector\Factory\Component\InMemoryCheckpoint;
 
 use function array_values;
 use function count;

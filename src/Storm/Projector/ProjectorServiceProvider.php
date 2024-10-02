@@ -18,7 +18,7 @@ use Storm\Projector\Factory\Factory;
 use Storm\Projector\Factory\ProviderResolver;
 use Storm\Projector\Factory\QueryFactory;
 use Storm\Projector\Factory\ReadModelFactory;
-use Storm\Projector\Factory\Registry;
+use Storm\Projector\Factory\Resolver;
 
 class ProjectorServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -67,22 +67,22 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
 
     protected function registerFactories(): void
     {
-        $this->app->singleton(Registry::class, function (Application $app) {
-            $registry = new ProviderResolver($app);
+        $this->app->singleton(Resolver::class, function (Application $app) {
+            $resolver = new ProviderResolver($app);
 
-            $registry->register('query', function (ConnectionManager $manager): Factory {
+            $resolver->register('query', function (ConnectionManager $manager): Factory {
                 return new QueryFactory($manager);
             });
 
-            $registry->register('emitter', function (ConnectionManager $manager): Factory {
+            $resolver->register('emitter', function (ConnectionManager $manager): Factory {
                 return new EmitterFactory($manager);
             });
 
-            $registry->register('read_model', function (ConnectionManager $manager): Factory {
+            $resolver->register('read_model', function (ConnectionManager $manager): Factory {
                 return new ReadModelFactory($manager);
             });
 
-            return $registry;
+            return $resolver;
         });
     }
 
@@ -106,7 +106,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
         return [
             'projector.manager',
             ProjectorManager::class,
-            Registry::class,
+            Resolver::class,
             ConnectorManager::class,
         ];
     }

@@ -6,11 +6,11 @@ namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 
 use Closure;
 use Storm\Contract\Projector\NotificationHub;
+use Storm\Projector\Factory\Component\Computation;
 use Storm\Projector\Support\Metrics\AckedMetric;
 use Storm\Projector\Support\Metrics\CycleMetric;
 use Storm\Projector\Support\Metrics\MainMetric;
 use Storm\Projector\Support\Metrics\ProcessedMetric;
-use Storm\Projector\Workflow\Component\Computation;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\Promise\CurrentElapsedTime;
 use Storm\Projector\Workflow\Notification\Promise\CurrentStartedTime;
@@ -18,10 +18,10 @@ use Storm\Projector\Workflow\Notification\Promise\CurrentTime;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 
 beforeEach(function () {
-    $this->mainCounter = new MainMetric();
+    $this->mainCounter = new MainMetric;
     $this->processedCounter = new ProcessedMetric(1000);
-    $this->ackedCounter = new AckedMetric();
-    $this->cycleCounter = new CycleMetric();
+    $this->ackedCounter = new AckedMetric;
+    $this->cycleCounter = new CycleMetric;
 
     $this->watcher = new Computation(
         $this->mainCounter,

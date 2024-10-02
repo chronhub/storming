@@ -8,13 +8,13 @@ use Mockery\MockInterface;
 use Options\ProjectionOption;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Clock\SystemClock;
+use Storm\Projector\Factory\Component\ComponentManager;
+use Storm\Projector\Factory\Component\Components;
 use Storm\Projector\Factory\WatcherFactory;
-use Storm\Projector\Workflow\Component;
-use Storm\Projector\Workflow\ComponentRegistry;
 
 trait WatcherManagerTestingTrait
 {
-    protected Component&MockInterface $subscriptor;
+    protected Components&MockInterface $subscriptor;
 
     protected ProjectionOption&MockInterface $projectionOption;
 
@@ -22,7 +22,7 @@ trait WatcherManagerTestingTrait
 
     protected SystemClock&MockInterface $clock;
 
-    protected Component $watcherManager;
+    protected Components $watcherManager;
 
     protected function setupWatcherManager(
         int $batchCounterBlockSize = 100,
@@ -31,7 +31,7 @@ trait WatcherManagerTestingTrait
         $this->projectionOption = mock(ProjectionOption::class);
         $this->eventStreamProvider = mock(EventStreamProvider::class);
         $this->clock = mock(SystemClock::class);
-        $this->subscriptor = mock(Component::class);
+        $this->subscriptor = mock(Components::class);
 
         // constructed projection option
         $this->projectionOption->shouldReceive('getBlockSize')->andReturn($batchCounterBlockSize);
@@ -39,7 +39,7 @@ trait WatcherManagerTestingTrait
 
         $factory = new WatcherFactory($this->projectionOption, $this->eventStreamProvider, $this->clock);
 
-        $this->watcherManager = new ComponentRegistry($factory->watchers);
+        $this->watcherManager = new ComponentManager($factory->watchers);
 
         $this->subscriptor->shouldReceive('watcher')->andReturn($this->watcherManager);
     }

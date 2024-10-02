@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Workflow\Component;
+namespace Storm\Projector\Factory\Component;
 
 class Sprint
 {

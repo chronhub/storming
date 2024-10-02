@@ -7,6 +7,7 @@ namespace Storm\Projector\Workflow;
 use Illuminate\Support\Arr;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Projector\Exception\RuntimeException;
+use Storm\Projector\Factory\Component\ComponentSubscriber;
 use Storm\Projector\Workflow\Notification\ResetOnlyOnceEmittedEvent;
 
 use function array_key_exists;

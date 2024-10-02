@@ -15,13 +15,13 @@ use Storm\Projector\Factory\ProviderConnectionAware;
 use Storm\Projector\Factory\ProviderResolver;
 use Storm\Projector\Factory\QueryFactory;
 use Storm\Projector\Factory\ReadModelFactory;
-use Storm\Projector\Factory\Registry;
+use Storm\Projector\Factory\Resolver;
 use Storm\Projector\Options\Option;
 use Storm\Projector\Projection\Manager;
 
 test('resolve default provider factory registered in service provider', function () {
-    /** @var Registry $registry */
-    $registry = $this->app[Registry::class];
+    /** @var Resolver $registry */
+    $registry = $this->app[Resolver::class];
 
     expect($registry)->toBeInstanceOf(ProviderResolver::class)
         ->and($registry->has('query'))->toBeTrue()
@@ -38,8 +38,8 @@ test('resolve default provider factory registered in service provider', function
 });
 
 test('add factory from provider factory instance and resolve it', function () {
-    /** @var Registry $registry */
-    $registry = $this->app[Registry::class];
+    /** @var Resolver $registry */
+    $registry = $this->app[Resolver::class];
 
     $mockFactory = mock(Factory::class);
     $registry->register('foo', $mockFactory);
@@ -48,8 +48,8 @@ test('add factory from provider factory instance and resolve it', function () {
 });
 
 test('add binding factory and resolve it', function () {
-    /** @var Registry $registry */
-    $registry = $this->app[Registry::class];
+    /** @var Resolver $registry */
+    $registry = $this->app[Resolver::class];
 
     $factory = new readonly class implements Factory, ProviderConnectionAware
     {
@@ -82,8 +82,8 @@ test('add binding factory and resolve it', function () {
 });
 
 test('override query with Closure factory and resolve it', function () {
-    /** @var Registry $registry */
-    $registry = $this->app[Registry::class];
+    /** @var Resolver $registry */
+    $registry = $this->app[Resolver::class];
 
     $mockConnection = mock(ConnectionManager::class);
     $mockFactory = mock(Factory::class);
@@ -101,8 +101,8 @@ test('override query with Closure factory and resolve it', function () {
 });
 
 test('add Closure factory and resolve it', function () {
-    /** @var Registry $registry */
-    $registry = $this->app[Registry::class];
+    /** @var Resolver $registry */
+    $registry = $this->app[Resolver::class];
 
     $mockConnection = mock(ConnectionManager::class);
     $mockFactory = mock(Factory::class);
@@ -121,7 +121,7 @@ test('add Closure factory and resolve it', function () {
 });
 
 test('raise exception when factory not found', function () {
-    /** @var Registry $registry */
-    $registry = $this->app[Registry::class];
+    /** @var Resolver $registry */
+    $registry = $this->app[Resolver::class];
     $registry->resolve('foo', mock(ConnectionManager::class));
 })->throws(ConfigurationViolation::class, 'Provider factory foo not found');

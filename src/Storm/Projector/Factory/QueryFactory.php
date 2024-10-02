@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector\Factory;
 
 use Storm\Contract\Projector\ReadModel;
+use Storm\Projector\Factory\Activity\QueryActivityFactory;
 use Storm\Projector\Options\Option;
 use Storm\Projector\Projection\Manager;
 use Storm\Projector\Projection\ProcessManager;

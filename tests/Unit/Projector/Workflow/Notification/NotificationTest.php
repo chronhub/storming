@@ -11,19 +11,19 @@ use Storm\Contract\Projector\ContextReader;
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Exception\CheckpointViolation;
+use Storm\Projector\Factory\Component\Components;
+use Storm\Projector\Factory\Component\Computation;
+use Storm\Projector\Factory\Component\EventStreamBatch;
+use Storm\Projector\Factory\Component\EventStreamDiscovery;
+use Storm\Projector\Factory\Component\Sprint;
+use Storm\Projector\Factory\Component\Timer;
+use Storm\Projector\Factory\Component\UserState;
 use Storm\Projector\ProjectionStatus;
 use Storm\Projector\Stream\Iterator\MergeStreamIterator;
 use Storm\Projector\Support\Metrics\AckedMetric;
 use Storm\Projector\Support\Metrics\CycleMetric;
 use Storm\Projector\Support\Metrics\MainMetric;
 use Storm\Projector\Support\Metrics\ProcessedMetric;
-use Storm\Projector\Workflow\Component;
-use Storm\Projector\Workflow\Component\Computation;
-use Storm\Projector\Workflow\Component\EventStreamBatch;
-use Storm\Projector\Workflow\Component\EventStreamDiscovery;
-use Storm\Projector\Workflow\Component\Sprint;
-use Storm\Projector\Workflow\Component\Timer;
-use Storm\Projector\Workflow\Component\UserState;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamIncrements;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamReset;
@@ -90,8 +90,8 @@ use Storm\Tests\Stubs\MergeStreamIteratorStub;
 use function microtime;
 
 beforeEach(function () {
-    $this->subscriptor = mock(Component::class);
-    $this->watcherManager = mock(Component::class);
+    $this->subscriptor = mock(Components::class);
+    $this->watcherManager = mock(Components::class);
 
     $this->streamEventWatcher = mock(EventStreamBatch::class);
     $this->recognitionWatcher = mock(CheckpointRecognition::class);

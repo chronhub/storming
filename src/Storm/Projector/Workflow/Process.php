@@ -4,38 +4,41 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow;
 
+use Storm\Projector\Factory\Component\ComponentManager;
+use Storm\Projector\Factory\Component\Components;
+
 /**
- * @mixin Component
+ * @mixin Components
  */
 class Process
 {
     public function __construct(
-        protected readonly ComponentRegistry $component
+        protected readonly ComponentManager $components
     ) {}
 
     public function dispatch(string|object $event, mixed ...$arguments): void
     {
-        $this->component->dispatcher()->notify($event, ...$arguments);
+        $this->components->dispatcher()->notify($event, ...$arguments);
     }
 
     public function addListener(string $event, string|callable|array $handler): void
     {
-        $this->component->dispatcher()->listenTo($event, $handler);
+        $this->components->dispatcher()->listenTo($event, $handler);
     }
 
     public function removeListener(string $event): void
     {
-        $this->component->dispatcher()->forgetListener($event);
+        $this->components->dispatcher()->forgetListener($event);
     }
 
     public function isSprintTerminated(): bool
     {
-        return ! $this->component->sprint()->inBackground()
-            || ! $this->component->sprint()->inProgress();
+        return ! $this->components->sprint()->inBackground()
+            || ! $this->components->sprint()->inProgress();
     }
 
     public function __call(string $name, array $arguments): mixed
     {
-        return $this->component->{$name}(...$arguments);
+        return $this->components->{$name}(...$arguments);
     }
 }

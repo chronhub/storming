@@ -2,6 +2,6 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Factory;
+namespace Storm\Projector\Factory\Activity;
 
 interface PersistentActivityFactory extends ActivityFactory {}

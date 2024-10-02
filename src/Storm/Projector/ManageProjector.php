@@ -15,7 +15,7 @@ use Storm\Contract\Projector\ReadModel;
 use Storm\Contract\Projector\ReadModelProjector;
 use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Connector\ConnectorManager;
-use Storm\Projector\Factory\Registry;
+use Storm\Projector\Factory\Resolver;
 use Storm\Projector\Options\Option;
 
 use function is_string;
@@ -28,14 +28,14 @@ final class ManageProjector implements ProjectorManager
     public function __construct(
         private readonly Container $container,
         private readonly ConnectorManager $connectorResolver,
-        private readonly Registry $registry,
+        private readonly Resolver $resolver,
     ) {}
 
     public function query(array $options = [], ?string $connection = null, ?string $name = null): QueryProjector
     {
         [$connector, $optionInstance] = $this->handleConnectionWithMergedOptions($connection, $options);
 
-        $manager = $this->registry
+        $manager = $this->resolver
             ->resolve($name ?? 'query', $connector)
             ->create(null, null, $optionInstance);
 
@@ -46,7 +46,7 @@ final class ManageProjector implements ProjectorManager
     {
         [$connector, $optionInstance] = $this->handleConnectionWithMergedOptions($connection, $options);
 
-        $manager = $this->registry
+        $manager = $this->resolver
             ->resolve($name ?? 'emitter', $connector)
             ->create($streamName, null, $optionInstance);
 
@@ -61,7 +61,7 @@ final class ManageProjector implements ProjectorManager
             $readModel = $this->configureReadModel($connector, $readModel);
         }
 
-        $manager = $this->registry
+        $manager = $this->resolver
             ->resolve($name ?? 'read_model', $connector)
             ->create($streamName, $readModel, $optionInstance);
 

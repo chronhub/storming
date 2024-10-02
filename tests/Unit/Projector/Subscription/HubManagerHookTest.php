@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace Storm\Tests\Unit\Projector\Subscription;
 
 use stdClass;
+use Storm\Projector\Factory\Component\ComponentManager;
 use Storm\Projector\Projection\HubManager;
-use Storm\Projector\Workflow\ComponentRegistry;
 
 use function get_class;
 use function in_array;
 
 beforeEach(function () {
-    $this->subscriptor = mock(ComponentRegistry::class);
+    $this->subscriptor = mock(ComponentManager::class);
     $this->hub = new HubManager($this->subscriptor);
 });
 

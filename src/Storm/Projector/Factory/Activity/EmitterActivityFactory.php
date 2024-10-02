@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Factory;
+namespace Storm\Projector\Factory\Activity;
 
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Clock\SystemClock;

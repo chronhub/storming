@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Workflow;
+namespace Storm\Projector\Factory\Component;
 
 use Storm\Contract\Projector\ContextReader;
+use Storm\Projector\Workflow\Process;
 
 interface ComponentSubscriber
 {

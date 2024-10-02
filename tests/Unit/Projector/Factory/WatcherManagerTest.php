@@ -11,15 +11,15 @@ use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
+use Storm\Projector\Factory\Component\Components;
+use Storm\Projector\Factory\Component\Computation;
+use Storm\Projector\Factory\Component\EventStreamBatch;
+use Storm\Projector\Factory\Component\EventStreamDiscovery;
+use Storm\Projector\Factory\Component\HaltOn;
+use Storm\Projector\Factory\Component\Sprint;
+use Storm\Projector\Factory\Component\Timer;
+use Storm\Projector\Factory\Component\UserState;
 use Storm\Projector\Factory\WatcherFactory;
-use Storm\Projector\Workflow\Component;
-use Storm\Projector\Workflow\Component\Computation;
-use Storm\Projector\Workflow\Component\EventStreamBatch;
-use Storm\Projector\Workflow\Component\EventStreamDiscovery;
-use Storm\Projector\Workflow\Component\HaltOn;
-use Storm\Projector\Workflow\Component\Sprint;
-use Storm\Projector\Workflow\Component\Timer;
-use Storm\Projector\Workflow\Component\UserState;
 
 use function method_exists;
 
@@ -36,7 +36,7 @@ beforeEach(function () {
 
     $watcherFactory = new WatcherFactory($this->option, $this->eventStreamProvider, $this->clock);
 
-    $this->watcherManager = new Component($watcherFactory->watchers);
+    $this->watcherManager = new Components($watcherFactory->watchers);
 });
 
 /**

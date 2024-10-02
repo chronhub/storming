@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Contract\Projector;
 
+use Storm\Projector\Factory\Component\Computation;
 use Storm\Projector\Support\ProjectionReport;
-use Storm\Projector\Workflow\Component\Computation;
 
 interface Projector
 {

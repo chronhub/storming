@@ -2,12 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Workflow\Component;
+namespace Storm\Projector\Factory\Component;
 
 use Storm\Contract\Projector\ContextReader;
 use Storm\Projector\Options\Option;
 use Storm\Projector\Support\ProjectionReport;
-use Storm\Projector\Workflow\ComponentSubscriber;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Process;
 

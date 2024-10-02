@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Workflow\Component;
+namespace Storm\Projector\Factory\Component;
 
 use Storm\Projector\Stream\Iterator\MergeStreamIterator;
 use Storm\Projector\Support\ExponentialSleep;

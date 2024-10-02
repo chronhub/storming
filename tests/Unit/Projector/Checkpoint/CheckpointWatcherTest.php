@@ -14,7 +14,7 @@ use Storm\Projector\Checkpoint\GapRules;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Exception\CheckpointViolation;
-use Storm\Projector\Workflow\Component\CheckpointReckoning;
+use Storm\Projector\Factory\Component\CheckpointReckoning;
 
 use function array_values;
 use function count;
@@ -25,7 +25,7 @@ beforeEach(function () {
     $this->checkpoints = new Checkpoints(true);
     $this->gapDetector = mock(GapRecognition::class);
 
-    $this->rules = new GapRules();
+    $this->rules = new GapRules;
     $this->watcher = new CheckpointRecognition($this->checkpoints, $this->gapDetector, $this->rules, $this->clock);
 });
 

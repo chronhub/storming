@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 
+use Storm\Projector\Factory\Component\Timer;
 use Storm\Projector\Support\Timer;
-use Storm\Projector\Workflow\Component\Timer;
 
 beforeEach(function () {
     $this->timer = mock(Timer::class);

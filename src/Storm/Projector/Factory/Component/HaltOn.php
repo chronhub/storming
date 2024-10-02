@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Workflow\Component;
+namespace Storm\Projector\Factory\Component;
 
 use Storm\Contract\Projector\ContextReader;
-use Storm\Projector\Workflow\ComponentSubscriber;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
 use Storm\Projector\Workflow\Process;
 

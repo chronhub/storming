@@ -9,7 +9,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Exception\ConfigurationViolation;
 
-final class ProviderResolver implements Registry
+final class ProviderResolver implements Resolver
 {
     /** @var array<string, (Closure(ConnectionManager, Application): Factory)|Factory>|array */
     private array $factories = [];

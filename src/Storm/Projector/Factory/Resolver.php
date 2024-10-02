@@ -9,7 +9,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Exception\ConfigurationViolation;
 
-interface Registry
+interface Resolver
 {
     /**
      * Create a provider factory.
