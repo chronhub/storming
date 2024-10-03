@@ -35,7 +35,7 @@ use function array_keys;
 
 beforeEach(function () {
     $this->hub = mock(NotificationHub::class);
-    $this->map = new ProviderEventMap();
+    $this->map = new ProviderEventMap;
     $this->defaultListeners = [
         WorkflowBegan::class => WhenWorkflowBegan::class,
         StreamEventProcessed::class => WhenStreamEventProcessed::class,

@@ -87,7 +87,7 @@ test('do nothing if hook does not exists on trigger', function () {
     $handler = getDummyHookHandler($expected);
 
     $this->hub->addHook(get_class($hook), $handler);
-    $this->hub->trigger(new stdClass());
+    $this->hub->trigger(new stdClass);
 
     expect($expected)->toBeEmpty();
 });

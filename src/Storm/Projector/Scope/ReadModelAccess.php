@@ -27,6 +27,6 @@ final class ReadModelAccess implements ReadModelScope
 
     public function stop(): void
     {
-        $this->process->dispatch(new ProjectionClosed());
+        $this->process->dispatch(new ProjectionClosed);
     }
 }

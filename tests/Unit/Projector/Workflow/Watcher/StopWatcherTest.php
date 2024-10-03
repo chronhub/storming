@@ -16,7 +16,7 @@ use Storm\Projector\Workflow\Notification\SprintTerminated;
 beforeEach(function () {
     $this->hub = mock(NotificationHub::class);
     $this->context = mock(ContextReader::class);
-    $this->watcher = new HaltOn();
+    $this->watcher = new HaltOn;
 });
 
 test('stop when callback returns boolean', function (bool $shouldStop, bool $alreadyStopped): void {

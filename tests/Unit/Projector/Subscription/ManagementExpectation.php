@@ -59,7 +59,7 @@ class ManagementExpectation
 
     public function assertSynchronize(): void
     {
-        $result = (new ProjectionSnapshotStub())->fromDefault();
+        $result = (new ProjectionSnapshotStub)->fromDefault();
 
         $this->repository->expects('loadSnapshot')->andReturn($result);
         $this->hub->expects('emit')->with(CheckpointUpdated::class, $result->checkpoint);

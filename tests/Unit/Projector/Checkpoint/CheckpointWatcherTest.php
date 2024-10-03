@@ -25,7 +25,7 @@ beforeEach(function () {
     $this->checkpoints = new Checkpoints(true);
     $this->gapDetector = mock(GapRecognition::class);
 
-    $this->rules = new GapRules();
+    $this->rules = new GapRules;
     $this->watcher = new CheckpointRecognition($this->checkpoints, $this->gapDetector, $this->rules, $this->clock);
 });
 

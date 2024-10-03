@@ -18,10 +18,10 @@ use Storm\Projector\Workflow\Notification\Promise\CurrentTime;
 use Storm\Tests\Stubs\Double\Message\SomeEvent;
 
 beforeEach(function () {
-    $this->mainCounter = new MainMetric();
+    $this->mainCounter = new MainMetric;
     $this->processedCounter = new ProcessedMetric(1000);
-    $this->ackedCounter = new AckedMetric();
-    $this->cycleCounter = new CycleMetric();
+    $this->ackedCounter = new AckedMetric;
+    $this->cycleCounter = new CycleMetric;
 
     $this->watcher = new Computation(
         $this->mainCounter,

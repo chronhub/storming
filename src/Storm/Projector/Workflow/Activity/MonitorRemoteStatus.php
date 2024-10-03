@@ -25,7 +25,7 @@ trait MonitorRemoteStatus
      */
     protected function discloseRemoteStatus(Process $process): bool
     {
-        $process->dispatch(new ProjectionStatusDisclosed());
+        $process->dispatch(new ProjectionStatusDisclosed);
 
         $currentStatus = $process->status()->get();
 
@@ -44,10 +44,10 @@ trait MonitorRemoteStatus
     protected function onStopping(Process $process): bool
     {
         if ($this->onRise) {
-            $process->dispatch(new ProjectionSynchronized());
+            $process->dispatch(new ProjectionSynchronized);
         }
 
-        $process->dispatch(new ProjectionClosed());
+        $process->dispatch(new ProjectionClosed);
 
         return $this->onRise;
     }
@@ -60,10 +60,10 @@ trait MonitorRemoteStatus
      */
     protected function onResetting(Process $process): false
     {
-        $process->dispatch(new ProjectionRevised());
+        $process->dispatch(new ProjectionRevised);
 
         if (! $this->onRise && $process->sprint()->inBackground()) {
-            $process->dispatch(new ProjectionRestarted());
+            $process->dispatch(new ProjectionRestarted);
         }
 
         return false;

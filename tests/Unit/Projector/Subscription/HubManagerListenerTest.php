@@ -38,8 +38,8 @@ test('add listener with handler', function (string|callable|array $handler) {
 })->with('listener handler');
 
 test('add listeners with handlers', function () {
-    $listener1 = new class() {};
-    $listener2 = new class() {};
+    $listener1 = new class {};
+    $listener2 = new class {};
 
     $this->subscriptor->expects('capture')->andReturns($listener1);
     $this->subscriptor->expects('capture')->andReturns($listener2);
@@ -64,7 +64,7 @@ test('add listeners with handlers', function () {
 });
 
 test('merge handlers if listener already exists', function () {
-    $listener = new class() {};
+    $listener = new class {};
     $this->subscriptor->expects('capture')->andReturns($listener);
 
     $expected = [];
@@ -83,7 +83,7 @@ test('merge handlers if listener already exists', function () {
 });
 
 test('forget listener', function () {
-    $listener = new class() {};
+    $listener = new class {};
     $this->subscriptor->expects('capture')->andReturns($listener);
 
     $called = false;
@@ -101,8 +101,8 @@ test('forget listener', function () {
 });
 
 test('notify many listeners', function () {
-    $listener1 = new class() {};
-    $listener2 = new class() {};
+    $listener1 = new class {};
+    $listener2 = new class {};
 
     $this->subscriptor->expects('capture')->andReturns($listener1);
     $this->subscriptor->expects('capture')->andReturns($listener2);
@@ -126,8 +126,8 @@ test('notify many listeners', function () {
 });
 
 test('notify when condition', function (bool $condition) {
-    $listener1 = new class() {};
-    $listener2 = new class() {};
+    $listener1 = new class {};
+    $listener2 = new class {};
 
     $condition
         ? $this->subscriptor->expects('capture')->andReturns($listener1)
@@ -162,7 +162,7 @@ test('notify when condition', function (bool $condition) {
 })->with([[true], [false]]);
 
 test('expect return value from notification', function () {
-    $listener = new class() {};
+    $listener = new class {};
     $this->subscriptor->expects('capture')->andReturns($listener);
 
     $expected = [];

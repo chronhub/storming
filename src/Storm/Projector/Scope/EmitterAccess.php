@@ -33,6 +33,6 @@ final class EmitterAccess implements EmitterScope
 
     public function stop(): void
     {
-        $this->process->dispatch(new ProjectionClosed());
+        $this->process->dispatch(new ProjectionClosed);
     }
 }

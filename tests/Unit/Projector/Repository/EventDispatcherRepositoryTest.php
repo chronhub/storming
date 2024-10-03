@@ -29,7 +29,7 @@ beforeEach(function () {
     $this->repository = mock(Repository::class);
     $this->eventDispatcher = mock(Dispatcher::class);
     $this->eventDispatcherRepository = new EventRepository($this->repository, $this->eventDispatcher);
-    $this->projectionResultStub = new ProjectionSnapshotStub();
+    $this->projectionResultStub = new ProjectionSnapshotStub;
 });
 
 dataset('exceptions', [new Exception('error message'), new RuntimeException('error message')]);

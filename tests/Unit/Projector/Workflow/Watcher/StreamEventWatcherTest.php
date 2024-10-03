@@ -19,7 +19,7 @@ test('test new instance', function () {
 });
 
 test('set iterator', function () {
-    $iterator = (new MergeStreamIteratorStub())->getMergeStreams();
+    $iterator = (new MergeStreamIteratorStub)->getMergeStreams();
 
     $this->watcher->set($iterator);
 
@@ -51,19 +51,19 @@ test('set null iterator and reset sleeping time', function () {
     $this->watcher->set(null);
     expect($this->sleep->getSleepingTime())->toBe(4000);
 
-    $this->watcher->set((new MergeStreamIteratorStub())->getMergeStreams());
+    $this->watcher->set((new MergeStreamIteratorStub)->getMergeStreams());
     expect($this->sleep->getSleepingTime())->toBe(1000);
 });
 
 test('pull iterator', function () {
-    $this->watcher->set((new MergeStreamIteratorStub())->getMergeStreams());
+    $this->watcher->set((new MergeStreamIteratorStub)->getMergeStreams());
 
     expect($this->watcher->pull())->toBeInstanceOf(MergeStreamIterator::class)
         ->and($this->watcher->pull())->toBeNull();
 });
 
 test('sleep', function () {
-    $this->watcher->set((new MergeStreamIteratorStub())->getMergeStreams());
+    $this->watcher->set((new MergeStreamIteratorStub)->getMergeStreams());
 
     $this->watcher->sleep();
     expect($this->sleep->getSleepingTime())->toBe(1000);

@@ -12,7 +12,7 @@ final class ResetSnapshot
     {
         $component->recognition()->resets();
 
-        $callback = new RestoreUserState();
+        $callback = new RestoreUserState;
 
         $callback($component);
     }

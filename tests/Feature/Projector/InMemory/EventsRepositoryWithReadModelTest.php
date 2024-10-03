@@ -30,8 +30,8 @@ uses(
 );
 
 beforeEach(function () {
-    $this->factory = new InMemoryTestingFactory();
-    $this->readModel = new InMemoryReadModel();
+    $this->factory = new InMemoryTestingFactory;
+    $this->readModel = new InMemoryReadModel;
 
     $this->app['config']->set('projector.connection.in_memory.dispatch_events', true);
 });
