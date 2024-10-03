@@ -11,7 +11,7 @@ use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Exception\ConfigurationViolation;
-use Storm\Projector\Repository\DatabaseProjectionProvider;
+use Storm\Projector\Store\DatabaseProjectionProvider;
 use Storm\Serializer\SerializerFactory;
 
 use function get_class;

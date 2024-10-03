@@ -9,21 +9,21 @@ use Storm\Contract\Projector\ReadModel;
 use Storm\Projector\Connector\ConnectionManager;
 use Storm\Projector\Connector\ConnectorManager;
 use Storm\Projector\Exception\ConfigurationViolation;
-use Storm\Projector\Factory\EmitterProviderFactory;
+use Storm\Projector\Factory\EmitterFactory;
+use Storm\Projector\Factory\Factory;
 use Storm\Projector\Factory\ProviderConnectionAware;
-use Storm\Projector\Factory\ProviderFactory;
-use Storm\Projector\Factory\ProviderFactoryRegistry;
-use Storm\Projector\Factory\ProviderFactoryResolver;
-use Storm\Projector\Factory\QueryProviderFactory;
-use Storm\Projector\Factory\ReadModelProviderFactory;
+use Storm\Projector\Factory\ProviderResolver;
+use Storm\Projector\Factory\QueryFactory;
+use Storm\Projector\Factory\ReadModelFactory;
+use Storm\Projector\Factory\Resolver;
 use Storm\Projector\Options\Option;
-use Storm\Projector\Provider\Manager;
+use Storm\Projector\Projection\Manager;
 
 test('resolve default provider factory registered in service provider', function () {
-    /** @var ProviderFactoryRegistry $registry */
-    $registry = $this->app[ProviderFactoryRegistry::class];
+    /** @var Resolver $registry */
+    $registry = $this->app[Resolver::class];
 
-    expect($registry)->toBeInstanceOf(ProviderFactoryResolver::class)
+    expect($registry)->toBeInstanceOf(ProviderResolver::class)
         ->and($registry->has('query'))->toBeTrue()
         ->and($registry->has('emitter'))->toBeTrue()
         ->and($registry->has('read_model'))->toBeTrue();
@@ -32,26 +32,26 @@ test('resolve default provider factory registered in service provider', function
     $connector = $this->app[ConnectorManager::class];
     $connection = $connector->connection('in_memory');
 
-    expect($registry->resolve('query', $connection))->toBeInstanceOf(QueryProviderFactory::class)
-        ->and($registry->resolve('emitter', $connection))->toBeInstanceOf(EmitterProviderFactory::class)
-        ->and($registry->resolve('read_model', $connection))->toBeInstanceOf(ReadModelProviderFactory::class);
+    expect($registry->resolve('query', $connection))->toBeInstanceOf(QueryFactory::class)
+        ->and($registry->resolve('emitter', $connection))->toBeInstanceOf(EmitterFactory::class)
+        ->and($registry->resolve('read_model', $connection))->toBeInstanceOf(ReadModelFactory::class);
 });
 
 test('add factory from provider factory instance and resolve it', function () {
-    /** @var ProviderFactoryRegistry $registry */
-    $registry = $this->app[ProviderFactoryRegistry::class];
+    /** @var Resolver $registry */
+    $registry = $this->app[Resolver::class];
 
-    $mockFactory = mock(ProviderFactory::class);
+    $mockFactory = mock(Factory::class);
     $registry->register('foo', $mockFactory);
 
     expect($registry->resolve('foo', mock(ConnectionManager::class)))->toBe($mockFactory);
 });
 
 test('add binding factory and resolve it', function () {
-    /** @var ProviderFactoryRegistry $registry */
-    $registry = $this->app[ProviderFactoryRegistry::class];
+    /** @var Resolver $registry */
+    $registry = $this->app[Resolver::class];
 
-    $factory = new readonly class implements ProviderConnectionAware, ProviderFactory
+    $factory = new readonly class implements Factory, ProviderConnectionAware
     {
         /** @phpstan-ignore-next-line */
         public ?ConnectionManager $connection;
@@ -82,11 +82,11 @@ test('add binding factory and resolve it', function () {
 });
 
 test('override query with Closure factory and resolve it', function () {
-    /** @var ProviderFactoryRegistry $registry */
-    $registry = $this->app[ProviderFactoryRegistry::class];
+    /** @var Resolver $registry */
+    $registry = $this->app[Resolver::class];
 
     $mockConnection = mock(ConnectionManager::class);
-    $mockFactory = mock(ProviderFactory::class);
+    $mockFactory = mock(Factory::class);
 
     $closureFactory = function (ConnectionManager $connection, Application $app) use ($mockConnection, $mockFactory) {
         expect($connection)->toBe($mockConnection);
@@ -101,11 +101,11 @@ test('override query with Closure factory and resolve it', function () {
 });
 
 test('add Closure factory and resolve it', function () {
-    /** @var ProviderFactoryRegistry $registry */
-    $registry = $this->app[ProviderFactoryRegistry::class];
+    /** @var Resolver $registry */
+    $registry = $this->app[Resolver::class];
 
     $mockConnection = mock(ConnectionManager::class);
-    $mockFactory = mock(ProviderFactory::class);
+    $mockFactory = mock(Factory::class);
 
     $closureFactory = function (ConnectionManager $connection, Application $app) use ($mockConnection, $mockFactory) {
         expect($connection)->toBe($mockConnection);
@@ -121,7 +121,7 @@ test('add Closure factory and resolve it', function () {
 });
 
 test('raise exception when factory not found', function () {
-    /** @var ProviderFactoryRegistry $registry */
-    $registry = $this->app[ProviderFactoryRegistry::class];
+    /** @var Resolver $registry */
+    $registry = $this->app[Resolver::class];
     $registry->resolve('foo', mock(ConnectionManager::class));
 })->throws(ConfigurationViolation::class, 'Provider factory foo not found');

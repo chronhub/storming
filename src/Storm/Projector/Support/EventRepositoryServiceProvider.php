@@ -5,16 +5,16 @@ declare(strict_types=1);
 namespace Storm\Projector\Support;
 
 use Illuminate\Foundation\Support\Providers\EventServiceProvider;
-use Storm\Projector\Repository\EventRepository;
-use Storm\Projector\Repository\Events\ProjectionCreated;
-use Storm\Projector\Repository\Events\ProjectionDeleted;
-use Storm\Projector\Repository\Events\ProjectionDeletedWithEvents;
-use Storm\Projector\Repository\Events\ProjectionError;
-use Storm\Projector\Repository\Events\ProjectionReleased;
-use Storm\Projector\Repository\Events\ProjectionReset;
-use Storm\Projector\Repository\Events\ProjectionRestarted;
-use Storm\Projector\Repository\Events\ProjectionStarted;
-use Storm\Projector\Repository\Events\ProjectionStopped;
+use Storm\Projector\Store\EventRepository;
+use Storm\Projector\Store\Events\ProjectionCreated;
+use Storm\Projector\Store\Events\ProjectionDeleted;
+use Storm\Projector\Store\Events\ProjectionDeletedWithEvents;
+use Storm\Projector\Store\Events\ProjectionError;
+use Storm\Projector\Store\Events\ProjectionReleased;
+use Storm\Projector\Store\Events\ProjectionReset;
+use Storm\Projector\Store\Events\ProjectionRestarted;
+use Storm\Projector\Store\Events\ProjectionStarted;
+use Storm\Projector\Store\Events\ProjectionStopped;
 
 class EventRepositoryServiceProvider extends EventServiceProvider
 {

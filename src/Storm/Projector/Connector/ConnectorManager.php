@@ -22,8 +22,6 @@ interface ConnectorManager
      * Add a new connector to the projector.
      *
      * @param Closure(Application): Connector $connector
-     *
-     * @throws ConfigurationViolation when the connector name already exists
      */
     public function addConnector(string $name, Closure $connector): void;
 

@@ -8,7 +8,7 @@ use Closure;
 use DateInterval;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Exception\InvalidArgumentException;
-use Storm\Projector\Workflow\Component\HaltOn;
+use Storm\Projector\Factory\Component\HaltOn;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;
 use Storm\Projector\Workflow\Process;
 

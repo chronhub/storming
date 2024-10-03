@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector\Stream;
 
 use Storm\Contract\Chronicler\QueryFilter;
-use Storm\Projector\Exception\InvalidArgumentException;
+use Storm\Projector\Exception\LogicException;
 use Storm\Projector\Stream\Filter\LoadLimiter;
 use Storm\Projector\Stream\Filter\LoadLimiterQueryFilter;
 use Storm\Projector\Stream\Filter\ProjectionQueryFilter;
@@ -27,7 +27,7 @@ final readonly class QueryFilterResolver
 
         if ($queryFilter instanceof LoadLimiterQueryFilter) {
             if ($loadLimiter === null) {
-                throw new InvalidArgumentException('Query filter implements a load limiter contract, therefore, no load limiter provided');
+                throw new LogicException('Query filter implements a load limiter contract, therefore, no load limiter provided');
             }
 
             $queryFilter->setLoadLimiter($loadLimiter);

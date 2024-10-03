@@ -10,9 +10,9 @@ use Storm\Chronicler\Exceptions\StreamNotFound;
 use Storm\Contract\Chronicler\Chronicler;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\Repository;
+use Storm\Projector\Projection\EmittingProjection;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Provider\EmittingProvider;
-use Storm\Projector\Repository\ProjectionSnapshot;
+use Storm\Projector\Store\ProjectionSnapshot;
 use Storm\Projector\Stream\EmittedStream;
 use Storm\Projector\Stream\EmittedStreamCache;
 use Storm\Projector\Workflow\Notification\Command\CheckpointReset;
@@ -33,7 +33,7 @@ beforeEach(function () {
     $this->emittedStream = mock(EmittedStream::class);
     $this->expectation = new ManagementExpectation($this->repository, $this->hub);
     $this->chronicler = mock(Chronicler::class);
-    $this->management = new EmittingProvider(
+    $this->management = new EmittingProjection(
         $this->hub,
         $this->chronicler,
         $this->repository,

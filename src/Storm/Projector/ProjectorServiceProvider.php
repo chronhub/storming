@@ -13,12 +13,12 @@ use Storm\Projector\Connector\ConnectorManager;
 use Storm\Projector\Connector\DatabaseConnector;
 use Storm\Projector\Connector\InMemoryConnector;
 use Storm\Projector\Connector\ManageConnector;
-use Storm\Projector\Factory\EmitterProviderFactory;
-use Storm\Projector\Factory\ProviderFactory;
-use Storm\Projector\Factory\ProviderFactoryRegistry;
-use Storm\Projector\Factory\ProviderFactoryResolver;
-use Storm\Projector\Factory\QueryProviderFactory;
-use Storm\Projector\Factory\ReadModelProviderFactory;
+use Storm\Projector\Factory\EmitterFactory;
+use Storm\Projector\Factory\Factory;
+use Storm\Projector\Factory\ProviderResolver;
+use Storm\Projector\Factory\QueryFactory;
+use Storm\Projector\Factory\ReadModelFactory;
+use Storm\Projector\Factory\Resolver;
 
 class ProjectorServiceProvider extends ServiceProvider implements DeferrableProvider
 {
@@ -43,10 +43,8 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
     public function register(): void
     {
         $this->mergeConfigFrom($this->projector, 'projector');
-
         $this->registerManager();
         $this->registerFactories();
-        $this->registerProjections();
     }
 
     protected function registerManager(): void
@@ -67,38 +65,23 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
 
     protected function registerFactories(): void
     {
-        $this->app->singleton(ProviderFactoryRegistry::class, function (Application $app) {
-            $registry = new ProviderFactoryResolver($app);
+        $this->app->singleton(Resolver::class, function (Application $app) {
+            $resolver = new ProviderResolver($app);
 
-            $registry->register('query', function (ConnectionManager $manager): ProviderFactory {
-                return new QueryProviderFactory($manager);
+            $resolver->register('query', function (ConnectionManager $manager): Factory {
+                return new QueryFactory($manager);
             });
 
-            $registry->register('emitter', function (ConnectionManager $manager): ProviderFactory {
-                return new EmitterProviderFactory($manager);
+            $resolver->register('emitter', function (ConnectionManager $manager): Factory {
+                return new EmitterFactory($manager);
             });
 
-            $registry->register('read_model', function (ConnectionManager $manager): ProviderFactory {
-                return new ReadModelProviderFactory($manager);
+            $resolver->register('read_model', function (ConnectionManager $manager): Factory {
+                return new ReadModelFactory($manager);
             });
 
-            return $registry;
+            return $resolver;
         });
-    }
-
-    protected function registerProjections(): void
-    {
-        if (! config('projector.projections.auto_discovery', false)) {
-            return;
-        }
-
-        $projections = config('projector.projections.projection', []);
-
-        foreach ($projections as $key => $builds) {
-            foreach ($builds as $name => $projectionBuild) {
-                $this->app->bind("projection.$key.$name", $projectionBuild);
-            }
-        }
     }
 
     public function provides(): array
@@ -106,7 +89,7 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
         return [
             'projector.manager',
             ProjectorManager::class,
-            ProviderFactoryRegistry::class,
+            Resolver::class,
             ConnectorManager::class,
         ];
     }

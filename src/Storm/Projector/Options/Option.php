@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Storm\Projector\Options;
 
 use JsonSerializable;
+use Storm\Projector\Factory\Component\EventStreamBatch;
+use Storm\Projector\Factory\Component\HaltOn;
 use Storm\Projector\Stream\Filter\LoadLimiter;
 use Storm\Projector\Support\ExponentialSleep;
 use Storm\Projector\Support\StopWhen;

@@ -6,9 +6,9 @@ namespace Storm\Projector\Scope;
 
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Message\DomainEvent;
-use Storm\Projector\Provider\Events\ProjectionClosed;
-use Storm\Projector\Provider\Events\StreamEventEmitted;
-use Storm\Projector\Provider\Events\StreamEventLinkedTo;
+use Storm\Projector\Projection\Events\ProjectionClosed;
+use Storm\Projector\Projection\Events\StreamEventEmitted;
+use Storm\Projector\Projection\Events\StreamEventLinkedTo;
 use Storm\Projector\Workflow\Process;
 
 final class EmitterAccess implements EmitterScope

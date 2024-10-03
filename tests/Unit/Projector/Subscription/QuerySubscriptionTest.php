@@ -10,10 +10,10 @@ use Factory\ActivityFactory;
 use Scope\QueryProjectorScope;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Provider\QueryProvider;
-use Storm\Projector\Provider\QuerySubscription;
-use Storm\Projector\Workflow\Component\Sprint;
-use Storm\Projector\Workflow\ComponentRegistry;
+use Storm\Projector\Factory\Component\ComponentManager;
+use Storm\Projector\Factory\Component\Sprint;
+use Storm\Projector\Projection\QueryProjection;
+use Storm\Projector\Projection\QuerySubscription;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\Command\UserStateRestored;
 use Storm\Projector\Workflow\Notification\IsSprintTerminated;
@@ -26,8 +26,8 @@ beforeEach(function () {
     $this->activities = mock(ActivityFactory::class);
     $this->projectorScope = mock(QueryProjectorScope::class);
     $this->hub = mock(NotificationHub::class);
-    $this->management = mock(QueryProvider::class);
-    $this->subscriptor = mock(ComponentRegistry::class);
+    $this->management = mock(QueryProjection::class);
+    $this->subscriptor = mock(ComponentManager::class);
 
     $this->subscription = new QuerySubscription(
         $this->subscriptor,

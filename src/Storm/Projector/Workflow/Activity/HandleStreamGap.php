@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Activity;
 
 use Closure;
-use Storm\Projector\Provider\Events\ProjectionStored;
-use Storm\Projector\Provider\InteractWithProvider;
+use Storm\Projector\Projection\Events\ProjectionStored;
+use Storm\Projector\Projection\InteractWithProvider;
 use Storm\Projector\Workflow\Notification\AfterHandleStreamGap;
 use Storm\Projector\Workflow\Notification\BeforeHandleStreamGap;
 use Storm\Projector\Workflow\Process;

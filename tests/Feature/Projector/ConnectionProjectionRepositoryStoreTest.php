@@ -12,11 +12,11 @@ use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Repository\DatabaseProjectionProvider;
-use Storm\Projector\Repository\LockManager;
-use Storm\Projector\Repository\Projection;
-use Storm\Projector\Repository\ProjectionSnapshot;
-use Storm\Projector\Repository\ProjectorRepository;
+use Storm\Projector\Store\DatabaseProjectionProvider;
+use Storm\Projector\Store\LockManager;
+use Storm\Projector\Store\Projection;
+use Storm\Projector\Store\ProjectionRepository;
+use Storm\Projector\Store\ProjectionSnapshot;
 use Storm\Serializer\JsonSerializerFactory;
 
 use function random_int;
@@ -41,7 +41,7 @@ beforeEach(function () {
 
     $this->lock = new LockManager($this->clock, 1000, 1000);
     $this->serializer = (new JsonSerializerFactory)->create();
-    $this->repository = new ProjectorRepository(
+    $this->repository = new ProjectionRepository(
         $this->projectionProvider,
         $this->lock,
         $this->serializer,
@@ -49,7 +49,7 @@ beforeEach(function () {
     );
 });
 
-function createProjectionStore(ProjectorRepository $store, ProjectionStatus $status): void
+function createProjectionStore(ProjectionRepository $store, ProjectionStatus $status): void
 {
     expect($store->exists())->toBeFalse();
 

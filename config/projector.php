@@ -68,25 +68,6 @@ return [
         ],
     ],
 
-    /**
-     * All the projection builds here.
-     *
-     * When auto discovery is enabled,
-     * it will produce abstract as 'projection.emitter.edge-all'
-     */
-    'projections' => [
-
-        'auto_discovery' => false,
-
-        'projection' => [
-            'read_model' => [],
-
-            'emitter' => [],
-
-            'query' => [],
-        ],
-    ],
-
     'console' => [
         'commands' => [
             // Monitor projections

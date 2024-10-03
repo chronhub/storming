@@ -19,11 +19,11 @@ use Provider\Event\ProjectionSynchronized;
 use Provider\Event\StreamEventEmitted;
 use Provider\Event\StreamEventLinkedTo;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Provider\EmitterProvider;
-use Storm\Projector\Provider\PersistentProvider;
-use Storm\Projector\Provider\ProviderEventMap;
-use Storm\Projector\Provider\QueryProvider;
-use Storm\Projector\Provider\ReadModelProvider;
+use Storm\Projector\Projection\EmitterProjection;
+use Storm\Projector\Projection\PersistentProjection;
+use Storm\Projector\Projection\ProviderEventMap;
+use Storm\Projector\Projection\QueryProjection;
+use Storm\Projector\Projection\ReadModelProjection;
 use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;
 use Storm\Projector\Workflow\Notification\Handler\WhenEventStreamDiscovered;
 use Storm\Projector\Workflow\Notification\Handler\WhenStreamEventProcessed;
@@ -43,7 +43,7 @@ beforeEach(function () {
     ];
 });
 
-function defaultHooksSubscriptionMap(PersistentProvider&MockInterface $management): array
+function defaultHooksSubscriptionMap(PersistentProjection&MockInterface $management): array
 {
     return [
         ProjectionRise::class => fn () => $management->rise(),
@@ -61,7 +61,7 @@ function defaultHooksSubscriptionMap(PersistentProvider&MockInterface $managemen
 }
 
 //fixMe we only test hooks keys but not the values
-test('subscribe to persistent management', function (PersistentProvider&MockInterface $management) {
+test('subscribe to persistent management', function (PersistentProjection&MockInterface $management) {
     $management->shouldReceive('hub')->andReturn($this->hub);
 
     $this->hub->expects('addHooks')->withArgs(
@@ -70,7 +70,7 @@ test('subscribe to persistent management', function (PersistentProvider&MockInte
 
     $this->hub->expects('addEvents')->with($this->defaultListeners);
 
-    if ($management instanceof EmitterProvider) {
+    if ($management instanceof EmitterProjection) {
         $emitterHooks = [
             StreamEventEmitted::class => fn (StreamEventEmitted $listener) => $management->emit($listener->event),
             StreamEventLinkedTo::class => fn (StreamEventLinkedTo $listener) => $management->linkTo($listener->streamName, $listener->event),
@@ -83,12 +83,12 @@ test('subscribe to persistent management', function (PersistentProvider&MockInte
 
     $this->map->subscribeTo($management);
 })->with([
-    'read model management' => fn () => mock(ReadModelProvider::class),
-    'emitter management' => fn () => mock(EmitterProvider::class),
+    'read model management' => fn () => mock(ReadModelProjection::class),
+    'emitter management' => fn () => mock(EmitterProjection::class),
 ]);
 
 test('subscribe to listener with query management', function () {
-    $management = mock(QueryProvider::class);
+    $management = mock(QueryProjection::class);
 
     $management->shouldReceive('hub')->andReturn($this->hub);
 

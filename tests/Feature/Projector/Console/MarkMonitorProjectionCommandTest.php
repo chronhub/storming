@@ -7,7 +7,7 @@ namespace Storm\Tests\Feature\Projector\Console;
 use Illuminate\Console\Application;
 use Storm\Projector\Connector\ConnectorManager;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Repository\Data\CreateData;
+use Storm\Projector\Store\Data\CreateData;
 use Storm\Projector\Support\Console\Monitor\MarkMonitorProjectionCommand;
 
 beforeEach(function () {

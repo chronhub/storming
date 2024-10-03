@@ -6,7 +6,7 @@ namespace Storm\Projector\Scope;
 
 use Storm\Contract\Clock\SystemClock;
 use Storm\Contract\Projector\ReadModel;
-use Storm\Projector\Provider\Events\ProjectionClosed;
+use Storm\Projector\Projection\Events\ProjectionClosed;
 use Storm\Projector\Workflow\Process;
 
 final class ReadModelAccess implements ReadModelScope

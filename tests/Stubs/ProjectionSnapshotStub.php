@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Stubs;
 
 use Storm\Projector\Checkpoint\CheckpointFactory;
-use Storm\Projector\Repository\ProjectionSnapshot;
+use Storm\Projector\Store\ProjectionSnapshot;
 
 final class ProjectionSnapshotStub
 {

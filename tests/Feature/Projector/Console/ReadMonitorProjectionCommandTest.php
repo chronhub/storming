@@ -6,9 +6,9 @@ namespace Storm\Tests\Feature\Projector\Console;
 
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\Connector\ConnectorManager;
-use Storm\Projector\Repository\Data\CreateData;
-use Storm\Projector\Repository\Data\PersistData;
-use Storm\Projector\Repository\InMemoryProjectionProvider;
+use Storm\Projector\Store\Data\CreateData;
+use Storm\Projector\Store\Data\PersistData;
+use Storm\Projector\Store\InMemoryProjectionProvider;
 
 use function json_encode;
 

@@ -7,7 +7,7 @@ namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 use Closure;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
-use Storm\Projector\Workflow\Component\HaltOn;
+use Storm\Projector\Factory\Component\HaltOn;
 use Storm\Projector\Workflow\Notification\Command\SprintStopped;
 use Storm\Projector\Workflow\Notification\IsSprintTerminated;
 use Storm\Projector\Workflow\Notification\ShouldTerminateWorkflow;

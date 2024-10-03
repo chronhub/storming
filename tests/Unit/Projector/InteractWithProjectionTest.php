@@ -8,7 +8,7 @@ use Closure;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Projector\InteractWithProjection;
-use Storm\Projector\Provider\Manager;
+use Storm\Projector\Projection\Manager;
 use Storm\Projector\Workflow\Notification\Promise\CurrentUserState;
 use Storm\Projector\Workflow\Notification\Promise\GetProjectionReport;
 

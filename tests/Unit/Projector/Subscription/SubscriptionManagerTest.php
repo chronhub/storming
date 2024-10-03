@@ -9,14 +9,14 @@ use stdClass;
 use Storm\Contract\Chronicler\EventStreamProvider;
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\NotificationHub;
+use Storm\Projector\Factory\Component\Components;
+use Storm\Projector\Projection\AgentManager;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Provider\AgentManager;
-use Storm\Projector\Workflow\Component;
 use TypeError;
 
 beforeEach(function () {
     $this->eventStreamProvider = mock(EventStreamProvider::class);
-    $this->watchers = mock(Component::class);
+    $this->watchers = mock(Components::class);
     $this->subscriptionManager = new AgentManager($this->watchers);
 });
 

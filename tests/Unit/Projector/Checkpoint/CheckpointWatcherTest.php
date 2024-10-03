@@ -14,7 +14,7 @@ use Storm\Projector\Checkpoint\GapRules;
 use Storm\Projector\Checkpoint\GapType;
 use Storm\Projector\Checkpoint\StreamPoint;
 use Storm\Projector\Exception\CheckpointViolation;
-use Storm\Projector\Workflow\Component\CheckpointReckoning;
+use Storm\Projector\Factory\Component\CheckpointReckoning;
 
 use function array_values;
 use function count;

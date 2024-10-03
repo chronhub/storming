@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace Storm\Projector\Workflow\Activity;
 
+use Storm\Projector\Projection\Events\ProjectionClosed;
+use Storm\Projector\Projection\Events\ProjectionDiscarded;
+use Storm\Projector\Projection\Events\ProjectionRestarted;
+use Storm\Projector\Projection\Events\ProjectionRevised;
+use Storm\Projector\Projection\Events\ProjectionStatusDisclosed;
+use Storm\Projector\Projection\Events\ProjectionSynchronized;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Provider\Events\ProjectionClosed;
-use Storm\Projector\Provider\Events\ProjectionDiscarded;
-use Storm\Projector\Provider\Events\ProjectionRestarted;
-use Storm\Projector\Provider\Events\ProjectionRevised;
-use Storm\Projector\Provider\Events\ProjectionStatusDisclosed;
-use Storm\Projector\Provider\Events\ProjectionSynchronized;
 use Storm\Projector\Workflow\Process;
 
 /**

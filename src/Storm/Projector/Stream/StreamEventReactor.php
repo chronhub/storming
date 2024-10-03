@@ -7,7 +7,7 @@ namespace Storm\Projector\Stream;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Contract\Message\Header;
 use Storm\Projector\Checkpoint\StreamPoint;
-use Storm\Projector\Provider\Events\PerformWhenThresholdIsReached;
+use Storm\Projector\Projection\Events\PerformWhenThresholdIsReached;
 use Storm\Projector\Scope\ProjectorScopeFactory;
 use Storm\Projector\Workflow\Process;
 use Storm\Stream\StreamPosition;

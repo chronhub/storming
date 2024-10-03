@@ -6,11 +6,11 @@ namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 
 use Closure;
 use Storm\Contract\Projector\NotificationHub;
+use Storm\Projector\Factory\Component\Computation;
 use Storm\Projector\Support\Metrics\AckedMetric;
 use Storm\Projector\Support\Metrics\CycleMetric;
 use Storm\Projector\Support\Metrics\MainMetric;
 use Storm\Projector\Support\Metrics\ProcessedMetric;
-use Storm\Projector\Workflow\Component\Computation;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;
 use Storm\Projector\Workflow\Notification\Promise\CurrentElapsedTime;
 use Storm\Projector\Workflow\Notification\Promise\CurrentStartedTime;

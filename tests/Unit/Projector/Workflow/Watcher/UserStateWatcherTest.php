@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Workflow\Watcher;
 
-use Storm\Projector\Workflow\Component\UserState;
+use Storm\Projector\Factory\Component\UserState;
 
 beforeEach(function () {
     $this->watcher = new UserState;

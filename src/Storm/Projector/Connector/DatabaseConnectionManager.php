@@ -34,8 +34,6 @@ final readonly class DatabaseConnectionManager implements ConnectionManager
         private Option|array $options,
         private ?Dispatcher $dispatcher = null,
     ) {
-        // Use the real instance of your event store,
-        // no decorator as transaction, eventable, publisher ...
         while ($chronicler instanceof ChroniclerDecorator) {
             $chronicler = $chronicler->innerChronicler();
         }

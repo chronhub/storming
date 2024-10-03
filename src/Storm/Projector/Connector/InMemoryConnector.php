@@ -8,7 +8,7 @@ use Illuminate\Contracts\Foundation\Application;
 use Storm\Chronicler\EventStoreBridge;
 use Storm\Contract\Chronicler\InMemoryChronicler;
 use Storm\Contract\Clock\SystemClock;
-use Storm\Projector\Repository\InMemoryProjectionProvider;
+use Storm\Projector\Store\InMemoryProjectionProvider;
 use Storm\Serializer\SerializerFactory;
 
 final readonly class InMemoryConnector implements Connector

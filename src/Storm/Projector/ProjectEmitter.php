@@ -6,10 +6,10 @@ namespace Storm\Projector;
 
 use Storm\Contract\Projector\ContextReader;
 use Storm\Contract\Projector\EmitterProjector;
-use Storm\Projector\Provider\Events\ProjectionClosed;
-use Storm\Projector\Provider\Events\ProjectionDiscarded;
-use Storm\Projector\Provider\Events\ProjectionRevised;
-use Storm\Projector\Provider\Manager;
+use Storm\Projector\Projection\Events\ProjectionClosed;
+use Storm\Projector\Projection\Events\ProjectionDiscarded;
+use Storm\Projector\Projection\Events\ProjectionRevised;
+use Storm\Projector\Projection\Manager;
 use Storm\Projector\Stream\Filter\ProjectionQueryFilter;
 use Storm\Projector\Workflow\Process;
 
