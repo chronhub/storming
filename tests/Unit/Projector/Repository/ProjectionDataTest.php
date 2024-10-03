@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Storm\Tests\Unit\Projector\Repository;
 
-use Storm\Projector\Storage\Data\CreateData;
-use Storm\Projector\Storage\Data\PersistData;
-use Storm\Projector\Storage\Data\ProjectionData;
-use Storm\Projector\Storage\Data\ReleaseData;
-use Storm\Projector\Storage\Data\ResetData;
-use Storm\Projector\Storage\Data\StartAgainData;
-use Storm\Projector\Storage\Data\StartData;
-use Storm\Projector\Storage\Data\StopData;
-use Storm\Projector\Storage\Data\UpdateLockData;
-use Storm\Projector\Storage\Data\UpdateStatusData;
+use Storm\Projector\Store\Data\CreateData;
+use Storm\Projector\Store\Data\PersistData;
+use Storm\Projector\Store\Data\ProjectionData;
+use Storm\Projector\Store\Data\ReleaseData;
+use Storm\Projector\Store\Data\ResetData;
+use Storm\Projector\Store\Data\StartAgainData;
+use Storm\Projector\Store\Data\StartData;
+use Storm\Projector\Store\Data\StopData;
+use Storm\Projector\Store\Data\UpdateLockData;
+use Storm\Projector\Store\Data\UpdateStatusData;
 
 test('create data', function () {
     $data = new CreateData('idle');

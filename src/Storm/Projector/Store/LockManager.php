@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Storage;
+namespace Storm\Projector\Store;
 
 use Storm\Clock\PointInTime;
 use Storm\Contract\Clock\SystemClock;

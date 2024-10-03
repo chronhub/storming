@@ -6,7 +6,7 @@ namespace Storm\Projector\Projection;
 
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Storage\ProjectionSnapshot;
+use Storm\Projector\Store\ProjectionSnapshot;
 use Storm\Projector\Workflow\Input\ResetSnapshot;
 use Storm\Projector\Workflow\Input\TakeSnapshot;
 use Storm\Projector\Workflow\Notification\BeforeWorkflowRenewal;

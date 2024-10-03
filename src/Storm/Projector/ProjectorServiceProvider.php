@@ -43,10 +43,8 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
     public function register(): void
     {
         $this->mergeConfigFrom($this->projector, 'projector');
-
         $this->registerManager();
         $this->registerFactories();
-        $this->registerProjections();
     }
 
     protected function registerManager(): void
@@ -84,21 +82,6 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
 
             return $resolver;
         });
-    }
-
-    protected function registerProjections(): void
-    {
-        if (! config('projector.projections.auto_discovery', false)) {
-            return;
-        }
-
-        $projections = config('projector.projections.projection', []);
-
-        foreach ($projections as $key => $builds) {
-            foreach ($builds as $name => $projectionBuild) {
-                $this->app->bind("projection.$key.$name", $projectionBuild);
-            }
-        }
     }
 
     public function provides(): array

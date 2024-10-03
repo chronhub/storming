@@ -12,11 +12,11 @@ use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Exception\ProjectionAlreadyExists;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
 use Storm\Projector\Exception\ProjectionNotFound;
-use Storm\Projector\Storage\Data\CreateData;
-use Storm\Projector\Storage\Data\ProjectionData;
-use Storm\Projector\Storage\Data\StartData;
-use Storm\Projector\Storage\Data\UpdateLockData;
-use Storm\Projector\Storage\DatabaseProjectionProvider;
+use Storm\Projector\Store\Data\CreateData;
+use Storm\Projector\Store\Data\ProjectionData;
+use Storm\Projector\Store\Data\StartData;
+use Storm\Projector\Store\Data\UpdateLockData;
+use Storm\Projector\Store\DatabaseProjectionProvider;
 
 uses(RefreshDatabase::class);
 

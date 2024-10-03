@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Storage;
+namespace Storm\Projector\Store;
 
 use Storm\Contract\Projector\ProjectionModel;
 

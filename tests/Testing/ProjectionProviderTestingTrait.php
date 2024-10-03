@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Tests\Testing;
 
 use Storm\Contract\Projector\ProjectionProvider;
-use Storm\Projector\Storage\Data\CreateData;
+use Storm\Projector\Store\Data\CreateData;
 
 /**
  * @property ProjectionProvider $projectionProvider

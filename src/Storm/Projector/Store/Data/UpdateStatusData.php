@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Storage\Data;
+namespace Storm\Projector\Store\Data;
 
 final readonly class UpdateStatusData extends ProjectionData
 {

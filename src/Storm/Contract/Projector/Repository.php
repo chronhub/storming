@@ -9,7 +9,7 @@ use Storm\Projector\Exception\ProjectionAlreadyRunning;
 use Storm\Projector\Exception\ProjectionFailed;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Storage\ProjectionSnapshot;
+use Storm\Projector\Store\ProjectionSnapshot;
 
 interface Repository
 {

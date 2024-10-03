@@ -47,10 +47,6 @@ final class ManageConnector implements ConnectorManager
 
     public function addConnector(string $name, Closure $connector): void
     {
-        if (isset($this->connectors[$name])) {
-            throw ConfigurationViolation::withMessage("Connector $name already exists.");
-        }
-
         $this->connectors[$name] = $connector;
     }
 
@@ -61,7 +57,7 @@ final class ManageConnector implements ConnectorManager
 
     public function getDefaultDriver(): string
     {
-        return config('projector.default');
+        return $this->app['config']->get('projector.default');
     }
 
     public function setDefaultDriver(string $name): void

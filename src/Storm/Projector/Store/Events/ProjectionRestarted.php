@@ -2,16 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Storage\Events;
+namespace Storm\Projector\Store\Events;
 
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Storage\ProjectionSnapshot;
 
-final readonly class ProjectionStopped
+final readonly class ProjectionRestarted
 {
     public function __construct(
         public string $name,
         public ProjectionStatus $status,
-        public ProjectionSnapshot $snapshot,
     ) {}
 }

@@ -32,8 +32,9 @@ final readonly class ReadModelActivityFactory implements PersistentActivityFacto
 
     protected function activities(Process $process): array
     {
-        [$reactors, $then] = $process->context()->get()->reactors();
         $projectorScope = new ReadModelAccess($process, $this->clock, $this->readModel);
+
+        [$reactors, $then] = $process->context()->get()->reactors();
         $eventProcessor = $this->createStreamEventReactor($projectorScope, $reactors, $then);
 
         $streamEventLoader = $this->createStreamLoader(

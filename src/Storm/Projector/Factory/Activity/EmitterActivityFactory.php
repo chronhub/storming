@@ -30,8 +30,9 @@ final readonly class EmitterActivityFactory implements PersistentActivityFactory
 
     protected function activities(Process $process): array
     {
-        [$reactors, $then] = $process->context()->get()->reactors();
         $projectorScope = new EmitterAccess($process, $this->clock);
+
+        [$reactors, $then] = $process->context()->get()->reactors();
         $eventProcessor = $this->createStreamEventReactor($projectorScope, $reactors, $then);
 
         $streamEventLoader = $this->createStreamLoader(

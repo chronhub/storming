@@ -30,8 +30,9 @@ final readonly class QueryActivityFactory implements ActivityFactory
 
     protected function activities(Process $process): array
     {
-        [$reactors, $then] = $process->context()->get()->reactors();
         $projectorScope = new QueryAccess($process, $this->clock);
+
+        [$reactors, $then] = $process->context()->get()->reactors();
         $eventProcessor = $this->createStreamEventReactor($projectorScope, $reactors, $then);
 
         $streamEventLoader = $this->createStreamLoader(

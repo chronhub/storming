@@ -9,7 +9,7 @@ use Mockery\MockInterface;
 use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Storage\ProjectionSnapshot;
+use Storm\Projector\Store\ProjectionSnapshot;
 use Storm\Projector\Workflow\Notification\Command\CheckpointUpdated;
 use Storm\Projector\Workflow\Notification\Command\SprintContinue;
 use Storm\Projector\Workflow\Notification\Command\SprintStopped;

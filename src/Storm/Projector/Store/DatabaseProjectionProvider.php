@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Storage;
+namespace Storm\Projector\Store;
 
 use Illuminate\Database\Connection;
 use Illuminate\Database\Query\Builder;
@@ -14,9 +14,9 @@ use Storm\Projector\Exception\ProjectionAlreadyExists;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
 use Storm\Projector\Exception\ProjectionConnectionFailed;
 use Storm\Projector\Exception\ProjectionNotFound;
-use Storm\Projector\Storage\Data\CreateData;
-use Storm\Projector\Storage\Data\ProjectionData;
-use Storm\Projector\Storage\Data\StartData;
+use Storm\Projector\Store\Data\CreateData;
+use Storm\Projector\Store\Data\ProjectionData;
+use Storm\Projector\Store\Data\StartData;
 
 use function sprintf;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Storage\Events;
+namespace Storm\Projector\Store\Events;
 
 final readonly class ProjectionReleased
 {

@@ -12,7 +12,7 @@ use Storm\Contract\Projector\NotificationHub;
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\Projection\EmittingProjection;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Storage\ProjectionSnapshot;
+use Storm\Projector\Store\ProjectionSnapshot;
 use Storm\Projector\Stream\EmittedStream;
 use Storm\Projector\Stream\EmittedStreamCache;
 use Storm\Projector\Workflow\Notification\Command\CheckpointReset;

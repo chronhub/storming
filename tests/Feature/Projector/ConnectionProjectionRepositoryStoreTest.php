@@ -12,11 +12,11 @@ use Storm\Contract\Projector\ProjectionProvider;
 use Storm\Projector\Checkpoint\CheckpointFactory;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Storage\DatabaseProjectionProvider;
-use Storm\Projector\Storage\LockManager;
-use Storm\Projector\Storage\Projection;
-use Storm\Projector\Storage\ProjectionRepository;
-use Storm\Projector\Storage\ProjectionSnapshot;
+use Storm\Projector\Store\DatabaseProjectionProvider;
+use Storm\Projector\Store\LockManager;
+use Storm\Projector\Store\Projection;
+use Storm\Projector\Store\ProjectionRepository;
+use Storm\Projector\Store\ProjectionSnapshot;
 use Storm\Serializer\JsonSerializerFactory;
 
 use function random_int;

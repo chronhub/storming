@@ -10,7 +10,7 @@ use Storm\Contract\Projector\Repository;
 use Storm\Projector\Projection\ReadingModelProjection;
 use Storm\Projector\Projection\ReadModelProjection;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Storage\ProjectionSnapshot;
+use Storm\Projector\Store\ProjectionSnapshot;
 use Storm\Projector\Workflow\Notification\Command\BatchStreamReset;
 use Storm\Projector\Workflow\Notification\Command\CheckpointReset;
 use Storm\Projector\Workflow\Notification\Command\EventStreamDiscovered;

@@ -7,7 +7,7 @@ namespace Storm\Tests\Unit\Projector\Repository;
 use Storm\Clock\PointInTime;
 use Storm\Contract\Clock\SystemClock;
 use Storm\Projector\Exception\RuntimeException;
-use Storm\Projector\Storage\LockManager;
+use Storm\Projector\Store\LockManager;
 
 beforeEach(function () {
     $this->clock = mock(SystemClock::class);

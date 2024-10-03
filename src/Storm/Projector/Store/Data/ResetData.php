@@ -2,19 +2,18 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Storage\Data;
+namespace Storm\Projector\Store\Data;
 
-final readonly class StopData extends ProjectionData
+final readonly class ResetData extends ProjectionData
 {
     public function __construct(
         public string $status,
         public string $state,
-        public string $checkpoint,
-        public string $lockedUntil
+        public string $checkpoint
     ) {}
 
     /**
-     * @return array{'status': string, 'state': string, 'checkpoint': string, 'locked_until': string}
+     * @return array{'status': string, 'state': string, 'checkpoint': string}
      */
     public function toArray(): array
     {
@@ -22,7 +21,6 @@ final readonly class StopData extends ProjectionData
             'status' => $this->status,
             'state' => $this->state,
             'checkpoint' => $this->checkpoint,
-            'locked_until' => $this->lockedUntil,
         ];
     }
 }

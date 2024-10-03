@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Storage;
+namespace Storm\Projector\Store;
 
 use Illuminate\Support\Collection;
 use Storm\Contract\Clock\SystemClock;
@@ -12,7 +12,7 @@ use Storm\Projector\Exception\InMemoryProjectionFailed;
 use Storm\Projector\Exception\ProjectionAlreadyExists;
 use Storm\Projector\Exception\ProjectionAlreadyRunning;
 use Storm\Projector\Exception\ProjectionNotFound;
-use Storm\Projector\Storage\Data\ProjectionData;
+use Storm\Projector\Store\Data\ProjectionData;
 
 use function array_flip;
 use function array_key_exists;

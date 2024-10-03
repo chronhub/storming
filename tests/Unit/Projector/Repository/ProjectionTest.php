@@ -6,7 +6,7 @@ namespace Storm\Tests\Unit\Projector\Repository;
 
 use JsonSerializable;
 use Storm\Contract\Projector\ProjectionModel;
-use Storm\Projector\Storage\Projection;
+use Storm\Projector\Store\Projection;
 
 use function json_encode;
 

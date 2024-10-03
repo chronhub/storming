@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Storm\Projector\Workflow\Input;
 
 use Storm\Projector\Factory\Component\ComponentManager;
-use Storm\Projector\Storage\ProjectionSnapshot;
+use Storm\Projector\Store\ProjectionSnapshot;
 
 final class TakeSnapshot
 {

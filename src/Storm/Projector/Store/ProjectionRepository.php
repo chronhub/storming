@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Storage;
+namespace Storm\Projector\Store;
 
 use Storm\Contract\Projector\ProjectionModel;
 use Storm\Contract\Projector\ProjectionProvider;
@@ -10,15 +10,15 @@ use Storm\Contract\Projector\Repository;
 use Storm\Contract\Serializer\SymfonySerializer;
 use Storm\Projector\Exception\ProjectionNotFound;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Storage\Data\CreateData;
-use Storm\Projector\Storage\Data\PersistData;
-use Storm\Projector\Storage\Data\ProjectionData;
-use Storm\Projector\Storage\Data\ReleaseData;
-use Storm\Projector\Storage\Data\ResetData;
-use Storm\Projector\Storage\Data\StartAgainData;
-use Storm\Projector\Storage\Data\StartData;
-use Storm\Projector\Storage\Data\StopData;
-use Storm\Projector\Storage\Data\UpdateLockData;
+use Storm\Projector\Store\Data\CreateData;
+use Storm\Projector\Store\Data\PersistData;
+use Storm\Projector\Store\Data\ProjectionData;
+use Storm\Projector\Store\Data\ReleaseData;
+use Storm\Projector\Store\Data\ResetData;
+use Storm\Projector\Store\Data\StartAgainData;
+use Storm\Projector\Store\Data\StartData;
+use Storm\Projector\Store\Data\StopData;
+use Storm\Projector\Store\Data\UpdateLockData;
 
 final readonly class ProjectionRepository implements Repository
 {

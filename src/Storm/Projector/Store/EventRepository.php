@@ -2,20 +2,20 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Storage;
+namespace Storm\Projector\Store;
 
 use Illuminate\Contracts\Events\Dispatcher;
 use Storm\Contract\Projector\Repository;
 use Storm\Projector\ProjectionStatus;
-use Storm\Projector\Storage\Events\ProjectionCreated;
-use Storm\Projector\Storage\Events\ProjectionDeleted;
-use Storm\Projector\Storage\Events\ProjectionDeletedWithEvents;
-use Storm\Projector\Storage\Events\ProjectionError;
-use Storm\Projector\Storage\Events\ProjectionReleased;
-use Storm\Projector\Storage\Events\ProjectionReset;
-use Storm\Projector\Storage\Events\ProjectionRestarted;
-use Storm\Projector\Storage\Events\ProjectionStarted;
-use Storm\Projector\Storage\Events\ProjectionStopped;
+use Storm\Projector\Store\Events\ProjectionCreated;
+use Storm\Projector\Store\Events\ProjectionDeleted;
+use Storm\Projector\Store\Events\ProjectionDeletedWithEvents;
+use Storm\Projector\Store\Events\ProjectionError;
+use Storm\Projector\Store\Events\ProjectionReleased;
+use Storm\Projector\Store\Events\ProjectionReset;
+use Storm\Projector\Store\Events\ProjectionRestarted;
+use Storm\Projector\Store\Events\ProjectionStarted;
+use Storm\Projector\Store\Events\ProjectionStopped;
 use Throwable;
 
 final readonly class EventRepository implements Repository
