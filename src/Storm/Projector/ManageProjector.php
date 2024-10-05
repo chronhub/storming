@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Storm\Projector;
 
-use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Contracts\Container\Container;
-use Storm\Contract\Chronicler\DatabaseChronicler;
 use Storm\Contract\Projector\EmitterProjector;
 use Storm\Contract\Projector\ProjectorManager;
 use Storm\Contract\Projector\ProjectorMonitor;
@@ -58,7 +56,7 @@ final class ManageProjector implements ProjectorManager
         [$connector, $optionInstance] = $this->handleConnectionWithMergedOptions($connection, $options);
 
         if (is_string($readModel)) {
-            $readModel = $this->configureReadModel($connector, $readModel);
+            $readModel = $this->container[$readModel];
         }
 
         $manager = $this->resolver
@@ -92,26 +90,5 @@ final class ManageProjector implements ProjectorManager
         $option = $connector->toOption($options);
 
         return [$connector, $option];
-    }
-
-    /**
-     * Configure the read model passed as string.
-     *
-     * @throws BindingResolutionException
-     */
-    private function configureReadModel(ConnectionManager $manager, string $readModel): ReadModel
-    {
-        if ($this->container->bound($readModel)) {
-            return $this->container[$readModel];
-        }
-
-        $eventStore = $manager->eventStore();
-        if ($eventStore instanceof DatabaseChronicler) {
-            $connection = $eventStore->getConnection();
-
-            return $this->container->make($readModel, ['connection' => $connection]);
-        }
-
-        return $this->container[$readModel];
     }
 }
