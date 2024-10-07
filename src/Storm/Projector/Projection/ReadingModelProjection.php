@@ -34,9 +34,7 @@ final readonly class ReadingModelProjection implements ReadModelProjection
 
     public function store(): void
     {
-        $snapshot = $this->takeSnapshot();
-
-        $this->repository->persist($snapshot);
+        $this->repository->persist($this->takeSnapshot());
 
         $this->readModel->persist();
     }

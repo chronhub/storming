@@ -27,7 +27,6 @@ use Storm\Projector\Factory\Component\Timer;
 use Storm\Projector\Factory\Component\UserState;
 use Storm\Projector\Options\Option;
 use Storm\Projector\Projection\Projection;
-use Storm\Projector\Projection\ProviderEventMap;
 use Storm\Projector\Store\EventRepository;
 use Storm\Projector\Store\LockManager;
 use Storm\Projector\Store\ProjectionRepository;

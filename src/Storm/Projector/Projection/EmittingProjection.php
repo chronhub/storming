@@ -66,9 +66,7 @@ final readonly class EmittingProjection implements EmitterProjection
 
     public function store(): void
     {
-        $this->repository->persist(
-            $this->takeSnapshot()
-        );
+        $this->repository->persist($this->takeSnapshot());
     }
 
     public function revise(): void

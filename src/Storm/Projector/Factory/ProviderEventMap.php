@@ -2,9 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Projection;
+namespace Storm\Projector\Factory;
 
 use Storm\Projector\Checkpoint\GapType;
+use Storm\Projector\Projection\EmitterProjection;
 use Storm\Projector\Projection\Events\PerformWhenThresholdIsReached;
 use Storm\Projector\Projection\Events\ProjectionClosed;
 use Storm\Projector\Projection\Events\ProjectionDiscarded;
@@ -18,6 +19,8 @@ use Storm\Projector\Projection\Events\ProjectionStored;
 use Storm\Projector\Projection\Events\ProjectionSynchronized;
 use Storm\Projector\Projection\Events\StreamEventEmitted;
 use Storm\Projector\Projection\Events\StreamEventLinkedTo;
+use Storm\Projector\Projection\PersistentProjection;
+use Storm\Projector\Projection\Projection;
 use Storm\Projector\Workflow\Notification\BeforeHandleStreamGap;
 use Storm\Projector\Workflow\Process;
 
