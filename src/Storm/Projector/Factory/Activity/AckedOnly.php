@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Scope;
+namespace Storm\Projector\Factory\Activity;
 
 use Closure;
 use Illuminate\Support\Traits\ReflectsClosures;
@@ -10,6 +10,9 @@ use ReflectionException;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Projector\Exception\InvalidArgumentException;
 use Storm\Projector\Exception\RuntimeException;
+use Storm\Projector\Scope\ProjectorScope;
+use Storm\Projector\Scope\ProjectorScopeFactory;
+use Storm\Projector\Scope\UserState;
 
 use function array_key_exists;
 use function is_a;

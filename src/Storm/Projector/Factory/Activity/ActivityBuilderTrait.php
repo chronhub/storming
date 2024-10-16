@@ -6,8 +6,6 @@ namespace Storm\Projector\Factory\Activity;
 
 use Closure;
 use Storm\Contract\Chronicler\QueryFilter;
-use Storm\Projector\Scope\AckedOnly;
-use Storm\Projector\Scope\AllTrough;
 use Storm\Projector\Scope\ProjectorScope;
 use Storm\Projector\Stream\CollectStreams;
 use Storm\Projector\Stream\Filter\LoadLimiter;

@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Storm\Projector\Scope;
+namespace Storm\Projector\Factory\Activity;
 
 use Closure;
 use Storm\Contract\Message\DomainEvent;
 use Storm\Projector\Exception\RuntimeException;
+use Storm\Projector\Scope\ProjectorScope;
+use Storm\Projector\Scope\ProjectorScopeFactory;
+use Storm\Projector\Scope\UserState;
 
 use function is_array;
 use function is_callable;
@@ -32,17 +35,8 @@ final class AllTrough implements ProjectorScopeFactory
         $userStateScope = is_array($initState) ? $this->userStateScope->setState($initState) : null;
 
         ($this->projector)($event, $userStateScope);
-        $this->bindReactor(fn () => null)($this->projector);
         ($this->callback)($this->projector);
 
         return $this->projector;
-    }
-
-    private function bindReactor(Closure $reactor): Closure
-    {
-        return function (ProjectorScope $bindScope) use ($reactor) {
-            $boundReactor = Closure::bind($reactor, $bindScope);
-            $boundReactor($bindScope->event());
-        };
     }
 }

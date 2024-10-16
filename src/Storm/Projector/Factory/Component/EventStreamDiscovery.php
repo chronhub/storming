@@ -6,13 +6,10 @@ namespace Storm\Projector\Factory\Component;
 
 use Storm\Contract\Chronicler\EventStreamProvider;
 
-class EventStreamDiscovery
+readonly class EventStreamDiscovery
 {
-    /** @var array|array<string> */
-    protected array $streamDiscovered = [];
-
     public function __construct(
-        protected readonly EventStreamProvider $eventStreamProvider
+        protected EventStreamProvider $eventStreamProvider
     ) {}
 
     /**
@@ -20,6 +17,6 @@ class EventStreamDiscovery
      */
     public function discover(callable $query): array
     {
-        return $this->streamDiscovered = $query($this->eventStreamProvider);
+        return $query($this->eventStreamProvider);
     }
 }

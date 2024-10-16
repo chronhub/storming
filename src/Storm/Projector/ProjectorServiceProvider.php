@@ -22,10 +22,6 @@ use Storm\Projector\Factory\Resolver;
 
 class ProjectorServiceProvider extends ServiceProvider implements DeferrableProvider
 {
-    public array $singletons = [
-        ProjectorManager::class => ManageProjector::class,
-    ];
-
     protected string $projector = __DIR__.'/../../../config/projector.php';
 
     public function boot(): void
@@ -44,44 +40,42 @@ class ProjectorServiceProvider extends ServiceProvider implements DeferrableProv
     {
         $this->mergeConfigFrom($this->projector, 'projector');
         $this->registerManager();
-        $this->registerFactories();
+        $this->registerResolver();
     }
 
     protected function registerManager(): void
     {
         $this->app->singleton(ConnectorManager::class, function (Application $app) {
-            $projector = new ManageConnector($app);
-
-            // fixMe no need two in memory instances
-            $projector->addConnector('in_memory', fn (Application $app) => $app[InMemoryConnector::class]);
-            $projector->addConnector('in_memory-incremental', fn (Application $app) => $app[InMemoryConnector::class]);
-            $projector->addConnector('pgsql', fn (Application $app) => $app[DatabaseConnector::class]);
-
-            return $projector;
+            return tap(new ManageConnector($app), function (ConnectorManager $manager) {
+                $this->registerConnectors($manager);
+            });
         });
 
+        $this->app->singleton(ProjectorManager::class, ManageProjector::class);
         $this->app->alias(ProjectorManager::class, 'projector.manager');
     }
 
-    protected function registerFactories(): void
+    protected function registerResolver(): void
     {
         $this->app->singleton(Resolver::class, function (Application $app) {
-            $resolver = new ProviderResolver($app);
-
-            $resolver->register('query', function (ConnectionManager $manager): Factory {
-                return new QueryFactory($manager);
+            return tap(new ProviderResolver($app), function (Resolver $resolver) {
+                $this->registerFactories($resolver);
             });
-
-            $resolver->register('emitter', function (ConnectionManager $manager): Factory {
-                return new EmitterFactory($manager);
-            });
-
-            $resolver->register('read_model', function (ConnectionManager $manager): Factory {
-                return new ReadModelFactory($manager);
-            });
-
-            return $resolver;
         });
+    }
+
+    protected function registerConnectors(ConnectorManager $manager): void
+    {
+        //$manager->addConnector('in_memory', fn (Application $app) => $app[InMemoryConnector::class]);
+        //$manager->addConnector('in_memory-incremental', fn (Application $app) => $app[InMemoryConnector::class]);
+        $manager->addConnector('pgsql', fn (Application $app) => $app[DatabaseConnector::class]);
+    }
+
+    protected function registerFactories(Resolver $resolver): void
+    {
+        $resolver->register('query', fn (ConnectionManager $manager): Factory => new QueryFactory($manager));
+        $resolver->register('emitter', fn (ConnectionManager $manager): Factory => new EmitterFactory($manager));
+        $resolver->register('read_model', fn (ConnectionManager $manager): Factory => new ReadModelFactory($manager));
     }
 
     public function provides(): array
